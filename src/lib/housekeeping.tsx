@@ -47,7 +47,7 @@ export function TaskStatusBadge({ status }: { status: string }) {
 }
 export function PriorityBadge({ priority }: { priority: string }) {
   if (priority === "normal") return null;
-  const p = PRIORITIES[priority] ?? PRIORITIES.normal!;
+  const p = PRIORITIES[priority] ?? PRIORITIES['normal']!;
   return <Badge variant={p.tone}>{p.label}</Badge>;
 }
 
@@ -126,7 +126,7 @@ export function NewTaskDialog({ open, onOpenChange }: { open: boolean; onOpenCha
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title="New housekeeping task" busy={m.isPending}
       onSubmit={() => {
-        if (!f.room) return toast.error("Pick a room.");
+        if (!f.room) { toast.error("Pick a room."); return; }
         m.mutate({ p_room_id: f.room, p_type: f.type, p_priority: f.priority, p_assignee_id: f.assignee === "none" ? null : f.assignee, p_notes: f.notes || null },
           { onSuccess: () => onOpenChange(false) });
       }}>
