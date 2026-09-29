@@ -78,6 +78,8 @@ function ReservationDetailPage() {
         title={<span className="inline-flex flex-wrap items-center gap-3">{r.number} <ResStatusBadge status={r.status} holdUntil={r.hold_until} /></span>}
         description={`${primary ? fullName(primary) : ""} · ${formatDay(r.arrival_date)} → ${formatDay(r.departure_date)} · ${nights} night${nights === 1 ? "" : "s"}`}
         actions={<>
+          {can("fin.folio.view") && r.status !== "cancelled" && r.status !== "no_show" &&
+            <Button variant="outline" disabled={openFolio.isPending} onClick={() => openFolio.mutate(r.id)}>Folio</Button>}
           {open && can("res.edit") && <Button variant="outline" onClick={() => setEditing(true)}>Change</Button>}
           {r.status === "tentative" && can("res.edit") && <Button disabled={confirm.isPending} onClick={() => confirm.mutate({ p_id: r.id })}>Confirm</Button>}
           {open && can("res.noshow") && <Button variant="outline" onClick={() => setDialog("noshow")}>No-show</Button>}
