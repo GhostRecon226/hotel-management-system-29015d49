@@ -1344,6 +1344,134 @@ export type Database = {
           },
         ]
       }
+      maintenance_tickets: {
+        Row: {
+          assignee_id: string | null
+          business_date: string
+          cancel_reason: string | null
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          last_reopen_reason: string | null
+          location: string | null
+          priority: string
+          property_id: string
+          reopen_count: number
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          room_id: string | null
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          wait_reason: string | null
+        }
+        Insert: {
+          assignee_id?: string | null
+          business_date: string
+          cancel_reason?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_reopen_reason?: string | null
+          location?: string | null
+          priority?: string
+          property_id: string
+          reopen_count?: number
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          room_id?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          wait_reason?: string | null
+        }
+        Update: {
+          assignee_id?: string | null
+          business_date?: string
+          cancel_reason?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_reopen_reason?: string | null
+          location?: string | null
+          priority?: string
+          property_id?: string
+          reopen_count?: number
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          room_id?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          wait_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_tickets_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -2332,6 +2460,20 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "room_blocks_ticket_fk"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_blocks_ticket_fk"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_tickets"
+            referencedColumns: ["id"]
+          },
         ]
       }
       room_types: {
@@ -2442,6 +2584,157 @@ export type Database = {
           },
           {
             foreignKeyName: "rooms_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_requests: {
+        Row: {
+          assignee_id: string | null
+          business_date: string
+          cancel_reason: string | null
+          category: string
+          charge_amount: number | null
+          charge_code_id: string | null
+          chargeable: boolean
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string
+          id: string
+          posted_transaction_id: string | null
+          property_id: string
+          reservation_id: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          business_date: string
+          cancel_reason?: string | null
+          category: string
+          charge_amount?: number | null
+          charge_code_id?: string | null
+          chargeable?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          description: string
+          id?: string
+          posted_transaction_id?: string | null
+          property_id: string
+          reservation_id: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          assignee_id?: string | null
+          business_date?: string
+          cancel_reason?: string | null
+          category?: string
+          charge_amount?: number | null
+          charge_code_id?: string | null
+          chargeable?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string
+          id?: string
+          posted_transaction_id?: string | null
+          property_id?: string
+          reservation_id?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_charge_code_id_fkey"
+            columns: ["charge_code_id"]
+            isOneToOne: false
+            referencedRelation: "charge_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_posted_transaction_id_fkey"
+            columns: ["posted_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_posted_transaction_id_fkey"
+            columns: ["posted_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_arrivals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["reservation_id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["current_reservation_id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["next_reservation_id"]
+          },
+          {
+            foreignKeyName: "service_requests_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -3348,6 +3641,90 @@ export type Database = {
           },
         ]
       }
+      v_maintenance_tickets: {
+        Row: {
+          assignee_id: string | null
+          assignee_name: string | null
+          business_date: string | null
+          cancel_reason: string | null
+          closed_at: string | null
+          closed_by: string | null
+          closed_by_name: string | null
+          created_at: string | null
+          created_by: string | null
+          created_by_name: string | null
+          description: string | null
+          has_active_block: boolean | null
+          id: string | null
+          last_reopen_reason: string | null
+          location: string | null
+          priority: string | null
+          property_id: string | null
+          reopen_count: number | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          resolved_by_name: string | null
+          room_id: string | null
+          room_number: string | null
+          status: string | null
+          tenant_id: string | null
+          title: string | null
+          updated_at: string | null
+          wait_reason: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_tickets_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_room_board: {
         Row: {
           block_id: string | null
@@ -3391,6 +3768,121 @@ export type Database = {
           },
         ]
       }
+      v_service_requests: {
+        Row: {
+          assignee_id: string | null
+          assignee_name: string | null
+          business_date: string | null
+          cancel_reason: string | null
+          category: string | null
+          charge_amount: number | null
+          charge_code_id: string | null
+          charge_code_name: string | null
+          chargeable: boolean | null
+          completed_at: string | null
+          completed_by: string | null
+          completed_by_name: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          guest_name: string | null
+          id: string | null
+          posted_transaction_id: string | null
+          property_id: string | null
+          reservation_id: string | null
+          reservation_number: string | null
+          room_number: string | null
+          status: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_charge_code_id_fkey"
+            columns: ["charge_code_id"]
+            isOneToOne: false
+            referencedRelation: "charge_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_posted_transaction_id_fkey"
+            columns: ["posted_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_posted_transaction_id_fkey"
+            columns: ["posted_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_arrivals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["reservation_id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["current_reservation_id"]
+          },
+          {
+            foreignKeyName: "service_requests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["next_reservation_id"]
+          },
+          {
+            foreignKeyName: "service_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_guest_feedback: {
@@ -3418,6 +3910,24 @@ export type Database = {
       assign_room: {
         Args: { p_id: string; p_room_id: string }
         Returns: undefined
+      }
+      assign_service_request: {
+        Args: { p_assignee_id: string; p_id: string }
+        Returns: undefined
+      }
+      assign_ticket: {
+        Args: { p_assignee_id: string; p_id: string }
+        Returns: undefined
+      }
+      block_room_for_ticket: {
+        Args: {
+          p_from: string
+          p_id: string
+          p_reason?: string
+          p_to: string
+          p_type: string
+        }
+        Returns: string
       }
       bulk_add_rooms: {
         Args: {
@@ -3457,6 +3967,14 @@ export type Database = {
         }
         Returns: Json
       }
+      cancel_service_request: {
+        Args: { p_id: string; p_reason: string }
+        Returns: undefined
+      }
+      cancel_ticket: {
+        Args: { p_id: string; p_reason: string }
+        Returns: undefined
+      }
       check_in: {
         Args: {
           p_deposit_waive_reason?: string
@@ -3472,10 +3990,12 @@ export type Database = {
         Returns: string
       }
       close_folio: { Args: { p_id: string }; Returns: undefined }
+      close_ticket: { Args: { p_id: string }; Returns: undefined }
       complete_hk_task: {
         Args: { p_checklist?: Json; p_id: string; p_notes?: string }
         Returns: undefined
       }
+      complete_service_request: { Args: { p_id: string }; Returns: string }
       confirm_reservation: { Args: { p_id: string }; Returns: undefined }
       create_hk_task: {
         Args: {
@@ -3521,6 +4041,30 @@ export type Database = {
           p_source?: string
           p_special_requests?: string
           p_status?: string
+        }
+        Returns: string
+      }
+      create_service_request: {
+        Args: {
+          p_assignee_id?: string
+          p_category: string
+          p_charge_amount?: number
+          p_charge_code_id?: string
+          p_chargeable?: boolean
+          p_description: string
+          p_reservation_id: string
+        }
+        Returns: string
+      }
+      create_ticket: {
+        Args: {
+          p_assignee_id?: string
+          p_description: string
+          p_location: string
+          p_priority?: string
+          p_property_id: string
+          p_room_id: string
+          p_title: string
         }
         Returns: string
       }
@@ -3612,6 +4156,13 @@ export type Database = {
         Args: { p_keep: string; p_reason: string; p_remove: string }
         Returns: undefined
       }
+      mnt_staff: {
+        Args: { p_property_id: string }
+        Returns: {
+          full_name: string
+          id: string
+        }[]
+      }
       modify_reservation: {
         Args: {
           p_adults: number
@@ -3690,6 +4241,10 @@ export type Database = {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
       }
+      reopen_ticket: {
+        Args: { p_id: string; p_reason: string }
+        Returns: undefined
+      }
       request_adjustment: {
         Args: {
           p_amount: number
@@ -3734,6 +4289,10 @@ export type Database = {
       request_unsettled_checkout: {
         Args: { p_id: string; p_idempotency_key: string; p_reason: string }
         Returns: Json
+      }
+      resolve_ticket: {
+        Args: { p_id: string; p_resolution: string }
+        Returns: undefined
       }
       reverse_transaction: {
         Args: { p_id: string; p_idempotency_key: string; p_reason: string }
@@ -3959,6 +4518,15 @@ export type Database = {
         Returns: string
       }
       start_hk_task: { Args: { p_id: string }; Returns: undefined }
+      start_service_request: { Args: { p_id: string }; Returns: undefined }
+      start_ticket: { Args: { p_id: string }; Returns: undefined }
+      svc_staff: {
+        Args: { p_property_id: string }
+        Returns: {
+          full_name: string
+          id: string
+        }[]
+      }
       tenant_is_writable: { Args: never; Returns: boolean }
       transfer_transaction: {
         Args: { p_id: string; p_idempotency_key: string; p_to_folio_id: string }
@@ -3983,6 +4551,10 @@ export type Database = {
         Returns: undefined
       }
       void_check_in: {
+        Args: { p_id: string; p_reason: string }
+        Returns: undefined
+      }
+      wait_ticket: {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
       }
