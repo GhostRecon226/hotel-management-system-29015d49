@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useAccess } from "@/lib/access";
 import { SETUP_PERMS } from "@/lib/setup";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/_app/setup")({
   head: () => ({
@@ -32,13 +33,12 @@ function SetupLayout() {
   }
   return (
     <div>
-      <h1 className="text-2xl font-semibold">Setup</h1>
-      <p className="mb-4 text-sm text-muted-foreground">Settings for {property?.name}.</p>
-      <nav className="mb-6 flex flex-wrap gap-1 border-b">
+      <PageHeader title="Setup" description={`Settings for ${property?.name ?? "this property"}.`} className="mb-4" />
+      <nav className="mb-6 flex gap-1 overflow-x-auto border-b">
         {TABS.filter((t) => canAny([...t.perms])).map((t) => (
           <Link key={t.to} to={t.to}
-            className="-mb-px border-b-2 border-transparent px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-            activeProps={{ className: "!border-primary font-medium !text-foreground" }}>
+            className="-mb-px flex h-11 shrink-0 items-center whitespace-nowrap border-b-2 border-transparent px-4 text-[15px] text-muted-foreground hover:text-foreground"
+            activeProps={{ className: "!border-primary font-medium !text-primary-strong" }}>
             {t.label}
           </Link>
         ))}
