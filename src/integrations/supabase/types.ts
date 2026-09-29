@@ -464,6 +464,8 @@ export type Database = {
           tenant_id: string
         }[]
       }
+      my_context: { Args: never; Returns: Json }
+      tenant_is_writable: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
