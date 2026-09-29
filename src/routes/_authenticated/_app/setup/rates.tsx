@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAccess } from "@/lib/access";
-import { Field, FormDialog, SectionHeader, StatusText, formatMoney, useSetupList, useSetupMutation } from "@/lib/setup";
-import { NoAccess } from "./route";
+import { NoAccess, Field, FormDialog, SectionHeader, StatusText, formatMoney, useSetupList, useSetupMutation } from "@/lib/setup";
+
 import type { RoomType } from "./room-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

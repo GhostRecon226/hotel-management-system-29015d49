@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAccess } from "@/lib/access";
-import { Field, FormDialog, SectionHeader, useSetupList, useSetupMutation } from "@/lib/setup";
-import { NoAccess } from "./route";
+import { NoAccess, Field, FormDialog, SectionHeader, useSetupList, useSetupMutation } from "@/lib/setup";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";

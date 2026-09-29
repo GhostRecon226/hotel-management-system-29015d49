@@ -48,6 +48,3 @@ function SetupLayout() {
   );
 }
 
-export function NoAccess() {
-  return <p className="text-sm text-muted-foreground">You do not have permission to manage this.</p>;
-}

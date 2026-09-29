@@ -111,3 +111,7 @@ export function SectionHeader({ title, description, action }: { title: string; d
 export const SETUP_PERMS = [
   "setup.property.view", "setup.property.edit", "setup.room.manage", "setup.rate.manage", "setup.tax.manage",
 ];
+
+export function NoAccess() {
+  return <p className="text-sm text-muted-foreground">You do not have permission to manage this.</p>;
+}

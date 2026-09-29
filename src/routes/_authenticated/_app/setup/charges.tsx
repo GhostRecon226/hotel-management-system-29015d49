@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useAccess } from "@/lib/access";
-import { Field, FormDialog, SectionHeader, StatusText, useSetupList, useSetupMutation } from "@/lib/setup";
-import { NoAccess } from "./route";
+import { NoAccess, Field, FormDialog, SectionHeader, StatusText, useSetupList, useSetupMutation } from "@/lib/setup";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
