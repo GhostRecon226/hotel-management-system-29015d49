@@ -31,7 +31,7 @@ export async function processOutbox(opts: { tenantId?: string | null; limit?: nu
   const channels = emailReady ? ["email", "sms", "whatsapp"] : ["sms", "whatsapp"];
 
   const { data, error } = await supabaseAdmin.rpc("outbox_claim", {
-    p_limit: opts.limit ?? 25, p_channels: channels, p_tenant: opts.tenantId ?? undefined,
+    p_limit: opts.limit ?? 25, p_channels: channels, ...(opts.tenantId ? { p_tenant: opts.tenantId } : {}),
   });
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as OutboxRow[];
