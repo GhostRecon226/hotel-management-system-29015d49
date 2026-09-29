@@ -17,14 +17,14 @@ import { SubscriptionBanner } from "@/components/subscription-banner";
 import { cn } from "@/lib/utils";
 import { SETUP_PERMS } from "@/lib/setup";
 
-type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" };
+type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" };
 
 // perms: null = everyone; otherwise any one of the keys shows the item.
 const MENU: Item[] = [
   { label: "Dashboard", icon: LayoutDashboard, perms: null, to: "/dashboard" },
   { label: "Reservations", icon: CalendarDays, perms: ["res.view"], to: "/reservations" },
   { label: "Front Desk", icon: ConciergeBell, perms: ["fo.view"], to: "/front-desk" },
-  { label: "Rooms", icon: BedDouble, perms: ["room.view"] },
+  { label: "Rooms", icon: BedDouble, perms: ["room.view"], to: "/rooms" },
   { label: "Housekeeping", icon: Sparkles, perms: ["hk.view"] },
   { label: "Maintenance", icon: Wrench, perms: ["mnt.view", "mnt.ticket.create"] },
   { label: "Guests", icon: Users, perms: ["guest.view"], to: "/guests" },
