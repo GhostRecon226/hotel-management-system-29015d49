@@ -9,6 +9,7 @@ import {
   type ArrivalRow, type InHouseRow,
 } from "@/lib/front-desk";
 import { useOpenMainFolio } from "@/lib/folios";
+import { NewServiceRequestDialog, type ServiceGuest } from "@/lib/maintenance";
 import { usePostRoomCharges } from "@/lib/checkout";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,7 @@ function FrontDesk() {
   const [move, setMove] = useState<InHouseRow | null>(null);
   const [extend, setExtend] = useState<InHouseRow | null>(null);
   const [voiding, setVoiding] = useState<InHouseRow | null>(null);
+  const [svc, setSvc] = useState<ServiceGuest | null>(null);
   const openFolio = useOpenMainFolio();
   const roomCharges = usePostRoomCharges();
   if (!can("fo.view")) return <NoAccess />;
@@ -58,6 +60,7 @@ function FrontDesk() {
           const actions = [
             can("fo.checkout") && <DropdownMenuItem key="c" className="h-10" asChild><Link to="/checkout/$id" params={{ id: s.reservation_id }}>Check out</Link></DropdownMenuItem>,
             can("fin.folio.view") && <DropdownMenuItem key="f" className="h-10" onClick={() => openFolio.mutate(s.reservation_id)}>Open folio</DropdownMenuItem>,
+            can("svc.order.create") && <DropdownMenuItem key="s" className="h-10" onClick={() => setSvc(s)}>Service request</DropdownMenuItem>,
             can("fo.room.move") && !s.is_departing && <DropdownMenuItem key="m" className="h-10" onClick={() => setMove(s)}>Move room</DropdownMenuItem>,
             can("fo.stay.extend") && <DropdownMenuItem key="e" className="h-10" onClick={() => setExtend(s)}>Extend stay</DropdownMenuItem>,
             can("fo.checkin.void") && s.can_void && <DropdownMenuItem key="v" className="h-10 text-destructive" onClick={() => setVoiding(s)}>Void check-in</DropdownMenuItem>,
@@ -138,6 +141,7 @@ function FrontDesk() {
       <WalkInDialog open={walkIn} onOpenChange={setWalkIn} />
       <MoveRoomDialog stay={move} onOpenChange={(o) => !o && setMove(null)} />
       <ExtendStayDialog stay={extend} onOpenChange={(o) => !o && setExtend(null)} />
+      <NewServiceRequestDialog guest={svc} onOpenChange={(o) => !o && setSvc(null)} />
       <VoidCheckInDialog stay={voiding} onOpenChange={(o) => !o && setVoiding(null)} />
     </div>
   );

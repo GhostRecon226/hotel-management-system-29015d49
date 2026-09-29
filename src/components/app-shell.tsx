@@ -19,7 +19,7 @@ import { SETUP_PERMS } from "@/lib/setup";
 import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
 import { NotificationBell } from "@/components/notification-bell";
 
-type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/approvals" | "/housekeeping" };
+type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" };
 
 // perms: null = everyone; otherwise any one of the keys shows the item.
 const MENU: Item[] = [
@@ -28,7 +28,8 @@ const MENU: Item[] = [
   { label: "Front Desk", icon: ConciergeBell, perms: ["fo.view"], to: "/front-desk" },
   { label: "Rooms", icon: BedDouble, perms: ["room.view"], to: "/rooms" },
   { label: "Housekeeping", icon: Sparkles, perms: ["hk.view"], to: "/housekeeping" },
-  { label: "Maintenance", icon: Wrench, perms: ["mnt.view", "mnt.ticket.create"] },
+  { label: "Maintenance", icon: Wrench, perms: ["mnt.view", "mnt.ticket.create"], to: "/maintenance" },
+  { label: "Service requests", icon: ConciergeBell, perms: ["svc.view", "svc.order.complete"], to: "/service-requests" },
   { label: "Guests", icon: Users, perms: ["guest.view"], to: "/guests" },
   { label: "Folios", icon: Receipt, perms: ["fin.folio.view"], to: "/folios" },
   { label: "Approvals", icon: CheckCircle2, perms: APPROVAL_MENU_PERMS, to: "/approvals" },
