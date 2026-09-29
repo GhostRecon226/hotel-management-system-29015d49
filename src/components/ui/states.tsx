@@ -5,7 +5,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 
 /** Friendly empty state: an icon, a short title, one line of help and an optional action. */
 export function EmptyState({ icon: Icon = Inbox, title, description, action, className }: {
-  icon?: typeof Inbox; title: string; description?: string; action?: ReactNode; className?: string;
+  icon?: typeof Inbox; title: string; description?: string | undefined; action?: ReactNode; className?: string | undefined;
 }) {
   return (
     <div className={cn("flex flex-col items-center justify-center gap-2 px-4 py-10 text-center", className)}>
@@ -29,7 +29,7 @@ export function LoadingState({ label = "Loading…", className }: { label?: stri
 
 /** Empty or loading row inside a table. */
 export function TableStateRow({ colSpan, loading, title, description, action }: {
-  colSpan: number; loading?: boolean; title: string; description?: string; action?: ReactNode;
+  colSpan: number; loading?: boolean; title: string; description?: string | undefined; action?: ReactNode;
 }) {
   return (
     <TableRow className="hover:bg-transparent">
