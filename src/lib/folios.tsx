@@ -217,11 +217,11 @@ export function SplitFolioDialog({ folio, rows, open, onOpenChange }: { folio: F
   );
 }
 
-/** Charges, payments and rows that were moved in can be moved again, once. */
+/** Charges, payments and rows moved in from another folio can be reversed or moved, once. */
 export function movableRow(r: FolioTx, rows: FolioTx[]) {
   if (r.is_reversed || r.is_transferred) return false;
   if (r.kind === "charge" || r.kind === "payment") return true;
-  return r.kind === "transfer" && Number(r.total) !== 0 && !rows.some((x) => x.id === r.original_id);
+  return r.kind === "transfer" && !rows.some((x) => x.id === r.original_id);
 }
 
 export function TransferDialog({ folio, rows, initial, open, onOpenChange }: {

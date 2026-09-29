@@ -36,8 +36,7 @@ function FolioPage() {
   const open = folio.status === "open";
   const cur = folio.currency;
   const balance = Number(folio.balance);
-  const canReverse = (r: FolioTx) => !r.is_reversed && !r.is_transferred
-    && (r.kind === "charge" || r.kind === "payment" || (r.kind === "transfer" && movableRow(r, rows) && Number(r.total) > -Infinity && r.original_id !== null && !rows.some((x) => x.id === r.original_id)));
+  const isOutRow = (r: FolioTx) => r.kind === "transfer" && rows.some((x) => x.id === r.original_id);
 
   return (
     <div>
@@ -91,9 +90,9 @@ function FolioPage() {
           {!rowsLoading && rows.length === 0 && <TableStateRow colSpan={6} title="No transactions yet" description="Post a charge or record a payment to start." />}
           {rows.map((r) => {
             const total = Number(r.total);
-            const greyed = r.is_reversed || r.is_transferred || r.kind === "reversal" || (r.kind === "transfer" && total * (rows.some((x) => x.id === r.original_id) ? 1 : 1) !== 0 && rows.some((x) => x.id === r.original_id));
+            const greyed = r.is_reversed || r.is_transferred || r.kind === "reversal" || isOutRow(r);
             const actions = open ? [
-              perm.reverse && canReverse(r) && <DropdownMenuItem key="r" className="h-10" onClick={() => setReverse(r)}>Reverse</DropdownMenuItem>,
+              perm.reverse && movableRow(r, rows) && <DropdownMenuItem key="r" className="h-10" onClick={() => setReverse(r)}>Reverse</DropdownMenuItem>,
               perm.charge && movableRow(r, rows) && <DropdownMenuItem key="t" className="h-10" onClick={() => { setTransferRow(r.id); setDialog("transfer"); }}>Transfer to another folio</DropdownMenuItem>,
             ].filter(Boolean) : [];
             return (
