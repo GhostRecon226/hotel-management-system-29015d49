@@ -19,7 +19,7 @@ import { SETUP_PERMS } from "@/lib/setup";
 import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
 import { NotificationBell } from "@/components/notification-bell";
 
-type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" };
+type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" };
 
 // perms: null = everyone; otherwise any one of the keys shows the item.
 const MENU: Item[] = [
@@ -33,9 +33,9 @@ const MENU: Item[] = [
   { label: "Guests", icon: Users, perms: ["guest.view"], to: "/guests" },
   { label: "Folios", icon: Receipt, perms: ["fin.folio.view"], to: "/folios" },
   { label: "Approvals", icon: CheckCircle2, perms: APPROVAL_MENU_PERMS, to: "/approvals" },
-  { label: "Reports", icon: BarChart3, perms: ["rpt.operations.view", "rpt.finance.view"] },
+  { label: "Reports", icon: BarChart3, perms: ["rpt.operations.view", "rpt.finance.view"], to: "/reports" },
   { label: "Setup", icon: Settings, perms: SETUP_PERMS, to: "/setup" },
-  { label: "Admin", icon: Shield, perms: ["adm.user.manage", "adm.role.manage", "adm.audit.view"] },
+  { label: "Admin", icon: Shield, perms: ["adm.user.manage", "adm.role.manage", "adm.audit.view", "fin.nightaudit.run"], to: "/admin" },
 ];
 
 function Nav({ onNavigate }: { onNavigate?: () => void }) {
