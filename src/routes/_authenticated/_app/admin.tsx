@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/_app/admin")({
 });
 
 interface RollStatus { business_date: string; rollover_time: string; timezone: string; next_roll_at: string; is_due: boolean }
-interface LogRow { id: string; from_date: string; to_date: string; status: string; trigger: string; finished_at: string; details: Record<string, number>; error: string | null }
+interface LogRow { id: string; from_date: string; to_date: string; status: string; trigger: string; finished_at: string; details: { room_charges?: number; holds_expired?: number; no_shows?: number; stayover_tasks?: number }; error: string | null }
 
 function Admin() {
   const { property, can, canAny } = useAccess();
