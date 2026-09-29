@@ -9,6 +9,7 @@ import {
   describeEvent, formatDateTime, formatDay, GUARANTEES, nightsBetween, ResStatusBadge, SOURCES, useReservation, useResMutation,
   type ReservationDetail,
 } from "@/lib/reservations";
+import { useOpenMainFolio } from "@/lib/folios";
 import { formFromReservation, ReservationForm } from "@/components/reservation-form";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,7 @@ function ReservationDetailPage() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const confirm = useResMutation("confirm_reservation", "Booking confirmed.");
   const unassign = useResMutation("unassign_room", "Room removed.");
+  const openFolio = useOpenMainFolio();
 
   if (isLoading) return <LoadingState label="Loading booking…" />;
   if (error || !data) return <EmptyState title="Booking not found" action={<Button variant="outline" asChild><Link to="/reservations">All bookings</Link></Button>} />;
