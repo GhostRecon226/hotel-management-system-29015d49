@@ -60,7 +60,7 @@ export const inviteStaffMember = createServerFn({ method: "POST" })
     let createdUserId: string | null = null;
     if (!userId) {
       const invited = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
-        redirectTo: data.redirectTo || undefined,
+        ...(data.redirectTo ? { redirectTo: data.redirectTo } : {}),
         data: { full_name: data.fullName },
       });
       if (!invited.error && invited.data?.user) {
@@ -86,7 +86,7 @@ export const inviteStaffMember = createServerFn({ method: "POST" })
       const reg = await supabase.rpc("register_invited_user", {
         p_user_id: userId,
         p_full_name: data.fullName,
-        p_phone: data.phone,
+        p_phone: data.phone ?? undefined,
       });
       if (reg.error) throw new Error(reg.error.message);
 
