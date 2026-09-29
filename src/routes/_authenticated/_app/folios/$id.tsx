@@ -2,10 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, Info, MoreHorizontal } from "lucide-react";
 import {
-  movableRow, PostChargeDialog, RecordPaymentDialog, ReopenDialog, ReverseDialog, SplitFolioDialog, TransferDialog,
+  movableRow, PostChargeDialog, RecordPaymentDialog, ReopenDialog, SplitFolioDialog, TransferDialog,
   useFolio, useFolioAccess, useFolioMutation, useFolioTransactions, useReservationFolios, type FolioTx,
 } from "@/lib/folios";
 import { formatDateTime, formatDay } from "@/lib/reservations";
+import { useAccess } from "@/lib/access";
+import { AdjustmentDialog, DiscountDialog, KIND_LABEL as APPROVAL_KIND, RefundDialog, RequestReversalDialog, useApprovals } from "@/lib/approvals";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/_app/folios/$id")({ component: FolioPage });
 
-const KIND: Record<string, string> = { charge: "Charge", payment: "Payment", reversal: "Reversal", transfer: "Transfer" };
+const KIND: Record<string, string> = { charge: "Charge", payment: "Payment", reversal: "Reversal", transfer: "Transfer", discount: "Discount", adjustment: "Adjustment", refund: "Refund" };
 
 function FolioPage() {
   const { id } = Route.useParams();
@@ -27,7 +29,10 @@ function FolioPage() {
   const { data: siblings = [] } = useReservationFolios(folio?.reservation_id);
   const perm = useFolioAccess();
   const close = useFolioMutation("close_folio", "Folio closed.");
-  const [dialog, setDialog] = useState<null | "charge" | "payment" | "split" | "transfer" | "reopen">(null);
+  const { can } = useAccess();
+  const { data: approvals = [] } = useApprovals(undefined, id);
+  const [dialog, setDialog] = useState<null | "charge" | "payment" | "split" | "transfer" | "reopen" | "discount" | "adjust" | "refund">(null);
+  const [discountRow, setDiscountRow] = useState<string | null>(null);
   const [transferRow, setTransferRow] = useState<string | null>(null);
   const [reverse, setReverse] = useState<FolioTx | null>(null);
 
@@ -36,6 +41,9 @@ function FolioPage() {
   const open = folio.status === "open";
   const cur = folio.currency;
   const balance = Number(folio.balance);
+  const pending = approvals.filter((a) => a.status === "pending");
+  const pendingTx = new Set(pending.map((a) => a.transaction_id));
+  const reversible = (r: FolioTx) => !r.is_reversed && !r.is_transferred && (["discount", "adjustment", "refund"].includes(r.kind) || movableRow(r, rows));
   const isOutRow = (r: FolioTx) => r.kind === "transfer" && rows.some((x) => x.id === r.original_id);
 
   return (
@@ -50,6 +58,9 @@ function FolioPage() {
         actions={<>
           {open && perm.charge && <Button onClick={() => setDialog("charge")}>Post charge</Button>}
           {open && perm.payment && <Button onClick={() => setDialog("payment")}>Record payment</Button>}
+          {open && can("fin.discount.apply") && <Button variant="outline" onClick={() => { setDiscountRow(null); setDialog("discount"); }}>Discount</Button>}
+          {open && can("fin.adjust.post") && <Button variant="outline" onClick={() => setDialog("adjust")}>Adjustment</Button>}
+          {open && can("fin.refund.post") && <Button variant="outline" onClick={() => setDialog("refund")}>Refund</Button>}
           {open && perm.charge && <Button variant="outline" onClick={() => setDialog("split")}>Split folio</Button>}
           {open && perm.charge && <Button variant="outline" onClick={() => { setTransferRow(null); setDialog("transfer"); }}>Transfer</Button>}
           {open && perm.payment && <Button variant="outline" disabled={close.isPending} onClick={() => close.mutate({ p_id: folio.folio_id })}>Close</Button>}
@@ -59,6 +70,16 @@ function FolioPage() {
       <p className="mb-4 flex items-start gap-2 rounded-md border border-info/30 bg-info-soft p-3 text-[15px] text-info-strong">
         <Info className="mt-0.5 h-5 w-5 shrink-0" /> Payments are taken outside the system and recorded here. Nothing is charged to a card from this screen.
       </p>
+
+      {pending.length > 0 && (
+        <div className="mb-4 rounded-md border border-warning/40 bg-warning-soft p-3 text-[15px] text-warning-strong">
+          <p className="font-medium">Waiting for approval</p>
+          {pending.map((a) => (
+            <p key={a.id}>{APPROVAL_KIND[a.kind]} of {formatAmount(Math.abs(a.amount), a.currency)} by {a.requested_by_name ?? "someone"}: {a.reason}{" "}
+              <Link to="/approvals" className="underline">Open approvals</Link></p>
+          ))}
+        </div>
+      )}
 
       {siblings.length > 1 && (
         <div className="mb-4 flex flex-wrap gap-2">
@@ -92,7 +113,8 @@ function FolioPage() {
             const total = Number(r.total);
             const greyed = r.is_reversed || r.is_transferred || r.kind === "reversal" || isOutRow(r);
             const actions = open ? [
-              perm.reverse && movableRow(r, rows) && <DropdownMenuItem key="r" className="h-10" onClick={() => setReverse(r)}>Reverse</DropdownMenuItem>,
+              can("fin.discount.apply") && r.kind === "charge" && !r.is_reversed && !r.is_transferred && <DropdownMenuItem key="d" className="h-10" onClick={() => { setDiscountRow(r.id); setDialog("discount"); }}>Give discount</DropdownMenuItem>,
+              perm.reverse && reversible(r) && !pendingTx.has(r.id) && <DropdownMenuItem key="r" className="h-10" onClick={() => setReverse(r)}>Request reversal</DropdownMenuItem>,
               perm.charge && movableRow(r, rows) && <DropdownMenuItem key="t" className="h-10" onClick={() => { setTransferRow(r.id); setDialog("transfer"); }}>Transfer to another folio</DropdownMenuItem>,
             ].filter(Boolean) : [];
             return (
@@ -135,7 +157,10 @@ function FolioPage() {
       <SplitFolioDialog folio={folio} rows={rows} open={dialog === "split"} onOpenChange={(o) => !o && setDialog(null)} />
       <TransferDialog folio={folio} rows={rows} initial={transferRow} open={dialog === "transfer"} onOpenChange={(o) => !o && setDialog(null)} />
       <ReopenDialog folio={folio} open={dialog === "reopen"} onOpenChange={(o) => !o && setDialog(null)} />
-      <ReverseDialog row={reverse} currency={cur} onOpenChange={(o) => !o && setReverse(null)} />
+      <RequestReversalDialog row={reverse} currency={cur} onOpenChange={(o) => !o && setReverse(null)} />
+      <DiscountDialog folio={folio} rows={rows} initial={discountRow} open={dialog === "discount"} onOpenChange={(o) => !o && setDialog(null)} />
+      <AdjustmentDialog folio={folio} open={dialog === "adjust"} onOpenChange={(o) => !o && setDialog(null)} />
+      <RefundDialog folio={folio} open={dialog === "refund"} onOpenChange={(o) => !o && setDialog(null)} />
     </div>
   );
 }

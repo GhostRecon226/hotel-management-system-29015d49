@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import {
   Bell, BedDouble, BarChart3, CalendarDays, ConciergeBell, LayoutDashboard, LogOut, Menu,
-  Receipt, Settings, Shield, Sparkles, Users, Wrench, CalendarClock,
+  Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wrench, CalendarClock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,10 @@ import { formatBusinessDate, useAccess } from "@/lib/access";
 import { SubscriptionBanner } from "@/components/subscription-banner";
 import { cn } from "@/lib/utils";
 import { SETUP_PERMS } from "@/lib/setup";
+import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
+import { NotificationBell } from "@/components/notification-bell";
 
-type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" };
+type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/approvals" };
 
 // perms: null = everyone; otherwise any one of the keys shows the item.
 const MENU: Item[] = [
@@ -29,6 +31,7 @@ const MENU: Item[] = [
   { label: "Maintenance", icon: Wrench, perms: ["mnt.view", "mnt.ticket.create"] },
   { label: "Guests", icon: Users, perms: ["guest.view"], to: "/guests" },
   { label: "Folios", icon: Receipt, perms: ["fin.folio.view"], to: "/folios" },
+  { label: "Approvals", icon: CheckCircle2, perms: APPROVAL_MENU_PERMS, to: "/approvals" },
   { label: "Reports", icon: BarChart3, perms: ["rpt.operations.view", "rpt.finance.view"] },
   { label: "Setup", icon: Settings, perms: SETUP_PERMS, to: "/setup" },
   { label: "Admin", icon: Shield, perms: ["adm.user.manage", "adm.role.manage", "adm.audit.view"] },
@@ -112,7 +115,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
 
           <div className="ml-auto flex items-center gap-1">
-            <Button variant="ghost" size="icon" aria-label="Notifications"><Bell className="h-5 w-5" /></Button>
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2 px-2">
