@@ -18,6 +18,7 @@ export function NotificationBell() {
     if (!n.read_at) await callRpc("mark_notification_read", { p_id: n.id });
     qc.invalidateQueries({ queryKey: ["notifications"] });
     if (n.link === "/approvals") navigate({ to: "/approvals" });
+    else if (n.link === "/admin") navigate({ to: "/admin" });
     else if (n.link === "/service-requests") navigate({ to: "/service-requests" });
     else if (n.link?.startsWith("/maintenance/")) navigate({ to: "/maintenance/$id", params: { id: n.link.slice(13) } });
     else if (n.link?.startsWith("/housekeeping")) navigate({ to: "/housekeeping/my-tasks" });

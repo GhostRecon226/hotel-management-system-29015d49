@@ -1,0 +1,131 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAccess } from "@/lib/access";
+import { errorMessage } from "@/lib/errors";
+import { callRpc, NoAccess } from "@/lib/setup";
+import { formatDateTime, formatDay } from "@/lib/reservations";
+import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+export const Route = createFileRoute("/_authenticated/_app/admin")({
+  head: () => ({
+    meta: [
+      { title: "Admin — Hotel Desk" },
+      { name: "description", content: "Business date roll settings and history for your property." },
+      { property: "og:title", content: "Admin — Hotel Desk" },
+      { property: "og:description", content: "Business date roll settings and history for your property." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: Admin,
+});
+
+interface RollStatus { business_date: string; rollover_time: string; timezone: string; next_roll_at: string; is_due: boolean }
+interface LogRow { id: string; from_date: string; to_date: string; status: string; trigger: string; finished_at: string; details: Record<string, number>; error: string | null }
+
+function Admin() {
+  const { property, can, canAny } = useAccess();
+  const qc = useQueryClient();
+  const status = useQuery({
+    queryKey: ["admin", "roll-status", property?.id], enabled: !!property,
+    queryFn: () => callRpc<RollStatus>("rollover_status", { p_property_id: property!.id }),
+  });
+  const log = useQuery({
+    queryKey: ["admin", "roll-log", property?.id], enabled: !!property,
+    queryFn: async () => {
+      const { data, error } = await (supabase.from as any)("business_date_log").select("*").eq("property_id", property!.id).order("finished_at", { ascending: false }).limit(60);
+      if (error) throw error;
+      return data as LogRow[];
+    },
+  });
+  const [time, setTime] = useState("03:00");
+  useEffect(() => { if (status.data) setTime(status.data.rollover_time.slice(0, 5)); }, [status.data]);
+  const refresh = () => { qc.invalidateQueries({ queryKey: ["admin"] }); qc.invalidateQueries({ queryKey: ["reports"] }); };
+  const save = useMutation({
+    mutationFn: () => callRpc("set_rollover_time", { p_property_id: property!.id, p_time: time }),
+    onSuccess: () => { toast.success("Roll time saved."); refresh(); }, onError: (e) => toast.error(errorMessage(e)),
+  });
+  const run = useMutation({
+    mutationFn: () => callRpc<{ status: string; error?: string }[]>("run_due_rollovers_now", {}),
+    onSuccess: (res) => {
+      const failed = res.filter((r) => r.status === "failed");
+      if (res.length === 0) toast.info("No property is due to roll yet.");
+      else if (failed.length) toast.error(`Roll failed: ${errorMessage({ message: failed[0]!.error })}`);
+      else toast.success(`Business date rolled (${res.length}). Refresh the page to see the new date.`);
+      refresh();
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+
+  if (!canAny(["fin.nightaudit.run", "adm.audit.view", "adm.user.manage", "adm.role.manage"])) return <NoAccess />;
+  const manager = can("fin.nightaudit.run");
+  const s = status.data;
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Admin" description="Business date roll for this property." />
+      <Card>
+        <CardHeader><CardTitle>Business date</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div><div className="text-sm text-muted-foreground">Current business date</div><div className="text-2xl font-semibold tabular">{s ? formatDay(s.business_date) : "—"}</div></div>
+            <div><div className="text-sm text-muted-foreground">Next roll</div><div className="text-lg tabular">{s ? `${formatDay(s.next_roll_at.slice(0, 10))} at ${s.rollover_time.slice(0, 5)}` : "—"}</div><div className="text-sm text-muted-foreground">{s?.timezone}</div></div>
+            <div>{s?.is_due ? <Badge variant="warning">Due now</Badge> : <Badge variant="success">Up to date</Badge>}</div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            The date rolls by itself within 5 minutes of the roll time. Each roll posts room charges, cancels expired tentative holds,
+            marks confirmed guests who did not arrive as no-shows, creates stayover cleaning tasks and saves the day's figures.
+            If anything fails, nothing changes and managers get a notification.
+          </p>
+          {manager && (
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="space-y-1.5"><Label htmlFor="roll-time">Roll time (property time)</Label><Input id="roll-time" type="time" className="w-36" value={time} onChange={(e) => setTime(e.target.value)} /></div>
+              <Button variant="outline" disabled={save.isPending} onClick={() => save.mutate()}>Save time</Button>
+              <Button disabled={run.isPending} onClick={() => run.mutate()}>Run due rolls now</Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Roll history</CardTitle></CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader><TableRow>
+              <TableHead>Closed date</TableHead><TableHead>Result</TableHead><TableHead>How</TableHead><TableHead>What happened</TableHead><TableHead>When</TableHead>
+            </TableRow></TableHeader>
+            <TableBody>
+              {log.isLoading && <TableSkeletonRows cols={5} />}
+              {!log.isLoading && (log.data ?? []).length === 0 && <TableStateRow colSpan={5} title="No rolls yet" />}
+              {(log.data ?? []).map((l) => (
+                <TableRow key={l.id}>
+                  <TableCell className="tabular">{formatDay(l.from_date)} → {formatDay(l.to_date)}</TableCell>
+                  <TableCell>{l.status === "success" ? <Badge variant="success">Done</Badge> : <Badge variant="danger">Failed</Badge>}</TableCell>
+                  <TableCell>{l.trigger === "schedule" ? "Automatic" : "By hand"}</TableCell>
+                  <TableCell className="text-sm">
+                    {l.status === "success"
+                      ? `${l.details.room_charges ?? 0} room charges · ${l.details.holds_expired ?? 0} holds expired · ${l.details.no_shows ?? 0} no-shows · ${l.details.stayover_tasks ?? 0} stayover tasks`
+                      : <span className="text-destructive">{errorMessage({ message: l.error })}</span>}
+                  </TableCell>
+                  <TableCell className="tabular text-sm">{formatDateTime(l.finished_at)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
