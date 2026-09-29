@@ -43,6 +43,13 @@
       "when": 1790675121215,
       "tag": "0005_reservations",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790676449770,
+      "tag": "0006_front_desk",
+      "breakpoints": true
     }
   ]
 }

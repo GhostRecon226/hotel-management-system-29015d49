@@ -1,0 +1,136 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { MoreHorizontal } from "lucide-react";
+import { useAccess } from "@/lib/access";
+import { NoAccess } from "@/lib/setup";
+import { formatDay, ResStatusBadge } from "@/lib/reservations";
+import {
+  CheckInDialog, ExtendStayDialog, MoveRoomDialog, RoomStateBadge, useArrivals, useInHouse, VoidCheckInDialog, WalkInDialog,
+  type ArrivalRow, type InHouseRow,
+} from "@/lib/front-desk";
+import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Money } from "@/components/ui/money";
+import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+export const Route = createFileRoute("/_authenticated/_app/front-desk")({
+  head: () => ({ meta: [{ title: "Front Desk · Hotel Desk" }] }),
+  component: FrontDesk,
+});
+
+function FrontDesk() {
+  const { property, can } = useAccess();
+  const arrivals = useArrivals(property?.id);
+  const inHouse = useInHouse(property?.id);
+  const [checkIn, setCheckIn] = useState<ArrivalRow | null>(null);
+  const [walkIn, setWalkIn] = useState(false);
+  const [move, setMove] = useState<InHouseRow | null>(null);
+  const [extend, setExtend] = useState<InHouseRow | null>(null);
+  const [voiding, setVoiding] = useState<InHouseRow | null>(null);
+  if (!can("fo.view")) return <NoAccess />;
+
+  const departures = (inHouse.data ?? []).filter((s) => s.is_departing);
+  const guestCell = (id: string, number: string, name: string | null, company: string | null) => (
+    <TableCell>
+      <Link to="/reservations/$id" params={{ id }} className="font-medium text-primary-strong hover:underline">{name ?? "Guest"}</Link>
+      <span className="block text-sm text-muted-foreground">{number}{company ? ` · ${company}` : ""}</span>
+    </TableCell>
+  );
+
+  const stayTable = (rows: InHouseRow[], loading: boolean, empty: string) => (
+    <Table>
+      <TableHeader><TableRow>
+        <TableHead>Room</TableHead><TableHead>Guest</TableHead><TableHead>Arrived</TableHead><TableHead>Departure</TableHead>
+        <TableHead>Guests</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="w-12" />
+      </TableRow></TableHeader>
+      <TableBody>
+        {loading && <TableSkeletonRows cols={7} />}
+        {!loading && rows.length === 0 && <TableStateRow colSpan={7} title={empty} />}
+        {rows.map((s) => {
+          const actions = [
+            can("fo.room.move") && !s.is_departing && <DropdownMenuItem key="m" className="h-10" onClick={() => setMove(s)}>Move room</DropdownMenuItem>,
+            can("fo.stay.extend") && <DropdownMenuItem key="e" className="h-10" onClick={() => setExtend(s)}>Extend stay</DropdownMenuItem>,
+            can("fo.checkin.void") && s.can_void && <DropdownMenuItem key="v" className="h-10 text-destructive" onClick={() => setVoiding(s)}>Void check-in</DropdownMenuItem>,
+          ].filter(Boolean);
+          return (
+            <TableRow key={s.stay_id}>
+              <TableCell className="font-semibold tabular">{s.room_number}<span className="block text-sm font-normal text-muted-foreground">{s.room_type_code}</span></TableCell>
+              {guestCell(s.reservation_id, s.number, s.guest_name, s.company_name)}
+              <TableCell className="tabular">{formatDay(s.arrival_date)}</TableCell>
+              <TableCell className="tabular">{formatDay(s.departure_date)}{s.is_departing && <Badge variant="warning" className="ml-2">Due out</Badge>}</TableCell>
+              <TableCell className="tabular">{s.adults}{s.children ? ` + ${s.children}` : ""}</TableCell>
+              <TableCell><Money amount={s.total_amount} currency={s.currency} /></TableCell>
+              <TableCell>
+                {actions.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={`Actions for room ${s.room_number}`}><MoreHorizontal className="h-5 w-5" /></Button></DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">{actions}</DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
+
+  return (
+    <div>
+      <PageHeader title="Front Desk" description={`Today's arrivals, in-house guests and departures for ${property?.name ?? ""}.`}
+        actions={can("fo.walkin") && can("fo.checkin") ? <Button onClick={() => setWalkIn(true)}>Walk-in</Button> : null} />
+      <Tabs defaultValue="arrivals">
+        <TabsList className="mb-3">
+          <TabsTrigger value="arrivals">Arrivals ({arrivals.data?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="in-house">In house ({inHouse.data?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="departures">Departures today ({departures.length})</TabsTrigger>
+        </TabsList>
+        <TabsContent value="arrivals">
+          <Table>
+            <TableHeader><TableRow>
+              <TableHead>Guest</TableHead><TableHead>Stay</TableHead><TableHead>Room</TableHead><TableHead>Status</TableHead>
+              <TableHead className="text-right">Deposit due</TableHead><TableHead className="w-32" />
+            </TableRow></TableHeader>
+            <TableBody>
+              {arrivals.isLoading && <TableSkeletonRows cols={6} />}
+              {!arrivals.isLoading && (arrivals.data ?? []).length === 0 && <TableStateRow colSpan={6} title="No arrivals today" description="Bookings arriving on the business date appear here." />}
+              {(arrivals.data ?? []).map((a) => (
+                <TableRow key={a.id}>
+                  {guestCell(a.id, a.number, a.guest_name, a.company_name)}
+                  <TableCell className="tabular">
+                    {formatDay(a.arrival_date)} – {formatDay(a.departure_date)}
+                    <span className="block text-sm text-muted-foreground">{a.nights} nights · {a.room_type_code}</span>
+                    {a.is_late && <Badge variant="danger">Late arrival</Badge>}
+                  </TableCell>
+                  <TableCell>
+                    {a.room_number
+                      ? <span className="inline-flex items-center gap-2"><span className="font-semibold tabular">{a.room_number}</span><RoomStateBadge condition={a.room_condition} occupied={a.room_is_occupied} /></span>
+                      : <span className="text-muted-foreground">Not assigned</span>}
+                  </TableCell>
+                  <TableCell><ResStatusBadge status={a.status} holdUntil={a.hold_until} /></TableCell>
+                  <TableCell><Money amount={Math.max(Number(a.deposit_required) - Number(a.deposit_paid), 0)} currency={a.currency} /></TableCell>
+                  <TableCell className="text-right">{can("fo.checkin") && <Button size="sm" onClick={() => setCheckIn(a)}>Check in</Button>}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TabsContent>
+        <TabsContent value="in-house">{stayTable(inHouse.data ?? [], inHouse.isLoading, "No guests in house")}</TabsContent>
+        <TabsContent value="departures">
+          <p className="mb-3 text-sm text-muted-foreground">Check-out will be added with folios.</p>
+          {stayTable(departures, inHouse.isLoading, "No departures today")}
+        </TabsContent>
+      </Tabs>
+
+      <CheckInDialog arrival={checkIn} onOpenChange={(o) => !o && setCheckIn(null)} />
+      <WalkInDialog open={walkIn} onOpenChange={setWalkIn} />
+      <MoveRoomDialog stay={move} onOpenChange={(o) => !o && setMove(null)} />
+      <ExtendStayDialog stay={extend} onOpenChange={(o) => !o && setExtend(null)} />
+      <VoidCheckInDialog stay={voiding} onOpenChange={(o) => !o && setVoiding(null)} />
+    </div>
+  );
+}
