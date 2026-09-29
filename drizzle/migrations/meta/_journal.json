@@ -15,6 +15,13 @@
       "when": 1790671772007,
       "tag": "0001_app_context_and_read_only",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790672142876,
+      "tag": "0002_setup_catalog",
+      "breakpoints": true
     }
   ]
 }
