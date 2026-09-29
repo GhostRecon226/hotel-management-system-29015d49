@@ -5,6 +5,7 @@ import { useAccess } from "@/lib/access";
 import { formatDate, fullName, GuestFormDialog, useGuestSearch } from "@/lib/guests";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/_app/guests/")({ component: GuestList });
@@ -38,7 +39,7 @@ function GuestList() {
           <TableHead>Nationality</TableHead><TableHead>Added</TableHead>
         </TableRow></TableHeader>
         <TableBody>
-          {isLoading && <TableRow><TableCell colSpan={5} className="text-muted-foreground">Searching…</TableCell></TableRow>}
+          {isLoading && <TableStateRow colSpan={5} title="Searching…" />}
           {!isLoading && data.length === 0 && (
             <TableRow><TableCell colSpan={5} className="text-muted-foreground">{q ? "No guests match." : "No guests yet."}</TableCell></TableRow>
           )}

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/_app/setup/rooms")({ component: Rooms });
@@ -63,7 +64,7 @@ function Rooms() {
           <TableHead>Condition</TableHead><TableHead>Occupied</TableHead><TableHead>Status</TableHead><TableHead />
         </TableRow></TableHeader>
         <TableBody>
-          {rooms.length === 0 && <TableRow><TableCell colSpan={7} className="text-muted-foreground">No rooms yet.</TableCell></TableRow>}
+          {rooms.length === 0 && <TableStateRow colSpan={7} title="No rooms yet." />}
           {rooms.map((r) => (
             <TableRow key={r.id}>
               <TableCell className="font-medium">{r.room_number}</TableCell><TableCell>{typeName(r.room_type_id)}</TableCell>

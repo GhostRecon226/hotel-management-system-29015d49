@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -122,7 +123,7 @@ function GuestProfile() {
               <Table>
                 <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Number</TableHead><TableHead>Expiry</TableHead><TableHead /></TableRow></TableHeader>
                 <TableBody>
-                  {data.documents.length === 0 && <TableRow><TableCell colSpan={4} className="text-muted-foreground">No documents.</TableCell></TableRow>}
+                  {data.documents.length === 0 && <TableStateRow colSpan={4} title="No documents." />}
                   {data.documents.map((d) => {
                     const expired = d.expiry && d.expiry < new Date().toISOString().slice(0, 10);
                     return (
