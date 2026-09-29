@@ -4,6 +4,7 @@ import { useAccess } from "@/lib/access";
 import { NoAccess, Field, FormDialog, SectionHeader, StatusText, useSetupList, useSetupMutation } from "@/lib/setup";
 
 import type { RoomType } from "./room-types";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -19,6 +20,7 @@ interface Room {
 }
 
 const CONDITION: Record<string, string> = { clean: "Clean", dirty: "Dirty", inspected: "Inspected", out_of_order: "Out of order" };
+const CONDITION_TONE: Record<string, "success" | "warning" | "danger"> = { clean: "success", inspected: "success", dirty: "warning", out_of_order: "danger" };
 
 function TypeSelect({ id, value, onChange, types }: { id: string; value: string; onChange: (v: string) => void; types: RoomType[] }) {
   return (
@@ -68,8 +70,8 @@ function Rooms() {
           {rooms.map((r) => (
             <TableRow key={r.id}>
               <TableCell className="font-medium">{r.room_number}</TableCell><TableCell>{typeName(r.room_type_id)}</TableCell>
-              <TableCell>{r.floor}</TableCell><TableCell>{CONDITION[r.condition]}</TableCell>
-              <TableCell>{r.is_occupied ? "Yes" : "No"}</TableCell><TableCell><StatusText active={r.is_active} /></TableCell>
+              <TableCell>{r.floor}</TableCell><TableCell><Badge variant={CONDITION_TONE[r.condition]} dot>{CONDITION[r.condition]}</Badge></TableCell>
+              <TableCell>{r.is_occupied ? <Badge variant="info" dot>In house</Badge> : <Badge variant="neutral">Empty</Badge>}</TableCell><TableCell><StatusText active={r.is_active} /></TableCell>
               <TableCell className="text-right"><Button variant="outline" size="sm" onClick={() => edit(r)}>Edit</Button></TableCell>
             </TableRow>
           ))}

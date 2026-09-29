@@ -4,6 +4,7 @@ import { useAccess } from "@/lib/access";
 import { NoAccess, Field, FormDialog, SectionHeader, StatusText, formatMoney, useSetupList, useSetupMutation } from "@/lib/setup";
 
 import type { RoomType } from "./room-types";
+import { Money } from "@/components/ui/money";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -104,7 +105,7 @@ function Rates() {
               {prices.filter((x) => x.rate_plan_id === plan.id).map((x) => (
                 <TableRow key={x.id}>
                   <TableCell>{typeName(x.room_type_id)}</TableCell><TableCell>{x.valid_from}</TableCell><TableCell>{x.valid_to}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatMoney(x.amount, x.currency)}</TableCell>
+                  <TableCell><Money amount={x.amount} currency={x.currency} /></TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" onClick={() => editPrice(plan.id, x)}>Edit</Button>
                     <Button variant="ghost" size="sm" onClick={() => { if (confirm("Remove this price?")) delPrice.mutate({ p_id: x.id }); }}>Remove</Button>
