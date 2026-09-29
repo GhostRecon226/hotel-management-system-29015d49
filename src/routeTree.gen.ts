@@ -22,8 +22,10 @@ import { Route as AuthenticatedAppFoliosRouteRouteImport } from './routes/_authe
 import { Route as AuthenticatedAppFrontDeskRouteImport } from './routes/_authenticated/_app/front-desk'
 import { Route as AuthenticatedAppGuestsRouteRouteImport } from './routes/_authenticated/_app/guests/route'
 import { Route as AuthenticatedAppHousekeepingRouteRouteImport } from './routes/_authenticated/_app/housekeeping/route'
+import { Route as AuthenticatedAppMaintenanceRouteRouteImport } from './routes/_authenticated/_app/maintenance/route'
 import { Route as AuthenticatedAppReservationsRouteRouteImport } from './routes/_authenticated/_app/reservations/route'
 import { Route as AuthenticatedAppRoomsRouteRouteImport } from './routes/_authenticated/_app/rooms/route'
+import { Route as AuthenticatedAppServiceRequestsRouteImport } from './routes/_authenticated/_app/service-requests'
 import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
 import { Route as AuthenticatedInvoicesIdRouteImport } from './routes/_authenticated/invoices.$id'
 import { Route as AuthenticatedAppCheckoutIdRouteImport } from './routes/_authenticated/_app/checkout.$id'
@@ -36,6 +38,8 @@ import { Route as AuthenticatedAppHousekeepingIndexRouteImport } from './routes/
 import { Route as AuthenticatedAppHousekeepingInspectionsRouteImport } from './routes/_authenticated/_app/housekeeping/inspections'
 import { Route as AuthenticatedAppHousekeepingLostFoundRouteImport } from './routes/_authenticated/_app/housekeeping/lost-found'
 import { Route as AuthenticatedAppHousekeepingMyTasksRouteImport } from './routes/_authenticated/_app/housekeeping/my-tasks'
+import { Route as AuthenticatedAppMaintenanceIndexRouteImport } from './routes/_authenticated/_app/maintenance/index'
+import { Route as AuthenticatedAppMaintenanceIdRouteImport } from './routes/_authenticated/_app/maintenance/$id'
 import { Route as AuthenticatedAppReservationsIndexRouteImport } from './routes/_authenticated/_app/reservations/index'
 import { Route as AuthenticatedAppReservationsIdRouteImport } from './routes/_authenticated/_app/reservations/$id'
 import { Route as AuthenticatedAppReservationsAvailabilityRouteImport } from './routes/_authenticated/_app/reservations/availability'
@@ -120,6 +124,12 @@ const AuthenticatedAppHousekeepingRouteRoute =
     path: '/housekeeping',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppMaintenanceRouteRoute =
+  AuthenticatedAppMaintenanceRouteRouteImport.update({
+    id: '/maintenance',
+    path: '/maintenance',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 const AuthenticatedAppReservationsRouteRoute =
   AuthenticatedAppReservationsRouteRouteImport.update({
     id: '/reservations',
@@ -130,6 +140,12 @@ const AuthenticatedAppRoomsRouteRoute =
   AuthenticatedAppRoomsRouteRouteImport.update({
     id: '/rooms',
     path: '/rooms',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppServiceRequestsRoute =
+  AuthenticatedAppServiceRequestsRouteImport.update({
+    id: '/service-requests',
+    path: '/service-requests',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
 const AuthenticatedAppSetupRouteRoute =
@@ -202,6 +218,18 @@ const AuthenticatedAppHousekeepingMyTasksRoute =
     id: '/my-tasks',
     path: '/my-tasks',
     getParentRoute: () => AuthenticatedAppHousekeepingRouteRoute,
+  } as any)
+const AuthenticatedAppMaintenanceIndexRoute =
+  AuthenticatedAppMaintenanceIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppMaintenanceRouteRoute,
+  } as any)
+const AuthenticatedAppMaintenanceIdRoute =
+  AuthenticatedAppMaintenanceIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAppMaintenanceRouteRoute,
   } as any)
 const AuthenticatedAppReservationsIndexRoute =
   AuthenticatedAppReservationsIndexRouteImport.update({
@@ -290,12 +318,14 @@ export interface FileRoutesByFullPath {
   '/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
   '/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/housekeeping': typeof AuthenticatedAppHousekeepingRouteRouteWithChildren
+  '/maintenance': typeof AuthenticatedAppMaintenanceRouteRouteWithChildren
   '/reservations': typeof AuthenticatedAppReservationsRouteRouteWithChildren
   '/rooms': typeof AuthenticatedAppRoomsRouteRouteWithChildren
   '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/approvals': typeof AuthenticatedAppApprovalsRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
@@ -304,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/housekeeping/inspections': typeof AuthenticatedAppHousekeepingInspectionsRoute
   '/housekeeping/lost-found': typeof AuthenticatedAppHousekeepingLostFoundRoute
   '/housekeeping/my-tasks': typeof AuthenticatedAppHousekeepingMyTasksRoute
+  '/maintenance/$id': typeof AuthenticatedAppMaintenanceIdRoute
   '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
   '/reservations/availability': typeof AuthenticatedAppReservationsAvailabilityRoute
   '/reservations/new': typeof AuthenticatedAppReservationsNewRoute
@@ -317,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/folios/': typeof AuthenticatedAppFoliosIndexRoute
   '/guests/': typeof AuthenticatedAppGuestsIndexRoute
   '/housekeeping/': typeof AuthenticatedAppHousekeepingIndexRoute
+  '/maintenance/': typeof AuthenticatedAppMaintenanceIndexRoute
   '/reservations/': typeof AuthenticatedAppReservationsIndexRoute
   '/rooms/': typeof AuthenticatedAppRoomsIndexRoute
   '/setup/': typeof AuthenticatedAppSetupIndexRoute
@@ -330,6 +362,7 @@ export interface FileRoutesByTo {
   '/approvals': typeof AuthenticatedAppApprovalsRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
@@ -338,6 +371,7 @@ export interface FileRoutesByTo {
   '/housekeeping/inspections': typeof AuthenticatedAppHousekeepingInspectionsRoute
   '/housekeeping/lost-found': typeof AuthenticatedAppHousekeepingLostFoundRoute
   '/housekeeping/my-tasks': typeof AuthenticatedAppHousekeepingMyTasksRoute
+  '/maintenance/$id': typeof AuthenticatedAppMaintenanceIdRoute
   '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
   '/reservations/availability': typeof AuthenticatedAppReservationsAvailabilityRoute
   '/reservations/new': typeof AuthenticatedAppReservationsNewRoute
@@ -351,6 +385,7 @@ export interface FileRoutesByTo {
   '/folios': typeof AuthenticatedAppFoliosIndexRoute
   '/guests': typeof AuthenticatedAppGuestsIndexRoute
   '/housekeeping': typeof AuthenticatedAppHousekeepingIndexRoute
+  '/maintenance': typeof AuthenticatedAppMaintenanceIndexRoute
   '/reservations': typeof AuthenticatedAppReservationsIndexRoute
   '/rooms': typeof AuthenticatedAppRoomsIndexRoute
   '/setup': typeof AuthenticatedAppSetupIndexRoute
@@ -367,12 +402,14 @@ export interface FileRoutesById {
   '/_authenticated/_app/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
   '/_authenticated/_app/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/_authenticated/_app/housekeeping': typeof AuthenticatedAppHousekeepingRouteRouteWithChildren
+  '/_authenticated/_app/maintenance': typeof AuthenticatedAppMaintenanceRouteRouteWithChildren
   '/_authenticated/_app/reservations': typeof AuthenticatedAppReservationsRouteRouteWithChildren
   '/_authenticated/_app/rooms': typeof AuthenticatedAppRoomsRouteRouteWithChildren
   '/_authenticated/_app/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/_authenticated/_app/approvals': typeof AuthenticatedAppApprovalsRoute
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/_app/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/_authenticated/_app/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/_authenticated/_app/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/_authenticated/_app/folios/$id': typeof AuthenticatedAppFoliosIdRoute
@@ -381,6 +418,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/housekeeping/inspections': typeof AuthenticatedAppHousekeepingInspectionsRoute
   '/_authenticated/_app/housekeeping/lost-found': typeof AuthenticatedAppHousekeepingLostFoundRoute
   '/_authenticated/_app/housekeeping/my-tasks': typeof AuthenticatedAppHousekeepingMyTasksRoute
+  '/_authenticated/_app/maintenance/$id': typeof AuthenticatedAppMaintenanceIdRoute
   '/_authenticated/_app/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
   '/_authenticated/_app/reservations/availability': typeof AuthenticatedAppReservationsAvailabilityRoute
   '/_authenticated/_app/reservations/new': typeof AuthenticatedAppReservationsNewRoute
@@ -394,6 +432,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/folios/': typeof AuthenticatedAppFoliosIndexRoute
   '/_authenticated/_app/guests/': typeof AuthenticatedAppGuestsIndexRoute
   '/_authenticated/_app/housekeeping/': typeof AuthenticatedAppHousekeepingIndexRoute
+  '/_authenticated/_app/maintenance/': typeof AuthenticatedAppMaintenanceIndexRoute
   '/_authenticated/_app/reservations/': typeof AuthenticatedAppReservationsIndexRoute
   '/_authenticated/_app/rooms/': typeof AuthenticatedAppRoomsIndexRoute
   '/_authenticated/_app/setup/': typeof AuthenticatedAppSetupIndexRoute
@@ -409,12 +448,14 @@ export interface FileRouteTypes {
     | '/folios'
     | '/guests'
     | '/housekeeping'
+    | '/maintenance'
     | '/reservations'
     | '/rooms'
     | '/setup'
     | '/approvals'
     | '/dashboard'
     | '/front-desk'
+    | '/service-requests'
     | '/invoices/$id'
     | '/checkout/$id'
     | '/folios/$id'
@@ -423,6 +464,7 @@ export interface FileRouteTypes {
     | '/housekeeping/inspections'
     | '/housekeeping/lost-found'
     | '/housekeeping/my-tasks'
+    | '/maintenance/$id'
     | '/reservations/$id'
     | '/reservations/availability'
     | '/reservations/new'
@@ -436,6 +478,7 @@ export interface FileRouteTypes {
     | '/folios/'
     | '/guests/'
     | '/housekeeping/'
+    | '/maintenance/'
     | '/reservations/'
     | '/rooms/'
     | '/setup/'
@@ -449,6 +492,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/dashboard'
     | '/front-desk'
+    | '/service-requests'
     | '/invoices/$id'
     | '/checkout/$id'
     | '/folios/$id'
@@ -457,6 +501,7 @@ export interface FileRouteTypes {
     | '/housekeeping/inspections'
     | '/housekeeping/lost-found'
     | '/housekeeping/my-tasks'
+    | '/maintenance/$id'
     | '/reservations/$id'
     | '/reservations/availability'
     | '/reservations/new'
@@ -470,6 +515,7 @@ export interface FileRouteTypes {
     | '/folios'
     | '/guests'
     | '/housekeeping'
+    | '/maintenance'
     | '/reservations'
     | '/rooms'
     | '/setup'
@@ -485,12 +531,14 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/folios'
     | '/_authenticated/_app/guests'
     | '/_authenticated/_app/housekeeping'
+    | '/_authenticated/_app/maintenance'
     | '/_authenticated/_app/reservations'
     | '/_authenticated/_app/rooms'
     | '/_authenticated/_app/setup'
     | '/_authenticated/_app/approvals'
     | '/_authenticated/_app/dashboard'
     | '/_authenticated/_app/front-desk'
+    | '/_authenticated/_app/service-requests'
     | '/_authenticated/invoices/$id'
     | '/_authenticated/_app/checkout/$id'
     | '/_authenticated/_app/folios/$id'
@@ -499,6 +547,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/housekeeping/inspections'
     | '/_authenticated/_app/housekeeping/lost-found'
     | '/_authenticated/_app/housekeeping/my-tasks'
+    | '/_authenticated/_app/maintenance/$id'
     | '/_authenticated/_app/reservations/$id'
     | '/_authenticated/_app/reservations/availability'
     | '/_authenticated/_app/reservations/new'
@@ -512,6 +561,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/folios/'
     | '/_authenticated/_app/guests/'
     | '/_authenticated/_app/housekeeping/'
+    | '/_authenticated/_app/maintenance/'
     | '/_authenticated/_app/reservations/'
     | '/_authenticated/_app/rooms/'
     | '/_authenticated/_app/setup/'
@@ -618,6 +668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppHousekeepingRouteRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/maintenance': {
+      id: '/_authenticated/_app/maintenance'
+      path: '/maintenance'
+      fullPath: '/maintenance'
+      preLoaderRoute: typeof AuthenticatedAppMaintenanceRouteRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/_app/reservations': {
       id: '/_authenticated/_app/reservations'
       path: '/reservations'
@@ -630,6 +687,13 @@ declare module '@tanstack/react-router' {
       path: '/rooms'
       fullPath: '/rooms'
       preLoaderRoute: typeof AuthenticatedAppRoomsRouteRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/service-requests': {
+      id: '/_authenticated/_app/service-requests'
+      path: '/service-requests'
+      fullPath: '/service-requests'
+      preLoaderRoute: typeof AuthenticatedAppServiceRequestsRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/_app/setup': {
@@ -715,6 +779,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/housekeeping/my-tasks'
       preLoaderRoute: typeof AuthenticatedAppHousekeepingMyTasksRouteImport
       parentRoute: typeof AuthenticatedAppHousekeepingRouteRoute
+    }
+    '/_authenticated/_app/maintenance/': {
+      id: '/_authenticated/_app/maintenance/'
+      path: '/'
+      fullPath: '/maintenance/'
+      preLoaderRoute: typeof AuthenticatedAppMaintenanceIndexRouteImport
+      parentRoute: typeof AuthenticatedAppMaintenanceRouteRoute
+    }
+    '/_authenticated/_app/maintenance/$id': {
+      id: '/_authenticated/_app/maintenance/$id'
+      path: '/$id'
+      fullPath: '/maintenance/$id'
+      preLoaderRoute: typeof AuthenticatedAppMaintenanceIdRouteImport
+      parentRoute: typeof AuthenticatedAppMaintenanceRouteRoute
     }
     '/_authenticated/_app/reservations/': {
       id: '/_authenticated/_app/reservations/'
@@ -868,6 +946,23 @@ const AuthenticatedAppHousekeepingRouteRouteWithChildren =
     AuthenticatedAppHousekeepingRouteRouteChildren,
   )
 
+interface AuthenticatedAppMaintenanceRouteRouteChildren {
+  AuthenticatedAppMaintenanceIdRoute: typeof AuthenticatedAppMaintenanceIdRoute
+  AuthenticatedAppMaintenanceIndexRoute: typeof AuthenticatedAppMaintenanceIndexRoute
+}
+
+const AuthenticatedAppMaintenanceRouteRouteChildren: AuthenticatedAppMaintenanceRouteRouteChildren =
+  {
+    AuthenticatedAppMaintenanceIdRoute: AuthenticatedAppMaintenanceIdRoute,
+    AuthenticatedAppMaintenanceIndexRoute:
+      AuthenticatedAppMaintenanceIndexRoute,
+  }
+
+const AuthenticatedAppMaintenanceRouteRouteWithChildren =
+  AuthenticatedAppMaintenanceRouteRoute._addFileChildren(
+    AuthenticatedAppMaintenanceRouteRouteChildren,
+  )
+
 interface AuthenticatedAppReservationsRouteRouteChildren {
   AuthenticatedAppReservationsIdRoute: typeof AuthenticatedAppReservationsIdRoute
   AuthenticatedAppReservationsAvailabilityRoute: typeof AuthenticatedAppReservationsAvailabilityRoute
@@ -937,12 +1032,14 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppFoliosRouteRoute: typeof AuthenticatedAppFoliosRouteRouteWithChildren
   AuthenticatedAppGuestsRouteRoute: typeof AuthenticatedAppGuestsRouteRouteWithChildren
   AuthenticatedAppHousekeepingRouteRoute: typeof AuthenticatedAppHousekeepingRouteRouteWithChildren
+  AuthenticatedAppMaintenanceRouteRoute: typeof AuthenticatedAppMaintenanceRouteRouteWithChildren
   AuthenticatedAppReservationsRouteRoute: typeof AuthenticatedAppReservationsRouteRouteWithChildren
   AuthenticatedAppRoomsRouteRoute: typeof AuthenticatedAppRoomsRouteRouteWithChildren
   AuthenticatedAppSetupRouteRoute: typeof AuthenticatedAppSetupRouteRouteWithChildren
   AuthenticatedAppApprovalsRoute: typeof AuthenticatedAppApprovalsRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
   AuthenticatedAppFrontDeskRoute: typeof AuthenticatedAppFrontDeskRoute
+  AuthenticatedAppServiceRequestsRoute: typeof AuthenticatedAppServiceRequestsRoute
   AuthenticatedAppCheckoutIdRoute: typeof AuthenticatedAppCheckoutIdRoute
 }
 
@@ -953,6 +1050,8 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
     AuthenticatedAppGuestsRouteRouteWithChildren,
   AuthenticatedAppHousekeepingRouteRoute:
     AuthenticatedAppHousekeepingRouteRouteWithChildren,
+  AuthenticatedAppMaintenanceRouteRoute:
+    AuthenticatedAppMaintenanceRouteRouteWithChildren,
   AuthenticatedAppReservationsRouteRoute:
     AuthenticatedAppReservationsRouteRouteWithChildren,
   AuthenticatedAppRoomsRouteRoute: AuthenticatedAppRoomsRouteRouteWithChildren,
@@ -960,6 +1059,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppApprovalsRoute: AuthenticatedAppApprovalsRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
   AuthenticatedAppFrontDeskRoute: AuthenticatedAppFrontDeskRoute,
+  AuthenticatedAppServiceRequestsRoute: AuthenticatedAppServiceRequestsRoute,
   AuthenticatedAppCheckoutIdRoute: AuthenticatedAppCheckoutIdRoute,
 }
 
