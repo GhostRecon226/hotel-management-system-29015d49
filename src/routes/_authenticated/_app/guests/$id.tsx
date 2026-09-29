@@ -22,6 +22,11 @@ import {
   AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import { formatDay, ResStatusBadge } from "@/lib/reservations";
+import { Money } from "@/components/ui/money";
+
+interface StayRow { id: string; number: string; property_name: string; arrival_date: string; departure_date: string; status: string; total_amount: number; currency: string }
+
 export const Route = createFileRoute("/_authenticated/_app/guests/$id")({ component: GuestProfile });
 
 const FEEDBACK_TONE: Record<string, "warning" | "info" | "success" | "neutral"> = { open: "warning", in_progress: "info", resolved: "success", closed: "neutral" };
@@ -153,7 +158,23 @@ function GuestProfile() {
 
         <TabsContent value="stays">
           <Card><CardContent className="pt-6">
-            <EmptyState title="No stays yet" description="Stays will appear here once reservations are in use." />
+            {(data.stays as StayRow[]).length === 0 ? <EmptyState title="No stays yet" description="Bookings for this guest will appear here." /> : (
+              <Table>
+                <TableHeader><TableRow><TableHead>Booking</TableHead><TableHead>Property</TableHead><TableHead>Arrival</TableHead><TableHead>Departure</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Total</TableHead></TableRow></TableHeader>
+                <TableBody>
+                  {(data.stays as StayRow[]).map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell><Link className="text-primary-strong hover:underline" to="/reservations/$id" params={{ id: s.id }}>{s.number}</Link></TableCell>
+                      <TableCell>{s.property_name}</TableCell>
+                      <TableCell className="tabular">{formatDay(s.arrival_date)}</TableCell>
+                      <TableCell className="tabular">{formatDay(s.departure_date)}</TableCell>
+                      <TableCell><ResStatusBadge status={s.status} /></TableCell>
+                      <TableCell><Money amount={s.total_amount} currency={s.currency} /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent></Card>
         </TabsContent>
 
