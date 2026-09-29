@@ -271,7 +271,7 @@ export function ExtendStayDialog({ stay, onOpenChange }: { stay: InHouseRow | nu
     <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Extend stay · Room ${stay?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_new_departure: dep, p_reason: reason || null }, { onSuccess: () => onOpenChange(false) })}>
       <p className="text-sm text-muted-foreground">Current departure: {formatDay(stay?.departure_date)}</p>
-      <Field label="New departure" htmlFor="ex-dep" hint={extra > 0 ? `${extra} extra night${extra === 1 ? "" : "s"}` : undefined}>
+      <Field label="New departure" htmlFor="ex-dep" hint={extra > 0 ? `${extra} extra night${extra === 1 ? "" : "s"}` : ""}>
         <Input id="ex-dep" type="date" min={stay ? addDays(stay.departure_date, 1) : undefined} value={dep} onChange={(e) => setDep(e.target.value)} required />
       </Field>
       <Field label="Note" htmlFor="ex-reason" hint="Optional."><Input id="ex-reason" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} /></Field>
