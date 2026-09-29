@@ -60,6 +60,129 @@ export type Database = {
           },
         ]
       }
+      approvals: {
+        Row: {
+          amount: number
+          currency: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_reason: string | null
+          entity: string
+          folio_id: string
+          id: string
+          idempotency_key: string
+          kind: string
+          payload: Json
+          posted_transaction_id: string | null
+          property_id: string
+          reason: string
+          requested_at: string
+          requested_by: string
+          status: string
+          tenant_id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          amount: number
+          currency: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          entity?: string
+          folio_id: string
+          id?: string
+          idempotency_key: string
+          kind: string
+          payload?: Json
+          posted_transaction_id?: string | null
+          property_id: string
+          reason: string
+          requested_at?: string
+          requested_by?: string
+          status?: string
+          tenant_id: string
+          transaction_id?: string | null
+        }
+        Update: {
+          amount?: number
+          currency?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          entity?: string
+          folio_id?: string
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          payload?: Json
+          posted_transaction_id?: string | null
+          property_id?: string
+          reason?: string
+          requested_at?: string
+          requested_by?: string
+          status?: string
+          tenant_id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approvals_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "folios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_balances"
+            referencedColumns: ["folio_id"]
+          },
+          {
+            foreignKeyName: "approvals_posted_transaction_id_fkey"
+            columns: ["posted_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_posted_transaction_id_fkey"
+            columns: ["posted_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_events: {
         Row: {
           action: string
@@ -768,6 +891,70 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          entity_id: string | null
+          id: string
+          kind: string
+          link: string | null
+          property_id: string | null
+          read_at: string | null
+          tenant_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          kind: string
+          link?: string | null
+          property_id?: string | null
+          read_at?: string | null
+          tenant_id: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          kind?: string
+          link?: string | null
+          property_id?: string | null
+          read_at?: string | null
+          tenant_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2115,6 +2302,117 @@ export type Database = {
       }
     }
     Views: {
+      v_approvals: {
+        Row: {
+          amount: number | null
+          currency: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_name: string | null
+          decision_reason: string | null
+          folio_id: string | null
+          folio_number: string | null
+          guest_name: string | null
+          id: string | null
+          kind: string | null
+          posted_transaction_id: string | null
+          property_id: string | null
+          reason: string | null
+          requested_at: string | null
+          requested_by: string | null
+          requested_by_name: string | null
+          reservation_id: string | null
+          status: string | null
+          transaction_description: string | null
+          transaction_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approvals_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "folios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_balances"
+            referencedColumns: ["folio_id"]
+          },
+          {
+            foreignKeyName: "approvals_posted_transaction_id_fkey"
+            columns: ["posted_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_posted_transaction_id_fkey"
+            columns: ["posted_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_arrivals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["reservation_id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["current_reservation_id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["next_reservation_id"]
+          },
+        ]
+      }
       v_arrivals: {
         Row: {
           adults: number | null
@@ -2465,6 +2763,15 @@ export type Database = {
         Args: { p_guest: string; p_reason: string }
         Returns: undefined
       }
+      apply_discount: {
+        Args: {
+          p_amount: number
+          p_idempotency_key: string
+          p_reason: string
+          p_transaction_id: string
+        }
+        Returns: Json
+      }
       approve_room_block: { Args: { p_id: string }; Returns: undefined }
       assign_room: {
         Args: { p_id: string; p_room_id: string }
@@ -2553,6 +2860,10 @@ export type Database = {
         }
         Returns: string
       }
+      decide_approval: {
+        Args: { p_approve: boolean; p_id: string; p_reason: string }
+        Returns: string
+      }
       delete_rate_plan_price: { Args: { p_id: string }; Returns: undefined }
       extend_stay: {
         Args: { p_id: string; p_new_departure: string; p_reason?: string }
@@ -2601,6 +2912,7 @@ export type Database = {
       }
       get_guest: { Args: { p_id: string }; Returns: Json }
       get_reservation: { Args: { p_id: string }; Returns: Json }
+      mark_all_notifications_read: { Args: never; Returns: undefined }
       mark_no_show: {
         Args: {
           p_id: string
@@ -2610,6 +2922,7 @@ export type Database = {
         }
         Returns: Json
       }
+      mark_notification_read: { Args: { p_id: string }; Returns: undefined }
       merge_guests: {
         Args: { p_keep: string; p_reason: string; p_remove: string }
         Returns: undefined
@@ -2687,6 +3000,36 @@ export type Database = {
       reopen_folio: {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
+      }
+      request_adjustment: {
+        Args: {
+          p_amount: number
+          p_charge_code_id: string
+          p_folio_id: string
+          p_idempotency_key: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      request_refund: {
+        Args: {
+          p_amount: number
+          p_currency: string
+          p_folio_id: string
+          p_idempotency_key: string
+          p_payment_method_id: string
+          p_reason: string
+          p_reference: string
+        }
+        Returns: Json
+      }
+      request_reversal: {
+        Args: {
+          p_idempotency_key: string
+          p_reason: string
+          p_transaction_id: string
+        }
+        Returns: Json
       }
       request_room_block: {
         Args: {
@@ -2947,6 +3290,7 @@ export type Database = {
         }
         Returns: string
       }
+      withdraw_approval: { Args: { p_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
