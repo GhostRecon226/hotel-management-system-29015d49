@@ -57,6 +57,13 @@
       "when": 1790679282189,
       "tag": "0007_room_blocks",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790679601718,
+      "tag": "0008_folios_ledger",
+      "breakpoints": true
     }
   ]
 }
