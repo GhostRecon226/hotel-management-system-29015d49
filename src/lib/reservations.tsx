@@ -140,7 +140,7 @@ export function describeEvent(e: HistoryEvent): { title: string; changes: string
   const changes: string[] = [];
   if (e.action === "update" && e.before && e.after) {
     const b = e.before, a = e.after;
-    if (b.status !== a.status) title = `Status: ${RES_STATUS[String(b.status)] ?? b.status} → ${RES_STATUS[String(a.status)] ?? a.status}`;
+    if (b["status"] !== a["status"]) title = `Status: ${RES_STATUS[String(b["status"])] ?? String(b["status"])} → ${RES_STATUS[String(a["status"])] ?? String(a["status"])}`;
     for (const k of Object.keys(FIELD_LABEL)) {
       if (k === "status" || k.endsWith("_id") && k !== "guest_id") {
         if (k.endsWith("_id") && JSON.stringify(b[k]) !== JSON.stringify(a[k])) changes.push(`${FIELD_LABEL[k]} changed`);
@@ -152,6 +152,6 @@ export function describeEvent(e: HistoryEvent): { title: string; changes: string
       }
     }
   }
-  if (e.action === "assign_room" && e.after?.room_number) title = `Room ${String(e.after.room_number)} assigned`;
+  if (e.action === "assign_room" && e.after?.["room_number"]) title = `Room ${String(e.after.room_number)} assigned`;
   return { title, changes };
 }

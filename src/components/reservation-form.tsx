@@ -179,9 +179,9 @@ export function ReservationForm({ initial, mode, reservationId, onDone, onCancel
               </Field>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Adults" htmlFor="adults" hint={rt ? `Up to ${rt.max_adults}` : undefined}>
+              <Field label="Adults" htmlFor="adults" {...(rt ? { hint: `Up to ${rt.max_adults}` } : {})}>
                 <Input id="adults" type="number" min={1} max={rt?.max_adults} required value={f.adults} onChange={(e) => set("adults", e.target.value)} /></Field>
-              <Field label="Children" htmlFor="children" hint={rt ? `Up to ${rt.max_children}` : undefined}>
+              <Field label="Children" htmlFor="children" {...(rt ? { hint: `Up to ${rt.max_children}` } : {})}>
                 <Input id="children" type="number" min={0} max={rt?.max_children} value={f.children} onChange={(e) => set("children", e.target.value)} /></Field>
             </div>
           </CardContent>
