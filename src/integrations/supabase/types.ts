@@ -4071,6 +4071,8 @@ export type Database = {
         Args: { p_category: string; p_guest_id: string; p_text: string }
         Returns: string
       }
+      admin_roles: { Args: never; Returns: Json }
+      admin_users: { Args: never; Returns: Json }
       anonymise_guest: {
         Args: { p_guest: string; p_reason: string }
         Returns: undefined
@@ -4089,6 +4091,10 @@ export type Database = {
         Args: { p_assignee_id: string; p_id: string }
         Returns: undefined
       }
+      assign_role: {
+        Args: { p_property_id: string; p_role_id: string; p_user_id: string }
+        Returns: string
+      }
       assign_room: {
         Args: { p_id: string; p_room_id: string }
         Returns: undefined
@@ -4100,6 +4106,18 @@ export type Database = {
       assign_ticket: {
         Args: { p_assignee_id: string; p_id: string }
         Returns: undefined
+      }
+      audit_filters: { Args: never; Returns: Json }
+      audit_log: {
+        Args: {
+          p_action?: string
+          p_actor?: string
+          p_from?: string
+          p_limit?: number
+          p_table?: string
+          p_to?: string
+        }
+        Returns: Json
       }
       block_room_for_ticket: {
         Args: {
@@ -4179,6 +4197,10 @@ export type Database = {
       }
       complete_service_request: { Args: { p_id: string }; Returns: string }
       confirm_reservation: { Args: { p_id: string }; Returns: undefined }
+      copy_role: {
+        Args: { p_code: string; p_name: string; p_source_role_id: string }
+        Returns: string
+      }
       create_hk_task: {
         Args: {
           p_assignee_id?: string
@@ -4256,6 +4278,7 @@ export type Database = {
         Returns: string
       }
       delete_rate_plan_price: { Args: { p_id: string }; Returns: undefined }
+      delete_role: { Args: { p_role_id: string }; Returns: undefined }
       extend_stay: {
         Args: { p_id: string; p_new_departure: string; p_reason?: string }
         Returns: undefined
@@ -4407,6 +4430,10 @@ export type Database = {
         Args: { p_business_date?: string; p_property_id: string }
         Returns: Json
       }
+      register_invited_user: {
+        Args: { p_full_name: string; p_phone?: string; p_user_id: string }
+        Returns: string
+      }
       reinstate_reservation: {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
@@ -4420,6 +4447,14 @@ export type Database = {
         Returns: undefined
       }
       remove_guest_document: { Args: { p_id: string }; Returns: undefined }
+      remove_role: {
+        Args: { p_property_id: string; p_role_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      rename_role: {
+        Args: { p_name: string; p_role_id: string }
+        Returns: undefined
+      }
       reopen_folio: {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
@@ -4698,6 +4733,14 @@ export type Database = {
           total_amount: number
         }[]
       }
+      set_approval_limit: {
+        Args: {
+          p_max_amount: number
+          p_permission_key: string
+          p_role_id: string
+        }
+        Returns: undefined
+      }
       set_exchange_rate: {
         Args: {
           p_currency: string
@@ -4728,12 +4771,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_role_permissions: {
+        Args: { p_permissions: Json; p_role_id: string }
+        Returns: undefined
+      }
       set_rollover_time: {
         Args: { p_property_id: string; p_time: string }
         Returns: undefined
       }
       set_room_condition: {
         Args: { p_condition: string; p_reason?: string; p_room_id: string }
+        Returns: undefined
+      }
+      set_user_status: {
+        Args: { p_status: string; p_user_id: string }
         Returns: undefined
       }
       split_folio: {
@@ -4749,6 +4800,7 @@ export type Database = {
       start_hk_task: { Args: { p_id: string }; Returns: undefined }
       start_service_request: { Args: { p_id: string }; Returns: undefined }
       start_ticket: { Args: { p_id: string }; Returns: undefined }
+      subscription_info: { Args: never; Returns: Json }
       svc_staff: {
         Args: { p_property_id: string }
         Returns: {
