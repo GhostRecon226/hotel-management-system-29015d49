@@ -58,7 +58,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     setError(null);
     const parsed = schema.safeParse({ email, password });
     if (!parsed.success) {
-      setError(parsed.error.issues[0].message);
+      setError(parsed.error.issues[0]?.message ?? "Please check the form.");
       return;
     }
     setBusy(true);

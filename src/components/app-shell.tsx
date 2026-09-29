@@ -90,7 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Sheet>
 
           {properties.length > 0 && (
-            <Select value={property?.id} onValueChange={setPropertyId}>
+            <Select value={property?.id ?? ""} onValueChange={setPropertyId}>
               <SelectTrigger className="h-9 w-44 sm:w-56" aria-label="Property"><SelectValue placeholder="Property" /></SelectTrigger>
               <SelectContent>
                 {properties.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}

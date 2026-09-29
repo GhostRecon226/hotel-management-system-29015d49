@@ -103,7 +103,7 @@ export function Can({ perm, children }: { perm: string | string[]; children: Rea
 
 export function formatBusinessDate(d: string | undefined) {
   if (!d) return "";
-  const [y, m, day] = d.split("-").map(Number);
+  const [y = 1970, m = 1, day = 1] = d.split("-").map(Number);
   return new Intl.DateTimeFormat("en-NG", {
     weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC",
   }).format(new Date(Date.UTC(y, m - 1, day)));

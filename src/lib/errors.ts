@@ -13,5 +13,5 @@ export function errorCode(e: unknown): string | null {
       ? String((e as { message: unknown }).message)
       : "";
   const m = raw.match(/^\[([A-Z0-9_]+)\]/);
-  return m ? m[1] : null;
+  return m?.[1] ?? null;
 }
