@@ -71,6 +71,13 @@
       "when": 1790680157743,
       "tag": "0009_approvals_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790683054734,
+      "tag": "0010_checkout_invoices_room_charges",
+      "breakpoints": true
     }
   ]
 }
