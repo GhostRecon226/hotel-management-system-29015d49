@@ -251,6 +251,314 @@ export type Database = {
           },
         ]
       }
+      folio_tax_lines: {
+        Row: {
+          amount: number
+          base_amount: number
+          id: string
+          line_no: number
+          percent: number
+          property_id: string
+          tax_code: string
+          tax_name: string
+          taxable_base: number
+          tenant_id: string
+          transaction_id: string
+        }
+        Insert: {
+          amount: number
+          base_amount: number
+          id?: string
+          line_no: number
+          percent: number
+          property_id: string
+          tax_code: string
+          tax_name: string
+          taxable_base: number
+          tenant_id: string
+          transaction_id: string
+        }
+        Update: {
+          amount?: number
+          base_amount?: number
+          id?: string
+          line_no?: number
+          percent?: number
+          property_id?: string
+          tax_code?: string
+          tax_name?: string
+          taxable_base?: number
+          tenant_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folio_tax_lines_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_tax_lines_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_tax_lines_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_tax_lines_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folio_transactions: {
+        Row: {
+          amount: number
+          base_amount: number
+          business_date: string
+          charge_code_id: string | null
+          currency: string
+          description: string | null
+          folio_id: string
+          fx_rate: number
+          id: string
+          idempotency_key: string
+          is_deposit: boolean
+          kind: string
+          original_id: string | null
+          payment_method_id: string | null
+          posted_at: string
+          posted_by: string | null
+          property_id: string
+          reference: string | null
+          tax_inclusive: boolean
+          tenant_id: string
+        }
+        Insert: {
+          amount: number
+          base_amount: number
+          business_date: string
+          charge_code_id?: string | null
+          currency: string
+          description?: string | null
+          folio_id: string
+          fx_rate?: number
+          id?: string
+          idempotency_key: string
+          is_deposit?: boolean
+          kind: string
+          original_id?: string | null
+          payment_method_id?: string | null
+          posted_at?: string
+          posted_by?: string | null
+          property_id: string
+          reference?: string | null
+          tax_inclusive?: boolean
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          base_amount?: number
+          business_date?: string
+          charge_code_id?: string | null
+          currency?: string
+          description?: string | null
+          folio_id?: string
+          fx_rate?: number
+          id?: string
+          idempotency_key?: string
+          is_deposit?: boolean
+          kind?: string
+          original_id?: string | null
+          payment_method_id?: string | null
+          posted_at?: string
+          posted_by?: string | null
+          property_id?: string
+          reference?: string | null
+          tax_inclusive?: boolean
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folio_transactions_charge_code_id_fkey"
+            columns: ["charge_code_id"]
+            isOneToOne: false
+            referencedRelation: "charge_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "folios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_balances"
+            referencedColumns: ["folio_id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_original_id_fkey"
+            columns: ["original_id"]
+            isOneToOne: false
+            referencedRelation: "folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_original_id_fkey"
+            columns: ["original_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folios: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          guest_id: string | null
+          id: string
+          idempotency_key: string | null
+          is_main: boolean
+          label: string
+          number: string
+          property_id: string
+          reservation_id: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          guest_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          is_main?: boolean
+          label?: string
+          number: string
+          property_id: string
+          reservation_id: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          guest_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          is_main?: boolean
+          label?: string
+          number?: string
+          property_id?: string
+          reservation_id?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folios_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_arrivals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["reservation_id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["current_reservation_id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["next_reservation_id"]
+          },
+          {
+            foreignKeyName: "folios_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_bookings: {
         Row: {
           contact_name: string | null
@@ -1884,6 +2192,163 @@ export type Database = {
           },
         ]
       }
+      v_folio_balances: {
+        Row: {
+          arrival_date: string | null
+          balance: number | null
+          closed_at: string | null
+          created_at: string | null
+          currency: string | null
+          departure_date: string | null
+          folio_id: string | null
+          guest_id: string | null
+          guest_name: string | null
+          is_main: boolean | null
+          label: string | null
+          number: string | null
+          property_id: string | null
+          reservation_id: string | null
+          reservation_number: string | null
+          reservation_status: string | null
+          room_number: string | null
+          status: string | null
+          total_credits: number | null
+          total_debits: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folios_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_arrivals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["reservation_id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["current_reservation_id"]
+          },
+          {
+            foreignKeyName: "folios_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["next_reservation_id"]
+          },
+        ]
+      }
+      v_folio_transactions: {
+        Row: {
+          amount: number | null
+          base_amount: number | null
+          business_date: string | null
+          charge_code: string | null
+          charge_code_id: string | null
+          charge_code_name: string | null
+          currency: string | null
+          description: string | null
+          folio_id: string | null
+          fx_rate: number | null
+          id: string | null
+          is_deposit: boolean | null
+          is_reversed: boolean | null
+          is_transferred: boolean | null
+          kind: string | null
+          original_id: string | null
+          payment_method_id: string | null
+          payment_method_name: string | null
+          posted_at: string | null
+          posted_by: string | null
+          posted_by_name: string | null
+          property_id: string | null
+          reference: string | null
+          tax_amount: number | null
+          tax_inclusive: boolean | null
+          tax_lines: Json | null
+          total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folio_transactions_charge_code_id_fkey"
+            columns: ["charge_code_id"]
+            isOneToOne: false
+            referencedRelation: "charge_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "folios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_balances"
+            referencedColumns: ["folio_id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_original_id_fkey"
+            columns: ["original_id"]
+            isOneToOne: false
+            referencedRelation: "folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_original_id_fkey"
+            columns: ["original_id"]
+            isOneToOne: false
+            referencedRelation: "v_folio_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folio_transactions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_in_house: {
         Row: {
           adults: number | null
@@ -2049,6 +2514,7 @@ export type Database = {
         }
         Returns: string
       }
+      close_folio: { Args: { p_id: string }; Returns: undefined }
       confirm_reservation: { Args: { p_id: string }; Returns: undefined }
       create_hotel: {
         Args: {
@@ -2179,6 +2645,32 @@ export type Database = {
         Returns: string
       }
       my_context: { Args: never; Returns: Json }
+      open_main_folio: { Args: { p_reservation_id: string }; Returns: string }
+      post_charge: {
+        Args: {
+          p_amount: number
+          p_charge_code_id: string
+          p_description: string
+          p_folio_id: string
+          p_idempotency_key: string
+          p_reference: string
+          p_tax_inclusive: boolean
+        }
+        Returns: string
+      }
+      post_payment: {
+        Args: {
+          p_amount: number
+          p_currency: string
+          p_description: string
+          p_folio_id: string
+          p_idempotency_key: string
+          p_is_deposit: boolean
+          p_payment_method_id: string
+          p_reference: string
+        }
+        Returns: string
+      }
       reinstate_reservation: {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
@@ -2192,6 +2684,10 @@ export type Database = {
         Returns: undefined
       }
       remove_guest_document: { Args: { p_id: string }; Returns: undefined }
+      reopen_folio: {
+        Args: { p_id: string; p_reason: string }
+        Returns: undefined
+      }
       request_room_block: {
         Args: {
           p_from: string
@@ -2201,6 +2697,10 @@ export type Database = {
           p_to: string
           p_type: string
         }
+        Returns: string
+      }
+      reverse_transaction: {
+        Args: { p_id: string; p_idempotency_key: string; p_reason: string }
         Returns: string
       }
       save_charge_code: {
@@ -2393,7 +2893,21 @@ export type Database = {
         Args: { p_condition: string; p_reason?: string; p_room_id: string }
         Returns: undefined
       }
+      split_folio: {
+        Args: {
+          p_folio_id: string
+          p_guest_id: string
+          p_idempotency_key: string
+          p_label: string
+          p_transaction_ids: string[]
+        }
+        Returns: string
+      }
       tenant_is_writable: { Args: never; Returns: boolean }
+      transfer_transaction: {
+        Args: { p_id: string; p_idempotency_key: string; p_to_folio_id: string }
+        Returns: string
+      }
       unassign_room: { Args: { p_id: string }; Returns: undefined }
       update_property: {
         Args: {

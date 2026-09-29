@@ -17,11 +17,14 @@ import { Route as DesignRouteImport } from './routes/design'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenticated/create-hotel'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
+import { Route as AuthenticatedAppFoliosRouteRouteImport } from './routes/_authenticated/_app/folios/route'
 import { Route as AuthenticatedAppFrontDeskRouteImport } from './routes/_authenticated/_app/front-desk'
 import { Route as AuthenticatedAppGuestsRouteRouteImport } from './routes/_authenticated/_app/guests/route'
 import { Route as AuthenticatedAppReservationsRouteRouteImport } from './routes/_authenticated/_app/reservations/route'
 import { Route as AuthenticatedAppRoomsRouteRouteImport } from './routes/_authenticated/_app/rooms/route'
 import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
+import { Route as AuthenticatedAppFoliosIndexRouteImport } from './routes/_authenticated/_app/folios/index'
+import { Route as AuthenticatedAppFoliosIdRouteImport } from './routes/_authenticated/_app/folios/$id'
 import { Route as AuthenticatedAppGuestsIndexRouteImport } from './routes/_authenticated/_app/guests/index'
 import { Route as AuthenticatedAppGuestsIdRouteImport } from './routes/_authenticated/_app/guests/$id'
 import { Route as AuthenticatedAppGuestsMergeRouteImport } from './routes/_authenticated/_app/guests/merge'
@@ -79,6 +82,12 @@ const AuthenticatedAppDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppFoliosRouteRoute =
+  AuthenticatedAppFoliosRouteRouteImport.update({
+    id: '/folios',
+    path: '/folios',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 const AuthenticatedAppFrontDeskRoute =
   AuthenticatedAppFrontDeskRouteImport.update({
     id: '/front-desk',
@@ -108,6 +117,18 @@ const AuthenticatedAppSetupRouteRoute =
     id: '/setup',
     path: '/setup',
     getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppFoliosIndexRoute =
+  AuthenticatedAppFoliosIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppFoliosRouteRoute,
+  } as any)
+const AuthenticatedAppFoliosIdRoute =
+  AuthenticatedAppFoliosIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAppFoliosRouteRoute,
   } as any)
 const AuthenticatedAppGuestsIndexRoute =
   AuthenticatedAppGuestsIndexRouteImport.update({
@@ -211,12 +232,14 @@ export interface FileRoutesByFullPath {
   '/check-email': typeof CheckEmailRoute
   '/design': typeof DesignRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
   '/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/reservations': typeof AuthenticatedAppReservationsRouteRouteWithChildren
   '/rooms': typeof AuthenticatedAppRoomsRouteRouteWithChildren
   '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
@@ -229,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/setup/rates': typeof AuthenticatedAppSetupRatesRoute
   '/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
   '/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
+  '/folios/': typeof AuthenticatedAppFoliosIndexRoute
   '/guests/': typeof AuthenticatedAppGuestsIndexRoute
   '/reservations/': typeof AuthenticatedAppReservationsIndexRoute
   '/rooms/': typeof AuthenticatedAppRoomsIndexRoute
@@ -242,6 +266,7 @@ export interface FileRoutesByTo {
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
@@ -254,6 +279,7 @@ export interface FileRoutesByTo {
   '/setup/rates': typeof AuthenticatedAppSetupRatesRoute
   '/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
   '/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
+  '/folios': typeof AuthenticatedAppFoliosIndexRoute
   '/guests': typeof AuthenticatedAppGuestsIndexRoute
   '/reservations': typeof AuthenticatedAppReservationsIndexRoute
   '/rooms': typeof AuthenticatedAppRoomsIndexRoute
@@ -268,12 +294,14 @@ export interface FileRoutesById {
   '/design': typeof DesignRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/_authenticated/_app/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
   '/_authenticated/_app/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/_authenticated/_app/reservations': typeof AuthenticatedAppReservationsRouteRouteWithChildren
   '/_authenticated/_app/rooms': typeof AuthenticatedAppRoomsRouteRouteWithChildren
   '/_authenticated/_app/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/_app/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/_authenticated/_app/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/_authenticated/_app/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/_authenticated/_app/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/_authenticated/_app/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
@@ -286,6 +314,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/setup/rates': typeof AuthenticatedAppSetupRatesRoute
   '/_authenticated/_app/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
   '/_authenticated/_app/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
+  '/_authenticated/_app/folios/': typeof AuthenticatedAppFoliosIndexRoute
   '/_authenticated/_app/guests/': typeof AuthenticatedAppGuestsIndexRoute
   '/_authenticated/_app/reservations/': typeof AuthenticatedAppReservationsIndexRoute
   '/_authenticated/_app/rooms/': typeof AuthenticatedAppRoomsIndexRoute
@@ -299,12 +328,14 @@ export interface FileRouteTypes {
     | '/check-email'
     | '/design'
     | '/create-hotel'
+    | '/folios'
     | '/guests'
     | '/reservations'
     | '/rooms'
     | '/setup'
     | '/dashboard'
     | '/front-desk'
+    | '/folios/$id'
     | '/guests/$id'
     | '/guests/merge'
     | '/reservations/$id'
@@ -317,6 +348,7 @@ export interface FileRouteTypes {
     | '/setup/rates'
     | '/setup/room-types'
     | '/setup/rooms'
+    | '/folios/'
     | '/guests/'
     | '/reservations/'
     | '/rooms/'
@@ -330,6 +362,7 @@ export interface FileRouteTypes {
     | '/create-hotel'
     | '/dashboard'
     | '/front-desk'
+    | '/folios/$id'
     | '/guests/$id'
     | '/guests/merge'
     | '/reservations/$id'
@@ -342,6 +375,7 @@ export interface FileRouteTypes {
     | '/setup/rates'
     | '/setup/room-types'
     | '/setup/rooms'
+    | '/folios'
     | '/guests'
     | '/reservations'
     | '/rooms'
@@ -355,12 +389,14 @@ export interface FileRouteTypes {
     | '/design'
     | '/_authenticated/_app'
     | '/_authenticated/create-hotel'
+    | '/_authenticated/_app/folios'
     | '/_authenticated/_app/guests'
     | '/_authenticated/_app/reservations'
     | '/_authenticated/_app/rooms'
     | '/_authenticated/_app/setup'
     | '/_authenticated/_app/dashboard'
     | '/_authenticated/_app/front-desk'
+    | '/_authenticated/_app/folios/$id'
     | '/_authenticated/_app/guests/$id'
     | '/_authenticated/_app/guests/merge'
     | '/_authenticated/_app/reservations/$id'
@@ -373,6 +409,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/setup/rates'
     | '/_authenticated/_app/setup/room-types'
     | '/_authenticated/_app/setup/rooms'
+    | '/_authenticated/_app/folios/'
     | '/_authenticated/_app/guests/'
     | '/_authenticated/_app/reservations/'
     | '/_authenticated/_app/rooms/'
@@ -445,6 +482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppDashboardRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/folios': {
+      id: '/_authenticated/_app/folios'
+      path: '/folios'
+      fullPath: '/folios'
+      preLoaderRoute: typeof AuthenticatedAppFoliosRouteRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/_app/front-desk': {
       id: '/_authenticated/_app/front-desk'
       path: '/front-desk'
@@ -479,6 +523,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/setup'
       preLoaderRoute: typeof AuthenticatedAppSetupRouteRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/folios/': {
+      id: '/_authenticated/_app/folios/'
+      path: '/'
+      fullPath: '/folios/'
+      preLoaderRoute: typeof AuthenticatedAppFoliosIndexRouteImport
+      parentRoute: typeof AuthenticatedAppFoliosRouteRoute
+    }
+    '/_authenticated/_app/folios/$id': {
+      id: '/_authenticated/_app/folios/$id'
+      path: '/$id'
+      fullPath: '/folios/$id'
+      preLoaderRoute: typeof AuthenticatedAppFoliosIdRouteImport
+      parentRoute: typeof AuthenticatedAppFoliosRouteRoute
     }
     '/_authenticated/_app/guests/': {
       id: '/_authenticated/_app/guests/'
@@ -595,6 +653,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAppFoliosRouteRouteChildren {
+  AuthenticatedAppFoliosIdRoute: typeof AuthenticatedAppFoliosIdRoute
+  AuthenticatedAppFoliosIndexRoute: typeof AuthenticatedAppFoliosIndexRoute
+}
+
+const AuthenticatedAppFoliosRouteRouteChildren: AuthenticatedAppFoliosRouteRouteChildren =
+  {
+    AuthenticatedAppFoliosIdRoute: AuthenticatedAppFoliosIdRoute,
+    AuthenticatedAppFoliosIndexRoute: AuthenticatedAppFoliosIndexRoute,
+  }
+
+const AuthenticatedAppFoliosRouteRouteWithChildren =
+  AuthenticatedAppFoliosRouteRoute._addFileChildren(
+    AuthenticatedAppFoliosRouteRouteChildren,
+  )
+
 interface AuthenticatedAppGuestsRouteRouteChildren {
   AuthenticatedAppGuestsIdRoute: typeof AuthenticatedAppGuestsIdRoute
   AuthenticatedAppGuestsMergeRoute: typeof AuthenticatedAppGuestsMergeRoute
@@ -679,6 +753,7 @@ const AuthenticatedAppSetupRouteRouteWithChildren =
   )
 
 interface AuthenticatedAppRouteRouteChildren {
+  AuthenticatedAppFoliosRouteRoute: typeof AuthenticatedAppFoliosRouteRouteWithChildren
   AuthenticatedAppGuestsRouteRoute: typeof AuthenticatedAppGuestsRouteRouteWithChildren
   AuthenticatedAppReservationsRouteRoute: typeof AuthenticatedAppReservationsRouteRouteWithChildren
   AuthenticatedAppRoomsRouteRoute: typeof AuthenticatedAppRoomsRouteRouteWithChildren
@@ -688,6 +763,8 @@ interface AuthenticatedAppRouteRouteChildren {
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
+  AuthenticatedAppFoliosRouteRoute:
+    AuthenticatedAppFoliosRouteRouteWithChildren,
   AuthenticatedAppGuestsRouteRoute:
     AuthenticatedAppGuestsRouteRouteWithChildren,
   AuthenticatedAppReservationsRouteRoute:

@@ -9,6 +9,7 @@ import {
   describeEvent, formatDateTime, formatDay, GUARANTEES, nightsBetween, ResStatusBadge, SOURCES, useReservation, useResMutation,
   type ReservationDetail,
 } from "@/lib/reservations";
+import { useOpenMainFolio } from "@/lib/folios";
 import { formFromReservation, ReservationForm } from "@/components/reservation-form";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,7 @@ function ReservationDetailPage() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const confirm = useResMutation("confirm_reservation", "Booking confirmed.");
   const unassign = useResMutation("unassign_room", "Room removed.");
+  const openFolio = useOpenMainFolio();
 
   if (isLoading) return <LoadingState label="Loading booking…" />;
   if (error || !data) return <EmptyState title="Booking not found" action={<Button variant="outline" asChild><Link to="/reservations">All bookings</Link></Button>} />;
@@ -78,6 +80,8 @@ function ReservationDetailPage() {
         title={<span className="inline-flex flex-wrap items-center gap-3">{r.number} <ResStatusBadge status={r.status} holdUntil={r.hold_until} /></span>}
         description={`${primary ? fullName(primary) : ""} · ${formatDay(r.arrival_date)} → ${formatDay(r.departure_date)} · ${nights} night${nights === 1 ? "" : "s"}`}
         actions={<>
+          {can("fin.folio.view") && r.status !== "cancelled" && r.status !== "no_show" &&
+            <Button variant="outline" disabled={openFolio.isPending} onClick={() => openFolio.mutate(r.id)}>Folio</Button>}
           {open && can("res.edit") && <Button variant="outline" onClick={() => setEditing(true)}>Change</Button>}
           {r.status === "tentative" && can("res.edit") && <Button disabled={confirm.isPending} onClick={() => confirm.mutate({ p_id: r.id })}>Confirm</Button>}
           {open && can("res.noshow") && <Button variant="outline" onClick={() => setDialog("noshow")}>No-show</Button>}

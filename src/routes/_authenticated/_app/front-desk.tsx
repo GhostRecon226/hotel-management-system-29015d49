@@ -8,6 +8,7 @@ import {
   CheckInDialog, ExtendStayDialog, MoveRoomDialog, RoomStateBadge, useArrivals, useInHouse, VoidCheckInDialog, WalkInDialog,
   type ArrivalRow, type InHouseRow,
 } from "@/lib/front-desk";
+import { useOpenMainFolio } from "@/lib/folios";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ function FrontDesk() {
   const [move, setMove] = useState<InHouseRow | null>(null);
   const [extend, setExtend] = useState<InHouseRow | null>(null);
   const [voiding, setVoiding] = useState<InHouseRow | null>(null);
+  const openFolio = useOpenMainFolio();
   if (!can("fo.view")) return <NoAccess />;
 
   const departures = (inHouse.data ?? []).filter((s) => s.is_departing);
@@ -52,6 +54,7 @@ function FrontDesk() {
         {!loading && rows.length === 0 && <TableStateRow colSpan={7} title={empty} />}
         {rows.map((s) => {
           const actions = [
+            can("fin.folio.view") && <DropdownMenuItem key="f" className="h-10" onClick={() => openFolio.mutate(s.reservation_id)}>Open folio</DropdownMenuItem>,
             can("fo.room.move") && !s.is_departing && <DropdownMenuItem key="m" className="h-10" onClick={() => setMove(s)}>Move room</DropdownMenuItem>,
             can("fo.stay.extend") && <DropdownMenuItem key="e" className="h-10" onClick={() => setExtend(s)}>Extend stay</DropdownMenuItem>,
             can("fo.checkin.void") && s.can_void && <DropdownMenuItem key="v" className="h-10 text-destructive" onClick={() => setVoiding(s)}>Void check-in</DropdownMenuItem>,
@@ -121,7 +124,7 @@ function FrontDesk() {
         </TabsContent>
         <TabsContent value="in-house">{stayTable(inHouse.data ?? [], inHouse.isLoading, "No guests in house")}</TabsContent>
         <TabsContent value="departures">
-          <p className="mb-3 text-sm text-muted-foreground">Check-out will be added with folios.</p>
+          <p className="mb-3 text-sm text-muted-foreground">Check-out will be added next.</p>
           {stayTable(departures, inHouse.isLoading, "No departures today")}
         </TabsContent>
       </Tabs>
