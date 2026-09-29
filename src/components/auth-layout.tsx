@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { BedDouble, ConciergeBell, Receipt } from "lucide-react";
+import { BedDouble, ConciergeBell, FileText } from "lucide-react";
 
 /** Two-column layout for sign-in, sign-up and first-time setup. Brand panel hides on small screens. */
 export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boolean }) {
@@ -15,7 +15,7 @@ export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boo
           <ul className="mt-8 space-y-4 text-[15px]">
             <li className="flex items-center gap-3"><ConciergeBell className="size-5 shrink-0" /> Check guests in and out quickly</li>
             <li className="flex items-center gap-3"><BedDouble className="size-5 shrink-0" /> See which rooms are clean and ready</li>
-            <li className="flex items-center gap-3"><Receipt className="size-5 shrink-0" /> Keep every bill correct, in naira (₦)</li>
+            <li className="flex items-center gap-3"><FileText className="size-5 shrink-0" /> Keep every bill correct, in naira (₦)</li>
           </ul>
         </div>
         <p className="text-sm text-sidebar-foreground/60">Built for hotels in Nigeria and across Africa.</p>
