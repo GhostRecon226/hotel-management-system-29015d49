@@ -86,7 +86,7 @@ export const inviteStaffMember = createServerFn({ method: "POST" })
       const reg = await supabase.rpc("register_invited_user", {
         p_user_id: userId,
         p_full_name: data.fullName,
-        p_phone: data.phone ?? undefined,
+        ...(data.phone ? { p_phone: data.phone } : {}),
       });
       if (reg.error) throw new Error(reg.error.message);
 
