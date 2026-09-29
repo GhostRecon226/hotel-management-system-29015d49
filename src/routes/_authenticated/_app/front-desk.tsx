@@ -9,6 +9,7 @@ import {
   type ArrivalRow, type InHouseRow,
 } from "@/lib/front-desk";
 import { useOpenMainFolio } from "@/lib/folios";
+import { usePostRoomCharges } from "@/lib/checkout";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ function FrontDesk() {
   const [extend, setExtend] = useState<InHouseRow | null>(null);
   const [voiding, setVoiding] = useState<InHouseRow | null>(null);
   const openFolio = useOpenMainFolio();
+  const roomCharges = usePostRoomCharges();
   if (!can("fo.view")) return <NoAccess />;
 
   const departures = (inHouse.data ?? []).filter((s) => s.is_departing);
@@ -54,6 +56,7 @@ function FrontDesk() {
         {!loading && rows.length === 0 && <TableStateRow colSpan={7} title={empty} />}
         {rows.map((s) => {
           const actions = [
+            can("fo.checkout") && <DropdownMenuItem key="c" className="h-10" asChild><Link to="/checkout/$id" params={{ id: s.reservation_id }}>Check out</Link></DropdownMenuItem>,
             can("fin.folio.view") && <DropdownMenuItem key="f" className="h-10" onClick={() => openFolio.mutate(s.reservation_id)}>Open folio</DropdownMenuItem>,
             can("fo.room.move") && !s.is_departing && <DropdownMenuItem key="m" className="h-10" onClick={() => setMove(s)}>Move room</DropdownMenuItem>,
             can("fo.stay.extend") && <DropdownMenuItem key="e" className="h-10" onClick={() => setExtend(s)}>Extend stay</DropdownMenuItem>,
@@ -85,7 +88,10 @@ function FrontDesk() {
   return (
     <div>
       <PageHeader title="Front Desk" description={`Today's arrivals, in-house guests and departures for ${property?.name ?? ""}.`}
-        actions={can("fo.walkin") && can("fo.checkin") ? <Button onClick={() => setWalkIn(true)}>Walk-in</Button> : null} />
+        actions={<>
+          {can("fin.nightaudit.run") && property && <Button variant="outline" disabled={roomCharges.isPending} onClick={() => roomCharges.mutate(property.id)}>Post room charges</Button>}
+          {can("fo.walkin") && can("fo.checkin") && <Button onClick={() => setWalkIn(true)}>Walk-in</Button>}
+        </>} />
       <Tabs defaultValue="arrivals">
         <TabsList className="mb-3">
           <TabsTrigger value="arrivals">Arrivals ({arrivals.data?.length ?? 0})</TabsTrigger>
@@ -124,7 +130,6 @@ function FrontDesk() {
         </TabsContent>
         <TabsContent value="in-house">{stayTable(inHouse.data ?? [], inHouse.isLoading, "No guests in house")}</TabsContent>
         <TabsContent value="departures">
-          <p className="mb-3 text-sm text-muted-foreground">Check-out will be added next.</p>
           {stayTable(departures, inHouse.isLoading, "No departures today")}
         </TabsContent>
       </Tabs>

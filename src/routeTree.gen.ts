@@ -24,6 +24,8 @@ import { Route as AuthenticatedAppGuestsRouteRouteImport } from './routes/_authe
 import { Route as AuthenticatedAppReservationsRouteRouteImport } from './routes/_authenticated/_app/reservations/route'
 import { Route as AuthenticatedAppRoomsRouteRouteImport } from './routes/_authenticated/_app/rooms/route'
 import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
+import { Route as AuthenticatedInvoicesIdRouteImport } from './routes/_authenticated/invoices.$id'
+import { Route as AuthenticatedAppCheckoutIdRouteImport } from './routes/_authenticated/_app/checkout.$id'
 import { Route as AuthenticatedAppFoliosIndexRouteImport } from './routes/_authenticated/_app/folios/index'
 import { Route as AuthenticatedAppFoliosIdRouteImport } from './routes/_authenticated/_app/folios/$id'
 import { Route as AuthenticatedAppGuestsIndexRouteImport } from './routes/_authenticated/_app/guests/index'
@@ -123,6 +125,17 @@ const AuthenticatedAppSetupRouteRoute =
   AuthenticatedAppSetupRouteRouteImport.update({
     id: '/setup',
     path: '/setup',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedInvoicesIdRoute = AuthenticatedInvoicesIdRouteImport.update({
+  id: '/invoices/$id',
+  path: '/invoices/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppCheckoutIdRoute =
+  AuthenticatedAppCheckoutIdRouteImport.update({
+    id: '/checkout/$id',
+    path: '/checkout/$id',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
 const AuthenticatedAppFoliosIndexRoute =
@@ -247,6 +260,8 @@ export interface FileRoutesByFullPath {
   '/approvals': typeof AuthenticatedAppApprovalsRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
@@ -275,6 +290,8 @@ export interface FileRoutesByTo {
   '/approvals': typeof AuthenticatedAppApprovalsRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
@@ -311,6 +328,8 @@ export interface FileRoutesById {
   '/_authenticated/_app/approvals': typeof AuthenticatedAppApprovalsRoute
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/_app/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/_authenticated/_app/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/_authenticated/_app/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/_authenticated/_app/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/_authenticated/_app/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
@@ -346,6 +365,8 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/dashboard'
     | '/front-desk'
+    | '/invoices/$id'
+    | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
     | '/guests/merge'
@@ -374,6 +395,8 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/dashboard'
     | '/front-desk'
+    | '/invoices/$id'
+    | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
     | '/guests/merge'
@@ -409,6 +432,8 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/approvals'
     | '/_authenticated/_app/dashboard'
     | '/_authenticated/_app/front-desk'
+    | '/_authenticated/invoices/$id'
+    | '/_authenticated/_app/checkout/$id'
     | '/_authenticated/_app/folios/$id'
     | '/_authenticated/_app/guests/$id'
     | '/_authenticated/_app/guests/merge'
@@ -542,6 +567,20 @@ declare module '@tanstack/react-router' {
       path: '/setup'
       fullPath: '/setup'
       preLoaderRoute: typeof AuthenticatedAppSetupRouteRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/invoices/$id': {
+      id: '/_authenticated/invoices/$id'
+      path: '/invoices/$id'
+      fullPath: '/invoices/$id'
+      preLoaderRoute: typeof AuthenticatedInvoicesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/_app/checkout/$id': {
+      id: '/_authenticated/_app/checkout/$id'
+      path: '/checkout/$id'
+      fullPath: '/checkout/$id'
+      preLoaderRoute: typeof AuthenticatedAppCheckoutIdRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/_app/folios/': {
@@ -781,6 +820,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppApprovalsRoute: typeof AuthenticatedAppApprovalsRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
   AuthenticatedAppFrontDeskRoute: typeof AuthenticatedAppFrontDeskRoute
+  AuthenticatedAppCheckoutIdRoute: typeof AuthenticatedAppCheckoutIdRoute
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
@@ -795,6 +835,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppApprovalsRoute: AuthenticatedAppApprovalsRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
   AuthenticatedAppFrontDeskRoute: AuthenticatedAppFrontDeskRoute,
+  AuthenticatedAppCheckoutIdRoute: AuthenticatedAppCheckoutIdRoute,
 }
 
 const AuthenticatedAppRouteRouteWithChildren =
@@ -805,11 +846,13 @@ const AuthenticatedAppRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
   AuthenticatedCreateHotelRoute: typeof AuthenticatedCreateHotelRoute
+  AuthenticatedInvoicesIdRoute: typeof AuthenticatedInvoicesIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
   AuthenticatedCreateHotelRoute: AuthenticatedCreateHotelRoute,
+  AuthenticatedInvoicesIdRoute: AuthenticatedInvoicesIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

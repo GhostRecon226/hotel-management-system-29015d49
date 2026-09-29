@@ -14,7 +14,7 @@ import { formatAmount } from "@/components/ui/money";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface ApprovalRow {
-  id: string; property_id: string; kind: "discount" | "adjustment" | "reversal" | "refund"; folio_id: string; folio_number: string;
+  id: string; property_id: string; kind: "discount" | "adjustment" | "reversal" | "refund" | "checkout"; folio_id: string; folio_number: string;
   reservation_id: string; transaction_id: string | null; transaction_description: string | null; amount: number; currency: string;
   reason: string; status: "pending" | "approved" | "rejected" | "withdrawn"; requested_by: string; requested_by_name: string | null;
   requested_at: string; decided_by: string | null; decided_by_name: string | null; decided_at: string | null;
@@ -25,11 +25,11 @@ export interface Notification {
 }
 
 export const APPROVE_PERM: Record<ApprovalRow["kind"], string> = {
-  discount: "fin.discount.approve", adjustment: "fin.adjust.approve", reversal: "fin.reverse.approve", refund: "fin.refund.approve",
+  discount: "fin.discount.approve", adjustment: "fin.adjust.approve", reversal: "fin.reverse.approve", refund: "fin.refund.approve", checkout: "fo.checkout.unsettled",
 };
-export const KIND_LABEL: Record<ApprovalRow["kind"], string> = { discount: "Discount", adjustment: "Adjustment", reversal: "Reversal", refund: "Refund" };
+export const KIND_LABEL: Record<ApprovalRow["kind"], string> = { discount: "Discount", adjustment: "Adjustment", reversal: "Reversal", refund: "Refund", checkout: "Check-out with balance" };
 export const APPROVAL_MENU_PERMS = [
-  ...Object.values(APPROVE_PERM), "fin.discount.apply", "fin.adjust.post", "fin.reverse.post", "fin.refund.post",
+  ...Object.values(APPROVE_PERM), "fo.checkout", "fin.discount.apply", "fin.adjust.post", "fin.reverse.post", "fin.refund.post",
 ];
 
 const newKey = () => crypto.randomUUID();

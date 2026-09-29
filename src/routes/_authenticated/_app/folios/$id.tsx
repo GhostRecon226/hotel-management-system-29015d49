@@ -7,6 +7,7 @@ import {
 } from "@/lib/folios";
 import { formatDateTime, formatDay } from "@/lib/reservations";
 import { useAccess } from "@/lib/access";
+import { useFolioInvoices, useIssueInvoice } from "@/lib/checkout";
 import { AdjustmentDialog, DiscountDialog, KIND_LABEL as APPROVAL_KIND, RefundDialog, RequestReversalDialog, useApprovals } from "@/lib/approvals";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,8 @@ function FolioPage() {
   const [discountRow, setDiscountRow] = useState<string | null>(null);
   const [transferRow, setTransferRow] = useState<string | null>(null);
   const [reverse, setReverse] = useState<FolioTx | null>(null);
+  const invoices = useFolioInvoices(id);
+  const issue = useIssueInvoice();
 
   if (isLoading) return <LoadingState label="Loading folio…" />;
   if (!folio) return <EmptyState title="Folio not found" />;
@@ -64,6 +67,7 @@ function FolioPage() {
           {open && perm.charge && <Button variant="outline" onClick={() => setDialog("split")}>Split folio</Button>}
           {open && perm.charge && <Button variant="outline" onClick={() => { setTransferRow(null); setDialog("transfer"); }}>Transfer</Button>}
           {open && perm.payment && <Button variant="outline" disabled={close.isPending} onClick={() => close.mutate({ p_id: folio.folio_id })}>Close</Button>}
+          {can("fin.invoice.issue") && <Button variant="outline" disabled={issue.isPending} onClick={() => issue.mutate({ folioId: folio.folio_id, kind: open ? "interim" : "final" })}>{open ? "Interim invoice" : "Issue invoice"}</Button>}
           {!open && perm.reopen && <Button variant="outline" onClick={() => setDialog("reopen")}>Reopen</Button>}
         </>} />
 
@@ -77,6 +81,17 @@ function FolioPage() {
           {pending.map((a) => (
             <p key={a.id}>{APPROVAL_KIND[a.kind]} of {formatAmount(Math.abs(a.amount), a.currency)} by {a.requested_by_name ?? "someone"}: {a.reason}{" "}
               <Link to="/approvals" className="underline">Open approvals</Link></p>
+          ))}
+        </div>
+      )}
+
+      {(invoices.data ?? []).length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-[15px]">
+          <span className="text-muted-foreground">Invoices:</span>
+          {(invoices.data ?? []).map((inv) => (
+            <Link key={inv.id} to="/invoices/$id" params={{ id: inv.id }} className="inline-flex h-11 items-center gap-2 rounded-md border px-3 hover:bg-muted">
+              {inv.number} <span className="text-muted-foreground">{inv.kind === "final" ? "Final" : "Interim"} · {formatAmount(inv.gross_total, inv.currency)}</span>
+            </Link>
           ))}
         </div>
       )}

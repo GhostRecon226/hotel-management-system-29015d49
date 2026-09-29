@@ -20,7 +20,6 @@ function InvoicePage() {
   if (!inv) return <EmptyState title="Invoice not found" />;
   const h = inv.header;
   const cur = inv.currency;
-  const charges = inv.lines.filter((l) => !["payment", "refund"].includes(l.kind) && Number(l.total) !== 0 && !(l.kind !== "charge" && l.tax_lines.length === 0 && Number(l.total) < 0 && l.kind === "transfer" && false));
 
   return (
     <div className="mx-auto max-w-4xl bg-background p-6 text-foreground print:max-w-none print:p-0">
@@ -73,7 +72,7 @@ function InvoicePage() {
           ))}
         </TableBody>
       </Table>
-      {charges.length === 0 && <p className="mt-2 text-sm text-muted-foreground">No charges.</p>}
+      {inv.lines.length === 0 && <p className="mt-2 text-sm text-muted-foreground">No charges.</p>}
 
       <div className="mt-6 grid gap-6 sm:grid-cols-2">
         <section>

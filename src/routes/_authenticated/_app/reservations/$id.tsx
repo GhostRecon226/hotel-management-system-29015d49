@@ -82,6 +82,8 @@ function ReservationDetailPage() {
         actions={<>
           {can("fin.folio.view") && r.status !== "cancelled" && r.status !== "no_show" &&
             <Button variant="outline" disabled={openFolio.isPending} onClick={() => openFolio.mutate(r.id)}>Folio</Button>}
+          {(r.status === "checked_in" || r.status === "checked_out") && can("fo.view") &&
+            <Button variant={r.status === "checked_in" ? "default" : "outline"} asChild><Link to="/checkout/$id" params={{ id: r.id }}>{r.status === "checked_in" ? "Check out" : "Check-out details"}</Link></Button>}
           {open && can("res.edit") && <Button variant="outline" onClick={() => setEditing(true)}>Change</Button>}
           {r.status === "tentative" && can("res.edit") && <Button disabled={confirm.isPending} onClick={() => confirm.mutate({ p_id: r.id })}>Confirm</Button>}
           {open && can("res.noshow") && <Button variant="outline" onClick={() => setDialog("noshow")}>No-show</Button>}
