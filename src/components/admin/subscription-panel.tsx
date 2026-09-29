@@ -7,8 +7,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { LoadingState } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-const STATUS: Record<string, { label: string; variant: "success" | "warning" | "danger" | "neutral" }> = {
-  trialing: { label: "On trial", variant: "info" as never },
+type BadgeTone = "success" | "warning" | "danger" | "neutral" | "info";
+
+const STATUS: Record<string, { label: string; variant: BadgeTone }> = {
+  trialing: { label: "On trial", variant: "info" },
   active: { label: "Active", variant: "success" },
   past_due: { label: "Payment overdue", variant: "warning" },
   expired: { label: "Expired", variant: "danger" },

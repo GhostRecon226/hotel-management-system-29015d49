@@ -6,7 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/lib/access";
 import { errorMessage } from "@/lib/errors";
 import { callRpc, NoAccess } from "@/lib/setup";
+import { ADMIN_PERMS } from "@/lib/admin";
 import { formatDateTime, formatDay } from "@/lib/reservations";
+import { UsersPanel } from "@/components/admin/users-panel";
+import { RolesPanel } from "@/components/admin/roles-panel";
+import { LimitsPanel } from "@/components/admin/limits-panel";
+import { AuditPanel } from "@/components/admin/audit-panel";
+import { SubscriptionPanel } from "@/components/admin/subscription-panel";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -22,9 +29,9 @@ export const Route = createFileRoute("/_authenticated/_app/admin")({
   head: () => ({
     meta: [
       { title: "Admin — Hotel Desk" },
-      { name: "description", content: "Business date roll settings and history for your property." },
+      { name: "description", content: "Staff, roles, approval limits, audit log, subscription and the business date." },
       { property: "og:title", content: "Admin — Hotel Desk" },
-      { property: "og:description", content: "Business date roll settings and history for your property." },
+      { property: "og:description", content: "Staff, roles, approval limits, audit log, subscription and the business date." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -32,11 +39,39 @@ export const Route = createFileRoute("/_authenticated/_app/admin")({
   component: Admin,
 });
 
+function Admin() {
+  const { can, canAny } = useAccess();
+  if (!canAny(["fin.nightaudit.run", ...ADMIN_PERMS])) return <NoAccess />;
+
+  const tabs = [
+    can("adm.user.manage") && { value: "users", label: "Staff", node: <UsersPanel /> },
+    canAny(["adm.role.manage", "adm.user.manage"]) && { value: "roles", label: "Roles", node: <RolesPanel /> },
+    can("adm.role.manage") && { value: "limits", label: "Approval limits", node: <LimitsPanel /> },
+    can("adm.audit.view") && { value: "audit", label: "Audit log", node: <AuditPanel /> },
+    canAny(["adm.subscription.manage", "adm.user.manage"]) && { value: "plan", label: "Subscription", node: <SubscriptionPanel /> },
+    canAny(["fin.nightaudit.run", "adm.audit.view"]) && { value: "date", label: "Business date", node: <BusinessDate /> },
+  ].filter(Boolean) as { value: string; label: string; node: React.ReactNode }[];
+
+  if (tabs.length === 0) return <NoAccess />;
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Admin" description="Staff, roles, limits, history and your subscription." />
+      <Tabs defaultValue={tabs[0]!.value}>
+        <TabsList className="flex-wrap">
+          {tabs.map((t) => <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>)}
+        </TabsList>
+        {tabs.map((t) => <TabsContent key={t.value} value={t.value} className="mt-4">{t.node}</TabsContent>)}
+      </Tabs>
+    </div>
+  );
+}
+
 interface RollStatus { business_date: string; rollover_time: string; timezone: string; next_roll_at: string; is_due: boolean }
 interface LogRow { id: string; from_date: string; to_date: string; status: string; trigger: string; finished_at: string; details: { room_charges?: number; holds_expired?: number; no_shows?: number; stayover_tasks?: number }; error: string | null }
 
-function Admin() {
-  const { property, can, canAny } = useAccess();
+function BusinessDate() {
+  const { property, can } = useAccess();
   const qc = useQueryClient();
   const status = useQuery({
     queryKey: ["admin", "roll-status", property?.id], enabled: !!property,
@@ -69,13 +104,11 @@ function Admin() {
     onError: (e) => toast.error(errorMessage(e)),
   });
 
-  if (!canAny(["fin.nightaudit.run", "adm.audit.view", "adm.user.manage", "adm.role.manage"])) return <NoAccess />;
   const manager = can("fin.nightaudit.run");
   const s = status.data;
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Admin" description="Business date roll for this property." />
       <Card>
         <CardHeader><CardTitle>Business date</CardTitle></CardHeader>
         <CardContent className="space-y-4">
