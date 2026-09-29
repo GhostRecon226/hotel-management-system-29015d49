@@ -17,7 +17,7 @@ import { SubscriptionBanner } from "@/components/subscription-banner";
 import { cn } from "@/lib/utils";
 import { SETUP_PERMS } from "@/lib/setup";
 
-type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" };
+type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" };
 
 // perms: null = everyone; otherwise any one of the keys shows the item.
 const MENU: Item[] = [
@@ -27,7 +27,7 @@ const MENU: Item[] = [
   { label: "Rooms", icon: BedDouble, perms: ["room.view"] },
   { label: "Housekeeping", icon: Sparkles, perms: ["hk.view"] },
   { label: "Maintenance", icon: Wrench, perms: ["mnt.view", "mnt.ticket.create"] },
-  { label: "Guests", icon: Users, perms: ["guest.view"] },
+  { label: "Guests", icon: Users, perms: ["guest.view"], to: "/guests" },
   { label: "Folios", icon: Receipt, perms: ["fin.folio.view"] },
   { label: "Reports", icon: BarChart3, perms: ["rpt.operations.view", "rpt.finance.view"] },
   { label: "Setup", icon: Settings, perms: SETUP_PERMS, to: "/setup" },
