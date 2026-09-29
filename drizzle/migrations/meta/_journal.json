@@ -22,6 +22,13 @@
       "when": 1790672142876,
       "tag": "0002_setup_catalog",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790672172195,
+      "tag": "0003_fix_plan_limit_trigger",
+      "breakpoints": true
     }
   ]
 }
