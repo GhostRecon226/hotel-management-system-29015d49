@@ -837,6 +837,20 @@ export type Database = {
             referencedColumns: ["reservation_id"]
           },
           {
+            foreignKeyName: "reservation_guests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["current_reservation_id"]
+          },
+          {
+            foreignKeyName: "reservation_guests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["next_reservation_id"]
+          },
+          {
             foreignKeyName: "reservation_guests_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -906,10 +920,31 @@ export type Database = {
             referencedColumns: ["reservation_id"]
           },
           {
+            foreignKeyName: "reservation_nights_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["current_reservation_id"]
+          },
+          {
+            foreignKeyName: "reservation_nights_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["next_reservation_id"]
+          },
+          {
             foreignKeyName: "reservation_nights_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_nights_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
             referencedColumns: ["id"]
           },
           {
@@ -1227,6 +1262,20 @@ export type Database = {
             referencedColumns: ["reservation_id"]
           },
           {
+            foreignKeyName: "room_assignments_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["current_reservation_id"]
+          },
+          {
+            foreignKeyName: "room_assignments_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["next_reservation_id"]
+          },
+          {
             foreignKeyName: "room_assignments_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
@@ -1234,7 +1283,106 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "room_assignments_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "room_assignments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_blocks: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          block_type: string
+          created_at: string
+          decision_reason: string | null
+          from_date: string
+          id: string
+          property_id: string
+          reason: string
+          release_reason: string | null
+          released_at: string | null
+          released_by: string | null
+          requested_by: string | null
+          room_id: string
+          status: string
+          tenant_id: string
+          ticket_id: string | null
+          to_date: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          block_type: string
+          created_at?: string
+          decision_reason?: string | null
+          from_date: string
+          id?: string
+          property_id: string
+          reason: string
+          release_reason?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          requested_by?: string | null
+          room_id: string
+          status?: string
+          tenant_id: string
+          ticket_id?: string | null
+          to_date: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          block_type?: string
+          created_at?: string
+          decision_reason?: string | null
+          from_date?: string
+          id?: string
+          property_id?: string
+          reason?: string
+          release_reason?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          requested_by?: string | null
+          room_id?: string
+          status?: string
+          tenant_id?: string
+          ticket_id?: string | null
+          to_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_blocks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_blocks_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_blocks_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_blocks_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1439,10 +1587,31 @@ export type Database = {
             referencedColumns: ["reservation_id"]
           },
           {
+            foreignKeyName: "stays_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["current_reservation_id"]
+          },
+          {
+            foreignKeyName: "stays_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["next_reservation_id"]
+          },
+          {
             foreignKeyName: "stays_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stays_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
             referencedColumns: ["id"]
           },
           {
@@ -1706,6 +1875,13 @@ export type Database = {
             referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "room_assignments_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["id"]
+          },
         ]
       }
       v_in_house: {
@@ -1762,6 +1938,56 @@ export type Database = {
             referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "stays_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_room_board: {
+        Row: {
+          block_id: string | null
+          block_to_date: string | null
+          block_type: string | null
+          condition: string | null
+          current_departure_date: string | null
+          current_guest_name: string | null
+          current_number: string | null
+          current_reservation_id: string | null
+          floor: string | null
+          id: string | null
+          is_active: boolean | null
+          is_occupied: boolean | null
+          is_sellable: boolean | null
+          next_arrival_date: string | null
+          next_guest_name: string | null
+          next_number: string | null
+          next_reservation_id: string | null
+          pending_blocks: number | null
+          property_id: string | null
+          room_number: string | null
+          room_type_code: string | null
+          room_type_id: string | null
+          room_type_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rooms_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -1774,6 +2000,7 @@ export type Database = {
         Args: { p_guest: string; p_reason: string }
         Returns: undefined
       }
+      approve_room_block: { Args: { p_id: string }; Returns: undefined }
       assign_room: {
         Args: { p_id: string; p_room_id: string }
         Returns: undefined
@@ -1956,7 +2183,26 @@ export type Database = {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
       }
+      reject_room_block: {
+        Args: { p_id: string; p_reason: string }
+        Returns: undefined
+      }
+      release_room_block: {
+        Args: { p_id: string; p_reason?: string }
+        Returns: undefined
+      }
       remove_guest_document: { Args: { p_id: string }; Returns: undefined }
+      request_room_block: {
+        Args: {
+          p_from: string
+          p_reason: string
+          p_room_id: string
+          p_ticket_id?: string
+          p_to: string
+          p_type: string
+        }
+        Returns: string
+      }
       save_charge_code: {
         Args: {
           p_category: string
@@ -2141,6 +2387,10 @@ export type Database = {
           p_id: string
           p_primary_guest_id: string
         }
+        Returns: undefined
+      }
+      set_room_condition: {
+        Args: { p_condition: string; p_reason?: string; p_room_id: string }
         Returns: undefined
       }
       tenant_is_writable: { Args: never; Returns: boolean }

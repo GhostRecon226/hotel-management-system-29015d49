@@ -50,6 +50,13 @@
       "when": 1790676449770,
       "tag": "0006_front_desk",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790679282189,
+      "tag": "0007_room_blocks",
+      "breakpoints": true
     }
   ]
 }
