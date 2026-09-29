@@ -251,6 +251,165 @@ export type Database = {
           },
         ]
       }
+      guest_documents: {
+        Row: {
+          created_at: string
+          doc_number: string
+          doc_type: string
+          expiry: string | null
+          guest_id: string
+          id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          doc_number: string
+          doc_type: string
+          expiry?: string | null
+          guest_id: string
+          id?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          doc_number?: string
+          doc_type?: string
+          expiry?: string | null
+          guest_id?: string
+          id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_documents_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guest_documents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_feedback: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          guest_id: string
+          id: string
+          status: string
+          tenant_id: string
+          text: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          guest_id: string
+          id?: string
+          status?: string
+          tenant_id: string
+          text: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          guest_id?: string
+          id?: string
+          status?: string
+          tenant_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_feedback_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guest_feedback_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guests: {
+        Row: {
+          address: string | null
+          anonymised_at: string | null
+          created_at: string
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          merged_into: string | null
+          nationality: string | null
+          notes: string | null
+          phone: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          anonymised_at?: string | null
+          created_at?: string
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name?: string
+          merged_into?: string | null
+          nationality?: string | null
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          anonymised_at?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          merged_into?: string | null
+          nationality?: string | null
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_merged_into_fkey"
+            columns: ["merged_into"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           code: string
@@ -949,6 +1108,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_guest_feedback: {
+        Args: { p_category: string; p_guest_id: string; p_text: string }
+        Returns: string
+      }
+      anonymise_guest: {
+        Args: { p_guest: string; p_reason: string }
+        Returns: undefined
+      }
       bulk_add_rooms: {
         Args: {
           p_floor?: string
@@ -988,7 +1155,13 @@ export type Database = {
         }[]
       }
       delete_rate_plan_price: { Args: { p_id: string }; Returns: undefined }
+      get_guest: { Args: { p_id: string }; Returns: Json }
+      merge_guests: {
+        Args: { p_keep: string; p_reason: string; p_remove: string }
+        Returns: undefined
+      }
       my_context: { Args: never; Returns: Json }
+      remove_guest_document: { Args: { p_id: string }; Returns: undefined }
       save_charge_code: {
         Args: {
           p_category: string
@@ -998,6 +1171,29 @@ export type Database = {
           p_is_taxable: boolean
           p_name: string
           p_property_id: string
+        }
+        Returns: string
+      }
+      save_guest: {
+        Args: {
+          p_address: string
+          p_email: string
+          p_first_name: string
+          p_id: string
+          p_last_name: string
+          p_nationality: string
+          p_notes: string
+          p_phone: string
+        }
+        Returns: string
+      }
+      save_guest_document: {
+        Args: {
+          p_doc_number: string
+          p_doc_type: string
+          p_expiry: string
+          p_guest_id: string
+          p_id: string
         }
         Returns: string
       }
@@ -1079,6 +1275,19 @@ export type Database = {
         }
         Returns: string
       }
+      search_guests: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          anonymised_at: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          nationality: string
+          phone: string
+        }[]
+      }
       set_exchange_rate: {
         Args: {
           p_currency: string
@@ -1087,6 +1296,10 @@ export type Database = {
           p_rate_date: string
         }
         Returns: string
+      }
+      set_guest_feedback_status: {
+        Args: { p_id: string; p_status: string }
+        Returns: undefined
       }
       tenant_is_writable: { Args: never; Returns: boolean }
       update_property: {
