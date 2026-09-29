@@ -255,20 +255,6 @@ export function TransferDialog({ folio, rows, initial, open, onOpenChange }: {
   );
 }
 
-export function ReverseDialog({ row, currency, onOpenChange }: { row: FolioTx | null; currency: string; onOpenChange: (o: boolean) => void }) {
-  const m = useFolioMutation("reverse_transaction", "Reversal posted.");
-  const key = useDialogKey(!!row);
-  const [reason, setReason] = useState("");
-  useEffect(() => { if (row) setReason(""); }, [row]);
-  return (
-    <FormDialog open={!!row} onOpenChange={onOpenChange} title="Reverse row" busy={m.isPending}
-      onSubmit={() => m.mutate({ p_id: row!.id, p_reason: reason, p_idempotency_key: key }, { onSuccess: () => onOpenChange(false) })}>
-      <p className="text-[15px]">A new opposite row of <strong>{formatAmount(-Number(row?.total ?? 0), currency)}</strong> will be posted. The original stays on the folio.</p>
-      <Field label="Reason" htmlFor="rv-r"><Input id="rv-r" value={reason} onChange={(e) => setReason(e.target.value)} required /></Field>
-    </FormDialog>
-  );
-}
-
 export function ReopenDialog({ folio, open, onOpenChange }: { folio: FolioSummary; open: boolean; onOpenChange: (o: boolean) => void }) {
   const m = useFolioMutation("reopen_folio", "Folio reopened.");
   const [reason, setReason] = useState("");
