@@ -18,10 +18,15 @@ import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenticated/create-hotel'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
 import { Route as AuthenticatedAppGuestsRouteRouteImport } from './routes/_authenticated/_app/guests/route'
+import { Route as AuthenticatedAppReservationsRouteRouteImport } from './routes/_authenticated/_app/reservations/route'
 import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
 import { Route as AuthenticatedAppGuestsIndexRouteImport } from './routes/_authenticated/_app/guests/index'
 import { Route as AuthenticatedAppGuestsIdRouteImport } from './routes/_authenticated/_app/guests/$id'
 import { Route as AuthenticatedAppGuestsMergeRouteImport } from './routes/_authenticated/_app/guests/merge'
+import { Route as AuthenticatedAppReservationsIndexRouteImport } from './routes/_authenticated/_app/reservations/index'
+import { Route as AuthenticatedAppReservationsIdRouteImport } from './routes/_authenticated/_app/reservations/$id'
+import { Route as AuthenticatedAppReservationsAvailabilityRouteImport } from './routes/_authenticated/_app/reservations/availability'
+import { Route as AuthenticatedAppReservationsNewRouteImport } from './routes/_authenticated/_app/reservations/new'
 import { Route as AuthenticatedAppSetupIndexRouteImport } from './routes/_authenticated/_app/setup/index'
 import { Route as AuthenticatedAppSetupChargesRouteImport } from './routes/_authenticated/_app/setup/charges'
 import { Route as AuthenticatedAppSetupExchangeRatesRouteImport } from './routes/_authenticated/_app/setup/exchange-rates'
@@ -76,6 +81,12 @@ const AuthenticatedAppGuestsRouteRoute =
     path: '/guests',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppReservationsRouteRoute =
+  AuthenticatedAppReservationsRouteRouteImport.update({
+    id: '/reservations',
+    path: '/reservations',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 const AuthenticatedAppSetupRouteRoute =
   AuthenticatedAppSetupRouteRouteImport.update({
     id: '/setup',
@@ -99,6 +110,30 @@ const AuthenticatedAppGuestsMergeRoute =
     id: '/merge',
     path: '/merge',
     getParentRoute: () => AuthenticatedAppGuestsRouteRoute,
+  } as any)
+const AuthenticatedAppReservationsIndexRoute =
+  AuthenticatedAppReservationsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppReservationsRouteRoute,
+  } as any)
+const AuthenticatedAppReservationsIdRoute =
+  AuthenticatedAppReservationsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAppReservationsRouteRoute,
+  } as any)
+const AuthenticatedAppReservationsAvailabilityRoute =
+  AuthenticatedAppReservationsAvailabilityRouteImport.update({
+    id: '/availability',
+    path: '/availability',
+    getParentRoute: () => AuthenticatedAppReservationsRouteRoute,
+  } as any)
+const AuthenticatedAppReservationsNewRoute =
+  AuthenticatedAppReservationsNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedAppReservationsRouteRoute,
   } as any)
 const AuthenticatedAppSetupIndexRoute =
   AuthenticatedAppSetupIndexRouteImport.update({
@@ -150,10 +185,14 @@ export interface FileRoutesByFullPath {
   '/design': typeof DesignRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
+  '/reservations': typeof AuthenticatedAppReservationsRouteRouteWithChildren
   '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
+  '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
+  '/reservations/availability': typeof AuthenticatedAppReservationsAvailabilityRoute
+  '/reservations/new': typeof AuthenticatedAppReservationsNewRoute
   '/setup/charges': typeof AuthenticatedAppSetupChargesRoute
   '/setup/exchange-rates': typeof AuthenticatedAppSetupExchangeRatesRoute
   '/setup/property': typeof AuthenticatedAppSetupPropertyRoute
@@ -161,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
   '/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
   '/guests/': typeof AuthenticatedAppGuestsIndexRoute
+  '/reservations/': typeof AuthenticatedAppReservationsIndexRoute
   '/setup/': typeof AuthenticatedAppSetupIndexRoute
 }
 export interface FileRoutesByTo {
@@ -172,6 +212,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
+  '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
+  '/reservations/availability': typeof AuthenticatedAppReservationsAvailabilityRoute
+  '/reservations/new': typeof AuthenticatedAppReservationsNewRoute
   '/setup/charges': typeof AuthenticatedAppSetupChargesRoute
   '/setup/exchange-rates': typeof AuthenticatedAppSetupExchangeRatesRoute
   '/setup/property': typeof AuthenticatedAppSetupPropertyRoute
@@ -179,6 +222,7 @@ export interface FileRoutesByTo {
   '/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
   '/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
   '/guests': typeof AuthenticatedAppGuestsIndexRoute
+  '/reservations': typeof AuthenticatedAppReservationsIndexRoute
   '/setup': typeof AuthenticatedAppSetupIndexRoute
 }
 export interface FileRoutesById {
@@ -191,10 +235,14 @@ export interface FileRoutesById {
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/_authenticated/_app/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
+  '/_authenticated/_app/reservations': typeof AuthenticatedAppReservationsRouteRouteWithChildren
   '/_authenticated/_app/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/_app/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/_authenticated/_app/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
+  '/_authenticated/_app/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
+  '/_authenticated/_app/reservations/availability': typeof AuthenticatedAppReservationsAvailabilityRoute
+  '/_authenticated/_app/reservations/new': typeof AuthenticatedAppReservationsNewRoute
   '/_authenticated/_app/setup/charges': typeof AuthenticatedAppSetupChargesRoute
   '/_authenticated/_app/setup/exchange-rates': typeof AuthenticatedAppSetupExchangeRatesRoute
   '/_authenticated/_app/setup/property': typeof AuthenticatedAppSetupPropertyRoute
@@ -202,6 +250,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
   '/_authenticated/_app/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
   '/_authenticated/_app/guests/': typeof AuthenticatedAppGuestsIndexRoute
+  '/_authenticated/_app/reservations/': typeof AuthenticatedAppReservationsIndexRoute
   '/_authenticated/_app/setup/': typeof AuthenticatedAppSetupIndexRoute
 }
 export interface FileRouteTypes {
@@ -213,10 +262,14 @@ export interface FileRouteTypes {
     | '/design'
     | '/create-hotel'
     | '/guests'
+    | '/reservations'
     | '/setup'
     | '/dashboard'
     | '/guests/$id'
     | '/guests/merge'
+    | '/reservations/$id'
+    | '/reservations/availability'
+    | '/reservations/new'
     | '/setup/charges'
     | '/setup/exchange-rates'
     | '/setup/property'
@@ -224,6 +277,7 @@ export interface FileRouteTypes {
     | '/setup/room-types'
     | '/setup/rooms'
     | '/guests/'
+    | '/reservations/'
     | '/setup/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -235,6 +289,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/guests/$id'
     | '/guests/merge'
+    | '/reservations/$id'
+    | '/reservations/availability'
+    | '/reservations/new'
     | '/setup/charges'
     | '/setup/exchange-rates'
     | '/setup/property'
@@ -242,6 +299,7 @@ export interface FileRouteTypes {
     | '/setup/room-types'
     | '/setup/rooms'
     | '/guests'
+    | '/reservations'
     | '/setup'
   id:
     | '__root__'
@@ -253,10 +311,14 @@ export interface FileRouteTypes {
     | '/_authenticated/_app'
     | '/_authenticated/create-hotel'
     | '/_authenticated/_app/guests'
+    | '/_authenticated/_app/reservations'
     | '/_authenticated/_app/setup'
     | '/_authenticated/_app/dashboard'
     | '/_authenticated/_app/guests/$id'
     | '/_authenticated/_app/guests/merge'
+    | '/_authenticated/_app/reservations/$id'
+    | '/_authenticated/_app/reservations/availability'
+    | '/_authenticated/_app/reservations/new'
     | '/_authenticated/_app/setup/charges'
     | '/_authenticated/_app/setup/exchange-rates'
     | '/_authenticated/_app/setup/property'
@@ -264,6 +326,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/setup/room-types'
     | '/_authenticated/_app/setup/rooms'
     | '/_authenticated/_app/guests/'
+    | '/_authenticated/_app/reservations/'
     | '/_authenticated/_app/setup/'
   fileRoutesById: FileRoutesById
 }
@@ -340,6 +403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppGuestsRouteRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/reservations': {
+      id: '/_authenticated/_app/reservations'
+      path: '/reservations'
+      fullPath: '/reservations'
+      preLoaderRoute: typeof AuthenticatedAppReservationsRouteRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/_app/setup': {
       id: '/_authenticated/_app/setup'
       path: '/setup'
@@ -367,6 +437,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/guests/merge'
       preLoaderRoute: typeof AuthenticatedAppGuestsMergeRouteImport
       parentRoute: typeof AuthenticatedAppGuestsRouteRoute
+    }
+    '/_authenticated/_app/reservations/': {
+      id: '/_authenticated/_app/reservations/'
+      path: '/'
+      fullPath: '/reservations/'
+      preLoaderRoute: typeof AuthenticatedAppReservationsIndexRouteImport
+      parentRoute: typeof AuthenticatedAppReservationsRouteRoute
+    }
+    '/_authenticated/_app/reservations/$id': {
+      id: '/_authenticated/_app/reservations/$id'
+      path: '/$id'
+      fullPath: '/reservations/$id'
+      preLoaderRoute: typeof AuthenticatedAppReservationsIdRouteImport
+      parentRoute: typeof AuthenticatedAppReservationsRouteRoute
+    }
+    '/_authenticated/_app/reservations/availability': {
+      id: '/_authenticated/_app/reservations/availability'
+      path: '/availability'
+      fullPath: '/reservations/availability'
+      preLoaderRoute: typeof AuthenticatedAppReservationsAvailabilityRouteImport
+      parentRoute: typeof AuthenticatedAppReservationsRouteRoute
+    }
+    '/_authenticated/_app/reservations/new': {
+      id: '/_authenticated/_app/reservations/new'
+      path: '/new'
+      fullPath: '/reservations/new'
+      preLoaderRoute: typeof AuthenticatedAppReservationsNewRouteImport
+      parentRoute: typeof AuthenticatedAppReservationsRouteRoute
     }
     '/_authenticated/_app/setup/': {
       id: '/_authenticated/_app/setup/'
@@ -438,6 +536,28 @@ const AuthenticatedAppGuestsRouteRouteWithChildren =
     AuthenticatedAppGuestsRouteRouteChildren,
   )
 
+interface AuthenticatedAppReservationsRouteRouteChildren {
+  AuthenticatedAppReservationsIdRoute: typeof AuthenticatedAppReservationsIdRoute
+  AuthenticatedAppReservationsAvailabilityRoute: typeof AuthenticatedAppReservationsAvailabilityRoute
+  AuthenticatedAppReservationsNewRoute: typeof AuthenticatedAppReservationsNewRoute
+  AuthenticatedAppReservationsIndexRoute: typeof AuthenticatedAppReservationsIndexRoute
+}
+
+const AuthenticatedAppReservationsRouteRouteChildren: AuthenticatedAppReservationsRouteRouteChildren =
+  {
+    AuthenticatedAppReservationsIdRoute: AuthenticatedAppReservationsIdRoute,
+    AuthenticatedAppReservationsAvailabilityRoute:
+      AuthenticatedAppReservationsAvailabilityRoute,
+    AuthenticatedAppReservationsNewRoute: AuthenticatedAppReservationsNewRoute,
+    AuthenticatedAppReservationsIndexRoute:
+      AuthenticatedAppReservationsIndexRoute,
+  }
+
+const AuthenticatedAppReservationsRouteRouteWithChildren =
+  AuthenticatedAppReservationsRouteRoute._addFileChildren(
+    AuthenticatedAppReservationsRouteRouteChildren,
+  )
+
 interface AuthenticatedAppSetupRouteRouteChildren {
   AuthenticatedAppSetupChargesRoute: typeof AuthenticatedAppSetupChargesRoute
   AuthenticatedAppSetupExchangeRatesRoute: typeof AuthenticatedAppSetupExchangeRatesRoute
@@ -467,6 +587,7 @@ const AuthenticatedAppSetupRouteRouteWithChildren =
 
 interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppGuestsRouteRoute: typeof AuthenticatedAppGuestsRouteRouteWithChildren
+  AuthenticatedAppReservationsRouteRoute: typeof AuthenticatedAppReservationsRouteRouteWithChildren
   AuthenticatedAppSetupRouteRoute: typeof AuthenticatedAppSetupRouteRouteWithChildren
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
 }
@@ -474,6 +595,8 @@ interface AuthenticatedAppRouteRouteChildren {
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppGuestsRouteRoute:
     AuthenticatedAppGuestsRouteRouteWithChildren,
+  AuthenticatedAppReservationsRouteRoute:
+    AuthenticatedAppReservationsRouteRouteWithChildren,
   AuthenticatedAppSetupRouteRoute: AuthenticatedAppSetupRouteRouteWithChildren,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
 }

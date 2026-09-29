@@ -251,6 +251,60 @@ export type Database = {
           },
         ]
       }
+      group_bookings: {
+        Row: {
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          property_id: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          property_id: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          property_id?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_bookings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guest_documents: {
         Row: {
           created_at: string
@@ -550,8 +604,10 @@ export type Database = {
           country: string | null
           created_at: string
           id: string
+          max_stay_nights: number
           name: string
           tenant_id: string
+          tentative_hold_hours: number
           timezone: string
         }
         Insert: {
@@ -565,8 +621,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          max_stay_nights?: number
           name: string
           tenant_id: string
+          tentative_hold_hours?: number
           timezone?: string
         }
         Update: {
@@ -580,8 +638,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          max_stay_nights?: number
           name?: string
           tenant_id?: string
+          tentative_hold_hours?: number
           timezone?: string
         }
         Relationships: [
@@ -728,6 +788,269 @@ export type Database = {
           },
         ]
       }
+      reservation_guests: {
+        Row: {
+          guest_id: string
+          is_primary: boolean
+          reservation_id: string
+          tenant_id: string
+        }
+        Insert: {
+          guest_id: string
+          is_primary?: boolean
+          reservation_id: string
+          tenant_id: string
+        }
+        Update: {
+          guest_id?: string
+          is_primary?: boolean
+          reservation_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservation_guests_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_guests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_guests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reservation_nights: {
+        Row: {
+          id: string
+          property_id: string
+          rate_amount: number
+          reservation_id: string
+          room_id: string | null
+          room_type_id: string
+          stay_date: string
+          tenant_id: string
+        }
+        Insert: {
+          id?: string
+          property_id: string
+          rate_amount: number
+          reservation_id: string
+          room_id?: string | null
+          room_type_id: string
+          stay_date: string
+          tenant_id: string
+        }
+        Update: {
+          id?: string
+          property_id?: string
+          rate_amount?: number
+          reservation_id?: string
+          room_id?: string | null
+          room_type_id?: string
+          stay_date?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservation_nights_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_nights_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_nights_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_nights_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_nights_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reservations: {
+        Row: {
+          adults: number
+          arrival_date: string
+          cancellation_fee: number | null
+          cancelled_at: string | null
+          children: number
+          company_name: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          departure_date: string
+          deposit_required: number
+          fee_waived: boolean
+          group_id: string | null
+          guarantee: string
+          guest_id: string
+          hold_until: string | null
+          id: string
+          idempotency_key: string
+          no_show_fee: number | null
+          notes: string | null
+          number: string
+          override_reason: string | null
+          property_id: string
+          rate_override: number | null
+          rate_plan_id: string
+          room_type_id: string
+          source: string
+          special_requests: string | null
+          status: string
+          status_reason: string | null
+          tenant_id: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          adults?: number
+          arrival_date: string
+          cancellation_fee?: number | null
+          cancelled_at?: string | null
+          children?: number
+          company_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          departure_date: string
+          deposit_required?: number
+          fee_waived?: boolean
+          group_id?: string | null
+          guarantee?: string
+          guest_id: string
+          hold_until?: string | null
+          id?: string
+          idempotency_key: string
+          no_show_fee?: number | null
+          notes?: string | null
+          number: string
+          override_reason?: string | null
+          property_id: string
+          rate_override?: number | null
+          rate_plan_id: string
+          room_type_id: string
+          source?: string
+          special_requests?: string | null
+          status?: string
+          status_reason?: string | null
+          tenant_id: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          adults?: number
+          arrival_date?: string
+          cancellation_fee?: number | null
+          cancelled_at?: string | null
+          children?: number
+          company_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          departure_date?: string
+          deposit_required?: number
+          fee_waived?: boolean
+          group_id?: string | null
+          guarantee?: string
+          guest_id?: string
+          hold_until?: string | null
+          id?: string
+          idempotency_key?: string
+          no_show_fee?: number | null
+          notes?: string | null
+          number?: string
+          override_reason?: string | null
+          property_id?: string
+          rate_override?: number | null
+          rate_plan_id?: string
+          room_type_id?: string
+          source?: string
+          special_requests?: string | null
+          status?: string
+          status_reason?: string | null
+          tenant_id?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "group_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_rate_plan_id_fkey"
+            columns: ["rate_plan_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           grant_level: string
@@ -799,6 +1122,77 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_assignments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          from_date: string
+          id: string
+          is_active: boolean
+          property_id: string
+          released_at: string | null
+          reservation_id: string
+          room_id: string
+          tenant_id: string
+          to_date: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          from_date: string
+          id?: string
+          is_active?: boolean
+          property_id: string
+          released_at?: string | null
+          reservation_id: string
+          room_id: string
+          tenant_id: string
+          to_date: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_date?: string
+          id?: string
+          is_active?: boolean
+          property_id?: string
+          released_at?: string | null
+          reservation_id?: string
+          room_id?: string
+          tenant_id?: string
+          to_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_assignments_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_assignments_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_assignments_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1116,6 +1510,10 @@ export type Database = {
         Args: { p_guest: string; p_reason: string }
         Returns: undefined
       }
+      assign_room: {
+        Args: { p_id: string; p_room_id: string }
+        Returns: undefined
+      }
       bulk_add_rooms: {
         Args: {
           p_floor?: string
@@ -1141,6 +1539,16 @@ export type Database = {
           taxable_base: number
         }[]
       }
+      cancel_reservation: {
+        Args: {
+          p_id: string
+          p_reason: string
+          p_waive_fee?: boolean
+          p_waive_reason?: string
+        }
+        Returns: Json
+      }
+      confirm_reservation: { Args: { p_id: string }; Returns: undefined }
       create_hotel: {
         Args: {
           p_business_name: string
@@ -1154,13 +1562,94 @@ export type Database = {
           tenant_id: string
         }[]
       }
+      create_reservation: {
+        Args: {
+          p_adults: number
+          p_arrival: string
+          p_children: number
+          p_company_name?: string
+          p_departure: string
+          p_group_id?: string
+          p_guarantee?: string
+          p_guest_id: string
+          p_hold_until?: string
+          p_idempotency_key: string
+          p_notes?: string
+          p_override_reason?: string
+          p_property_id: string
+          p_rate_override?: number
+          p_rate_plan_id: string
+          p_room_type_id: string
+          p_source?: string
+          p_special_requests?: string
+          p_status?: string
+        }
+        Returns: string
+      }
       delete_rate_plan_price: { Args: { p_id: string }; Returns: undefined }
+      get_assignable_rooms: {
+        Args: { p_id: string }
+        Returns: {
+          condition: string
+          floor: string
+          id: string
+          is_occupied: boolean
+          room_number: string
+        }[]
+      }
+      get_availability: {
+        Args: { p_arrival: string; p_departure: string; p_property_id: string }
+        Returns: {
+          available: number
+          reserved: number
+          room_type_code: string
+          room_type_id: string
+          room_type_name: string
+          sellable: number
+          stay_date: string
+        }[]
+      }
       get_guest: { Args: { p_id: string }; Returns: Json }
+      get_reservation: { Args: { p_id: string }; Returns: Json }
+      mark_no_show: {
+        Args: {
+          p_id: string
+          p_reason: string
+          p_waive_fee?: boolean
+          p_waive_reason?: string
+        }
+        Returns: Json
+      }
       merge_guests: {
         Args: { p_keep: string; p_reason: string; p_remove: string }
         Returns: undefined
       }
+      modify_reservation: {
+        Args: {
+          p_adults: number
+          p_arrival: string
+          p_children: number
+          p_company_name: string
+          p_departure: string
+          p_group_id: string
+          p_guarantee: string
+          p_hold_until: string
+          p_id: string
+          p_notes: string
+          p_override_reason: string
+          p_rate_override: number
+          p_rate_plan_id: string
+          p_room_type_id: string
+          p_source: string
+          p_special_requests: string
+        }
+        Returns: undefined
+      }
       my_context: { Args: never; Returns: Json }
+      reinstate_reservation: {
+        Args: { p_id: string; p_reason: string }
+        Returns: undefined
+      }
       remove_guest_document: { Args: { p_id: string }; Returns: undefined }
       save_charge_code: {
         Args: {
@@ -1170,6 +1659,17 @@ export type Database = {
           p_is_active: boolean
           p_is_taxable: boolean
           p_name: string
+          p_property_id: string
+        }
+        Returns: string
+      }
+      save_group_booking: {
+        Args: {
+          p_contact_name: string
+          p_contact_phone: string
+          p_id: string
+          p_name: string
+          p_notes: string
           p_property_id: string
         }
         Returns: string
@@ -1288,6 +1788,34 @@ export type Database = {
           phone: string
         }[]
       }
+      search_reservations: {
+        Args: {
+          p_from?: string
+          p_limit?: number
+          p_property_id: string
+          p_query?: string
+          p_status?: string
+          p_to?: string
+        }
+        Returns: {
+          adults: number
+          arrival_date: string
+          children: number
+          company_name: string
+          currency: string
+          departure_date: string
+          guest_id: string
+          guest_name: string
+          hold_until: string
+          id: string
+          number: string
+          room_number: string
+          room_type_code: string
+          source: string
+          status: string
+          total_amount: number
+        }[]
+      }
       set_exchange_rate: {
         Args: {
           p_currency: string
@@ -1301,7 +1829,16 @@ export type Database = {
         Args: { p_id: string; p_status: string }
         Returns: undefined
       }
+      set_reservation_guests: {
+        Args: {
+          p_guest_ids: string[]
+          p_id: string
+          p_primary_guest_id: string
+        }
+        Returns: undefined
+      }
       tenant_is_writable: { Args: never; Returns: boolean }
+      unassign_room: { Args: { p_id: string }; Returns: undefined }
       update_property: {
         Args: {
           p_address: string
