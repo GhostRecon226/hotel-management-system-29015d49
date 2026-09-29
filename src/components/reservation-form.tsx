@@ -49,7 +49,7 @@ function toLocalInput(ts: string) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-function GuestPicker({ value, label, onPick, disabled }: { value: string; label: string; onPick: (id: string, label: string) => void; disabled?: boolean }) {
+export function GuestPicker({ value, label, onPick, disabled }: { value: string; label: string; onPick: (id: string, label: string) => void; disabled?: boolean }) {
   const { can } = useAccess();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);

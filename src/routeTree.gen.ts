@@ -17,6 +17,7 @@ import { Route as DesignRouteImport } from './routes/design'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenticated/create-hotel'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
+import { Route as AuthenticatedAppFrontDeskRouteImport } from './routes/_authenticated/_app/front-desk'
 import { Route as AuthenticatedAppGuestsRouteRouteImport } from './routes/_authenticated/_app/guests/route'
 import { Route as AuthenticatedAppReservationsRouteRouteImport } from './routes/_authenticated/_app/reservations/route'
 import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
@@ -73,6 +74,12 @@ const AuthenticatedAppDashboardRoute =
   AuthenticatedAppDashboardRouteImport.update({
     id: '/dashboard',
     path: '/dashboard',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppFrontDeskRoute =
+  AuthenticatedAppFrontDeskRouteImport.update({
+    id: '/front-desk',
+    path: '/front-desk',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
 const AuthenticatedAppGuestsRouteRoute =
@@ -188,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/reservations': typeof AuthenticatedAppReservationsRouteRouteWithChildren
   '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
@@ -210,6 +218,7 @@ export interface FileRoutesByTo {
   '/design': typeof DesignRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
@@ -238,6 +247,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/reservations': typeof AuthenticatedAppReservationsRouteRouteWithChildren
   '/_authenticated/_app/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/_authenticated/_app/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/_authenticated/_app/guests/$id': typeof AuthenticatedAppGuestsIdRoute
   '/_authenticated/_app/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/_authenticated/_app/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/reservations'
     | '/setup'
     | '/dashboard'
+    | '/front-desk'
     | '/guests/$id'
     | '/guests/merge'
     | '/reservations/$id'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/create-hotel'
     | '/dashboard'
+    | '/front-desk'
     | '/guests/$id'
     | '/guests/merge'
     | '/reservations/$id'
@@ -314,6 +326,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/reservations'
     | '/_authenticated/_app/setup'
     | '/_authenticated/_app/dashboard'
+    | '/_authenticated/_app/front-desk'
     | '/_authenticated/_app/guests/$id'
     | '/_authenticated/_app/guests/merge'
     | '/_authenticated/_app/reservations/$id'
@@ -394,6 +407,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedAppDashboardRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/front-desk': {
+      id: '/_authenticated/_app/front-desk'
+      path: '/front-desk'
+      fullPath: '/front-desk'
+      preLoaderRoute: typeof AuthenticatedAppFrontDeskRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/_app/guests': {
@@ -590,6 +610,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppReservationsRouteRoute: typeof AuthenticatedAppReservationsRouteRouteWithChildren
   AuthenticatedAppSetupRouteRoute: typeof AuthenticatedAppSetupRouteRouteWithChildren
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
+  AuthenticatedAppFrontDeskRoute: typeof AuthenticatedAppFrontDeskRoute
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
@@ -599,6 +620,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
     AuthenticatedAppReservationsRouteRouteWithChildren,
   AuthenticatedAppSetupRouteRoute: AuthenticatedAppSetupRouteRouteWithChildren,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
+  AuthenticatedAppFrontDeskRoute: AuthenticatedAppFrontDeskRoute,
 }
 
 const AuthenticatedAppRouteRouteWithChildren =

@@ -823,6 +823,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reservation_guests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_arrivals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_guests_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["reservation_id"]
+          },
+          {
             foreignKeyName: "reservation_guests_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -876,6 +890,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "reservations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_nights_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_arrivals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_nights_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["reservation_id"]
           },
           {
             foreignKeyName: "reservation_nights_room_id_fkey"
@@ -1185,6 +1213,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "room_assignments_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_arrivals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_assignments_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["reservation_id"]
+          },
+          {
             foreignKeyName: "room_assignments_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
@@ -1308,6 +1350,103 @@ export type Database = {
           },
           {
             foreignKeyName: "rooms_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stays: {
+        Row: {
+          business_date: string
+          checked_in_at: string
+          checked_out_at: string | null
+          created_at: string
+          created_by: string | null
+          deposit_waive_reason: string | null
+          id: string
+          property_id: string
+          registration: Json
+          reservation_id: string
+          room_id: string
+          room_override_reason: string | null
+          status: string
+          tenant_id: string
+          void_reason: string | null
+        }
+        Insert: {
+          business_date: string
+          checked_in_at?: string
+          checked_out_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deposit_waive_reason?: string | null
+          id?: string
+          property_id: string
+          registration?: Json
+          reservation_id: string
+          room_id: string
+          room_override_reason?: string | null
+          status?: string
+          tenant_id: string
+          void_reason?: string | null
+        }
+        Update: {
+          business_date?: string
+          checked_in_at?: string
+          checked_out_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deposit_waive_reason?: string | null
+          id?: string
+          property_id?: string
+          registration?: Json
+          reservation_id?: string
+          room_id?: string
+          room_override_reason?: string | null
+          status?: string
+          tenant_id?: string
+          void_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stays_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stays_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stays_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_arrivals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stays_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["reservation_id"]
+          },
+          {
+            foreignKeyName: "stays_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stays_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1499,7 +1638,132 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_arrivals: {
+        Row: {
+          adults: number | null
+          arrival_date: string | null
+          children: number | null
+          company_name: string | null
+          currency: string | null
+          departure_date: string | null
+          deposit_paid: number | null
+          deposit_required: number | null
+          guest_id: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          hold_until: string | null
+          id: string | null
+          is_late: boolean | null
+          nights: number | null
+          number: string | null
+          property_id: string | null
+          rate_plan_id: string | null
+          room_condition: string | null
+          room_id: string | null
+          room_is_occupied: boolean | null
+          room_is_ready: boolean | null
+          room_number: string | null
+          room_type_code: string | null
+          room_type_id: string | null
+          room_type_name: string | null
+          special_requests: string | null
+          status: string | null
+          total_amount: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_rate_plan_id_fkey"
+            columns: ["rate_plan_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_assignments_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_in_house: {
+        Row: {
+          adults: number | null
+          arrival_date: string | null
+          can_void: boolean | null
+          checked_in_at: string | null
+          checked_in_business_date: string | null
+          children: number | null
+          company_name: string | null
+          currency: string | null
+          departure_date: string | null
+          guest_id: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          is_departing: boolean | null
+          number: string | null
+          property_id: string | null
+          reservation_id: string | null
+          room_id: string | null
+          room_number: string | null
+          room_type_code: string | null
+          room_type_id: string | null
+          stay_id: string | null
+          total_amount: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stays_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_guest_feedback: {
@@ -1548,6 +1812,16 @@ export type Database = {
         }
         Returns: Json
       }
+      check_in: {
+        Args: {
+          p_deposit_waive_reason?: string
+          p_id: string
+          p_registration: Json
+          p_room_id?: string
+          p_room_override_reason?: string
+        }
+        Returns: string
+      }
       confirm_reservation: { Args: { p_id: string }; Returns: undefined }
       create_hotel: {
         Args: {
@@ -1587,6 +1861,10 @@ export type Database = {
         Returns: string
       }
       delete_rate_plan_price: { Args: { p_id: string }; Returns: undefined }
+      extend_stay: {
+        Args: { p_id: string; p_new_departure: string; p_reason?: string }
+        Returns: undefined
+      }
       get_assignable_rooms: {
         Args: { p_id: string }
         Returns: {
@@ -1607,6 +1885,25 @@ export type Database = {
           room_type_name: string
           sellable: number
           stay_date: string
+        }[]
+      }
+      get_front_desk_rooms: {
+        Args: {
+          p_from: string
+          p_property_id: string
+          p_reservation_id?: string
+          p_room_type_id: string
+          p_to: string
+        }
+        Returns: {
+          condition: string
+          floor: string
+          id: string
+          is_occupied: boolean
+          is_ready: boolean
+          room_number: string
+          room_type_code: string
+          room_type_id: string
         }[]
       }
       get_guest: { Args: { p_id: string }; Returns: Json }
@@ -1644,6 +1941,15 @@ export type Database = {
           p_special_requests: string
         }
         Returns: undefined
+      }
+      move_room: {
+        Args: {
+          p_id: string
+          p_reason: string
+          p_room_id: string
+          p_room_override_reason?: string
+        }
+        Returns: string
       }
       my_context: { Args: never; Returns: Json }
       reinstate_reservation: {
@@ -1851,6 +2157,31 @@ export type Database = {
           p_timezone: string
         }
         Returns: undefined
+      }
+      void_check_in: {
+        Args: { p_id: string; p_reason: string }
+        Returns: undefined
+      }
+      walk_in_check_in: {
+        Args: {
+          p_adults: number
+          p_children: number
+          p_company_name?: string
+          p_departure: string
+          p_deposit_waive_reason?: string
+          p_guest_id: string
+          p_idempotency_key: string
+          p_notes?: string
+          p_override_reason?: string
+          p_property_id: string
+          p_rate_override?: number
+          p_rate_plan_id: string
+          p_registration: Json
+          p_room_id: string
+          p_room_override_reason?: string
+          p_room_type_id: string
+        }
+        Returns: string
       }
     }
     Enums: {

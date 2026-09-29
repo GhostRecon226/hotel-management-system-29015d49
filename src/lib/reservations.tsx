@@ -125,7 +125,7 @@ export function useResMutation<T = unknown>(name: string, success?: string | ((d
 
 const ACTION_LABEL: Record<string, string> = {
   insert: "Booking created", update: "Booking changed", assign_room: "Room assigned", unassign_room: "Room removed",
-  set_reservation_guests: "Guests changed", waive_cancellation_fee: "Cancellation fee waived", waive_no_show_fee: "No-show fee waived",
+  set_reservation_guests: "Guests changed", check_in: "Checked in", void_check_in: "Check-in voided", move_room: "Room moved", waive_cancellation_fee: "Cancellation fee waived", waive_no_show_fee: "No-show fee waived",
 };
 const FIELD_LABEL: Record<string, string> = {
   arrival_date: "Arrival", departure_date: "Departure", room_type_id: "Room type", rate_plan_id: "Rate plan",
