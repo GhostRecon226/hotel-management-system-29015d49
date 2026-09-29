@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/_app/dashboard")({
   component: Dashboard,
 });
 
-function Tile({ label, value, sub, tone, to }: { label: string; value: number | undefined; sub?: ReactNode; tone?: "success" | "warning" | "danger" | "info"; to?: string }) {
+function Tile({ label, value, sub, tone, to }: { label: string; value: number | undefined; sub?: ReactNode | undefined; tone?: "success" | "warning" | "danger" | "info" | undefined; to?: "/front-desk" | "/rooms" | "/approvals" | "/maintenance" | undefined }) {
   const body = (
     <Card className="h-full transition-colors hover:bg-muted/40">
       <CardContent className="p-4">
