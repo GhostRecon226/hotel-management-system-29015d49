@@ -268,6 +268,66 @@ export type Database = {
           },
         ]
       }
+      business_date_log: {
+        Row: {
+          actor_id: string | null
+          details: Json
+          error: string | null
+          finished_at: string
+          from_date: string
+          id: string
+          property_id: string
+          started_at: string
+          status: string
+          tenant_id: string
+          to_date: string
+          trigger: string
+        }
+        Insert: {
+          actor_id?: string | null
+          details?: Json
+          error?: string | null
+          finished_at?: string
+          from_date: string
+          id?: string
+          property_id: string
+          started_at: string
+          status: string
+          tenant_id: string
+          to_date: string
+          trigger: string
+        }
+        Update: {
+          actor_id?: string | null
+          details?: Json
+          error?: string | null
+          finished_at?: string
+          from_date?: string
+          id?: string
+          property_id?: string
+          started_at?: string
+          status?: string
+          tenant_id?: string
+          to_date?: string
+          trigger?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_date_log_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_date_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       charge_codes: {
         Row: {
           category: string
@@ -312,6 +372,69 @@ export type Database = {
           },
           {
             foreignKeyName: "charge_codes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_stats: {
+        Row: {
+          arrivals: number
+          business_date: string
+          cancellations: number
+          computed_at: string
+          departures: number
+          id: string
+          no_shows: number
+          property_id: string
+          room_revenue: number
+          rooms_available: number
+          rooms_sold: number
+          tenant_id: string
+          total_revenue: number
+        }
+        Insert: {
+          arrivals?: number
+          business_date: string
+          cancellations?: number
+          computed_at?: string
+          departures?: number
+          id?: string
+          no_shows?: number
+          property_id: string
+          room_revenue?: number
+          rooms_available?: number
+          rooms_sold?: number
+          tenant_id: string
+          total_revenue?: number
+        }
+        Update: {
+          arrivals?: number
+          business_date?: string
+          cancellations?: number
+          computed_at?: string
+          departures?: number
+          id?: string
+          no_shows?: number
+          property_id?: string
+          room_revenue?: number
+          rooms_available?: number
+          rooms_sold?: number
+          tenant_id?: string
+          total_revenue?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_stats_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_stats_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1678,6 +1801,7 @@ export type Database = {
           id: string
           max_stay_nights: number
           name: string
+          rollover_time: string
           tenant_id: string
           tentative_hold_hours: number
           timezone: string
@@ -1695,6 +1819,7 @@ export type Database = {
           id?: string
           max_stay_nights?: number
           name: string
+          rollover_time?: string
           tenant_id: string
           tentative_hold_hours?: number
           timezone?: string
@@ -1712,6 +1837,7 @@ export type Database = {
           id?: string
           max_stay_nights?: number
           name?: string
+          rollover_time?: string
           tenant_id?: string
           tentative_hold_hours?: number
           timezone?: string
@@ -3641,6 +3767,62 @@ export type Database = {
           },
         ]
       }
+      v_kpi_daily: {
+        Row: {
+          adr: number | null
+          arrivals: number | null
+          business_date: string | null
+          cancellations: number | null
+          departures: number | null
+          no_shows: number | null
+          occupancy: number | null
+          property_id: string | null
+          revpar: number | null
+          room_revenue: number | null
+          rooms_available: number | null
+          rooms_sold: number | null
+          total_revenue: number | null
+        }
+        Insert: {
+          adr?: never
+          arrivals?: number | null
+          business_date?: string | null
+          cancellations?: number | null
+          departures?: number | null
+          no_shows?: number | null
+          occupancy?: never
+          property_id?: string | null
+          revpar?: never
+          room_revenue?: number | null
+          rooms_available?: number | null
+          rooms_sold?: number | null
+          total_revenue?: number | null
+        }
+        Update: {
+          adr?: never
+          arrivals?: number | null
+          business_date?: string | null
+          cancellations?: number | null
+          departures?: number | null
+          no_shows?: number | null
+          occupancy?: never
+          property_id?: string | null
+          revpar?: never
+          room_revenue?: number | null
+          rooms_available?: number | null
+          rooms_sold?: number | null
+          total_revenue?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_stats_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_maintenance_tickets: {
         Row: {
           assignee_id: string | null
@@ -4068,6 +4250,7 @@ export type Database = {
         }
         Returns: string
       }
+      dashboard_summary: { Args: { p_property_id: string }; Returns: Json }
       decide_approval: {
         Args: { p_approve: boolean; p_id: string; p_reason: string }
         Returns: string
@@ -4245,6 +4428,46 @@ export type Database = {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
       }
+      report_outstanding_balances: {
+        Args: { p_property_id: string }
+        Returns: {
+          balance: number
+          currency: string
+          departure_date: string
+          folio_id: string
+          folio_number: string
+          folio_status: string
+          guest_name: string
+          label: string
+          reservation_id: string
+          reservation_number: string
+          reservation_status: string
+          room_number: string
+        }[]
+      }
+      report_payments: {
+        Args: { p_from: string; p_property_id: string; p_to: string }
+        Returns: {
+          business_date: string
+          count: number
+          kind: string
+          method: string
+          net: number
+          payments: number
+          refunds: number
+        }[]
+      }
+      report_revenue_by_charge_code: {
+        Args: { p_from: string; p_property_id: string; p_to: string }
+        Returns: {
+          category: string
+          charge_code: string
+          gross: number
+          name: string
+          net: number
+          tax: number
+        }[]
+      }
       request_adjustment: {
         Args: {
           p_amount: number
@@ -4298,6 +4521,8 @@ export type Database = {
         Args: { p_id: string; p_idempotency_key: string; p_reason: string }
         Returns: string
       }
+      rollover_status: { Args: { p_property_id: string }; Returns: Json }
+      run_due_rollovers_now: { Args: never; Returns: Json }
       save_charge_code: {
         Args: {
           p_category: string
@@ -4501,6 +4726,10 @@ export type Database = {
           p_id: string
           p_primary_guest_id: string
         }
+        Returns: undefined
+      }
+      set_rollover_time: {
+        Args: { p_property_id: string; p_time: string }
         Returns: undefined
       }
       set_room_condition: {
