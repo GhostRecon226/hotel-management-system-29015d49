@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MailCheck } from "lucide-react";
 import { z } from "zod";
+import { AuthLayout } from "@/components/auth-layout";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/check-email")({
   validateSearch: z.object({ email: z.string().optional() }),
@@ -20,18 +22,18 @@ export const Route = createFileRoute("/check-email")({
 function CheckEmail() {
   const { email } = Route.useSearch();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted px-4">
-      <div className="w-full max-w-sm rounded-lg border bg-card p-6 text-center shadow-sm">
-        <MailCheck className="mx-auto mb-3 h-10 w-10 text-primary" />
-        <h1 className="text-xl font-semibold">Check your email</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+    <AuthLayout>
+      <div className="text-center lg:text-left">
+        <div className="mx-auto mb-5 grid size-14 place-items-center rounded-full bg-primary-soft text-primary lg:mx-0">
+          <MailCheck className="size-7" />
+        </div>
+        <h1 className="text-[28px] font-semibold">Check your email</h1>
+        <p className="mt-2 text-[15px] text-muted-foreground">
           We sent a confirmation link to {email ? <strong className="text-foreground">{email}</strong> : "your email address"}.
           Click the link, then sign in to set up your hotel.
         </p>
-        <Link to="/auth" className="mt-5 inline-block text-sm font-medium text-primary underline">
-          Back to sign in
-        </Link>
+        <Button asChild variant="outline" className="mt-8"><Link to="/auth">Back to sign in</Link></Button>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

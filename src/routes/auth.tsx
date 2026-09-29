@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorMessage } from "@/lib/errors";
+import { AuthLayout } from "@/components/auth-layout";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -29,12 +30,12 @@ const schema = z.object({
 
 function AuthPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted px-4">
-      <div className="w-full max-w-sm rounded-lg border bg-card p-6 shadow-sm">
-        <h1 className="text-xl font-semibold">Hotel Desk</h1>
-        <p className="mb-5 text-sm text-muted-foreground">Sign in to your hotel, or create an account.</p>
+    <AuthLayout>
+      <div>
+        <h1 className="text-[28px] font-semibold">Welcome</h1>
+        <p className="mb-6 mt-1 text-[15px] text-muted-foreground">Sign in to your hotel, or create an account.</p>
         <Tabs defaultValue="signin">
-          <TabsList className="mb-4 grid w-full grid-cols-2">
+          <TabsList className="mb-6 grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign in</TabsTrigger>
             <TabsTrigger value="signup">Create account</TabsTrigger>
           </TabsList>
@@ -42,7 +43,7 @@ function AuthPage() {
           <TabsContent value="signup"><AuthForm mode="signup" /></TabsContent>
         </Tabs>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
 
@@ -86,7 +87,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4">
+    <form onSubmit={submit} className="space-y-5">
       <div className="space-y-1.5">
         <Label htmlFor={`${mode}-email`}>Email</Label>
         <Input id={`${mode}-email`} type="email" autoComplete="email" value={email}
@@ -97,10 +98,10 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         <Input id={`${mode}-password`} type="password"
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
           value={password} onChange={(e) => setPassword(e.target.value)} required />
-        {mode === "signup" && <p className="text-xs text-muted-foreground">At least 8 characters.</p>}
+        {mode === "signup" && <p className="text-sm text-muted-foreground">At least 8 characters.</p>}
       </div>
-      {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
-      <Button type="submit" className="w-full" disabled={busy}>
+      {error && <p className="rounded-md bg-danger-soft px-3 py-2.5 text-sm text-danger-strong" role="alert">{error}</p>}
+      <Button type="submit" size="lg" className="w-full" disabled={busy}>
         {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </Button>
     </form>

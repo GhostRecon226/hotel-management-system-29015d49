@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CheckEmailRouteImport } from './routes/check-email'
+import { Route as DesignRouteImport } from './routes/design'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenticated/create-hotel'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
@@ -46,6 +47,11 @@ const AuthRoute = AuthRouteImport.update({
 const CheckEmailRoute = CheckEmailRouteImport.update({
   id: '/check-email',
   path: '/check-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesignRoute = DesignRouteImport.update({
+  id: '/design',
+  path: '/design',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/check-email': typeof CheckEmailRoute
+  '/design': typeof DesignRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/check-email': typeof CheckEmailRoute
+  '/design': typeof DesignRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/check-email': typeof CheckEmailRoute
+  '/design': typeof DesignRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/_authenticated/_app/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/check-email'
+    | '/design'
     | '/create-hotel'
     | '/guests'
     | '/setup'
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/check-email'
+    | '/design'
     | '/create-hotel'
     | '/dashboard'
     | '/guests/$id'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/check-email'
+    | '/design'
     | '/_authenticated/_app'
     | '/_authenticated/create-hotel'
     | '/_authenticated/_app/guests'
@@ -260,6 +272,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CheckEmailRoute: typeof CheckEmailRoute
+  DesignRoute: typeof DesignRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -290,6 +303,13 @@ declare module '@tanstack/react-router' {
       path: '/check-email'
       fullPath: '/check-email'
       preLoaderRoute: typeof CheckEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/design': {
+      id: '/design'
+      path: '/design'
+      fullPath: '/design'
+      preLoaderRoute: typeof DesignRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/_app': {
@@ -481,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CheckEmailRoute: CheckEmailRoute,
+  DesignRoute: DesignRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

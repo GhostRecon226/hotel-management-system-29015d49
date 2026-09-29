@@ -7,12 +7,16 @@ import {
   DOC_TYPES, FEEDBACK_CATEGORIES, FEEDBACK_STATUS, formatDate, fullName, GuestFormDialog, useGuest, useGuestMutation,
   type GuestDocument,
 } from "@/lib/guests";
+import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState, LoadingState } from "@/components/ui/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -20,9 +24,11 @@ import {
 
 export const Route = createFileRoute("/_authenticated/_app/guests/$id")({ component: GuestProfile });
 
+const FEEDBACK_TONE: Record<string, "warning" | "info" | "success" | "neutral"> = { open: "warning", in_progress: "info", resolved: "success", closed: "neutral" };
+
 function Row({ label, value }: { label: string; value: string | null | undefined }) {
   return (
-    <div className="grid grid-cols-3 gap-2 py-1.5 text-sm">
+    <div className="grid grid-cols-3 gap-2 border-b py-3 text-[15px] last:border-0">
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="col-span-2 whitespace-pre-wrap">{value || "—"}</dd>
     </div>
@@ -48,8 +54,8 @@ function GuestProfile() {
   const setFbStatus = useGuestMutation("set_guest_feedback_status", "Status updated.");
   const anonymise = useGuestMutation("anonymise_guest", "Guest anonymised.");
 
-  if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
-  if (error || !data) return <p className="text-sm text-muted-foreground">Guest not found.</p>;
+  if (isLoading) return <LoadingState label="Loading guest…" />;
+  if (error || !data) return <EmptyState title="Guest not found" description="This guest may have been removed." action={<Button variant="outline" asChild><Link to="/guests">All guests</Link></Button>} />;
   const g = data.guest;
   const locked = g.status === "merged" || !!g.anonymised_at;
   const canEdit = can("guest.edit") && !locked;
@@ -66,26 +72,23 @@ function GuestProfile() {
       <Link to="/guests" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> All guests
       </Link>
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">{fullName(g)}</h1>
-          <p className="text-sm text-muted-foreground">Guest since {formatDate(g.created_at)}</p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader title={fullName(g)} description={<span className="inline-flex flex-wrap items-center gap-2">Guest since {formatDate(g.created_at)}
+          {g.status === "merged" && <Badge variant="neutral">Merged</Badge>}
+          {g.anonymised_at && <Badge variant="neutral">Anonymised</Badge>}</span>}
+        actions={<>
           {canEdit && <Button variant="outline" onClick={() => setEdit(true)}>Edit</Button>}
           {can("guest.anonymise") && !locked && (
             <Button variant="destructive" onClick={() => { setAnon({ reason: "", confirm: "" }); setAnonOpen(true); }}>Anonymise</Button>
           )}
-        </div>
-      </div>
+        </>} />
 
       {g.status === "merged" && g.merged_into && (
-        <p className="mb-4 rounded-md border bg-muted p-3 text-sm">
+        <p className="mb-4 rounded-md border border-info/30 bg-info-soft p-3 text-[15px] text-info-strong">
           This profile was merged. <Link className="underline" to="/guests/$id" params={{ id: g.merged_into }}>Open the kept profile</Link>.
         </p>
       )}
       {g.anonymised_at && (
-        <p className="mb-4 rounded-md border bg-muted p-3 text-sm">
+        <p className="mb-4 rounded-md border border-info/30 bg-info-soft p-3 text-[15px] text-info-strong">
           Personal details were removed on {formatDate(g.anonymised_at)}. Stay history is kept.
         </p>
       )}
@@ -117,19 +120,19 @@ function GuestProfile() {
             </CardHeader>
             <CardContent>
               {!data.can_view_documents && (
-                <p className="mb-3 text-sm text-muted-foreground">Document numbers are hidden. You need permission to see ID numbers.</p>
+                <p className="mb-3 rounded-md bg-warning-soft px-3 py-2 text-sm text-warning-strong">Document numbers are hidden. You need permission to see ID numbers.</p>
               )}
               <Table>
                 <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Number</TableHead><TableHead>Expiry</TableHead><TableHead /></TableRow></TableHeader>
                 <TableBody>
-                  {data.documents.length === 0 && <TableRow><TableCell colSpan={4} className="text-muted-foreground">No documents.</TableCell></TableRow>}
+                  {data.documents.length === 0 && <TableStateRow colSpan={4} title="No documents." />}
                   {data.documents.map((d) => {
                     const expired = d.expiry && d.expiry < new Date().toISOString().slice(0, 10);
                     return (
                       <TableRow key={d.id}>
                         <TableCell>{DOC_TYPES[d.doc_type]}</TableCell>
                         <TableCell className="font-mono">{d.doc_number ?? d.doc_number_masked}</TableCell>
-                        <TableCell>{formatDate(d.expiry)}{expired && <span className="ml-2 text-xs text-destructive">Expired</span>}</TableCell>
+                        <TableCell>{formatDate(d.expiry)}{expired && <Badge variant="danger" className="ml-2">Expired</Badge>}</TableCell>
                         <TableCell className="text-right">
                           {canEdit && data.can_view_documents && (
                             <div className="flex justify-end gap-2">
@@ -150,7 +153,7 @@ function GuestProfile() {
 
         <TabsContent value="stays">
           <Card><CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">No stays yet. Stays will appear here once reservations are in use.</p>
+            <EmptyState title="No stays yet" description="Stays will appear here once reservations are in use." />
           </CardContent></Card>
         </TabsContent>
 
@@ -161,17 +164,17 @@ function GuestProfile() {
               {canEdit && <Button size="sm" onClick={() => { setFb({ category: "compliment", text: "" }); setFbOpen(true); }}>Add feedback</Button>}
             </CardHeader>
             <CardContent className="space-y-3">
-              {data.feedback.length === 0 && <p className="text-sm text-muted-foreground">No feedback.</p>}
+              {data.feedback.length === 0 && <EmptyState title="No feedback" description="Compliments, complaints and requests from this guest will appear here." />}
               {data.feedback.map((f) => (
                 <div key={f.id} className="rounded-md border p-3">
                   <div className="mb-1 flex flex-wrap items-center justify-between gap-2 text-sm">
-                    <span className="font-medium">{FEEDBACK_CATEGORIES[f.category]} · <span className="font-normal text-muted-foreground">{formatDate(f.created_at)}</span></span>
+                    <span className="font-medium"><Badge variant={f.category === "complaint" ? "danger" : f.category === "compliment" ? "success" : "info"}>{FEEDBACK_CATEGORIES[f.category]}</Badge> <span className="font-normal text-muted-foreground">{formatDate(f.created_at)}</span></span>
                     {canEdit ? (
                       <Select value={f.status} onValueChange={(v) => setFbStatus.mutate({ p_id: f.id, p_status: v })}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-9 w-40"><SelectValue /></SelectTrigger>
                         <SelectContent>{Object.entries(FEEDBACK_STATUS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
                       </Select>
-                    ) : <span className="text-muted-foreground">{FEEDBACK_STATUS[f.status]}</span>}
+                    ) : <Badge variant={FEEDBACK_TONE[f.status]} dot>{FEEDBACK_STATUS[f.status]}</Badge>}
                   </div>
                   <p className="whitespace-pre-wrap text-sm">{f.text}</p>
                 </div>

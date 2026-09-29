@@ -7,6 +7,10 @@ import { errorMessage } from "@/lib/errors";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/states";
+import { formatAmount } from "@/components/ui/money";
+import { ShieldOff } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -47,12 +51,7 @@ export function useSetupMutation(name: string, invalidate: string[], success?: (
 }
 
 export function formatMoney(amount: number | string | null | undefined, currency = "NGN") {
-  const n = Number(amount ?? 0);
-  try {
-    return new Intl.NumberFormat("en-NG", { style: "currency", currency, minimumFractionDigits: 2 }).format(n);
-  } catch {
-    return `${currency} ${n.toFixed(2)}`;
-  }
+  return formatAmount(amount, currency);
 }
 
 export function FormDialog({
@@ -85,23 +84,23 @@ export function Field({ label, htmlFor, hint, children }: { label: string; htmlF
     <div className="space-y-1.5">
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
     </div>
   );
 }
 
 export function StatusText({ active }: { active: boolean }) {
   return active
-    ? <span className="text-sm">Active</span>
-    : <span className="text-sm text-muted-foreground">Inactive</span>;
+    ? <Badge variant="success" dot>Active</Badge>
+    : <Badge variant="neutral" dot>Inactive</Badge>;
 }
 
 export function SectionHeader({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return (
     <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h2 className="text-lg font-semibold">{title}</h2>
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        <h2 className="text-xl font-semibold">{title}</h2>
+        {description && <p className="mt-0.5 text-[15px] text-muted-foreground">{description}</p>}
       </div>
       {action}
     </div>
@@ -113,5 +112,5 @@ export const SETUP_PERMS = [
 ];
 
 export function NoAccess() {
-  return <p className="text-sm text-muted-foreground">You do not have permission to manage this.</p>;
+  return <EmptyState icon={ShieldOff} title="No access" description="You do not have permission to manage this. Ask your manager if you need it." />;
 }

@@ -6,6 +6,7 @@ import { NoAccess, Field, FormDialog, SectionHeader, StatusText, useSetupList, u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/_app/setup/room-types")({ component: RoomTypes });
@@ -45,7 +46,7 @@ function RoomTypes() {
           <TableHead>Max children</TableHead><TableHead>Status</TableHead><TableHead />
         </TableRow></TableHeader>
         <TableBody>
-          {data.length === 0 && <TableRow><TableCell colSpan={6} className="text-muted-foreground">No room types yet.</TableCell></TableRow>}
+          {data.length === 0 && <TableStateRow colSpan={6} title="No room types yet." />}
           {data.map((r) => (
             <TableRow key={r.id}>
               <TableCell className="font-medium">{r.code}</TableCell><TableCell>{r.name}</TableCell>

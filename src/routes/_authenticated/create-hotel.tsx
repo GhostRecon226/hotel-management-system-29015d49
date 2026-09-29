@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { myContextQuery } from "@/lib/access";
 import { errorMessage } from "@/lib/errors";
+import { AuthLayout } from "@/components/auth-layout";
 
 export const Route = createFileRoute("/_authenticated/create-hotel")({
   beforeLoad: async ({ context }) => {
@@ -73,11 +74,11 @@ function CreateHotel() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
-      <form onSubmit={submit} className="w-full max-w-md space-y-4 rounded-lg border bg-card p-6 shadow-sm">
-        <div>
-          <h1 className="text-xl font-semibold">Create your hotel</h1>
-          <p className="text-sm text-muted-foreground">You get a 30-day free trial on the Starter plan.</p>
+    <AuthLayout wide>
+      <form onSubmit={submit} className="space-y-5">
+        <div className="mb-2">
+          <h1 className="text-[28px] font-semibold">Create your hotel</h1>
+          <p className="mt-1 text-[15px] text-muted-foreground">You get a 30-day free trial on the Starter plan.</p>
         </div>
         <Field id="business_name" label="Business name" value={form.business_name} onChange={set("business_name")} />
         <div className="space-y-1.5">
@@ -92,10 +93,10 @@ function CreateHotel() {
         <Field id="property_name" label="Property name" value={form.property_name} onChange={set("property_name")} />
         <Field id="full_name" label="Your full name" value={form.full_name} onChange={set("full_name")} />
         <Field id="city" label="City" value={form.city} onChange={set("city")} />
-        {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
-        <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating…" : "Create hotel"}</Button>
+        {error && <p className="rounded-md bg-danger-soft px-3 py-2.5 text-sm text-danger-strong" role="alert">{error}</p>}
+        <Button type="submit" size="lg" className="w-full" disabled={busy}>{busy ? "Creating…" : "Create hotel"}</Button>
       </form>
-    </div>
+    </AuthLayout>
   );
 }
 

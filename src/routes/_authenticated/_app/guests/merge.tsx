@@ -4,6 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import { useAccess } from "@/lib/access";
 import { Field } from "@/lib/setup";
 import { formatDate, fullName, useGuest, useGuestMutation, useGuestSearch, type GuestDetail } from "@/lib/guests";
+import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,12 +33,12 @@ function Picker({ label, value, onChange, exclude }: { label: string; value: str
             <Input placeholder="Search name, phone or email" value={q} onChange={(e) => setQ(e.target.value)} />
             <div className="max-h-64 divide-y overflow-y-auto rounded-md border">
               {data.filter((g) => g.id !== exclude && !g.anonymised_at).map((g) => (
-                <button key={g.id} type="button" className="block w-full px-3 py-2 text-left text-sm hover:bg-muted" onClick={() => onChange(g.id)}>
+                <button key={g.id} type="button" className="block min-h-12 w-full px-3 py-2.5 text-left text-[15px] hover:bg-primary-soft" onClick={() => onChange(g.id)}>
                   <div className="font-medium">{fullName(g)}</div>
                   <div className="text-muted-foreground">{g.phone || "—"} · {g.email || "—"}</div>
                 </button>
               ))}
-              {data.length === 0 && <p className="px-3 py-2 text-sm text-muted-foreground">No guests found.</p>}
+              {data.length === 0 && <p className="px-3 py-3 text-sm text-muted-foreground">No guests found.</p>}
             </div>
           </>
         )}
@@ -54,10 +56,10 @@ function Preview({ keep, remove }: { keep: GuestDetail; remove: GuestDetail }) {
       <CardHeader><CardTitle className="text-base">Preview</CardTitle></CardHeader>
       <CardContent className="space-y-3 text-sm">
         <table className="w-full">
-          <thead><tr className="text-left text-muted-foreground"><th className="py-1 font-normal" /><th className="py-1 font-normal">Kept (stays)</th><th className="py-1 font-normal">Removed (discarded)</th></tr></thead>
+          <thead><tr className="text-left text-muted-foreground"><th className="py-1 font-normal" /><th className="py-1 font-normal"><Badge variant="success">Kept</Badge></th><th className="py-1 font-normal"><Badge variant="danger">Removed</Badge></th></tr></thead>
           <tbody>
             {fields.map(([l, a, b]) => (
-              <tr key={l} className="border-t"><td className="py-1.5 text-muted-foreground">{l}</td><td className="py-1.5 font-medium">{a || "—"}</td><td className="py-1.5 text-muted-foreground line-through">{b || "—"}</td></tr>
+              <tr key={l} className="border-t"><td className="py-2.5 text-muted-foreground">{l}</td><td className="py-2.5 font-medium">{a || "—"}</td><td className="py-2.5 text-muted-foreground line-through">{b || "—"}</td></tr>
             ))}
           </tbody>
         </table>
@@ -82,10 +84,7 @@ function MergeGuests() {
   return (
     <div className="space-y-4">
       <Link to="/guests" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> All guests</Link>
-      <div>
-        <h1 className="text-2xl font-semibold">Merge duplicate guests</h1>
-        <p className="text-sm text-muted-foreground">Choose the profile to keep and the duplicate to remove.</p>
-      </div>
+      <PageHeader title="Merge duplicate guests" description="Choose the profile to keep and the duplicate to remove." className="mb-2" />
       <div className="grid gap-4 md:grid-cols-2">
         <Picker label="Keep this guest" value={keep} onChange={setKeep} exclude={remove} />
         <Picker label="Remove this duplicate" value={remove} onChange={setRemove} exclude={keep} />
@@ -94,7 +93,7 @@ function MergeGuests() {
         <>
           <Preview keep={k} remove={r} />
           <Field label="Reason" htmlFor="m-reason"><Textarea id="m-reason" rows={2} placeholder="e.g. Same guest registered twice" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} /></Field>
-          <Button disabled={!reason.trim() || merge.isPending}
+          <Button size="lg" disabled={!reason.trim() || merge.isPending}
             onClick={() => merge.mutate({ p_keep: keep, p_remove: remove, p_reason: reason }, { onSuccess: () => navigate({ to: "/guests/$id", params: { id: keep } }) })}>
             {merge.isPending ? "Merging…" : "Merge guests"}
           </Button>

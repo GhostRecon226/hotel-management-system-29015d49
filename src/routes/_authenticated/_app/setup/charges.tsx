@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/_app/setup/charges")({ component: Charges });
@@ -57,7 +58,7 @@ function Taxes() {
       <Table>
         <TableHeader><TableRow><TableHead>Order</TableHead><TableHead>Code</TableHead><TableHead>Name</TableHead><TableHead className="text-right">Percent</TableHead><TableHead>Calculated on</TableHead><TableHead>Note</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader>
         <TableBody>
-          {data.length === 0 && <TableRow><TableCell colSpan={8} className="text-muted-foreground">No taxes set up.</TableCell></TableRow>}
+          {data.length === 0 && <TableStateRow colSpan={8} title="No taxes set up." />}
           {data.map((t) => (
             <TableRow key={t.id}>
               <TableCell>{t.sort_order}</TableCell><TableCell className="font-medium">{t.code}</TableCell><TableCell>{t.name}</TableCell>

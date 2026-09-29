@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useAccess } from "@/lib/access";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/_app/dashboard")({
   head: () => ({
@@ -19,10 +20,8 @@ function Dashboard() {
   const { ctx, property } = useAccess();
   return (
     <div>
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Welcome, {ctx.profile?.full_name}. {property ? `You are working in ${property.name}.` : "You are not assigned to any property yet."}
-      </p>
+      <PageHeader title="Dashboard"
+        description={`Welcome, ${ctx.profile?.full_name ?? ""}. ${property ? `You are working in ${property.name}.` : "You are not assigned to any property yet."}`} />
     </div>
   );
 }

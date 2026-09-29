@@ -5,6 +5,7 @@ import { NoAccess, Field, FormDialog, SectionHeader, useSetupList, useSetupMutat
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/_app/setup/exchange-rates")({ component: ExchangeRates });
@@ -28,7 +29,7 @@ function ExchangeRates() {
       <Table>
         <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Currency</TableHead><TableHead className="text-right">Rate ({base} per 1)</TableHead><TableHead /></TableRow></TableHeader>
         <TableBody>
-          {rows.length === 0 && <TableRow><TableCell colSpan={4} className="text-muted-foreground">No exchange rates yet.</TableCell></TableRow>}
+          {rows.length === 0 && <TableStateRow colSpan={4} title="No exchange rates yet." />}
           {rows.map((r) => (
             <TableRow key={r.id}>
               <TableCell>{r.rate_date}</TableCell><TableCell className="font-medium">{r.currency}</TableCell>
