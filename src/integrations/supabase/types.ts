@@ -933,6 +933,147 @@ export type Database = {
           },
         ]
       }
+      hk_tasks: {
+        Row: {
+          assigned_at: string | null
+          assignee_id: string | null
+          business_date: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          checklist: Json
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string | null
+          defects: Json
+          fail_count: number
+          id: string
+          inspected_at: string | null
+          inspected_by: string | null
+          inspection_result: string | null
+          notes: string | null
+          priority: string
+          property_id: string
+          room_id: string
+          started_at: string | null
+          status: string
+          stay_id: string | null
+          tenant_id: string
+          type: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assignee_id?: string | null
+          business_date: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          checklist?: Json
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          defects?: Json
+          fail_count?: number
+          id?: string
+          inspected_at?: string | null
+          inspected_by?: string | null
+          inspection_result?: string | null
+          notes?: string | null
+          priority?: string
+          property_id: string
+          room_id: string
+          started_at?: string | null
+          status?: string
+          stay_id?: string | null
+          tenant_id: string
+          type: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assignee_id?: string | null
+          business_date?: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          checklist?: Json
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          defects?: Json
+          fail_count?: number
+          id?: string
+          inspected_at?: string | null
+          inspected_by?: string | null
+          inspection_result?: string | null
+          notes?: string | null
+          priority?: string
+          property_id?: string
+          room_id?: string
+          started_at?: string | null
+          status?: string
+          stay_id?: string | null
+          tenant_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hk_tasks_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "stays"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "v_checkouts"
+            referencedColumns: ["stay_id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["stay_id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       housekeeping_tasks: {
         Row: {
           business_date: string
@@ -1116,6 +1257,86 @@ export type Database = {
           },
           {
             foreignKeyName: "invoices_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lost_found_items: {
+        Row: {
+          claimed_by_name: string | null
+          created_at: string
+          description: string
+          found_at: string
+          found_by: string | null
+          id: string
+          location: string
+          property_id: string
+          room_id: string | null
+          status: string
+          status_changed_at: string | null
+          status_changed_by: string | null
+          status_note: string | null
+          tenant_id: string
+        }
+        Insert: {
+          claimed_by_name?: string | null
+          created_at?: string
+          description: string
+          found_at?: string
+          found_by?: string | null
+          id?: string
+          location: string
+          property_id: string
+          room_id?: string | null
+          status?: string
+          status_changed_at?: string | null
+          status_changed_by?: string | null
+          status_note?: string | null
+          tenant_id: string
+        }
+        Update: {
+          claimed_by_name?: string | null
+          created_at?: string
+          description?: string
+          found_at?: string
+          found_by?: string | null
+          id?: string
+          location?: string
+          property_id?: string
+          room_id?: string | null
+          status?: string
+          status_changed_at?: string | null
+          status_changed_by?: string | null
+          status_note?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lost_found_items_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lost_found_items_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lost_found_items_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lost_found_items_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -2968,6 +3189,102 @@ export type Database = {
           },
         ]
       }
+      v_hk_board: {
+        Row: {
+          assigned_at: string | null
+          assignee_id: string | null
+          assignee_name: string | null
+          board_column: string | null
+          business_date: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          checklist: Json | null
+          completed_at: string | null
+          completed_by: string | null
+          completed_by_name: string | null
+          created_at: string | null
+          created_by: string | null
+          defects: Json | null
+          fail_count: number | null
+          floor: string | null
+          id: string | null
+          inspected_at: string | null
+          inspected_by: string | null
+          inspected_by_name: string | null
+          inspection_result: string | null
+          is_occupied: boolean | null
+          notes: string | null
+          priority: string | null
+          property_id: string | null
+          room_condition: string | null
+          room_id: string | null
+          room_number: string | null
+          room_type_name: string | null
+          started_at: string | null
+          status: string | null
+          stay_id: string | null
+          tenant_id: string | null
+          type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hk_tasks_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "v_room_board"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "stays"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "v_checkouts"
+            referencedColumns: ["stay_id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "v_in_house"
+            referencedColumns: ["stay_id"]
+          },
+          {
+            foreignKeyName: "hk_tasks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_in_house: {
         Row: {
           adults: number | null
@@ -3094,6 +3411,10 @@ export type Database = {
         Returns: Json
       }
       approve_room_block: { Args: { p_id: string }; Returns: undefined }
+      assign_hk_task: {
+        Args: { p_assignee_id: string; p_id: string }
+        Returns: undefined
+      }
       assign_room: {
         Args: { p_id: string; p_room_id: string }
         Returns: undefined
@@ -3123,6 +3444,10 @@ export type Database = {
           taxable_base: number
         }[]
       }
+      cancel_hk_task: {
+        Args: { p_id: string; p_reason: string }
+        Returns: undefined
+      }
       cancel_reservation: {
         Args: {
           p_id: string
@@ -3147,7 +3472,21 @@ export type Database = {
         Returns: string
       }
       close_folio: { Args: { p_id: string }; Returns: undefined }
+      complete_hk_task: {
+        Args: { p_checklist?: Json; p_id: string; p_notes?: string }
+        Returns: undefined
+      }
       confirm_reservation: { Args: { p_id: string }; Returns: undefined }
+      create_hk_task: {
+        Args: {
+          p_assignee_id?: string
+          p_notes?: string
+          p_priority?: string
+          p_room_id: string
+          p_type: string
+        }
+        Returns: string
+      }
       create_hotel: {
         Args: {
           p_business_name: string
@@ -3237,6 +3576,23 @@ export type Database = {
       }
       get_guest: { Args: { p_id: string }; Returns: Json }
       get_reservation: { Args: { p_id: string }; Returns: Json }
+      hk_staff: {
+        Args: { p_property_id: string }
+        Returns: {
+          full_name: string
+          id: string
+        }[]
+      }
+      inspect_hk_task: {
+        Args: {
+          p_defects?: Json
+          p_id: string
+          p_notes?: string
+          p_pass: boolean
+          p_result?: string
+        }
+        Returns: undefined
+      }
       issue_invoice: {
         Args: { p_folio_id: string; p_idempotency_key: string; p_kind: string }
         Returns: string
@@ -3429,6 +3785,16 @@ export type Database = {
         }
         Returns: string
       }
+      save_lost_found_item: {
+        Args: {
+          p_description: string
+          p_found_at?: string
+          p_location: string
+          p_property_id: string
+          p_room_id?: string
+        }
+        Returns: string
+      }
       save_payment_method: {
         Args: {
           p_code: string
@@ -3561,6 +3927,15 @@ export type Database = {
         Args: { p_id: string; p_status: string }
         Returns: undefined
       }
+      set_lost_found_status: {
+        Args: {
+          p_claimed_by?: string
+          p_id: string
+          p_note?: string
+          p_status: string
+        }
+        Returns: undefined
+      }
       set_reservation_guests: {
         Args: {
           p_guest_ids: string[]
@@ -3583,6 +3958,7 @@ export type Database = {
         }
         Returns: string
       }
+      start_hk_task: { Args: { p_id: string }; Returns: undefined }
       tenant_is_writable: { Args: never; Returns: boolean }
       transfer_transaction: {
         Args: { p_id: string; p_idempotency_key: string; p_to_folio_id: string }
