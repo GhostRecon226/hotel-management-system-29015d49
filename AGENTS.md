@@ -19,3 +19,5 @@
 - guest_documents has no client read policy; numbers come only via get_guest(), masked without guest.document.view. Why: ID numbers are sensitive.
 - merge_guests must move every table that references guests; add new referencing tables (reservations, folios) to it. Why: merges must leave no orphan references.
 - Every screen uses the shared design system only: tokens in src/styles.css, shadcn ui components, Badge status variants (success=clean/ready/paid, warning=pending/dirty, danger=out of order/overdue/error, info=in house/info), Money for amounts (right-aligned, ₦), PageHeader/FilterBar, EmptyState/LoadingState/TableStateRow. No raw colour classes. Reference: /design. Why: consistent, fast-to-scan front desk UI.
+- Availability comes from reservation_nights joined to live reservations (confirmed, checked_in, tentative with unexpired hold); bookings lock per property+room type via app.assert_available. Why: safe last-room booking.
+- Room assignments use an exclusion constraint on active rows; released rows stay (is_active=false). Why: no double-assigned rooms, keep history.
