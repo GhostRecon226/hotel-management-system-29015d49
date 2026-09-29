@@ -15,3 +15,6 @@
 - App shell loads everything via one rpc public.my_context() into AccessProvider (src/lib/access.tsx); hide UI with useAccess().can / <Can>. Why: one call, permissions as data.
 - Setup tables are read via RLS SELECT only; every write goes through a public.save_* / set_* function that calls app.require(perm, property). Why: rule 2/5, business rules in Postgres.
 - Property defaults (charge codes, payment methods, doc sequences, Nigerian taxes) are seeded by an AFTER INSERT trigger on properties via app.seed_property_defaults. Why: every new property is usable at once.
+- Guests are tenant-scoped (shared across properties); guest RPCs check permissions with app.require_any / app.can(key, null). Why: one guest profile per hotel group.
+- guest_documents has no client read policy; numbers come only via get_guest(), masked without guest.document.view. Why: ID numbers are sensitive.
+- merge_guests must move every table that references guests; add new referencing tables (reservations, folios) to it. Why: merges must leave no orphan references.

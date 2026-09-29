@@ -16,7 +16,11 @@ import { Route as CheckEmailRouteImport } from './routes/check-email'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenticated/create-hotel'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
+import { Route as AuthenticatedAppGuestsRouteRouteImport } from './routes/_authenticated/_app/guests/route'
 import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
+import { Route as AuthenticatedAppGuestsIndexRouteImport } from './routes/_authenticated/_app/guests/index'
+import { Route as AuthenticatedAppGuestsIdRouteImport } from './routes/_authenticated/_app/guests/$id'
+import { Route as AuthenticatedAppGuestsMergeRouteImport } from './routes/_authenticated/_app/guests/merge'
 import { Route as AuthenticatedAppSetupIndexRouteImport } from './routes/_authenticated/_app/setup/index'
 import { Route as AuthenticatedAppSetupChargesRouteImport } from './routes/_authenticated/_app/setup/charges'
 import { Route as AuthenticatedAppSetupExchangeRatesRouteImport } from './routes/_authenticated/_app/setup/exchange-rates'
@@ -60,11 +64,35 @@ const AuthenticatedAppDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppGuestsRouteRoute =
+  AuthenticatedAppGuestsRouteRouteImport.update({
+    id: '/guests',
+    path: '/guests',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 const AuthenticatedAppSetupRouteRoute =
   AuthenticatedAppSetupRouteRouteImport.update({
     id: '/setup',
     path: '/setup',
     getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppGuestsIndexRoute =
+  AuthenticatedAppGuestsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppGuestsRouteRoute,
+  } as any)
+const AuthenticatedAppGuestsIdRoute =
+  AuthenticatedAppGuestsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAppGuestsRouteRoute,
+  } as any)
+const AuthenticatedAppGuestsMergeRoute =
+  AuthenticatedAppGuestsMergeRouteImport.update({
+    id: '/merge',
+    path: '/merge',
+    getParentRoute: () => AuthenticatedAppGuestsRouteRoute,
   } as any)
 const AuthenticatedAppSetupIndexRoute =
   AuthenticatedAppSetupIndexRouteImport.update({
@@ -114,14 +142,18 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/check-email': typeof CheckEmailRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
+  '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/setup/charges': typeof AuthenticatedAppSetupChargesRoute
   '/setup/exchange-rates': typeof AuthenticatedAppSetupExchangeRatesRoute
   '/setup/property': typeof AuthenticatedAppSetupPropertyRoute
   '/setup/rates': typeof AuthenticatedAppSetupRatesRoute
   '/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
   '/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
+  '/guests/': typeof AuthenticatedAppGuestsIndexRoute
   '/setup/': typeof AuthenticatedAppSetupIndexRoute
 }
 export interface FileRoutesByTo {
@@ -130,12 +162,15 @@ export interface FileRoutesByTo {
   '/check-email': typeof CheckEmailRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
+  '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/setup/charges': typeof AuthenticatedAppSetupChargesRoute
   '/setup/exchange-rates': typeof AuthenticatedAppSetupExchangeRatesRoute
   '/setup/property': typeof AuthenticatedAppSetupPropertyRoute
   '/setup/rates': typeof AuthenticatedAppSetupRatesRoute
   '/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
   '/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
+  '/guests': typeof AuthenticatedAppGuestsIndexRoute
   '/setup': typeof AuthenticatedAppSetupIndexRoute
 }
 export interface FileRoutesById {
@@ -146,14 +181,18 @@ export interface FileRoutesById {
   '/check-email': typeof CheckEmailRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/_authenticated/_app/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/_authenticated/_app/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/_authenticated/_app/guests/$id': typeof AuthenticatedAppGuestsIdRoute
+  '/_authenticated/_app/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/_authenticated/_app/setup/charges': typeof AuthenticatedAppSetupChargesRoute
   '/_authenticated/_app/setup/exchange-rates': typeof AuthenticatedAppSetupExchangeRatesRoute
   '/_authenticated/_app/setup/property': typeof AuthenticatedAppSetupPropertyRoute
   '/_authenticated/_app/setup/rates': typeof AuthenticatedAppSetupRatesRoute
   '/_authenticated/_app/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
   '/_authenticated/_app/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
+  '/_authenticated/_app/guests/': typeof AuthenticatedAppGuestsIndexRoute
   '/_authenticated/_app/setup/': typeof AuthenticatedAppSetupIndexRoute
 }
 export interface FileRouteTypes {
@@ -163,14 +202,18 @@ export interface FileRouteTypes {
     | '/auth'
     | '/check-email'
     | '/create-hotel'
+    | '/guests'
     | '/setup'
     | '/dashboard'
+    | '/guests/$id'
+    | '/guests/merge'
     | '/setup/charges'
     | '/setup/exchange-rates'
     | '/setup/property'
     | '/setup/rates'
     | '/setup/room-types'
     | '/setup/rooms'
+    | '/guests/'
     | '/setup/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -179,12 +222,15 @@ export interface FileRouteTypes {
     | '/check-email'
     | '/create-hotel'
     | '/dashboard'
+    | '/guests/$id'
+    | '/guests/merge'
     | '/setup/charges'
     | '/setup/exchange-rates'
     | '/setup/property'
     | '/setup/rates'
     | '/setup/room-types'
     | '/setup/rooms'
+    | '/guests'
     | '/setup'
   id:
     | '__root__'
@@ -194,14 +240,18 @@ export interface FileRouteTypes {
     | '/check-email'
     | '/_authenticated/_app'
     | '/_authenticated/create-hotel'
+    | '/_authenticated/_app/guests'
     | '/_authenticated/_app/setup'
     | '/_authenticated/_app/dashboard'
+    | '/_authenticated/_app/guests/$id'
+    | '/_authenticated/_app/guests/merge'
     | '/_authenticated/_app/setup/charges'
     | '/_authenticated/_app/setup/exchange-rates'
     | '/_authenticated/_app/setup/property'
     | '/_authenticated/_app/setup/rates'
     | '/_authenticated/_app/setup/room-types'
     | '/_authenticated/_app/setup/rooms'
+    | '/_authenticated/_app/guests/'
     | '/_authenticated/_app/setup/'
   fileRoutesById: FileRoutesById
 }
@@ -263,12 +313,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppDashboardRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/guests': {
+      id: '/_authenticated/_app/guests'
+      path: '/guests'
+      fullPath: '/guests'
+      preLoaderRoute: typeof AuthenticatedAppGuestsRouteRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/_app/setup': {
       id: '/_authenticated/_app/setup'
       path: '/setup'
       fullPath: '/setup'
       preLoaderRoute: typeof AuthenticatedAppSetupRouteRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/guests/': {
+      id: '/_authenticated/_app/guests/'
+      path: '/'
+      fullPath: '/guests/'
+      preLoaderRoute: typeof AuthenticatedAppGuestsIndexRouteImport
+      parentRoute: typeof AuthenticatedAppGuestsRouteRoute
+    }
+    '/_authenticated/_app/guests/$id': {
+      id: '/_authenticated/_app/guests/$id'
+      path: '/$id'
+      fullPath: '/guests/$id'
+      preLoaderRoute: typeof AuthenticatedAppGuestsIdRouteImport
+      parentRoute: typeof AuthenticatedAppGuestsRouteRoute
+    }
+    '/_authenticated/_app/guests/merge': {
+      id: '/_authenticated/_app/guests/merge'
+      path: '/merge'
+      fullPath: '/guests/merge'
+      preLoaderRoute: typeof AuthenticatedAppGuestsMergeRouteImport
+      parentRoute: typeof AuthenticatedAppGuestsRouteRoute
     }
     '/_authenticated/_app/setup/': {
       id: '/_authenticated/_app/setup/'
@@ -322,6 +400,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAppGuestsRouteRouteChildren {
+  AuthenticatedAppGuestsIdRoute: typeof AuthenticatedAppGuestsIdRoute
+  AuthenticatedAppGuestsMergeRoute: typeof AuthenticatedAppGuestsMergeRoute
+  AuthenticatedAppGuestsIndexRoute: typeof AuthenticatedAppGuestsIndexRoute
+}
+
+const AuthenticatedAppGuestsRouteRouteChildren: AuthenticatedAppGuestsRouteRouteChildren =
+  {
+    AuthenticatedAppGuestsIdRoute: AuthenticatedAppGuestsIdRoute,
+    AuthenticatedAppGuestsMergeRoute: AuthenticatedAppGuestsMergeRoute,
+    AuthenticatedAppGuestsIndexRoute: AuthenticatedAppGuestsIndexRoute,
+  }
+
+const AuthenticatedAppGuestsRouteRouteWithChildren =
+  AuthenticatedAppGuestsRouteRoute._addFileChildren(
+    AuthenticatedAppGuestsRouteRouteChildren,
+  )
+
 interface AuthenticatedAppSetupRouteRouteChildren {
   AuthenticatedAppSetupChargesRoute: typeof AuthenticatedAppSetupChargesRoute
   AuthenticatedAppSetupExchangeRatesRoute: typeof AuthenticatedAppSetupExchangeRatesRoute
@@ -350,11 +446,14 @@ const AuthenticatedAppSetupRouteRouteWithChildren =
   )
 
 interface AuthenticatedAppRouteRouteChildren {
+  AuthenticatedAppGuestsRouteRoute: typeof AuthenticatedAppGuestsRouteRouteWithChildren
   AuthenticatedAppSetupRouteRoute: typeof AuthenticatedAppSetupRouteRouteWithChildren
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
+  AuthenticatedAppGuestsRouteRoute:
+    AuthenticatedAppGuestsRouteRouteWithChildren,
   AuthenticatedAppSetupRouteRoute: AuthenticatedAppSetupRouteRouteWithChildren,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
 }
