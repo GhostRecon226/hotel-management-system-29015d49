@@ -1,6 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Download } from "lucide-react";
+import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
+import { exportCsv, type ExportKind } from "@/lib/exports.functions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+interface CancelRow { bookings: number; cancelled: number; no_shows: number; cancellation_rate: number | null; no_show_rate: number | null }
+interface LosRow { stays: number; total_nights: number; average_nights: number | null }
+interface GuestBalanceRow { guest_id: string | null; guest_name: string | null; folios: number; currency: string; balance: number }
 import { useAccess } from "@/lib/access";
 import { NoAccess } from "@/lib/setup";
 import { formatDay } from "@/lib/reservations";
@@ -45,6 +54,24 @@ function Reports() {
   const revenue = useReport<RevenueRow>("report_revenue_by_charge_code", { p_from: range.from, p_to: range.to }, fin && !!range.from);
   const balances = useReport<BalanceRow>("report_outstanding_balances", {}, fin);
   const payments = useReport<PaymentRow>("report_payments", { p_from: range.from, p_to: range.to }, fin && !!range.from);
+  const cancel = useReport<CancelRow>("report_cancellation_rate", { p_from: range.from, p_to: range.to }, ops && !!range.from);
+  const los = useReport<LosRow>("report_length_of_stay", { p_from: range.from, p_to: range.to }, ops && !!range.from);
+  const byGuest = useReport<GuestBalanceRow>("report_balances_by_guest", {}, fin);
+  const canExport = can("rpt.export");
+  const runExport = useServerFn(exportCsv);
+  const [exporting, setExporting] = useState<ExportKind | null>(null);
+  async function doExport(kind: ExportKind) {
+    if (!property) return;
+    setExporting(kind);
+    try {
+      const r = await runExport({ data: { kind, propertyId: property.id, from: range.from, to: range.to } });
+      if (r.count === 0) { toast.info("Nothing to export in this range."); return; }
+      const url = URL.createObjectURL(new Blob([r.csv], { type: "text/csv;charset=utf-8" }));
+      const a = document.createElement("a"); a.href = url; a.download = r.filename; a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`Exported ${r.count} rows.`);
+    } catch (e) { toast.error(errorMessage(e)); } finally { setExporting(null); }
+  }
   if (!ops) return <NoAccess />;
   const cur = property?.base_currency ?? "NGN";
   const k = kpi.data ?? [];
@@ -66,6 +93,9 @@ function Reports() {
           {fin && <TabsTrigger value="revenue">Revenue by charge code</TabsTrigger>}
           {fin && <TabsTrigger value="balances">Outstanding balances</TabsTrigger>}
           {fin && <TabsTrigger value="payments">Payments</TabsTrigger>}
+          <TabsTrigger value="stays">Cancellations and stay length</TabsTrigger>
+          {fin && <TabsTrigger value="byguest">Balances by guest</TabsTrigger>}
+          {canExport && <TabsTrigger value="export">Export</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="kpi">
@@ -173,6 +203,63 @@ function Reports() {
                 ))}
               </TableBody>
             </Table>
+          </TabsContent>
+        )}
+        <TabsContent value="stays">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader><CardTitle>Cancellation rate</CardTitle></CardHeader>
+              <CardContent className="space-y-1 text-sm">
+                <p className="text-3xl font-semibold tabular">{formatPercent(cancel.data?.[0]?.cancellation_rate ?? null)}</p>
+                <p className="text-muted-foreground">{cancel.data?.[0]?.cancelled ?? 0} cancelled of {cancel.data?.[0]?.bookings ?? 0} bookings arriving in this range. No-shows: {cancel.data?.[0]?.no_shows ?? 0} ({formatPercent(cancel.data?.[0]?.no_show_rate ?? null)}).</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle>Average length of stay</CardTitle></CardHeader>
+              <CardContent className="space-y-1 text-sm">
+                <p className="text-3xl font-semibold tabular">{los.data?.[0]?.average_nights != null ? `${Number(los.data[0].average_nights).toFixed(2)} nights` : "—"}</p>
+                <p className="text-muted-foreground">{los.data?.[0]?.stays ?? 0} checked-in stays, {los.data?.[0]?.total_nights ?? 0} nights booked.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {fin && (
+          <TabsContent value="byguest">
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Guest</TableHead><TableHead className="text-right">Folios</TableHead><TableHead className="text-right">Balance</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {byGuest.isLoading && <TableSkeletonRows cols={3} />}
+                {!byGuest.isLoading && (byGuest.data ?? []).length === 0 && <TableStateRow colSpan={3} title="No outstanding balances" />}
+                {(byGuest.data ?? []).map((g) => (
+                  <TableRow key={`${g.guest_id}-${g.currency}`}>
+                    <TableCell>{g.guest_id ? <Link to="/guests/$id" params={{ id: g.guest_id }} className="text-primary-strong hover:underline">{g.guest_name ?? "Guest"}</Link> : "No guest"}</TableCell>
+                    <TableCell className="text-right tabular">{g.folios}</TableCell>
+                    <TableCell><Money amount={g.balance} currency={g.currency} className="font-semibold" /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TabsContent>
+        )}
+
+        {canExport && (
+          <TabsContent value="export">
+            <Card>
+              <CardHeader><CardTitle>Export to CSV</CardTitle></CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <p className="text-muted-foreground">Uses the date range above. Bookings and guests go by arrival date; transactions by business date. Every export is recorded in the audit log.</p>
+                <div className="flex flex-wrap gap-2">
+                  {(["reservations", "transactions", "guests"] as ExportKind[]).map((k) => (
+                    <Button key={k} variant="outline" disabled={!range.from || exporting !== null} onClick={() => doExport(k)}>
+                      <Download className="h-4 w-4" /> {k === "reservations" ? "Bookings" : k === "transactions" ? "Folio transactions" : "Guests"}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         )}
       </Tabs>
