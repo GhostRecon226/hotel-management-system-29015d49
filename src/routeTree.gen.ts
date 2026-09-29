@@ -16,6 +16,14 @@ import { Route as CheckEmailRouteImport } from './routes/check-email'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenticated/create-hotel'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
+import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
+import { Route as AuthenticatedAppSetupIndexRouteImport } from './routes/_authenticated/_app/setup/index'
+import { Route as AuthenticatedAppSetupChargesRouteImport } from './routes/_authenticated/_app/setup/charges'
+import { Route as AuthenticatedAppSetupExchangeRatesRouteImport } from './routes/_authenticated/_app/setup/exchange-rates'
+import { Route as AuthenticatedAppSetupPropertyRouteImport } from './routes/_authenticated/_app/setup/property'
+import { Route as AuthenticatedAppSetupRatesRouteImport } from './routes/_authenticated/_app/setup/rates'
+import { Route as AuthenticatedAppSetupRoomTypesRouteImport } from './routes/_authenticated/_app/setup/room-types'
+import { Route as AuthenticatedAppSetupRoomsRouteImport } from './routes/_authenticated/_app/setup/rooms'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,13 +60,69 @@ const AuthenticatedAppDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppSetupRouteRoute =
+  AuthenticatedAppSetupRouteRouteImport.update({
+    id: '/setup',
+    path: '/setup',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppSetupIndexRoute =
+  AuthenticatedAppSetupIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppSetupRouteRoute,
+  } as any)
+const AuthenticatedAppSetupChargesRoute =
+  AuthenticatedAppSetupChargesRouteImport.update({
+    id: '/charges',
+    path: '/charges',
+    getParentRoute: () => AuthenticatedAppSetupRouteRoute,
+  } as any)
+const AuthenticatedAppSetupExchangeRatesRoute =
+  AuthenticatedAppSetupExchangeRatesRouteImport.update({
+    id: '/exchange-rates',
+    path: '/exchange-rates',
+    getParentRoute: () => AuthenticatedAppSetupRouteRoute,
+  } as any)
+const AuthenticatedAppSetupPropertyRoute =
+  AuthenticatedAppSetupPropertyRouteImport.update({
+    id: '/property',
+    path: '/property',
+    getParentRoute: () => AuthenticatedAppSetupRouteRoute,
+  } as any)
+const AuthenticatedAppSetupRatesRoute =
+  AuthenticatedAppSetupRatesRouteImport.update({
+    id: '/rates',
+    path: '/rates',
+    getParentRoute: () => AuthenticatedAppSetupRouteRoute,
+  } as any)
+const AuthenticatedAppSetupRoomTypesRoute =
+  AuthenticatedAppSetupRoomTypesRouteImport.update({
+    id: '/room-types',
+    path: '/room-types',
+    getParentRoute: () => AuthenticatedAppSetupRouteRoute,
+  } as any)
+const AuthenticatedAppSetupRoomsRoute =
+  AuthenticatedAppSetupRoomsRouteImport.update({
+    id: '/rooms',
+    path: '/rooms',
+    getParentRoute: () => AuthenticatedAppSetupRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/check-email': typeof CheckEmailRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/setup/charges': typeof AuthenticatedAppSetupChargesRoute
+  '/setup/exchange-rates': typeof AuthenticatedAppSetupExchangeRatesRoute
+  '/setup/property': typeof AuthenticatedAppSetupPropertyRoute
+  '/setup/rates': typeof AuthenticatedAppSetupRatesRoute
+  '/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
+  '/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
+  '/setup/': typeof AuthenticatedAppSetupIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -66,6 +130,13 @@ export interface FileRoutesByTo {
   '/check-email': typeof CheckEmailRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/setup/charges': typeof AuthenticatedAppSetupChargesRoute
+  '/setup/exchange-rates': typeof AuthenticatedAppSetupExchangeRatesRoute
+  '/setup/property': typeof AuthenticatedAppSetupPropertyRoute
+  '/setup/rates': typeof AuthenticatedAppSetupRatesRoute
+  '/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
+  '/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
+  '/setup': typeof AuthenticatedAppSetupIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -75,13 +146,46 @@ export interface FileRoutesById {
   '/check-email': typeof CheckEmailRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/_authenticated/_app/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/_authenticated/_app/setup/charges': typeof AuthenticatedAppSetupChargesRoute
+  '/_authenticated/_app/setup/exchange-rates': typeof AuthenticatedAppSetupExchangeRatesRoute
+  '/_authenticated/_app/setup/property': typeof AuthenticatedAppSetupPropertyRoute
+  '/_authenticated/_app/setup/rates': typeof AuthenticatedAppSetupRatesRoute
+  '/_authenticated/_app/setup/room-types': typeof AuthenticatedAppSetupRoomTypesRoute
+  '/_authenticated/_app/setup/rooms': typeof AuthenticatedAppSetupRoomsRoute
+  '/_authenticated/_app/setup/': typeof AuthenticatedAppSetupIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/check-email' | '/create-hotel' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/check-email'
+    | '/create-hotel'
+    | '/setup'
+    | '/dashboard'
+    | '/setup/charges'
+    | '/setup/exchange-rates'
+    | '/setup/property'
+    | '/setup/rates'
+    | '/setup/room-types'
+    | '/setup/rooms'
+    | '/setup/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/check-email' | '/create-hotel' | '/dashboard'
+  to:
+    | '/'
+    | '/auth'
+    | '/check-email'
+    | '/create-hotel'
+    | '/dashboard'
+    | '/setup/charges'
+    | '/setup/exchange-rates'
+    | '/setup/property'
+    | '/setup/rates'
+    | '/setup/room-types'
+    | '/setup/rooms'
+    | '/setup'
   id:
     | '__root__'
     | '/'
@@ -90,7 +194,15 @@ export interface FileRouteTypes {
     | '/check-email'
     | '/_authenticated/_app'
     | '/_authenticated/create-hotel'
+    | '/_authenticated/_app/setup'
     | '/_authenticated/_app/dashboard'
+    | '/_authenticated/_app/setup/charges'
+    | '/_authenticated/_app/setup/exchange-rates'
+    | '/_authenticated/_app/setup/property'
+    | '/_authenticated/_app/setup/rates'
+    | '/_authenticated/_app/setup/room-types'
+    | '/_authenticated/_app/setup/rooms'
+    | '/_authenticated/_app/setup/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -151,14 +263,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppDashboardRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/setup': {
+      id: '/_authenticated/_app/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof AuthenticatedAppSetupRouteRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/setup/': {
+      id: '/_authenticated/_app/setup/'
+      path: '/'
+      fullPath: '/setup/'
+      preLoaderRoute: typeof AuthenticatedAppSetupIndexRouteImport
+      parentRoute: typeof AuthenticatedAppSetupRouteRoute
+    }
+    '/_authenticated/_app/setup/charges': {
+      id: '/_authenticated/_app/setup/charges'
+      path: '/charges'
+      fullPath: '/setup/charges'
+      preLoaderRoute: typeof AuthenticatedAppSetupChargesRouteImport
+      parentRoute: typeof AuthenticatedAppSetupRouteRoute
+    }
+    '/_authenticated/_app/setup/exchange-rates': {
+      id: '/_authenticated/_app/setup/exchange-rates'
+      path: '/exchange-rates'
+      fullPath: '/setup/exchange-rates'
+      preLoaderRoute: typeof AuthenticatedAppSetupExchangeRatesRouteImport
+      parentRoute: typeof AuthenticatedAppSetupRouteRoute
+    }
+    '/_authenticated/_app/setup/property': {
+      id: '/_authenticated/_app/setup/property'
+      path: '/property'
+      fullPath: '/setup/property'
+      preLoaderRoute: typeof AuthenticatedAppSetupPropertyRouteImport
+      parentRoute: typeof AuthenticatedAppSetupRouteRoute
+    }
+    '/_authenticated/_app/setup/rates': {
+      id: '/_authenticated/_app/setup/rates'
+      path: '/rates'
+      fullPath: '/setup/rates'
+      preLoaderRoute: typeof AuthenticatedAppSetupRatesRouteImport
+      parentRoute: typeof AuthenticatedAppSetupRouteRoute
+    }
+    '/_authenticated/_app/setup/room-types': {
+      id: '/_authenticated/_app/setup/room-types'
+      path: '/room-types'
+      fullPath: '/setup/room-types'
+      preLoaderRoute: typeof AuthenticatedAppSetupRoomTypesRouteImport
+      parentRoute: typeof AuthenticatedAppSetupRouteRoute
+    }
+    '/_authenticated/_app/setup/rooms': {
+      id: '/_authenticated/_app/setup/rooms'
+      path: '/rooms'
+      fullPath: '/setup/rooms'
+      preLoaderRoute: typeof AuthenticatedAppSetupRoomsRouteImport
+      parentRoute: typeof AuthenticatedAppSetupRouteRoute
+    }
   }
 }
 
+interface AuthenticatedAppSetupRouteRouteChildren {
+  AuthenticatedAppSetupChargesRoute: typeof AuthenticatedAppSetupChargesRoute
+  AuthenticatedAppSetupExchangeRatesRoute: typeof AuthenticatedAppSetupExchangeRatesRoute
+  AuthenticatedAppSetupPropertyRoute: typeof AuthenticatedAppSetupPropertyRoute
+  AuthenticatedAppSetupRatesRoute: typeof AuthenticatedAppSetupRatesRoute
+  AuthenticatedAppSetupRoomTypesRoute: typeof AuthenticatedAppSetupRoomTypesRoute
+  AuthenticatedAppSetupRoomsRoute: typeof AuthenticatedAppSetupRoomsRoute
+  AuthenticatedAppSetupIndexRoute: typeof AuthenticatedAppSetupIndexRoute
+}
+
+const AuthenticatedAppSetupRouteRouteChildren: AuthenticatedAppSetupRouteRouteChildren =
+  {
+    AuthenticatedAppSetupChargesRoute: AuthenticatedAppSetupChargesRoute,
+    AuthenticatedAppSetupExchangeRatesRoute:
+      AuthenticatedAppSetupExchangeRatesRoute,
+    AuthenticatedAppSetupPropertyRoute: AuthenticatedAppSetupPropertyRoute,
+    AuthenticatedAppSetupRatesRoute: AuthenticatedAppSetupRatesRoute,
+    AuthenticatedAppSetupRoomTypesRoute: AuthenticatedAppSetupRoomTypesRoute,
+    AuthenticatedAppSetupRoomsRoute: AuthenticatedAppSetupRoomsRoute,
+    AuthenticatedAppSetupIndexRoute: AuthenticatedAppSetupIndexRoute,
+  }
+
+const AuthenticatedAppSetupRouteRouteWithChildren =
+  AuthenticatedAppSetupRouteRoute._addFileChildren(
+    AuthenticatedAppSetupRouteRouteChildren,
+  )
+
 interface AuthenticatedAppRouteRouteChildren {
+  AuthenticatedAppSetupRouteRoute: typeof AuthenticatedAppSetupRouteRouteWithChildren
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
+  AuthenticatedAppSetupRouteRoute: AuthenticatedAppSetupRouteRouteWithChildren,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
 }
 

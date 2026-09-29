@@ -107,6 +107,198 @@ export type Database = {
           },
         ]
       }
+      charge_codes: {
+        Row: {
+          category: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_taxable: boolean
+          name: string
+          property_id: string
+          tenant_id: string
+        }
+        Insert: {
+          category: string
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_taxable?: boolean
+          name: string
+          property_id: string
+          tenant_id: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_taxable?: boolean
+          name?: string
+          property_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charge_codes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charge_codes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_sequences: {
+        Row: {
+          doc_type: string
+          id: string
+          next_number: number
+          padding: number
+          prefix: string
+          property_id: string
+          tenant_id: string
+        }
+        Insert: {
+          doc_type: string
+          id?: string
+          next_number?: number
+          padding?: number
+          prefix?: string
+          property_id: string
+          tenant_id: string
+        }
+        Update: {
+          doc_type?: string
+          id?: string
+          next_number?: number
+          padding?: number
+          prefix?: string
+          property_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_sequences_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_sequences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exchange_rates: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          property_id: string
+          rate: number
+          rate_date: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          id?: string
+          property_id: string
+          rate: number
+          rate_date: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          property_id?: string
+          rate?: number
+          rate_date?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_rates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exchange_rates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_methods: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          name: string
+          property_id: string
+          tenant_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: string
+          name: string
+          property_id: string
+          tenant_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name?: string
+          property_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_methods_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_methods_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       permissions: {
         Row: {
           description: string
@@ -243,6 +435,140 @@ export type Database = {
           },
         ]
       }
+      rate_plan_prices: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          property_id: string
+          rate_plan_id: string
+          room_type_id: string
+          tenant_id: string
+          valid_from: string
+          valid_to: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          property_id: string
+          rate_plan_id: string
+          room_type_id: string
+          tenant_id: string
+          valid_from: string
+          valid_to: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          property_id?: string
+          rate_plan_id?: string
+          room_type_id?: string
+          tenant_id?: string
+          valid_from?: string
+          valid_to?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_plan_prices_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_prices_rate_plan_id_fkey"
+            columns: ["rate_plan_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_prices_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_prices_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rate_plans: {
+        Row: {
+          cancellation_policy_type: string
+          cancellation_policy_value: number
+          code: string
+          created_at: string
+          deposit_policy_type: string
+          deposit_policy_value: number
+          id: string
+          is_active: boolean
+          is_corporate: boolean
+          name: string
+          no_show_policy_type: string
+          no_show_policy_value: number
+          property_id: string
+          tenant_id: string
+        }
+        Insert: {
+          cancellation_policy_type?: string
+          cancellation_policy_value?: number
+          code: string
+          created_at?: string
+          deposit_policy_type?: string
+          deposit_policy_value?: number
+          id?: string
+          is_active?: boolean
+          is_corporate?: boolean
+          name: string
+          no_show_policy_type?: string
+          no_show_policy_value?: number
+          property_id: string
+          tenant_id: string
+        }
+        Update: {
+          cancellation_policy_type?: string
+          cancellation_policy_value?: number
+          code?: string
+          created_at?: string
+          deposit_policy_type?: string
+          deposit_policy_value?: number
+          id?: string
+          is_active?: boolean
+          is_corporate?: boolean
+          name?: string
+          no_show_policy_type?: string
+          no_show_policy_value?: number
+          property_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_plans_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plans_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           grant_level: string
@@ -314,6 +640,178 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_types: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          max_adults: number
+          max_children: number
+          name: string
+          property_id: string
+          tenant_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_adults?: number
+          max_children?: number
+          name: string
+          property_id: string
+          tenant_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_adults?: number
+          max_children?: number
+          name?: string
+          property_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_types_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_types_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          condition: string
+          created_at: string
+          floor: string | null
+          id: string
+          is_active: boolean
+          is_occupied: boolean
+          property_id: string
+          room_number: string
+          room_type_id: string
+          tenant_id: string
+        }
+        Insert: {
+          condition?: string
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_active?: boolean
+          is_occupied?: boolean
+          property_id: string
+          room_number: string
+          room_type_id: string
+          tenant_id: string
+        }
+        Update: {
+          condition?: string
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_active?: boolean
+          is_occupied?: boolean
+          property_id?: string
+          room_number?: string
+          room_type_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rooms_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rooms_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_rates: {
+        Row: {
+          code: string
+          compounds_on_previous: boolean
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          percent: number
+          property_id: string
+          sort_order: number
+          tenant_id: string
+        }
+        Insert: {
+          code: string
+          compounds_on_previous?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          percent: number
+          property_id: string
+          sort_order?: number
+          tenant_id: string
+        }
+        Update: {
+          code?: string
+          compounds_on_previous?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          percent?: number
+          property_id?: string
+          sort_order?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_rates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_rates_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -451,6 +949,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bulk_add_rooms: {
+        Args: {
+          p_floor?: string
+          p_from: number
+          p_property_id: string
+          p_room_type_id: string
+          p_to: number
+        }
+        Returns: number
+      }
+      calculate_tax: {
+        Args: {
+          p_amount: number
+          p_property_id: string
+          p_tax_inclusive?: boolean
+        }
+        Returns: {
+          amount: number
+          line_no: number
+          percent: number
+          tax_code: string
+          tax_name: string
+          taxable_base: number
+        }[]
+      }
       create_hotel: {
         Args: {
           p_business_name: string
@@ -464,8 +987,121 @@ export type Database = {
           tenant_id: string
         }[]
       }
+      delete_rate_plan_price: { Args: { p_id: string }; Returns: undefined }
       my_context: { Args: never; Returns: Json }
+      save_charge_code: {
+        Args: {
+          p_category: string
+          p_code: string
+          p_id: string
+          p_is_active: boolean
+          p_is_taxable: boolean
+          p_name: string
+          p_property_id: string
+        }
+        Returns: string
+      }
+      save_payment_method: {
+        Args: {
+          p_code: string
+          p_id: string
+          p_is_active: boolean
+          p_kind: string
+          p_name: string
+          p_property_id: string
+        }
+        Returns: string
+      }
+      save_rate_plan: {
+        Args: {
+          p_cancellation_type: string
+          p_cancellation_value: number
+          p_code: string
+          p_deposit_type: string
+          p_deposit_value: number
+          p_id: string
+          p_is_active: boolean
+          p_is_corporate: boolean
+          p_name: string
+          p_no_show_type: string
+          p_no_show_value: number
+          p_property_id: string
+        }
+        Returns: string
+      }
+      save_rate_plan_price: {
+        Args: {
+          p_amount: number
+          p_currency: string
+          p_id: string
+          p_rate_plan_id: string
+          p_room_type_id: string
+          p_valid_from: string
+          p_valid_to: string
+        }
+        Returns: string
+      }
+      save_room: {
+        Args: {
+          p_floor: string
+          p_id: string
+          p_is_active: boolean
+          p_property_id: string
+          p_room_number: string
+          p_room_type_id: string
+        }
+        Returns: string
+      }
+      save_room_type: {
+        Args: {
+          p_code: string
+          p_description: string
+          p_id: string
+          p_is_active: boolean
+          p_max_adults: number
+          p_max_children: number
+          p_name: string
+          p_property_id: string
+        }
+        Returns: string
+      }
+      save_tax_rate: {
+        Args: {
+          p_code: string
+          p_compounds_on_previous: boolean
+          p_description: string
+          p_id: string
+          p_is_active: boolean
+          p_name: string
+          p_percent: number
+          p_property_id: string
+          p_sort_order: number
+        }
+        Returns: string
+      }
+      set_exchange_rate: {
+        Args: {
+          p_currency: string
+          p_property_id: string
+          p_rate: number
+          p_rate_date: string
+        }
+        Returns: string
+      }
       tenant_is_writable: { Args: never; Returns: boolean }
+      update_property: {
+        Args: {
+          p_address: string
+          p_check_in_time: string
+          p_check_out_time: string
+          p_city: string
+          p_country: string
+          p_name: string
+          p_property_id: string
+          p_timezone: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
