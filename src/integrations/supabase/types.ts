@@ -1595,6 +1595,75 @@ export type Database = {
           },
         ]
       }
+      notification_outbox: {
+        Row: {
+          attempts: number
+          body: string
+          channel: string
+          created_at: string
+          dedupe_key: string
+          id: string
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          property_id: string | null
+          recipient: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          tenant_id: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          channel: string
+          created_at?: string
+          dedupe_key: string
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          property_id?: string | null
+          recipient: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          tenant_id: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          channel?: string
+          created_at?: string
+          dedupe_key?: string
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          property_id?: string | null
+          recipient?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_outbox_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_outbox_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -4279,6 +4348,15 @@ export type Database = {
       }
       delete_rate_plan_price: { Args: { p_id: string }; Returns: undefined }
       delete_role: { Args: { p_role_id: string }; Returns: undefined }
+      export_data: {
+        Args: {
+          p_from: string
+          p_kind: string
+          p_property_id: string
+          p_to: string
+        }
+        Returns: Json
+      }
       extend_stay: {
         Args: { p_id: string; p_new_departure: string; p_reason?: string }
         Returns: undefined
@@ -4401,6 +4479,42 @@ export type Database = {
       }
       my_context: { Args: never; Returns: Json }
       open_main_folio: { Args: { p_reservation_id: string }; Returns: string }
+      outbox_claim: {
+        Args: { p_channels: string[]; p_limit: number; p_tenant?: string }
+        Returns: {
+          attempts: number
+          body: string
+          channel: string
+          created_at: string
+          dedupe_key: string
+          id: string
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          property_id: string | null
+          recipient: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          tenant_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notification_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      outbox_mark: {
+        Args: {
+          p_error?: string
+          p_final?: boolean
+          p_id: string
+          p_ok: boolean
+        }
+        Returns: undefined
+      }
+      outbox_status: { Args: never; Returns: Json }
       post_charge: {
         Args: {
           p_amount: number
@@ -4462,6 +4576,34 @@ export type Database = {
       reopen_ticket: {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
+      }
+      report_balances_by_guest: {
+        Args: { p_property_id: string }
+        Returns: {
+          balance: number
+          currency: string
+          folios: number
+          guest_id: string
+          guest_name: string
+        }[]
+      }
+      report_cancellation_rate: {
+        Args: { p_from: string; p_property_id: string; p_to: string }
+        Returns: {
+          bookings: number
+          cancellation_rate: number
+          cancelled: number
+          no_show_rate: number
+          no_shows: number
+        }[]
+      }
+      report_length_of_stay: {
+        Args: { p_from: string; p_property_id: string; p_to: string }
+        Returns: {
+          average_nights: number
+          stays: number
+          total_nights: number
+        }[]
       }
       report_outstanding_balances: {
         Args: { p_property_id: string }

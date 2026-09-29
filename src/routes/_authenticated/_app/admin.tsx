@@ -13,6 +13,7 @@ import { RolesPanel } from "@/components/admin/roles-panel";
 import { LimitsPanel } from "@/components/admin/limits-panel";
 import { AuditPanel } from "@/components/admin/audit-panel";
 import { SubscriptionPanel } from "@/components/admin/subscription-panel";
+import { OutboxPanel } from "@/components/admin/outbox-panel";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ function Admin() {
     can("adm.audit.view") && { value: "audit", label: "Audit log", node: <AuditPanel /> },
     canAny(["adm.subscription.manage", "adm.user.manage"]) && { value: "plan", label: "Subscription", node: <SubscriptionPanel /> },
     canAny(["fin.nightaudit.run", "adm.audit.view"]) && { value: "date", label: "Business date", node: <BusinessDate /> },
+    can("adm.user.manage") && { value: "outbox", label: "Messages", node: <OutboxPanel /> },
   ].filter(Boolean) as { value: string; label: string; node: React.ReactNode }[];
 
   if (tabs.length === 0) return <NoAccess />;
