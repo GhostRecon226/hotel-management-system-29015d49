@@ -1,64 +1,115 @@
 # Status report: Hotel Desk (Lovable build)
 
-Date: 30 Sep 2026. Code audited: `main` at commit `ef56121`. Written by Claude Code for Peter.
+First written 30 Sep 2026 after a read-only audit of `main` at commit `ef56121`. Updated the same day after steps 1 and 2 of the plan, on branch `claude/audit-status-report`. Written by Claude Code for Peter.
 
-This report covers the app Lovable built (`hotel-management-system-29015d49`). It measures that app against the 107 R1 requirements in the reference repo (`hms-reference-backend`, `docs/HMS_R1_Requirements.xlsx`). The "Built" marks in that workbook describe the older reference backend, not this app. Every status below comes from this audit.
+This report covers the app Lovable built (`hotel-management-system-29015d49`). It measures that app against the 107 R1 requirements in the reference repo (`hms-reference-backend`, `docs/HMS_R1_Requirements.xlsx`). The "Built" marks in that workbook describe the older reference backend, not this app. Every status below comes from this audit and from the tests.
 
 ## The short version
 
-- Lovable built far more than a skeleton: 17 database migrations, 123 business functions, 44 tables and about 45 screens. The code compiles and builds.
-- The core money and booking engine works in the scenarios I ran. That covers booking, sold-out protection (including four clerks racing for the last room), check-in, tax, charges, discounts with approval, the nightly roll, payment, check-out and invoice.
-- It is **not ready for a real hotel**. I found 8 problems that must be fixed first. The worst: a staff member with admin rights can make themselves System Administrator and give themselves refund approval, by writing straight to the database. Also, a hotel whose subscription lapses traps guests at the desk, because it can no longer take payment.
-- Almost nothing has been tested. The app has 1 automated test. The reference backend had 353. No one has clicked through the screens with real data.
-- Lovable can be removed. It is tied into the build tool, error reporting, a duplicate migration folder and the hosting target, and each tie is known and listed.
+- Lovable built far more than a skeleton: 17 database migrations, 123 business functions, 44 tables and about 45 screens.
+- **Steps 1 and 2 are done.** All 8 must-fix findings are fixed, and each has a test that failed before the fix and passes now.
+- There is now an automated test suite on local Supabase: **370 checks, 340 pass, 30 fail**. It ports the reference backend's scenarios to this app, so the 30 failures are real gaps, not guesses. They are listed in "Remaining failures" below. None of them is in the scope of steps 1 and 2.
+- Requirements: **66 of 107 are built and proven by tests** (up from 25). Of the 76 "Must" requirements, 53 are proven, 5 are untested, 16 are partly built, and 2 are missing.
+- It is still not ready for a real hotel. The screens have not been used against the fixed database yet (step 4 and 5), and some of the 30 failures matter for money and housekeeping.
 
-| | Count |
-|---|---|
-| Built and works (I ran it and it passed) | 25 |
-| Built, untested (code exists, not run) | 52 |
-| Partly built (a piece is missing or broken) | 17 |
-| Missing (3 of these are R1b or R2, not due yet) | 13 |
-| **Total** | **107** |
+## Update: steps 1 and 2
 
-Of the 76 "Must" requirements: 24 work, 33 are untested, 14 are partly built, 5 are missing.
+### What changed
 
-## How I tested
+| Finding | What was wrong | What it does now | Proof |
+|---|---|---|---|
+| M1, M8 | The browser could write to every table. Staff with "manage roles" could make themselves System Administrator or approve their own refunds by writing to role tables directly | Default-deny. The browser can only read (filtered by hotel and permission) and call functions. Every change goes through a function that checks permission and escalation | 49 security checks. One of them fails if any table becomes writable again. Checked on real local Supabase |
+| M2 | Changing a custom role's permissions always crashed | Works | Tests in `10_security.sql` |
+| M3 | A read-only hotel could not take payment or check out a guest who owed money | Payments, refunds, check-out and unsettled check-out work in a read-only hotel. New bookings and charges stay blocked | `15_accounts.sql`, read-only settlement |
+| M4 | Trials never ended. Past-due hotels were never suspended | A daily clock (00:15 UTC) expires trials, marks unpaid hotels past due, suspends them after 14 days, and ends cancelled subscriptions at the end of the paid period. Every change is in a new subscription history. Activation is manual for pilots (decision 5e), and a hotel can cancel its own subscription | `15_accounts.sql`, subscription clock |
+| M5 | The audit log kept guests' phone numbers, emails and passport numbers | The audit log records which fields changed, never their values. Old rows were cleaned | `15_accounts.sql`, guest privacy |
+| M6 | The staff invite sent an email before checking permission, and fell back to a temporary password | Permission is checked first. Accounts are looked up by email properly. No temporary passwords: if the email fails, nothing is created. Unaccepted invites have a "Resend invite" button (decision 5b) | Database check tested. Server code type-checks. Browser test in step 4 |
+| M7 | Cancellation and no-show fees were worked out but never charged. Every cancellation was charged, however early. Anyone who could cancel could waive the fee | Rate plans can set free-cancellation days. Fees post to the booking's folio once, whether the desk, a manager or the nightly roll sets the status. Waiving needs the rate override permission and a reason. Fees use their own charge codes and are not taxed until the accountant confirms | `13_reservations.sql`, fees |
+| S1, S2 | Base currency and staff status could be changed directly | Only through the functions. Staff edit their own name through `update_my_profile` | `10_security.sql` |
+| S3 | One person could check out a guest who owes | Kept, as you decided (5a): allowed only for holders of the approval permission, with a reason, and it is audited. Everyone else needs a second person to approve | `13_reservations.sql`, unsettled check-out |
+| S4 | 11 functions could be called by someone not signed in | None can | `10_security.sql` |
+| S6 | Amounts with too many decimals were silently rounded | Refused with E_PRECISION (naira 2 decimals, CFA franc 0) | `12_ledger.sql` |
+| ADM-003 | A disabled user was told the subscription had expired | They are told they have no access | `15_accounts.sql` |
 
-Everything was read only. I changed nothing in the app.
+New migrations, in order:
+- `20260930100000_default_deny_grants.sql`
+- `20260930100100_admin_invite_fixes.sql`
+- `20260930110000_read_only_settlement.sql`
+- `20260930110100_subscription_clock.sql`
+- `20260930110200_guest_audit_privacy.sql`
+- `20260930110300_reservation_fees.sql`
+- `20260930110400_money_precision.sql`
 
-1. Rebuilt the whole database from the migrations on a plain Postgres, then on a full local copy of Supabase in Docker (Postgres 17.6 with pg_cron). All 17 migrations apply cleanly on both. The existing tenant isolation test passes on both.
-2. Listed what the browser is allowed to do to every table and function, on the real Supabase setup.
-3. Ran attack tests: a user with limited admin rights tried to give themselves more power, the proper way and by writing to tables directly.
-4. Ran a guest journey test with 20 steps: setup, booking, sold out, check-in, charges, tax, duplicate protection, approvals, discount limits, nightly roll, check-out, invoice, ledger lock, read-only mode.
-5. Ran a race test: four bookings at the same instant for one room.
-6. Ran a code checker over all 123 database functions to find hidden crashes.
-7. Read the front-end code for secrets, money maths and duplicate protection. Ran the type check, linter and a production build.
+No existing migration was edited. All 24 migrations rebuild cleanly on local Supabase and on plain Postgres. A code checker finds no hidden faults in any function.
 
-All test data was rolled back or wiped. The test scripts live outside the repo. I will turn them into permanent tests in step 3 of the plan.
+### How the tests work
 
-What I did not do: click through the screens in a browser, test email sending, or check every one of the 353 reference scenarios. Statuses marked "untested" may hide bugs.
+- Run `scripts/test-db.sh`. It rebuilds the local Supabase database in Docker from the migrations, loads test users and a sample hotel, and runs every file in `supabase/tests/db/`. It refuses to run against anything but a local database.
+- Every check prints "ok" or "not ok" and the run carries on, so one run shows every failure. Each check is tagged with its requirement or finding, for example `[FIN-004]` or `[M7]`.
+- Order of work: the tests were written and committed first (commit `e578c1f`, 267 ok and 83 not ok), then the fixes (340 ok and 30 not ok).
+- Files: `10_security`, `11_isolation`, `12_ledger`, `13_reservations`, `14_lifecycle`, `15_accounts`, `16_structure`, `17_more_features`. Files 11 to 17 port the reference repo's tests to this app's functions.
+
+### Remaining failures (30)
+
+These are real gaps found by the ported tests. None was in scope for steps 1 and 2. Several are new. The audit did not see them.
+
+| # | Requirement | What the test found | Business risk | Size |
+|---|---|---|---|---|
+| 1 | FIN-004 | A discount lowers the bill by the discount only. Service charge and VAT stay the same | The hotel may over-collect tax. **Accountant to decide** | Small once decided |
+| 2 | FIN-009 | Front desk can move charges between folios | Charges can be shifted to a company folio without a manager | Small |
+| 3 | FIN-015 | Anyone who can see folios sees all of them | A reservation officer sees every guest's bill | Medium |
+| 4 | FIN-002 | Reservation officers can take any payment, not only deposits | Role differs from your design. **Your call** | Small |
+| 5 | FIN-012 | Interim invoices and receipts share the invoice number series | Gaps and mixed numbering in the invoice series | Small |
+| 6 to 8 | FIN-006, FIN-014 | The database owner can wipe the ledger in one command, and a direct insert by the owner can be backdated or negative. The app's own functions cannot do any of this | Low: needs database owner access. Worth closing | Small |
+| 9 | FO-006, HK-001 | A room move marks the old room dirty but creates no cleaning task | Housekeeping never learns that the old room needs cleaning | Small |
+| 10 | FO-003 | No "registration card accepted" step at check-in | Missing check from the requirement | Small |
+| 11 | FO-007 | No complimentary upgrade that keeps the booked rate | Staff must override the rate by hand | Small |
+| 12, 13 | FO-008 | An in-house stay can be extended but not shortened. Only an early check-out removes nights | Staff cannot record "leaving a day early" in advance | Small |
+| 14 | FO-012 | After voiding a check-in, the room is marked dirty, so the guest cannot be checked in again until it is cleaned | Delay at the desk after a mistake | Small |
+| 15 | RES-013 | No arrival-ready flag | Missing feature | Small |
+| 16 | HK-002 | A supervisor can start a task nobody is assigned to | Weakens the housekeeping flow | Small |
+| 17 | HK-002 | A room attendant sees every task, not only their own | Attendants see the whole board | Small |
+| 18 | HK-003 | The attendant is not notified when their room fails inspection | Rework waits until someone tells them | Small |
+| 19 | ROOM-004 | Marking a room dirty by override needs no reason | Weaker audit trail | Small |
+| 20 | MNT-002 | Closing a ticket does not release its room block | The room stays out of sale after the repair | Small |
+| 21 | DAY-003 | A guest still in house after their departure date is not extended or flagged at the roll | The night is not charged and nobody is told | Medium |
+| 22 | DAY-001 | Catching up several days stopped one day short when an overstaying guest was in house | Probably the same cause as 21. Needs a closer look | Small to medium |
+| 23 | PLT-007 | There is no way to add a second property | Multi-property plans cannot be used | Medium |
+| 24 | PLT-004 | A Ghana hotel gets naira as its currency | Wrong currency outside Nigeria | Small |
+| 25 | SET-008 | Inspection cannot be switched off per property | Small hotels without inspectors are stuck | Small |
+| 26 | GST-005 | A guest with an upcoming booking can be anonymised | The upcoming booking loses its guest details | Small |
+| 27 | GST-002 | Reservation officers can see ID documents | Role differs from your design. **Your call** | Small |
+| 28 to 30 | ADM-006 | The database owner can change, delete or wipe audit rows. The browser cannot | Low: needs database owner access. Worth closing | Small |
+
+Other things the tests showed:
+- **Built-in roles cannot carry approval limits.** A hotel must copy a role before it can set a limit. Until then, a built-in "limited" permission means zero, so every front desk discount waits for approval. That is safe, but it will surprise hotels. It belongs in the onboarding guide, or the design should change.
+- **Folios are opened when first needed** (at check-in, or when a deposit is taken), not at booking. RES-002 says "a folio is opened". It works either way.
+- **Checking in or out twice returns the same stay.** That is deliberate retry protection, and good.
+- **Error message wording.** "This booking is for 1 people" needs a small copy fix.
 
 ## 1. What exists, requirement by requirement
+
+Statuses after steps 1 and 2. A requirement counts as "Built and works" only when a test proves it. At the audit, the totals were 25 working, 52 untested, 17 partly built and 13 missing.
 
 ### Totals per module
 
 | Module | Built and works | Built, untested | Partly built | Missing | Total |
 |---|---|---|---|---|---|
-| Platform & Tenancy | 3 | 2 | 1 | 6 | 12 |
-| Administration | 1 | 4 | 4 | 0 | 9 |
-| Setup | 3 | 2 | 2 | 1 | 8 |
-| Reservations | 3 | 7 | 3 | 0 | 13 |
-| Front Office | 2 | 9 | 2 | 0 | 13 |
-| Guests | 0 | 4 | 1 | 1 | 6 |
-| Rooms | 1 | 3 | 0 | 0 | 4 |
-| Housekeeping | 2 | 4 | 0 | 0 | 6 |
-| Maintenance | 0 | 3 | 0 | 0 | 3 |
-| Guest Service | 0 | 2 | 0 | 0 | 2 |
-| Finance | 8 | 6 | 0 | 2 | 16 |
-| Business Date | 2 | 1 | 0 | 3 | 6 |
-| Reporting | 0 | 4 | 0 | 0 | 4 |
-| Non-functional | 0 | 1 | 4 | 0 | 5 |
-| **All** | **25** | **52** | **17** | **13** | **107** |
+| Platform & Tenancy | 7 | 0 | 2 | 3 | 12 |
+| Administration | 6 | 2 | 1 | 0 | 9 |
+| Setup | 6 | 1 | 0 | 1 | 8 |
+| Reservations | 11 | 1 | 1 | 0 | 13 |
+| Front Office | 8 | 0 | 5 | 0 | 13 |
+| Guests | 3 | 1 | 2 | 0 | 6 |
+| Rooms | 3 | 0 | 1 | 0 | 4 |
+| Housekeeping | 3 | 0 | 3 | 0 | 6 |
+| Maintenance | 2 | 0 | 1 | 0 | 3 |
+| Guest Service | 2 | 0 | 0 | 0 | 2 |
+| Finance | 8 | 0 | 6 | 2 | 16 |
+| Business Date | 2 | 0 | 1 | 3 | 6 |
+| Reporting | 1 | 3 | 0 | 0 | 4 |
+| Non-functional | 4 | 0 | 1 | 0 | 5 |
+| **All** | **66** | **8** | **24** | **9** | **107** |
 
 ### Every requirement
 
@@ -66,225 +117,228 @@ What I did not do: click through the screens in a browser, test email sending, o
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| PLT-001 | A person with a confirmed email creates a hotel account in one step. | Must | Built and works | Test S01: hotel, trial, property and admin roles created. |
-| PLT-002 | Signup is refused for an unconfirmed email and for a user who already belongs to a hotel. | Must | Built, untested | Code refuses unconfirmed email; second hotel refused in isolation test. Unconfirmed path not run. |
-| PLT-003 | One hotel can never see or change another hotel's data. | Must | Built and works | Isolation test passes on local Supabase. Cross-hotel writes not tested. |
-| PLT-004 | A new property is seeded from its country template (currency, timezone, tax lines, payment methods, charge codes). | Must | Built and works | Nigeria taxes seeded; 10,000 charge gave 11,825 (S07). Other countries not checked. |
-| PLT-005 | A trial ends automatically and the hotel becomes read-only. | Must | Missing | No subscription clock. Trials never expire. |
-| PLT-006 | A read-only hotel can still settle and check out guests already in house. | Must | Partly built | Broken: in a read-only hotel, payments and unsettled check-out are refused (test R1, R2). |
-| PLT-007 | Plan limits on rooms, properties and users stop new creation and never delete anything. | Should | Built, untested | Plan limit triggers exist on rooms, properties, users. |
-| PLT-008 | Platform staff activate, suspend, change plan or close a hotel by hand, with a reason, and every change is logged. | Must | Missing | No platform console. Status changes are manual SQL. |
-| PLT-009 | Platform staff see tenants and subscriptions but no guest, reservation or financial data. | Must | Missing | No platform staff role at all. |
-| PLT-010 | Time-boxed break-glass support access, with reason, tenant notice and audit entry. | Should | Missing | No break-glass access. |
-| PLT-011 | A hotel can cancel its own subscription and stays read-only afterwards. | Should | Missing | No cancel subscription function. |
-| PLT-012 | Subscription billing through a payment provider (Paystack or Flutterwave). | Should | Missing | R1b. Not due yet. |
+| PLT-001 | A person with a confirmed email creates a hotel account in one step. | Must | Built and works | 2 test checks pass. |
+| PLT-002 | Signup is refused for an unconfirmed email and for a user who already belongs to a hotel. | Must | Built and works | 2 test checks pass. |
+| PLT-003 | One hotel can never see or change another hotel's data. | Must | Built and works | 14 test checks pass. |
+| PLT-004 | A new property is seeded from its country template (currency, timezone, tax lines, payment methods, charge codes). | Must | Partly built | 7 pass, 1 fail: Ghana property uses cedi (got NGN, expected GHS) |
+| PLT-005 | A trial ends automatically and the hotel becomes read-only. | Must | Built and works | 8 test checks pass. |
+| PLT-006 | A read-only hotel can still settle and check out guests already in house. | Must | Built and works | 3 test checks pass. |
+| PLT-007 | Plan limits on rooms, properties and users stop new creation and never delete anything. | Should | Partly built | 3 pass, 1 fail: a hotel can add another property (so the property limit can apply) |
+| PLT-008 | Platform staff activate, suspend, change plan or close a hotel by hand, with a reason, and every change is logged. | Must | Built and works | Manual activation, suspension and plan change through app.platform_set_subscription (decision 5e). No console screen. Tests pass. |
+| PLT-009 | Platform staff see tenants and subscriptions but no guest, reservation or financial data. | Must | Missing | No platform staff role at all. (no automated test yet) |
+| PLT-010 | Time-boxed break-glass support access, with reason, tenant notice and audit entry. | Should | Missing | No break-glass access. (no automated test yet) |
+| PLT-011 | A hotel can cancel its own subscription and stays read-only afterwards. | Should | Built and works | 5 test checks pass. |
+| PLT-012 | Subscription billing through a payment provider (Paystack or Flutterwave). | Should | Missing | R1b. Not due yet. (no automated test yet) |
 
 ### Administration
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| ADM-001 | A hotel administrator adds staff to the hotel. | Must | Partly built | Invite works in code, but it creates the account and sends the email before checking permission. |
-| ADM-002 | Only administrators assign roles, per property or hotel-wide; the last administrator cannot be removed. | Must | Partly built | Function blocks escalation (test B) and last admin rule holds. Direct table write lets a user make themselves System Administrator (test D). |
-| ADM-003 | A disabled user loses all access immediately. | Must | Built, untested | Status check exists in permission helper. |
-| ADM-004 | Custom roles cannot hold more than their creator holds. | Must | Partly built | Function blocks it (test A) but direct write bypasses it (test C). set_role_permissions always crashes. |
-| ADM-005 | Limit-based permissions (grant level L) use a per-role amount; no limit means zero. | Must | Built and works | Front desk discount with no limit row waited for approval (S10). |
-| ADM-006 | The audit trail cannot be changed or deleted by anyone, and is visible to permitted roles only. | Must | Partly built | Browser cannot change audit rows (test J). No database-level lock, and anonymise rewrites audit rows. |
-| ADM-007 | Sensitive actions require a reason and write an audit event with actor, time, before and after. | Must | Built, untested | Reasons required in many functions; audit trigger on 8 tables. Not checked action by action. |
-| ADM-008 | Staff get in-app notifications for approvals, tasks and exceptions, and can mark them read. | Should | Built, untested | Notifications table and bell exist. |
-| ADM-009 | Authorised users export data. | Should | Built, untested | export_data with permission check and audit row. |
+| ADM-001 | A hotel administrator adds staff to the hotel. | Must | Built, untested | Invite now checks permission first, looks up accounts by email, never uses temporary passwords, and has a resend button (server code, finding M6). Browser test in step 4. |
+| ADM-002 | Only administrators assign roles, per property or hotel-wide; the last administrator cannot be removed. | Must | Built and works | 4 test checks pass. |
+| ADM-003 | A disabled user loses all access immediately. | Must | Built and works | 2 test checks pass. |
+| ADM-004 | Custom roles cannot hold more than their creator holds. | Must | Built and works | 2 test checks pass. |
+| ADM-005 | Limit-based permissions (grant level L) use a per-role amount; no limit means zero. | Must | Built and works | 1 test checks pass. |
+| ADM-006 | The audit trail cannot be changed or deleted by anyone, and is visible to permitted roles only. | Must | Partly built | 1 pass, 3 fail: the audit trail cannot be changed, even by the owner (expected [E_IMMUTABLE], but it succeeded); the audit trail cannot be deleted (expected [E_IMMUTABLE], but it succeeded); the audit trail cannot be truncated (expected [E_IMMUTABLE], but it succeeded) |
+| ADM-007 | Sensitive actions require a reason and write an audit event with actor, time, before and after. | Must | Built and works | 2 test checks pass. |
+| ADM-008 | Staff get in-app notifications for approvals, tasks and exceptions, and can mark them read. | Should | Built and works | 4 test checks pass. |
+| ADM-009 | Authorised users export data. | Should | Built, untested | export_data with permission check and audit row. (no automated test yet) |
 
 ### Setup
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| SET-001 | Property profile can be edited, but the business date and base currency cannot. | Must | Partly built | Business date locked (test G). Base currency can be changed directly (test F). |
-| SET-002 | Room types with occupancy limits and an overbooking allowance. | Must | Built and works | Room type created and bookable (S02, S03). |
-| SET-003 | Room inventory per property; rooms can be retired but never deleted while in use. | Must | Built and works | Bulk add worked (S02). Condition cannot be written directly (test I). |
-| SET-004 | Rate plans with prices by room type, date range and weekday, and policies for cancellation, no-show and deposit. | Must | Partly built | Policies stored and fees calculated, but cancellation and no-show fees are never posted to the folio. |
-| SET-005 | Tax lines with rate, base (net or net plus prior taxes), applicable revenue groups and a verified flag. | Must | Built and works | Exclusive and inclusive charge both give 11,825 with net 10,000 (S07, P1). |
-| SET-006 | Charge codes and payment methods per property. | Must | Built, untested | Charge codes and payment methods seeded per property. |
-| SET-007 | Exchange rates per property per day, entered by hand. | Should | Built, untested | set_exchange_rate exists. |
-| SET-008 | Inspection can be switched off per property. | Should | Missing | No inspection on/off setting. |
+| SET-001 | Property profile can be edited, but the business date and base currency cannot. | Must | Built and works | 4 test checks pass. |
+| SET-002 | Room types with occupancy limits and an overbooking allowance. | Must | Built and works | Room type created and bookable (S02, S03). (no automated test yet) |
+| SET-003 | Room inventory per property; rooms can be retired but never deleted while in use. | Must | Built and works | Bulk add worked (S02). Condition cannot be written directly (test I). (no automated test yet) |
+| SET-004 | Rate plans with prices by room type, date range and weekday, and policies for cancellation, no-show and deposit. | Must | Built and works | 2 test checks pass. |
+| SET-005 | Tax lines with rate, base (net or net plus prior taxes), applicable revenue groups and a verified flag. | Must | Built and works | 1 test checks pass. |
+| SET-006 | Charge codes and payment methods per property. | Must | Built, untested | Charge codes and payment methods seeded per property. (no automated test yet) |
+| SET-007 | Exchange rates per property per day, entered by hand. | Should | Built and works | 1 test checks pass. |
+| SET-008 | Inspection can be switched off per property. | Should | Missing | Test fails: inspection can be switched off per property |
 
 ### Reservations
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| RES-001 | Availability is calculated per room type and night from sellable rooms less held bookings. | Must | Built and works | Availability 2 for 2 rooms (S03). |
-| RES-002 | Create a reservation for one room type and rate plan, priced night by night. | Must | Built and works | Booking created; same key returned same booking (S04). |
-| RES-003 | A sold-out room type cannot be booked, and occupancy and stay-length limits are enforced. | Must | Built and works | Third booking for 2 rooms refused (S05). 4 clerks racing for 1 room: 1 booking. |
-| RES-004 | Modify dates, room type, rate plan or guest count before check-in; the stay is repriced and inventory follows. | Must | Built, untested | modify_reservation exists. |
-| RES-005 | A tentative booking holds inventory until its hold expires, then is released at the next roll; confirming ends the hold. | Must | Built, untested | Roll expires holds. |
-| RES-006 | Cancel with a reason; the fee follows the rate plan; only a permitted user can waive it. | Must | Partly built | Cancel works in code; fee calculated but not posted. |
-| RES-007 | No-show can be marked by hand or by the automatic roll, with the fee from the rate plan. | Must | Partly built | Roll marked no-show (S12). Fee of 50,000 calculated but not posted (S19). |
-| RES-008 | Reinstate a cancelled or no-show booking when inventory allows. | Should | Built, untested | reinstate_reservation exists. |
-| RES-009 | Rate override needs its own permission and a reason, and is audited. | Must | Built, untested | Override needs permission and reason in code. |
-| RES-010 | A deposit rule on the rate plan sets the deposit required. | Must | Built, untested | Deposit rule and deposit_paid exist. |
-| RES-011 | Corporate business is a booking source plus a free-text company name plus a corporate rate plan; no company entity in R1. | Must | Built, untested | Company name and source on booking. |
-| RES-012 | A group booking is several one-room reservations sharing a group record. | Should | Built, untested | Group bookings table and form. |
-| RES-013 | Additional guests and an arrival-ready flag on a booking. | Should | Partly built | Additional guests yes. No arrival-ready flag. |
+| RES-001 | Availability is calculated per room type and night from sellable rooms less held bookings. | Must | Built and works | 2 test checks pass. |
+| RES-002 | Create a reservation for one room type and rate plan, priced night by night. | Must | Built and works | 3 test checks pass. |
+| RES-003 | A sold-out room type cannot be booked, and occupancy and stay-length limits are enforced. | Must | Built and works | 4 test checks pass. |
+| RES-004 | Modify dates, room type, rate plan or guest count before check-in; the stay is repriced and inventory follows. | Must | Built and works | 3 test checks pass. |
+| RES-005 | A tentative booking holds inventory until its hold expires, then is released at the next roll; confirming ends the hold. | Must | Built and works | 5 test checks pass. |
+| RES-006 | Cancel with a reason; the fee follows the rate plan; only a permitted user can waive it. | Must | Built and works | 8 test checks pass. |
+| RES-007 | No-show can be marked by hand or by the automatic roll, with the fee from the rate plan. | Must | Built and works | 6 test checks pass. |
+| RES-008 | Reinstate a cancelled or no-show booking when inventory allows. | Should | Built and works | 2 test checks pass. |
+| RES-009 | Rate override needs its own permission and a reason, and is audited. | Must | Built and works | 3 test checks pass. |
+| RES-010 | A deposit rule on the rate plan sets the deposit required. | Must | Built and works | 2 test checks pass. |
+| RES-011 | Corporate business is a booking source plus a free-text company name plus a corporate rate plan; no company entity in R1. | Must | Built and works | 2 test checks pass. |
+| RES-012 | A group booking is several one-room reservations sharing a group record. | Should | Built, untested | Group bookings table and form. (no automated test yet) |
+| RES-013 | Additional guests and an arrival-ready flag on a booking. | Should | Partly built | 1 pass, 1 fail: the arrival-ready flag exists and is a flag, not a status |
 
 ### Front Office
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| FO-001 | Arrivals due today or overdue, with guest, room type, guarantee and assigned room. | Must | Built, untested | v_arrivals view and screen. |
-| FO-002 | In-house guests with room, departure and balance; overdue departures flagged. | Must | Built, untested | v_in_house view and screen. |
-| FO-003 | Check-in guards: confirmed booking, arrival date reached, ID recorded, registration accepted, room ready and free, deposit paid. | Must | Built and works | Check-in with ID succeeded, room occupied (S06). Refusal guards not all run. |
-| FO-004 | Walk-in check-in creates the booking and checks in in one step. | Must | Built, untested | walk_in_check_in exists. |
-| FO-005 | Assign a room before arrival; two overlapping stays can never hold the same room. | Must | Built, untested | Exclusion constraint on room assignments. |
-| FO-006 | Move a guest to another room; the old room turns dirty with a turnover task; the stay and folio carry over. | Must | Built, untested | move_room exists. |
-| FO-007 | A move to a different room type reprices from tonight; a complimentary upgrade keeps the rate and needs its own permission. | Should | Partly built | Move reprices by type. No complimentary upgrade permission. |
-| FO-008 | Extend or shorten a stay in house; extension checks inventory, the room and blocks. | Must | Built, untested | extend_stay exists. |
-| FO-009 | Check-out needs a zero balance and no credit, or an approved exception; open folios stay open for collection. | Must | Partly built | Refused while owing (S14), but one person with the permission can check out a debtor by typing a reason. No second person. |
-| FO-010 | Check-out sets the room Dirty and Vacant and creates a turnover task; leaving early releases the unused nights. | Must | Built and works | Room dirty, turnover task, folio closed (S15). Room also kept its stayover task: 2 open tasks. |
-| FO-011 | Undo a check-out on the same business date. | Should | Built, untested | undo_checkout exists. |
-| FO-012 | Void a check-in on the same business date when no charges are posted. | Should | Built, untested | void_check_in exists. |
-| FO-013 | Room board shows each room as occupied, vacant by condition, out of order or out of service. | Must | Built, untested | v_room_board and screen. |
+| FO-001 | Arrivals due today or overdue, with guest, room type, guarantee and assigned room. | Must | Built and works | 2 test checks pass. |
+| FO-002 | In-house guests with room, departure and balance; overdue departures flagged. | Must | Built and works | 1 test checks pass. |
+| FO-003 | Check-in guards: confirmed booking, arrival date reached, ID recorded, registration accepted, room ready and free, deposit paid. | Must | Partly built | 11 pass, 1 fail: check-in needs the registration card accepted (expected [E_REQUIRED/E_INVALID], but it succeeded) |
+| FO-004 | Walk-in check-in creates the booking and checks in in one step. | Must | Built and works | 2 test checks pass. |
+| FO-005 | Assign a room before arrival; two overlapping stays can never hold the same room. | Must | Built and works | 2 test checks pass. |
+| FO-006 | Move a guest to another room; the old room turns dirty with a turnover task; the stay and folio carry over. | Must | Partly built | 6 pass, 1 fail: a cleaning task was created for the old room |
+| FO-007 | A move to a different room type reprices from tonight; a complimentary upgrade keeps the rate and needs its own permission. | Should | Partly built | 0 pass, 1 fail: a complimentary upgrade that keeps the booked rate is supported |
+| FO-008 | Extend or shorten a stay in house; extension checks inventory, the room and blocks. | Must | Partly built | 4 pass, 2 fail: an in-house stay can be shortened (failed: [E_INVALID] The new departure must be after 03 Oct 2026.); shortening removes unused nights (got 3, expected 2) |
+| FO-009 | Check-out needs a zero balance and no credit, or an approved exception; open folios stay open for collection. | Must | Built and works | 10 test checks pass. |
+| FO-010 | Check-out sets the room Dirty and Vacant and creates a turnover task; leaving early releases the unused nights. | Must | Built and works | 5 test checks pass. |
+| FO-011 | Undo a check-out on the same business date. | Should | Built and works | 5 test checks pass. |
+| FO-012 | Void a check-in on the same business date when no charges are posted. | Should | Partly built | 5 pass, 1 fail: the guest can be checked in again straight away (failed: [E_ROOM_NOT_READY] Room 103 is not ready. Only clean  |
+| FO-013 | Room board shows each room as occupied, vacant by condition, out of order or out of service. | Must | Built and works | 1 test checks pass. |
 
 ### Guests
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| GST-001 | One guest profile per person across stays; search by name, phone, email or ID number. | Must | Built, untested | search_guests exists. |
-| GST-002 | ID documents are stored apart and shown only to roles that may see them. | Must | Partly built | Numbers masked on guest screen, but full ID numbers are copied into the audit log. |
-| GST-003 | Personal data never appears in audit records; only the names of changed fields do. | Must | Missing | Audit log stores full personal data (phone, email, ID numbers). |
-| GST-004 | Merge duplicate guest profiles; history moves to the kept profile. | Should | Built, untested | merge_guests exists. |
-| GST-005 | Anonymise a guest on request; the ledger and stay history stay intact. | Should | Built, untested | anonymise_guest exists. |
-| GST-006 | Feedback and complaints logged against a guest. | Should | Built, untested | add_guest_feedback exists. |
+| GST-001 | One guest profile per person across stays; search by name, phone, email or ID number. | Must | Built and works | 2 test checks pass. |
+| GST-002 | ID documents are stored apart and shown only to roles that may see them. | Must | Partly built | 3 pass, 1 fail: reservation officers do not see ID documents |
+| GST-003 | Personal data never appears in audit records; only the names of changed fields do. | Must | Built and works | 2 test checks pass. |
+| GST-004 | Merge duplicate guest profiles; history moves to the kept profile. | Should | Built and works | 3 test checks pass. |
+| GST-005 | Anonymise a guest on request; the ledger and stay history stay intact. | Should | Partly built | 4 pass, 1 fail: a guest with upcoming stays cannot be anonymised (expected [E_INVALID/E_IN_USE], but it succeeded) |
+| GST-006 | Feedback and complaints logged against a guest. | Should | Built, untested | add_guest_feedback exists. (no automated test yet) |
 
 ### Rooms
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| ROOM-001 | Room condition and occupancy are separate, are set only by the system or a controlled action, and cannot be written by hand. | Must | Built and works | Direct update of condition changed 0 rows (test I). |
-| ROOM-002 | Out-of-order and out-of-service blocks; a request from maintenance needs approval, an approver's own request does not. | Must | Built, untested | Block request and approval functions. |
-| ROOM-003 | A block cannot cover a night a guest is assigned, and cannot oversell the room type. | Must | Built, untested | check_block raises E_OVERSOLD. |
-| ROOM-004 | A supervisor can override a room's condition with a reason; it is audited. | Should | Built, untested | set_room_condition with reason. |
+| ROOM-001 | Room condition and occupancy are separate, are set only by the system or a controlled action, and cannot be written by hand. | Must | Built and works | 2 test checks pass. |
+| ROOM-002 | Out-of-order and out-of-service blocks; a request from maintenance needs approval, an approver's own request does not. | Must | Built and works | 5 test checks pass. |
+| ROOM-003 | A block cannot cover a night a guest is assigned, and cannot oversell the room type. | Must | Built and works | 2 test checks pass. |
+| ROOM-004 | A supervisor can override a room's condition with a reason; it is audited. | Should | Partly built | 2 pass, 1 fail: override needs a reason (expected [E_REQUIRED], but it succeeded) |
 
 ### Housekeeping
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| HK-001 | Check-out and room moves create a turnover task; the board lists open tasks. | Must | Built and works | Turnover task created at check-out (S15). |
-| HK-002 | Assign, start and complete cleaning tasks; an attendant sees only their own tasks. | Must | Built, untested | Task functions exist. |
-| HK-003 | Inspection passes to Ready or fails with a reason and goes to rework. | Must | Built, untested | inspect_hk_task exists. |
-| HK-004 | Nobody inspects their own cleaning. | Must | Built, untested | Database rule inspector differs from cleaner. |
-| HK-005 | Stayover cleaning tasks are planned at the roll for guests staying on. | Should | Built and works | Roll created a stayover task (S15 detail). |
-| HK-006 | Lost and found items are logged and tracked to return or disposal. | Should | Built, untested | Lost and found functions exist. |
+| HK-001 | Check-out and room moves create a turnover task; the board lists open tasks. | Must | Partly built | 2 pass, 1 fail: a cleaning task was created for the old room |
+| HK-002 | Assign, start and complete cleaning tasks; an attendant sees only their own tasks. | Must | Partly built | 4 pass, 2 fail: a task assigned to nobody cannot be started (expected [E_INVALID/E_FORBIDDEN], but it succeeded); an attendant sees only their own tasks |
+| HK-003 | Inspection passes to Ready or fails with a reason and goes to rework. | Must | Partly built | 4 pass, 1 fail: the attendant is notified of the failed inspection |
+| HK-004 | Nobody inspects their own cleaning. | Must | Built and works | 2 test checks pass. |
+| HK-005 | Stayover cleaning tasks are planned at the roll for guests staying on. | Should | Built and works | 1 test checks pass. |
+| HK-006 | Lost and found items are logged and tracked to return or disposal. | Should | Built and works | 1 test checks pass. |
 
 ### Maintenance
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| MNT-001 | Tickets move from open to assigned, in progress, waiting, resolved and closed; waiting needs a reason. | Must | Built, untested | Ticket functions exist. |
-| MNT-002 | The person who resolved a ticket cannot close it; closing releases its room block. | Must | Built, untested | Database rule closer differs from resolver. |
-| MNT-003 | Tickets can be reopened or cancelled, each with a reason. | Should | Built, untested | reopen and cancel exist. |
+| MNT-001 | Tickets move from open to assigned, in progress, waiting, resolved and closed; waiting needs a reason. | Must | Built and works | 2 test checks pass. |
+| MNT-002 | The person who resolved a ticket cannot close it; closing releases its room block. | Must | Partly built | 1 pass, 1 fail: closing the ticket releases the block (got approved, expected released) |
+| MNT-003 | Tickets can be reopened or cancelled, each with a reason. | Should | Built and works | 4 test checks pass. |
 
 ### Guest Service
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| SVC-001 | Guest requests are captured, assigned, progressed and completed. | Should | Built, untested | Service request functions exist. |
-| SVC-002 | A chargeable request posts its charge, with tax, to the folio when completed. | Should | Built, untested | Charge posts once with key svc:<id> in code. |
+| SVC-001 | Guest requests are captured, assigned, progressed and completed. | Should | Built and works | 3 test checks pass. |
+| SVC-002 | A chargeable request posts its charge, with tax, to the folio when completed. | Should | Built and works | 3 test checks pass. |
 
 ### Finance
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| FIN-001 | Charges post with their tax lines; prices can include or exclude tax; the remainder of a rounding goes on the last tax line. | Must | Built and works | Tax lines correct both ways (S07, P1). |
-| FIN-002 | Payments and deposits are recorded against a folio with a method; payments are taken outside the system in R1. | Must | Built and works | Cash payment cleared the balance (S15). |
-| FIN-003 | Foreign-currency postings store the amount, currency, exchange rate and base amount. | Should | Built, untested | FX columns and rate lookup exist. |
-| FIN-004 | A discount within the user's limit posts at once; above the limit it waits for an approver who is not the requester. | Must | Built and works | Pending discount did not change balance; manager approval posted it (S10, S11). |
-| FIN-005 | Adjustments, reversals and refunds always need a second person and stay within the approver's limit. | Must | Built and works | Requester could not approve own adjustment (S08). Approver limit not tested. |
-| FIN-006 | A posted transaction is never edited or deleted; corrections are linked reversal, adjustment or refund rows. | Must | Built and works | Ledger edit refused even for the database owner (S17). |
-| FIN-007 | A refund cannot exceed the credit on the folio. | Must | Built, untested | Refund capped at credit in code. |
-| FIN-008 | Repeating the same request cannot double post (idempotency keys). | Must | Built and works | Repeat charge key did not double post (S07). |
-| FIN-009 | Move a posted charge, with its tax, to another folio of the same booking; revenue does not change. | Should | Built, untested | transfer_transaction exists. |
-| FIN-010 | Split folios per reservation. | Should | Built, untested | split_folio exists. |
-| FIN-011 | A folio closes only at a zero balance and reopens only for the accountant with a reason; a closed folio takes no postings. | Must | Built, untested | close_folio and reopen_folio exist. |
-| FIN-012 | Invoices and receipts are numbered documents built from posted rows; they cannot be changed once issued. | Must | Built and works | Invoice INV-000001 issued (S16). |
-| FIN-013 | Balances are calculated from posted rows and never stored; pending approvals do not change them. | Must | Built and works | Balance unchanged while discount pending (S10). |
-| FIN-014 | Every posting takes the open business date, and a past date is refused. | Must | Built, untested | Postings take the business date in code. |
-| FIN-015 | Folio visibility follows the role: managers see all folios, a reservation officer sees only those of their own bookings. | Must | Missing | Folio access is all or nothing. No own-bookings-only level. |
-| FIN-016 | Cashier shifts and reconciliation by cashier, shift and method. | Should | Missing | R2. Not due yet. |
+| FIN-001 | Charges post with their tax lines; prices can include or exclude tax; the remainder of a rounding goes on the last tax line. | Must | Built and works | 4 test checks pass. |
+| FIN-002 | Payments and deposits are recorded against a folio with a method; payments are taken outside the system in R1. | Must | Partly built | 1 pass, 1 fail: reservation officer cannot take a normal payment (expected [E_FORBIDDEN/E_NOT_FOUND], but it succeeded) |
+| FIN-003 | Foreign-currency postings store the amount, currency, exchange rate and base amount. | Should | Built and works | 2 test checks pass. |
+| FIN-004 | A discount within the user's limit posts at once; above the limit it waits for an approver who is not the requester. | Must | Partly built | 4 pass, 1 fail: approved discount also reduces service charge and VAT (accountant to confirm) (got -5231.1600, expected -6326. |
+| FIN-005 | Adjustments, reversals and refunds always need a second person and stay within the approver's limit. | Must | Built and works | 2 test checks pass. |
+| FIN-006 | A posted transaction is never edited or deleted; corrections are linked reversal, adjustment or refund rows. | Must | Partly built | 9 pass, 2 fail: ledger cannot be truncated (expected [E_IMMUTABLE], but it succeeded); a charge cannot carry a negative sign (expected [check constraint/E_INVALID], but it succeeded) |
+| FIN-007 | A refund cannot exceed the credit on the folio. | Must | Built and works | 2 test checks pass. |
+| FIN-008 | Repeating the same request cannot double post (idempotency keys). | Must | Built and works | 2 test checks pass. |
+| FIN-009 | Move a posted charge, with its tax, to another folio of the same booking; revenue does not change. | Should | Partly built | 4 pass, 1 fail: front desk cannot transfer between folios (expected [E_FORBIDDEN], but it succeeded) |
+| FIN-010 | Split folios per reservation. | Should | Built and works | 1 test checks pass. |
+| FIN-011 | A folio closes only at a zero balance and reopens only for the accountant with a reason; a closed folio takes no postings. | Must | Built and works | 5 test checks pass. |
+| FIN-012 | Invoices and receipts are numbered documents built from posted rows; they cannot be changed once issued. | Must | Partly built | 5 pass, 1 fail: interim documents and receipts have their own number series |
+| FIN-013 | Balances are calculated from posted rows and never stored; pending approvals do not change them. | Must | Built and works | 2 test checks pass. |
+| FIN-014 | Every posting takes the open business date, and a past date is refused. | Must | Partly built | 1 pass, 1 fail: posting to a past business date is refused (expected [E_DATE/E_INVALID], but it succeeded) |
+| FIN-015 | Folio visibility follows the role: managers see all folios, a reservation officer sees only those of their own bookings. | Must | Missing | Test fails: reservation officer sees only folios of own bookings (got 2, expected 1) |
+| FIN-016 | Cashier shifts and reconciliation by cashier, shift and method. | Should | Missing | R2. Not due yet. (no automated test yet) |
 
 ### Business Date
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| DAY-001 | The business date rolls automatically at each property's cut-off time. | Must | Built and works | Roll advanced the date (S12); a hotel 3 days behind caught up in one run (P4). |
-| DAY-002 | At the roll, each guest in house is charged the night's room rate and tax exactly once. | Must | Built and works | One room charge per night; second run added none (S12, S13). |
-| DAY-003 | A guest still in house past departure is charged and extended a night if the room allows; otherwise managers are told. | Should | Missing | Guests past departure are not extended or flagged. |
-| DAY-004 | A failed roll changes nothing and notifies managers; other properties are not blocked. | Must | Built, untested | Sub-transaction and failure notice in code. |
-| DAY-005 | Night audit gates the roll from R2. | Should | Missing | R2. Not due yet. |
-| DAY-006 | A same-day arrival and departure: decide whether a night or day-use charge applies. | Should | Missing | Decision open. Today a same-day booking cannot be made at all. |
+| DAY-001 | The business date rolls automatically at each property's cut-off time. | Must | Partly built | 3 pass, 1 fail: the scheduler rolled the lagging property forward and stopped at the correct date (got 2026-09-29, expected 20 |
+| DAY-002 | At the roll, each guest in house is charged the night's room rate and tax exactly once. | Must | Built and works | 3 test checks pass. |
+| DAY-003 | A guest still in house past departure is charged and extended a night if the room allows; otherwise managers are told. | Should | Missing | Test fails: a guest still in house after departure is not extended or flagged at the roll. |
+| DAY-004 | A failed roll changes nothing and notifies managers; other properties are not blocked. | Must | Built and works | 2 test checks pass. |
+| DAY-005 | Night audit gates the roll from R2. | Should | Missing | R2. Not due yet. (no automated test yet) |
+| DAY-006 | A same-day arrival and departure: decide whether a night or day-use charge applies. | Should | Missing | Decision open. Today a same-day booking cannot be made at all. (no automated test yet) |
 
 ### Reporting
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| RPT-001 | Occupancy, ADR and RevPAR use one definition: rooms sold over rooms available (out-of-order rooms excluded), revenue net of tax. | Must | Built, untested | v_kpi_daily exists. |
-| RPT-002 | Live operations views: arrivals, in-house, room board, housekeeping board. | Must | Built, untested | Operations views exist. |
-| RPT-003 | Every reported figure traces to ledger rows or operational records. | Must | Built, untested | Not checked. |
-| RPT-004 | Report screens (occupancy trend, revenue by group, outstanding balances, cancellation and no-show rates). | Must | Built, untested | Report functions exist for each report. |
+| RPT-001 | Occupancy, ADR and RevPAR use one definition: rooms sold over rooms available (out-of-order rooms excluded), revenue net of tax. | Must | Built and works | 4 test checks pass. |
+| RPT-002 | Live operations views: arrivals, in-house, room board, housekeeping board. | Must | Built, untested | Operations views exist. (no automated test yet) |
+| RPT-003 | Every reported figure traces to ledger rows or operational records. | Must | Built, untested | Not checked. (no automated test yet) |
+| RPT-004 | Report screens (occupancy trend, revenue by group, outstanding balances, cancellation and no-show rates). | Must | Built, untested | Report functions exist for each report. (no automated test yet) |
 
 ### Non-functional
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
-| NFR-001 | Every table has row-level security and tenant_id; security definer functions pin their search path. | Must | Partly built | All 44 tables have RLS and tenant id (checked). No automated test guards this. |
-| NFR-002 | The browser can write directly only to plain configuration tables; ledger, reservations, stays, tasks and blocks change only through functions. | Must | Partly built | Ledger and state tables are protected by RLS only. Role and limit tables are writable. No test. |
-| NFR-003 | Create actions accept client-generated ids and idempotency keys so an offline queue can be added later. | Should | Partly built | Idempotency keys yes. Client-generated ids no. |
-| NFR-004 | Money uses fixed decimals per currency (naira 2, CFA franc 0), never floating point. | Must | Partly built | Money is numeric, but an amount with 3 decimals was accepted (P2). |
-| NFR-005 | Business date and cut-off follow the property's timezone. | Must | Built, untested | Business date uses property timezone in code. |
+| NFR-001 | Every table has row-level security and tenant_id; security definer functions pin their search path. | Must | Built and works | 3 test checks pass. |
+| NFR-002 | The browser can write directly only to plain configuration tables; ledger, reservations, stays, tasks and blocks change only through functions. | Must | Built and works | 1 test checks pass. |
+| NFR-003 | Create actions accept client-generated ids and idempotency keys so an offline queue can be added later. | Should | Partly built | Idempotency keys proven (RES-002, FIN-008 tests). Client-generated ids are not accepted yet. |
+| NFR-004 | Money uses fixed decimals per currency (naira 2, CFA franc 0), never floating point. | Must | Built and works | 2 test checks pass. |
+| NFR-005 | Business date and cut-off follow the property's timezone. | Must | Built and works | 1 test checks pass. |
+
 
 ## 2. Audit findings
+
+The findings as the read-only audit found them. Where one is fixed, its heading says so. The Update section above has the proof.
 
 Ranked by how much harm they could do. "Where" gives the file or database object. Test names (S07, C and so on) refer to the checks in "How I tested".
 
 ### Must fix before any real hotel
 
-**M1. Staff can give themselves more power by writing straight to the role tables.**
+**M1. Staff can give themselves more power by writing straight to the role tables. Fixed in step 1.**
 - Where: row-level security policies `roles_write`, `role_permissions_write`, `upr_write`, `approval_limits_write` in `supabase/migrations/20260929090000_multi_tenant_foundation.sql` (lines 386 to 407).
 - Proof: a user whose role only allowed "manage staff and roles" was blocked by the proper functions (tests A, B). The same user then wrote to the tables directly and succeeded. They gave their own role refund approval (C), made themselves System Administrator (D) and set their own approval limit (E).
 - Business risk: a manager could approve their own refunds and remove any trace of limits, which defeats separation of duties.
 - Fix: remove the four write policies, so the only way in is the functions that already check for escalation. Add a test that proves the attack fails.
 
-**M2. The "change role permissions" function always crashes.**
+**M2. The "change role permissions" function always crashes. Fixed in step 1.**
 - Where: `public.set_role_permissions` (both insert lines leave out the role id).
 - Proof: calling it gives "INSERT has more target columns than expressions". The code checker found no other function with this kind of fault.
 - Business risk: nobody can edit a custom role's permissions or limits from the Roles screen. Once M1 is fixed, this becomes the only way to do it.
 - Fix: two-line correction, plus a test.
 
-**M3. A read-only hotel cannot take payment or check out a guest who owes money.**
+**M3. A read-only hotel cannot take payment or check out a guest who owes money. Fixed in step 2.**
 - Where: `public.post_payment`, `public.request_refund`, `public.check_out`. They allow settlement, but only `check_out` switches on the flag the table guard (`app.enforce_writable`) looks for. Payment inserts are then blocked.
 - Proof: in a read-only hotel, a 1,000 payment on an open bill was refused with E_READ_ONLY (test R1). Checking out a guest who owes was also refused (R2).
 - Business risk: when a subscription lapses, guests are stuck at the desk and staff cannot record money already received. Decision D6 exists to prevent exactly this.
 - Fix: set the settlement flag in every settlement function. Test in a read-only hotel.
 
-**M4. Trials never end and past-due hotels are never suspended.**
+**M4. Trials never end and past-due hotels are never suspended. Fixed in step 2.**
 - Where: nothing exists. There is no subscription clock job. Read-only mode is only switched on by hand in SQL.
 - Business risk: every hotel keeps full access forever for free, and D7 (suspend after 14 days past due) never happens.
 - Fix: a daily job that expires trials, marks past due and suspends, with a history row for each change. Also align the two status fields (`tenants.status` controls access, `tenant_subscriptions.status` feeds the banner).
 
-**M5. The audit log keeps guests' personal data, including ID numbers.**
+**M5. The audit log keeps guests' personal data, including ID numbers. Fixed in step 2.**
 - Where: `app.audit_guest_row` in `20260929100000_guests.sql`. It copies the whole row, before and after, for `guests` and `guest_documents`.
 - Business risk: anyone allowed to read the audit log sees phone numbers, emails and passport numbers that the guest screen deliberately hides. That is a data protection problem (GST-003).
 - Fix: record only the names of the changed fields for guest tables. Clean the rows already written.
 
-**M6. The staff invite sends an email before checking permission.**
+**M6. The staff invite sends an email before checking permission. Fixed in step 1.**
 - Where: `src/lib/invite.functions.ts`. It creates the login and sends the invite using the powerful service key. Only after that does it ask the database whether the caller may add staff.
 - Business risk: any signed-in user, even one with no hotel, can make the system send invite emails to any address. That can be used for spam or phishing in your name. The failed account is deleted, but the email has already gone.
 - Fix: check `adm.user.manage` first. Also look up existing users properly (it only checks the first 200). Drop or restrict the "temporary password shown on screen" fallback.
 
-**M7. Cancellation and no-show fees are worked out but never charged.**
+**M7. Cancellation and no-show fees are worked out but never charged. Fixed in step 2.**
 - Where: `cancel_reservation`, `mark_no_show` and the nightly roll store the fee on the reservation (`cancellation_fee`, `no_show_fee`) but never post it to a folio.
 - Proof: the nightly roll marked a booking as a no-show and worked out a fee of 50,000. No folio rows were posted (S19).
 - Business risk: lost revenue on every late cancellation and no-show.
 - Fix: post the fee to the booking's folio with an idempotency key, and allow a waiver only with permission.
 
-**M8. The browser can write to every table, and only row-level security stops it.**
+**M8. The browser can write to every table, and only row-level security stops it. Fixed in step 1.**
 - Where: on real Supabase, the browser roles (`anon`, `authenticated`) get insert, update and delete on every table by default. No migration takes this away. Today the ledger, reservations and stays are safe only because they have no write policy (test H). The "column grants" the design relies on do nothing, because the whole table is granted.
 - Business risk: one careless policy in a future migration would open the ledger or bookings to direct edits. There is also no test that would catch it (NFR-001, NFR-002).
 - Fix: revoke table writes from `anon` and `authenticated`, grant back only the few that are needed, change the default privileges, and add a test that lists exactly which tables the browser can write.
@@ -293,15 +347,15 @@ Ranked by how much harm they could do. "Where" gives the file or database object
 
 | # | What | Where | Business risk | Fix |
 |---|---|---|---|---|
-| S1 | Admin can change a property's base currency directly | `properties_update` policy | Past bills and reports would show the wrong currency | Remove the policy. `update_property` already exists and leaves currency out |
-| S2 | Admin can edit other staff profiles directly, including status | `profiles_update_admin` policy | Disabling staff skips the audited `set_user_status` path | Route through the functions only |
-| S3 | One person can check out a guest who owes money, just by typing a reason | `check_out` with `fo.checkout.unsettled` | Unpaid bills leave with no second check (FO-009 says a different person must approve) | Require an approved exception from someone else, or confirm the one-person rule is acceptable |
-| S4 | 11 functions can be called by someone who is not signed in | `check_in`, `move_room`, `extend_stay`, `void_check_in`, `walk_in_check_in`, room block functions, `set_room_condition`, `get_front_desk_rooms` | Low today, since they refuse without a hotel, but it breaks the default-deny rule | Revoke from `anon` |
+| S1 | **Fixed in step 1.** Admin can change a property's base currency directly | `properties_update` policy | Past bills and reports would show the wrong currency | Remove the policy. `update_property` already exists and leaves currency out |
+| S2 | **Fixed in step 1.** Admin can edit other staff profiles directly, including status | `profiles_update_admin` policy | Disabling staff skips the audited `set_user_status` path | Route through the functions only |
+| S3 | **Kept by decision 5a**, now tested. One person can check out a guest who owes money, just by typing a reason | `check_out` with `fo.checkout.unsettled` | Unpaid bills leave with no second check (FO-009 says a different person must approve) | Require an approved exception from someone else, or confirm the one-person rule is acceptable |
+| S4 | **Fixed in step 1.** 11 functions can be called by someone who is not signed in | `check_in`, `move_room`, `extend_stay`, `void_check_in`, `walk_in_check_in`, room block functions, `set_room_condition`, `get_front_desk_rooms` | Low today, since they refuse without a hotel, but it breaks the default-deny rule | Revoke from `anon` |
 | S5 | Audit rows can be changed at database level, and anonymise rewrites them | `audit_events`, `anonymise_guest` | The audit trail is only as safe as the browser rules (ADM-006) | Add a lock trigger. Handle anonymise by storing no personal data in the first place (see M5) |
-| S6 | Amounts with too many decimals are accepted (₦100.123) | posting functions | Rounding differences between folio, invoice and accounts (NFR-004) | Check decimals per currency |
+| S6 | **Fixed in step 2.** Amounts with too many decimals are accepted (₦100.123) | posting functions | Rounding differences between folio, invoice and accounts (NFR-004) | Check decimals per currency |
 | S7 | Guests past departure are not extended or flagged | nightly roll | A guest who stays on is not charged, and nobody is told (DAY-003) | Extend and charge if the room is free, otherwise notify managers |
 | S8 | Folio access is all or nothing | `folios` read policy | A reservation officer sees every guest's bill, not only their own bookings (FIN-015) | Support grant level O (own records) |
-| S9 | Several screens add up money in the browser | `checkout.$id.tsx` (outstanding), `reservations/$id.tsx` (fee preview), `dashboard.tsx` (revenue), `folios.tsx` (tax preview) | Small rounding errors on screen that do not match the invoice | Take totals from the database |
+| S9 | **In the plan, step 5.** Several screens add up money in the browser | `checkout.$id.tsx` (outstanding), `reservations/$id.tsx` (fee preview), `dashboard.tsx` (revenue), `folios.tsx` (tax preview) | Small rounding errors on screen that do not match the invoice | Take totals from the database |
 | S10 | Check-out leaves two open cleaning tasks on the room | `app.hk_new_turnover` | Housekeeping sees duplicate work | Cancel the stayover task when a turnover is created |
 | S11 | A new invoice key is made on every click | `src/lib/checkout.tsx` | A retry after a network drop could issue two invoices | Keep one key per dialog, like the payment forms do |
 | S12 | Email is not connected, and nothing sends the outbox on a schedule | `outbox.server.ts`, no job | Booking confirmations and approval alerts never go out, including failed-roll alerts | Add the email key and a scheduled sender |
@@ -317,100 +371,98 @@ Ranked by how much harm they could do. "Where" gives the file or database object
 
 ### What the browser can do to each table
 
-This is the real Supabase setup. "Direct write" means the browser can change rows itself, not through a function.
+After step 1, on the real Supabase setup:
 
-| Table | Browser can read | Direct write allowed | Note |
-|---|---|---|---|
-| roles, role_permissions, user_property_roles, approval_limits | Yes | **Yes: insert, update, delete** | Finding M1 |
-| properties | Yes | **Yes: update any column** | Business date is locked by a trigger. Base currency is not (S1) |
-| profiles | Yes | **Yes: update** (own row, or any row for admins) | Finding S2 |
-| guest_documents | **No** | No | Read only through `get_guest`, masked |
-| folio_transactions, folio_tax_lines, folios, invoices | Yes, needs `fin.folio.view` | No | Ledger rows also locked by a trigger, even for the database owner |
-| approvals | Yes | No | |
-| reservations, reservation_nights, reservation_guests, room_assignments, stays, group_bookings | Yes | No | |
-| rooms, room_types, rate_plans, rate_plan_prices, tax_rates, charge_codes, payment_methods, exchange_rates, document_sequences | Yes | No | Changed only by `save_*` and `set_*` functions |
-| room_blocks, hk_tasks, housekeeping_tasks, maintenance_tickets, service_requests, lost_found_items | Yes | No | |
-| guests, guest_feedback | Yes | No | |
-| audit_events, business_date_log, daily_stats, notifications, notification_outbox | Yes | No | Notifications: own rows only |
-| tenants, tenant_subscriptions, plans, permissions | Yes | No | |
+| Tables | Browser can read | Direct write |
+|---|---|---|
+| Every table except guest_documents | Yes, filtered by row-level security to the user's hotel and permissions | **No.** Every change goes through a function |
+| guest_documents | No. ID numbers come only through `get_guest`, masked unless the user may see documents | No |
+| Any table, for someone not signed in | No | No |
 
-On every table the browser holds full write grants. The only barrier is the row-level security policy (M8).
+A test (`10_security.sql`) fails if any table, view or policy ever allows a direct write again, if anyone who is not signed in can call an app function, or if a table lacks row-level security or tenant_id.
+
+Before step 1, the browser held full write grants on every table. Direct writes were possible on roles, role_permissions, user_property_roles, approval_limits, properties and profiles.
 
 ## 3. What is outstanding
 
-Sizes: small is about a day or less, medium a few days, large a week or more.
+Sizes: small is about a day or less, medium a few days, large a week or more. Fixed items are gone from this list.
 
 | Area | Work | Size |
 |---|---|---|
-| Security | Close direct role and limit writes and fix `set_role_permissions` (M1, M2) | Small |
-| Security | Revoke default table and function grants, and add a test listing what the browser can write (M8, S4) | Small |
-| Security | Route property and profile edits through functions (S1, S2) | Small |
-| Security | Invite: check permission first, proper user lookup, decide on temporary passwords (M6) | Small |
-| Security | Keep personal data out of the audit log, lock audit rows (M5, S5) | Medium |
-| Money rules | Settlement in read-only hotels (M3) | Small |
-| Money rules | Post cancellation and no-show fees (M7) | Medium |
-| Money rules | Second-person approval for unsettled check-out (S3) | Small |
-| Money rules | Decimal rules per currency (S6), totals from the database (S9), invoice key (S11) | Small |
-| Money rules | Own-bookings folio access (S8) | Medium |
-| Money rules | Discount tax treatment, after the accountant decides | Small to medium |
-| Booking rules | Overdue departures at the roll (S7) | Medium |
+| Security | Lock audit rows and the ledger against the database owner (remaining failures 6 to 8, 28 to 30) | Small |
+| Security | Own-bookings folio access (FIN-015). Front desk transfers need a manager (FIN-009) | Medium |
+| Money rules | Discount tax treatment, after the accountant decides (FIN-004) | Small to medium |
+| Money rules | Separate number series for interim invoices and receipts (FIN-012) | Small |
+| Money rules | Approval limits on built-in roles, or clear onboarding to copy a role first | Small |
+| Booking rules | Overdue departures at the roll, and the catch-up roll stopping short (DAY-003, DAY-001) | Medium |
 | Booking rules | Same-day stays, after decision DAY-006. Today they cannot be booked at all | Medium |
-| Booking rules | Arrival-ready flag, complimentary upgrade, inspection on/off, duplicate task (S10, S13) | Small |
-| Jobs and email | Subscription clock: trial expiry, past due, suspension (M4) | Medium |
-| Jobs and email | Connect email and schedule the outbox sender (S12) | Small |
-| Jobs and email | Platform console for activating, suspending and changing plans (PLT-008, PLT-009) | Medium |
-| Jobs and email | Break-glass support access (PLT-010), cancel subscription (PLT-011) | Medium |
+| Booking rules | Shorten an in-house stay, complimentary upgrade, registration card accepted, arrival-ready flag, re-check-in after a void (FO-008, FO-007, FO-003, RES-013, FO-012) | Small each |
+| Booking rules | Guest with an upcoming stay cannot be anonymised (GST-005) | Small |
+| Housekeeping and maintenance | Cleaning task on room move, attendants see own tasks only, failed-inspection notice, no start without an assignee, reason for dirty override, ticket close releases block, inspection on/off (FO-006, HK-002, HK-003, ROOM-004, MNT-002, SET-008) | Small each, medium together |
+| Setup | Add a second property (PLT-007). Currency from the country template (PLT-004) | Medium, small |
+| Screens | **Show server-calculated figures wherever a screen adds up money today**: check-out outstanding total, reservation fee preview, dashboard revenue, tax preview on the charge form (S9, your adjustment 4). The database will provide each figure, and the screen shows it as is | Small to medium |
+| Screens | Rate plan screen: add the new free-cancellation days field | Small |
 | Screens | Click through every screen with real data and fix what breaks | Large |
-| Screens | Password reset, list paging, typed database calls | Small to medium |
-| Tests | Turn my audit checks into permanent tests, then work through the reference scenarios module by module | Large |
-| Lovable removal | Replace the Lovable build preset, delete Lovable preview auth, error reporting and the cron secret, remove the gateway branch from the outbox, delete `drizzle/`, `.lovable/` and the AGENTS block, stop tracking `.env`, replace `supabase/config.toml`, disconnect the GitHub sync | Medium |
+| Screens | Password reset, list paging, typed database calls (regenerate `types.ts`) | Small to medium |
+| Jobs and email | Connect Resend (decision 5d) and schedule the outbox sender | Small |
+| Jobs and email | Break-glass support access (PLT-010), platform console (PLT-009). Deferred by decision 5e | Medium |
+| Tests | Keep adding tests as each gap is fixed. Add browser tests for the main flows | Medium |
+| Lovable removal | Replace the Lovable build preset, delete Lovable preview auth, error reporting and the cron secret, remove the gateway branch from the outbox, delete `drizzle/`, `.lovable/` and the AGENTS block, stop tracking `.env`, disconnect the GitHub sync | Medium |
 | Deployment | Your Supabase project: migrations, auth settings, pg_cron, secrets | Small |
-| Deployment | Hosting. The build targets Cloudflare Workers today. Moving to Vercel means changing the build target | Small to medium |
+| Deployment | Vercel (decision 5c): change the build target from Cloudflare Workers | Small to medium |
 | Deployment | Automatic checks on every change (tests and build before anything reaches main) | Small |
 
-## 4. Decisions you must make
+## 4. Decisions
 
-| # | Decision | Why it matters now | My suggestion |
+### Answered on 30 Sep 2026
+
+| # | Question | Your answer | What it means in the build |
 |---|---|---|---|
-| 1 | Plan tiers and prices (A16) | Plan limits are enforced, so the numbers must be real before signup opens | Confirm starter 20, standard 60, pro 150 rooms, and set prices |
-| 2 | Cloud region (A14) | Guest data location. Frankfurt is the nearest Supabase region | Frankfurt for pilots with consent. Get data protection advice before signing a bank or chain |
-| 3 | Tax rules (A11), needs your accountant | Service charge 10%, VAT 7.5% on net plus service charge, state levy 0%, rounding to 2 decimals. Also: are cancellation and no-show fees taxable, and does a discount reduce the tax? | Send the accountant the one-page tax example I can produce from the test |
-| 4 | Same-day arrival and departure (DAY-006) | Today the system refuses these bookings outright | Choose: charge a night, a day-use rate, or nothing |
-| 5 | Unsettled check-out: one person with a reason, or a second approver? | The design says a second person. The build allows one | Second person, as designed |
-| 6 | Temporary passwords when the invite email fails | Convenient but weak | Remove them once email is connected |
-| 7 | Hosting: Cloudflare Workers (as built) or Vercel | Changes one build setting and where the server functions run | Vercel, since you already use it |
-| 8 | Email provider and sending domain | Needed for invites, confirmations and alerts. The code is written for Resend | Resend with your domain |
-| 9 | Platform console for R1, or manual activation by me for the first pilots | Affects how soon the first hotel can go live | Manual for the first 1 to 3 pilots, console before open signup |
-| 10 | Permission names | Lovable used its own names (for example `fo.room.move`, not `fo.roommove`). Your docs use the old ones | Keep Lovable's names and update the docs |
+| 5a | Unsettled check-out | The approval-permission holder may do it alone with a reason, and it is audited. Everyone else needs a second approver | Already how the app works. Now covered by tests |
+| 5b | Temporary passwords | None. Use a resend-invite button | Done in step 1 |
+| 5c | Hosting | Vercel | Build target changes in step 4 |
+| 5d | Email | Resend | Connect in step 6 |
+| 5e | Platform console | Manual activation for the first pilots | `app.platform_set_subscription`, run by me or the service role, with a reason and a history row |
+| 5f | Permission names | Keep Lovable's names, update the docs | Recorded in `docs/decisions.md`. The design docs will use these names from now on |
+
+### Still open
+
+| # | Decision | Why it matters now |
+|---|---|---|
+| A16 | Plan tiers and prices | Limits are enforced, so the numbers must be final before signup opens |
+| A14 | Cloud region | Your project is in West EU (Ireland). Get data protection advice before real guest data goes in |
+| A11 | Tax rules (accountant) | Rates, and whether a discount reduces tax (failure 1), whether cancellation and no-show fees are taxed (not taxed for now), and rounding |
+| DAY-006 | Same-day arrival and departure | Today they cannot be booked at all |
+| New | Should reservation officers take only deposits, and should they see ID documents? (failures 4, 27) | Lovable's roles are more generous than your design |
+| New | Approval limits on built-in roles | Today a hotel must copy a role to set a limit |
+| New | Default free-cancellation days for new rate plans | Empty means the fee always applies, as before. The reference design used 2 days |
 
 ## 5. Risks and things I am unsure about
 
-- **Untested is not the same as working.** 52 requirements have code I did not run. The one admin function I did run on a whim (M2) turned out broken. Expect more bugs like it until the tests exist.
-- **The screens have never been used with real data.** Lovable says so itself. Some will fail on first use.
-- **My checks ran on a local rebuild, not on the Lovable Cloud database.** Lovable says the rebuild matches the live database. I cannot confirm that, because Lovable Cloud gives no direct access. We are starting a fresh database anyway.
-- **Two-way sync with Lovable is still on.** Any edit made in Lovable lands on `main` and can clash with my work. Please do not edit in Lovable from now on.
-- **Tax figures are guesses** until your accountant signs off. They are marked unverified in the data.
-- **Data protection.** Guest ID numbers already sit in the audit log (M5), and the region decision is open.
-- **I checked about 35 scenarios, not all 353 reference tests.** The requirement statuses are my honest reading, not a full proof.
-- **One builder and no automatic checks.** Until tests run on every change, a later fix can quietly break an earlier one.
-- **Unsure:** whether discounts should reduce tax, and whether one-person unsettled check-out was a deliberate Lovable choice or an oversight.
+- **The screens have not been used against the fixed database.** Step 1 removed every direct table write. No screen does one, but a screen could still depend on something I cannot see without running it. Step 4 is the check.
+- **Untested is still not the same as working.** 8 requirements have no test yet, and some reports are only checked for existence.
+- **My checks ran on a local rebuild, not on the Lovable Cloud database.** We start a fresh database anyway.
+- **Two-way sync with Lovable is still on.** Nothing has been pushed. When we push this branch, edits made in Lovable in the meantime could clash.
+- **Tax figures are guesses** until your accountant signs off.
+- **One builder, no automatic checks yet.** The test suite helps, but it only runs when someone runs it.
+- **Unsure:** whether Lovable made the generous reservation officer rights on purpose, and whether the catch-up roll failure (22) has the same cause as the overstay failure (21).
 
-## 6. Proposed plan
+## 6. Plan
 
-Each step ends with the tests passing. You approve each step before I start the next.
+Steps 1 and 2 are done. You approve each step before I start the next.
 
 | Step | Work | What you can see or try afterwards |
 |---|---|---|
-| 1 | Security fixes: M1, M2, M6, M8, S1, S2, S4 | A test report showing the attack tests from this audit now fail. You can read it in plain words |
-| 2 | Money and subscription fixes: M3, M4, M5, M7, S3, S6 | The test report grows: read-only hotels settle, fees post, trials expire |
-| 3 | Permanent automated tests from this audit and the reference scenarios, run with one command | One command that ends in "ALL OK", plus a list of which requirements each test proves |
-| 4 | Remove Lovable, switch the build to your host, stop tracking `.env` | The app runs on your Mac at `http://localhost:8080` against the local database. You can sign up and click around |
-| 5 | Browser walk-through of every screen, fixing what breaks | Screenshots of each main flow: booking, check-in, folio, check-out, invoice, housekeeping, maintenance, reports |
-| 6 | Remaining gaps: overdue departures, own-bookings folios, email, smaller features, after your decisions | Updated requirement table with more rows at "Built and works" |
+| 1 | Done. Security fixes | 49 security checks pass |
+| 2 | Done. Money and subscription fixes | Read-only settlement, fees, clock and audit privacy checks pass |
+| 3 | Grow the test suite: fix and prove the 30 remaining failures, starting with money and housekeeping (failures 1 to 3, 9, 16 to 21) | Fewer "not ok" lines. A list of which requirements each test proves |
+| 4 | Remove Lovable, switch the build to Vercel, stop tracking `.env`, run the app on your Mac against local Supabase | Sign up and click around at `http://localhost:8080` |
+| 5 | Browser walk-through of every screen and fix what breaks. **Every screen that adds up money switches to figures from the database** (check-out, reservations, dashboard revenue, tax preview) | Screenshots of each main flow. No money is calculated in the browser |
+| 6 | Remaining gaps after your decisions: tax on discounts, same-day stays, roles, email with Resend | Updated requirement table |
 | 7 | Link your Supabase project and apply migrations (only after you confirm it is empty and approve the list), then set auth, pg_cron and secrets | The app on your Mac talking to your real Supabase project |
-| 8 | Deploy to your host, add automatic checks, disconnect Lovable | A live URL you control, with no Lovable dependency |
+| 8 | Deploy to Vercel, add automatic checks, disconnect Lovable | A live URL you control, with no Lovable dependency |
 
 ## Supabase status
 
-- **Local Supabase: done.** It runs in Docker on your Mac. All 17 migrations applied, the pg_cron job `business-date-rollover` is scheduled, and the isolation test passes. The local database has been wiped clean after my tests.
-- **Your project: waiting for you.** The steps are in the chat summary. No keys go in chat.
+- **Local Supabase: running** in Docker, from the app repo (`supabase/config.toml` replaced; project name `hotel-desk`). All 24 migrations apply, and both scheduled jobs are set: the business date roll every 5 minutes, and the subscription clock daily.
+- **Your project** `urbpxybyrfjczqbrpdsq` (West EU, Ireland): not linked yet. Linking steps are in the chat summary. Nothing will be applied until you have seen that it is empty and approved the migration list.

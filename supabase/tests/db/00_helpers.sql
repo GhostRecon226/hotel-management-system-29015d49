@@ -9,10 +9,12 @@ create function t.id(n text) returns uuid language sql stable as $$ select id fr
 create function t.put(n text, v uuid) returns void language sql security definer as $$
   insert into t.ids values (n, v) on conflict (name) do update set id = excluded.id $$;
 
--- Act as a named test user (the browser role).
+-- Act as a named test user (the browser role). Each login is like a new request from the browser,
+-- so request-scoped flags set by the previous call are cleared.
 create function t.login(n text) returns void language plpgsql as $$
 begin
   execute 'reset role';
+  perform set_config('app.settlement', '', false);
   perform set_config('request.jwt.claim.sub', t.id(n)::text, false);
   perform set_config('request.jwt.claims', json_build_object('sub', t.id(n), 'role', 'authenticated')::text, false);
   execute 'set role authenticated';

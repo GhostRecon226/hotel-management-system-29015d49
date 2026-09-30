@@ -115,6 +115,10 @@ begin
   perform t.ok(exists (select 1 from pg_proc where pronamespace = 'public'::regnamespace and proname in ('create_property', 'add_property')),
     '[PLT-007] a hotel can add another property (so the property limit can apply)');
   perform t.admin();
+  update public.tenant_subscriptions set plan_code = 'standard' where tenant_id = t.id('tenantA');
+  perform t.login('adminA');
+  perform public.save_room(t.id('propA'), null, '121', t.id('std'), '1', true);
+  perform t.admin();
   perform t.raises(format('select app.platform_set_subscription(%L, %L, %L, %L, %L)', t.id('tenantA'), 'active', now() + interval '30 days', 'Downgrade', 'starter'),
     'E_PLAN_LIMIT', '[PLT-007] a hotel cannot be moved to a plan smaller than what it uses');
   update public.tenant_subscriptions set plan_code = 'standard' where tenant_id = t.id('tenantA');

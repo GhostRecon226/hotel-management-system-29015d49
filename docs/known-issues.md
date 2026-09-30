@@ -4,13 +4,13 @@ Blunt list. Nothing here is hidden elsewhere.
 
 ## Testing
 - **Almost nothing has been tested end to end.** Every module compiled and the migrations replay cleanly on an empty database (`scripts/check-migrations.sh`), but no one has walked a booking → check-in → charges → payment → check-out → invoice flow in a browser with real data.
-- The only automated test is `supabase/tests/tenant_isolation.sql`. There are no tests for the ledger, tax maths, availability races, approvals, SOD, rollover or RLS on the later tables.
+- Database tests now live in `supabase/tests/db` and run on local Supabase with `scripts/test-db.sh` (370 checks on 30 Sep 2026). Open failures are listed in `docs/status-report.md`.
 - Concurrency (two clerks booking the last room) relies on an advisory lock and was never load-tested.
 - Authenticated screens after the design restyle (Setup, Guests and everything built later) were not visually checked.
 
 ## Money and tax
 - **Nigerian tax defaults are guesses** (service charge 10%, VAT 7.5% on net + service charge, state levy 0%). They are marked unverified. Confirm with an accountant before any real use.
-- Cancellation and no-show fees are calculated on the reservation but **not posted to a folio**.
+- Cancellation and no-show fees are posted to the main folio once (fixed 30 Sep 2026). Free-cancellation days are set per rate plan, but the rate plan screen does not show the field yet.
 - Early departure does not recalculate the reservation total; unused nights are just removed.
 - Discounts, adjustments and service-request charges are in base currency only.
 - Refunds are capped at the folio's credit balance. A discount must be reversed before its charge can be transferred.
@@ -33,8 +33,8 @@ Blunt list. Nothing here is hidden elsewhere.
 - Service request categories were invented; service requests are only for in-house guests.
 - Guest stay history is basic; no guest-level service/maintenance history.
 - Reservation settings (max stay 30 nights, 24 h tentative hold) are columns on `properties` but have no Setup screen.
-- Staff invite falls back to a temporary password shown once when the invite email fails. That is convenient but weak.
-- Admin "Subscription" is read-only; there is no billing integration. Status changes are manual SQL.
+- Staff invite: no temporary passwords. If the invite email fails, nothing is created. Unaccepted invites can be sent again from Admin, Staff.
+- Admin "Subscription" is read-only; there is no billing integration. A daily clock expires trials and suspends unpaid hotels; activation is manual through `app.platform_set_subscription` (decision 5e).
 
 ## Hacky or doubtful
 - `housekeeping_tasks` is deprecated (replaced by `hk_tasks`) but still in the schema because tables are never dropped.

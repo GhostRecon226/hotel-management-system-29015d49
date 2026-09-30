@@ -51,13 +51,14 @@ begin
   select count(*) into n from public.properties;
   if n <> 1 then raise exception 'FAIL: user A should see 1 property, saw %', n; end if;
 
-  -- A cannot remove its only System Administrator
+  -- A cannot remove its only System Administrator (the browser cannot write the table at all since the
+  -- default-deny migration; the database rule E_LAST_SYSADMIN still guards the admin functions)
   begin
     delete from public.user_property_roles
     where role_id = (select id from public.roles where code = 'SYSADMIN' and tenant_id is null);
     raise exception 'FAIL: last System Administrator was removed';
   exception when others then
-    if sqlerrm not like '[E_LAST_SYSADMIN]%' then raise; end if;
+    if sqlerrm not like '[E_LAST_SYSADMIN]%' and sqlerrm not like 'permission denied%' then raise; end if;
   end;
 
   -- A cannot create a second hotel
