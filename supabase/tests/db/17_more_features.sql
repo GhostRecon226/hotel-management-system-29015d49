@@ -67,6 +67,7 @@ begin
   perform t.lives(format('select public.void_check_in(%L, %L)', v_r, 'Wrong guest'), '[FO-012] a same-day check-in can be voided');
   perform t.eq((select status from public.reservations where id = v_r), 'confirmed', '[FO-012] the booking is confirmed again');
   perform t.ok(not (select is_occupied from public.rooms where id = t.room('103')), '[FO-012] the room is vacant');
+  perform t.ok((select condition in ('clean', 'inspected') from public.rooms where id = t.room('103')), '[FO-012] and still ready to sell (not marked dirty)');
   perform t.ok(exists (select 1 from public.room_assignments where reservation_id = v_r and room_id = t.room('103') and is_active), '[FO-012] and held for the guest');
   perform t.login('fdo');
   perform t.lives(format('select public.check_in(%L, t.reg(), %L, null, null)', v_r, t.room('103')), '[FO-012] the guest can be checked in again straight away');
