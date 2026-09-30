@@ -2,6 +2,8 @@
 # Creates a demo hotel on LOCAL Supabase for clicking through the app (http://localhost:8081, npm run dev -- --mode localdb --port 8081).
 # Demo sign-ins get generated passwords, written only to .env.localdb.local (git-ignored). Refuses non-local databases.
 # Usage: scripts/seed-demo.sh     (run after scripts/test-db.sh, which wipes the local database)
+#        DAYS_BACK=1 scripts/seed-demo.sh   starts the demo hotel one business day behind, so the nightly
+#        roll is due at once (Admin > Business date > Run due rolls now).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export SUPABASE_PROJECT_ID=hotel-desk
@@ -55,6 +57,13 @@ begin
   perform pg_temp.act('admin');
   select * into h from public.create_hotel('Lagoon View Hotels Ltd', 'NG', 'Lagoon View Ikoyi', 'Adaeze Admin', 'Lagos');
   p := h.property_id;
+  if ${DAYS_BACK:-0} > 0 then
+    execute 'reset role';  -- set-up only: the browser role cannot write properties
+    perform set_config('app.rolling', 'on', true);
+    update public.properties set business_date = business_date - ${DAYS_BACK:-0}, rollover_time = '00:00' where id = p;
+    perform set_config('app.rolling', '', true);
+    perform pg_temp.act('admin');
+  end if;
   foreach n in array array[1,2,3,4,5,6,7,8] loop
     perform public.register_invited_user((select id from demo_ids where role = v_staff[n][1]), initcap(v_staff[n][1]) || ' Demo', null);
     perform public.assign_role((select id from demo_ids where role = v_staff[n][1]), p, (select id from public.roles where tenant_id is null and code = v_staff[n][2]));

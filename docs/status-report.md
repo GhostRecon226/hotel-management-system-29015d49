@@ -1,16 +1,90 @@
 # Status report: Hotel Desk (Lovable build)
 
-First written 30 Sep 2026 after a read-only audit of `main` at commit `ef56121`. Updated the same day after steps 1 and 2 of the plan, on branch `claude/audit-status-report`. Written by Claude Code for Peter.
+First written 30 Sep 2026 after a read-only audit of `main` at commit `ef56121`. Updated the same day after steps 1, 2 and 4 of the plan, on branch `claude/audit-status-report`. Written by Claude Code for Peter.
 
 This report covers the app Lovable built (`hotel-management-system-29015d49`). It measures that app against the 107 R1 requirements in the reference repo (`hms-reference-backend`, `docs/HMS_R1_Requirements.xlsx`). The "Built" marks in that workbook describe the older reference backend, not this app. Every status below comes from this audit and from the tests.
 
 ## The short version
 
 - Lovable built far more than a skeleton: 17 database migrations, 123 business functions, 44 tables and about 45 screens.
-- **Steps 1 and 2 are done.** All 8 must-fix findings are fixed, and each has a test that failed before the fix and passes now.
-- There is now an automated test suite on local Supabase: **370 checks, 340 pass, 30 fail**. It ports the reference backend's scenarios to this app, so the 30 failures are real gaps, not guesses. They are listed in "Remaining failures" below. None of them is in the scope of steps 1 and 2.
-- Requirements: **66 of 107 are built and proven by tests** (up from 25). Of the 76 "Must" requirements, 53 are proven, 5 are untested, 16 are partly built, and 2 are missing.
-- It is still not ready for a real hotel. The screens have not been used against the fixed database yet (step 4 and 5), and some of the 30 failures matter for money and housekeeping.
+- **Steps 1, 2 and 4 are done on the local copy.** Lovable is removed, the app runs on your Mac, and every screen has been clicked through with a demo hotel.
+- Tests on local Supabase: **448 checks, 427 pass, 21 fail**, plus 17 upgrade checks (all pass) and 4 browser tests (all pass). The 21 failures are listed under "Remaining failures (21)" below.
+- Your real project has the first 24 migrations. **12 new migrations wait for your yes.** Nothing from step 4 has touched the real project.
+- Screens no longer add up money. Every total, tax preview, fee preview and KPI comes from the database. A check (`npm run check:money`) fails if browser code starts doing money sums again.
+- It is still not ready for a real hotel: 21 failures, tax rules wait for the accountant, email is not connected, and 6c and DAY-006 are not built.
+
+## Update: step 4 (30 Sep 2026)
+
+### What changed
+
+| Item | What was wrong | What it does now | Proof |
+|---|---|---|---|
+| FIN-012 | Interim invoices shared the invoice number series | Interim invoices get their own INT- series | `12_ledger.sql`, upgrade test |
+| MNT-002 | Closing a ticket left the room out of sale | Closing releases the block, or cancels it if it was never approved | `14_lifecycle.sql` |
+| FIN-009 | Front desk could move charges between folios | Needs the new permission `fin.folio.transfer` (System Administrator, General Manager, Front Office Manager, Accountant) | `12_ledger.sql`, upgrade test |
+| FIN-015 | Reservation officers saw every guest's bill | They see only folios of bookings they made | `12_ledger.sql`, upgrade test |
+| DAY-003, DAY-001 | Guests still in house after departure were not charged, and the catch-up roll stopped short | The roll extends the stay one night, charges it and flags it, up to the maximum stay | `17_more_features.sql` |
+| 6a | Reservation officers could take any payment | Deposits only | `12_ledger.sql`, upgrade test |
+| 6b | Reservation officers saw ID documents | They do not | `10_security.sql`, upgrade test |
+| 6d | Rate plans had no free-cancellation default, and 0 days made every cancellation free | Default 2 days, changeable on the rate plan screen. 0 days means the fee always applies | `18_server_figures.sql`, upgrade test |
+| API bug | Posting charges through the app failed with "DELETE requires a WHERE clause" (only on the API path) | Fixed in four functions. A code scan and a browser test guard it | `10_security.sql`, `e2e/api-path.spec.ts` |
+| S9 | Screens added up money in the browser | Fee preview, tax preview, check-out outstanding, amount due, credit, deposit due and dashboard KPIs come from the database | `18_server_figures.sql`, `npm run check:money` |
+| Rounding | A tax remainder of −0.01 could land on the 0% levy line | The remainder goes on the last tax that has a rate | `12_ledger.sql` |
+| Top bar | After "Run due rolls now" the date only changed after a refresh | The whole app refreshes its data after a roll | Checked in the browser |
+
+The earlier finding "a discount does not reduce tax" (old failure 1) was wrong. Discounts reduce tax in proportion. The test was corrected.
+
+### Lovable removal
+
+Removed the Lovable build preset, preview auth, error reporting, the cron secret, `drizzle/`, `.lovable/` and bun. The build now targets Vercel (Nitro `vercel` preset). `.env` is no longer tracked. The app runs with `npm run dev`.
+
+### Nightly roll, run on the local copy
+
+Demo hotel started one day behind (29 Sept), rolled by hand from Admin, Business date:
+- 2 room charges posted (Room 201 ₦100,512.50 and Room 101 ₦65,037.50, tax included), 1 no-show fee (₦55,000) with the booking marked no-show, 1 stayover task.
+- Dashboard "Last 30 days" and Reports daily KPIs both show 16 available, 2 sold, occupancy 12.5%, ADR ₦70,000, RevPAR ₦8,750.
+- Check-out for Room 101 shows ₦69,132.50 outstanding, the same as the database.
+
+### Remaining failures (21)
+
+Numbers refer to the table under steps 1 and 2. Fixed since then: 1 (test was wrong), 2, 3, 4, 5, 20, 21, 22, 27.
+
+| Requirement | What is still wrong |
+|---|---|
+| FIN-006, FIN-014 (3) | The database owner can wipe the ledger, or insert a backdated or negative row directly |
+| ADM-006 (3) | The database owner can change, delete or wipe audit rows |
+| FO-003 | No "registration card accepted" step at check-in |
+| FO-006, HK-001 | A room move creates no cleaning task for the old room |
+| FO-007 | No complimentary upgrade that keeps the booked rate |
+| FO-008 (2) | An in-house stay cannot be shortened in advance |
+| FO-012 | After a voided check-in the room is dirty, so the guest cannot be checked in again at once |
+| RES-013 | No arrival-ready flag |
+| HK-002 (2) | A task with no assignee can be started. Attendants see every task |
+| HK-003 | The attendant is not told when their room fails inspection |
+| ROOM-004 | A dirty override needs no reason |
+| PLT-007 | No way to add a second property (waits until after the first pilot) |
+| PLT-004 | A Ghana hotel gets naira (waits until after the first pilot) |
+| SET-008 | Inspection cannot be switched off per property |
+| GST-005 | A guest with an upcoming booking can be anonymised |
+
+Also not done: 6c (approval limits on built-in roles), DAY-006 (same-day stays), tax on the `tax_rates` table is not audited, invoice net and taxable figures can differ by 1 kobo from the folio on odd amounts, and one browser test failed once and then passed (not explained).
+
+### Migrations waiting for your yes (12, in order)
+
+1. `20260930120000_interim_invoice_numbers.sql`
+2. `20260930120100_ticket_close_releases_blocks.sql`
+3. `20260930120200_folio_transfer_permission.sql`
+4. `20260930120300_own_bookings_folio_access.sql`
+5. `20260930120400_roll_overstays.sql`
+6. `20260930130000_overstay_max_stay.sql`
+7. `20260930130100_deposits_only_reservations.sql`
+8. `20260930140000_api_safe_temp_table_deletes.sql`
+9. `20260930150000_reservations_no_id_documents.sql`
+10. `20260930150100_free_cancellation_default.sql`
+11. `20260930160000_server_money_figures.sql`
+12. `20260930160100_tax_rounding_remainder.sql`
+
+The upgrade test applies all 12 on top of a hotel made with the first 24, which is what your real project has. All 17 checks pass.
 
 ## Update: steps 1 and 2
 
@@ -424,6 +498,11 @@ Sizes: small is about a day or less, medium a few days, large a week or more. Fi
 | 5d | Email | Resend | Connect in step 6 |
 | 5e | Platform console | Manual activation for the first pilots | `app.platform_set_subscription`, run by me or the service role, with a reason and a history row |
 | 5f | Permission names | Keep Lovable's names, update the docs | Recorded in `docs/decisions.md`. The design docs will use these names from now on |
+| 6a | Reservation officers and payments | Deposits only | Built and tested |
+| 6b | Reservation officers and ID documents | They do not see them | Built and tested |
+| 6c | Approval limits on built-in roles | Yes, set per hotel | Not built yet |
+| 6d | Free-cancellation default | 2 days, changeable | Built and tested |
+| DAY-006 | Same-day stays | Charged one night. A manager can waive it with a reason | Not built yet. Today such bookings are refused |
 
 ### Still open
 
@@ -431,11 +510,7 @@ Sizes: small is about a day or less, medium a few days, large a week or more. Fi
 |---|---|---|
 | A16 | Plan tiers and prices | Limits are enforced, so the numbers must be final before signup opens |
 | A14 | Cloud region | Your project is in West EU (Ireland). Get data protection advice before real guest data goes in |
-| A11 | Tax rules (accountant) | Rates, and whether a discount reduces tax (failure 1), whether cancellation and no-show fees are taxed (not taxed for now), and rounding |
-| DAY-006 | Same-day arrival and departure | Today they cannot be booked at all |
-| New | Should reservation officers take only deposits, and should they see ID documents? (failures 4, 27) | Lovable's roles are more generous than your design |
-| New | Approval limits on built-in roles | Today a hotel must copy a role to set a limit |
-| New | Default free-cancellation days for new rate plans | Empty means the fee always applies, as before. The reference design used 2 days |
+| A11 | Tax rules (accountant) | Rates, whether cancellation and no-show fees are taxed (not taxed for now), and rounding |
 
 ## 5. Risks and things I am unsure about
 
@@ -464,5 +539,5 @@ Steps 1 and 2 are done. You approve each step before I start the next.
 
 ## Supabase status
 
-- **Local Supabase: running** in Docker, from the app repo (`supabase/config.toml` replaced; project name `hotel-desk`). All 24 migrations apply, and both scheduled jobs are set: the business date roll every 5 minutes, and the subscription clock daily.
-- **Your project** `urbpxybyrfjczqbrpdsq` (West EU, Ireland): not linked yet. Linking steps are in the chat summary. Nothing will be applied until you have seen that it is empty and approved the migration list.
+- **Local Supabase: running** in Docker, from the app repo (project name `hotel-desk`). All 36 migrations apply. Scheduled jobs: the business date roll every 5 minutes, and the subscription clock daily.
+- **Your project** `urbpxybyrfjczqbrpdsq` (West EU, Ireland): linked, pg_cron on, the first 24 migrations applied and recorded. Your account and hotel exist. The 12 new migrations are not applied.

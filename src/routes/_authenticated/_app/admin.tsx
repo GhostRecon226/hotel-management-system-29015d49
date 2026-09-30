@@ -100,8 +100,9 @@ function BusinessDate() {
       const failed = res.filter((r) => r.status === "failed");
       if (res.length === 0) toast.info("No property is due to roll yet.");
       else if (failed.length) toast.error(`Roll failed: ${errorMessage({ message: failed[0]!.error })}`);
-      else toast.success(`Business date rolled (${res.length}). Refresh the page to see the new date.`);
-      refresh();
+      else toast.success(`Business date rolled (${res.length}).`);
+      // A roll changes the business date and nearly every screen's figures, so refetch everything.
+      if (res.length) qc.invalidateQueries(); else refresh();
     },
     onError: (e) => toast.error(errorMessage(e)),
   });

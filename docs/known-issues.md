@@ -3,22 +3,22 @@
 Blunt list. Nothing here is hidden elsewhere.
 
 ## Testing
-- **Almost nothing has been tested end to end.** Every module compiled and the migrations replay cleanly on an empty database (`scripts/check-migrations.sh`), but no one has walked a booking → check-in → charges → payment → check-out → invoice flow in a browser with real data.
-- Database tests now live in `supabase/tests/db` and run on local Supabase with `scripts/test-db.sh` (370 checks on 30 Sep 2026). Open failures are listed in `docs/status-report.md`.
+- Every screen was clicked through on the local copy with a demo hotel (`scripts/seed-demo.sh`) on 30 Sep 2026. Not yet on the real project.
+- Database tests now live in `supabase/tests/db` and run on local Supabase with `scripts/test-db.sh` (448 checks on 30 Sep 2026, 21 open failures). Open failures are listed in `docs/status-report.md`.
 - Concurrency (two clerks booking the last room) relies on an advisory lock and was never load-tested.
 - Authenticated screens after the design restyle (Setup, Guests and everything built later) were not visually checked.
 
 ## Money and tax
 - **Nigerian tax defaults are guesses** (service charge 10%, VAT 7.5% on net + service charge, state levy 0%). They are marked unverified. Confirm with an accountant before any real use.
-- Cancellation and no-show fees are posted to the main folio once (fixed 30 Sep 2026). Free-cancellation days are set per rate plan, but the rate plan screen does not show the field yet.
+- Cancellation and no-show fees are posted to the main folio once (fixed 30 Sep 2026). Free-cancellation days are set per rate plan on the rate plan screen (default 2).
 - Early departure does not recalculate the reservation total; unused nights are just removed.
 - Discounts, adjustments and service-request charges are in base currency only.
 - Refunds are capped at the folio's credit balance. A discount must be reversed before its charge can be transferred.
 - Check-out with an approved balance leaves unsettled folios open with no follow-up/collections process.
-- `numeric(20,4)` everywhere but tax lines round to 2 dp; rounding remainder goes on the last line. Check this matches the accountant's expectations.
+- `numeric(20,4)` everywhere but tax lines round to 2 dp; the rounding remainder goes on the last tax that has a rate. On odd amounts an invoice's net and taxable figures can differ from the folio by 1 kobo. Check this with the accountant.
 
 ## Scheduling and messaging
-- Rollover pg_cron runs every 5 minutes (288 runs/day). A real rollover has **not been observed**; the first scheduled run found no property due.
+- Rollover pg_cron runs every 5 minutes (288 runs/day). A roll has been run by hand on the local copy and checked (charges, no-shows, stayover tasks, KPIs). A scheduled roll has not been observed on the real project yet.
 - `daily_stats` is only written by rollovers; there is no backfill, so KPIs start empty.
 - **Email is not connected.** Booking confirmations and approval alerts sit in `notification_outbox` as `pending` until `RESEND_API_KEY` is set. `OUTBOX_FROM_EMAIL` must be on a Resend-verified domain.
 - **No outbox schedule.** Sending runs only from Admin → Messages → Run now. When email is connected, add a scheduled caller (e.g. a pg_cron + `pg_net` call to a `/api/public/...` route that verifies a secret and runs `processOutbox()`).
