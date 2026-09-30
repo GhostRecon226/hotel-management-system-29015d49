@@ -1,15 +1,8 @@
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
+# Architecture rules
 
-- Canonical schema lives in supabase/migrations (YYYYMMDDHHMMSS_topic.sql); copy any tool-generated migration there. Why: files, not the Cloud DB, are the source of truth.
+One line per rule. Why: the reason.
+
+- Canonical schema lives in supabase/migrations (YYYYMMDDHHMMSS_topic.sql). Never edit an applied migration; add a new one. Why: files, not the live database, are the source of truth.
 - Permission/tenant helpers live in schema `app` (my_tenant, can, has_property_access, approval_limit, fail); RLS policies call them. Why: keeps helpers off the public API and avoids RLS recursion.
 - Every data-changing DB function calls app.assert_writable() first (pass true only for settlement/check-out); enforce_writable triggers also block direct writes. Why: expired/suspended hotels are read-only.
 - App shell loads everything via one rpc public.my_context() into AccessProvider (src/lib/access.tsx); hide UI with useAccess().can / <Can>. Why: one call, permissions as data.
@@ -30,6 +23,8 @@
 - Housekeeping: hk_tasks (housekeeping_tasks deprecated) changes only via create/assign/start/complete/inspect/cancel_hk_task; app.hk_new_turnover cancels stale unstarted turnovers. Complete sets room dirty, pass sets clean/inspected, fail reopens as status failed with defects. Inspector≠completer via E_SOD plus CHECK hk_tasks_sod. Board reads v_hk_board.board_column. Why: rules in Postgres, segregation of duties.
 - Maintenance tickets and service requests change only via their public RPCs (create/assign/start/wait/resolve/close/reopen/cancel_ticket, *_service_request). Closer≠resolver via E_SOD plus CHECK maintenance_tickets_sod; block_room_for_ticket wraps request_room_block with ticket_id. Chargeable service requests post once on completion with key svc:<id>. Why: rules in Postgres, retry-safe charges.
 - Business date rolls only via app.roll_property (sub-transaction: room charges, expire holds, no-shows, date+1, stayovers, daily_stats; logs business_date_log; failure notifies fin.nightaudit.run users once). pg_cron job 'business-date-rollover' runs app.run_due_rollovers() every 5 min; a trigger blocks other business_date edits. Dashboard/reports read dashboard_summary, v_kpi_daily and report_* functions only. Why: figures and rules in Postgres.
-- Admin: staff/roles/limits change only via register_invited_user, assign_role, remove_role, set_user_status, copy_role, rename_role, set_role_permissions, delete_role, set_approval_limit; app.assert_can_grant/app.assert_role_grantable raise [E_ESCALATION] so nobody hands out a permission or limit they do not hold, and [E_LAST_ADMIN] keeps one active SYSADMIN per tenant. System roles are read-only ([E_SYSTEM_ROLE]); copy to customise. Staff invites go through the createServerFn src/lib/invite.functions.ts (service role creates the auth account, hotel rules run as the inviter, orphan accounts are deleted on failure) — not an Edge Function, which this stack does not add. Why: rules in Postgres, no privilege escalation.
+- Admin: staff/roles/limits change only via register_invited_user, assign_role, remove_role, set_user_status, copy_role, rename_role, set_role_permissions, delete_role, set_approval_limit; app.assert_can_grant/app.assert_role_grantable raise [E_ESCALATION] so nobody hands out a permission or limit they do not hold, and [E_LAST_ADMIN] keeps one active SYSADMIN per tenant. System roles are read-only ([E_SYSTEM_ROLE]); copy to customise. Staff invites go through the createServerFn src/lib/invite.functions.ts (permission checked first via require_permission, service role sends the invite, hotel rules run as the inviter, orphan accounts are deleted on failure, no temporary passwords) (a server function, not an Edge Function). Why: rules in Postgres, no privilege escalation.
 - Outbound messages are rows in public.notification_outbox, added only by app.enqueue_message (dedupe key per tenant); src/lib/outbox.server.ts claims batches via outbox_claim/outbox_mark (service role) with exponential back-off. CSV exports go through public.export_data (rpt.export, audit row) via src/lib/exports.functions.ts. Why: queue and permissions in Postgres, no Edge Functions on this stack.
-- Migrations must replay from empty: run scripts/check-migrations.sh (plain Postgres + supabase/tests/local_supabase_stub.sql) after adding one. Why: supabase/migrations is the only source of truth.
+- Migrations must replay from empty. Run scripts/test-db.sh (local Supabase in Docker) after every change; it must not add any "not ok". Why: supabase/migrations is the only source of truth, and the tests are the proof.
+- The browser has no table write rights (default-deny, 20260930100000). New tables need RLS and tenant_id; new public functions need an explicit grant to authenticated. Why: every change goes through a permission-checked function.
+- Keep Lovable's permission names (decision 5f). Why: the code and database already use them.

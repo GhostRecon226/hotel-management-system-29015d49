@@ -8,29 +8,30 @@ Start with `docs/architecture.md`, then `docs/known-issues.md`.
 
 ## Stack
 
-- React 19 + TypeScript, TanStack Start v1 (file routes in `src/routes`, server functions), Vite 7
+- React 19 + TypeScript, TanStack Start v1 (file routes in `src/routes`, server functions), Vite
 - Tailwind CSS v4 (tokens in `src/styles.css`), shadcn/ui components in `src/components/ui`
-- Supabase (Postgres, Auth, RLS, pg_cron) — business rules live in Postgres functions called with `supabase.rpc(...)`
+- Supabase (Postgres, Auth, RLS, pg_cron). Business rules live in Postgres functions called with `supabase.rpc(...)`
 - TanStack Query for data fetching
+- Hosting: Vercel (Nitro `vercel` preset). No Lovable dependency.
 
 ## Run locally
 
 ```bash
-bun install          # or npm install
-cp .env.example .env # then fill in (see below)
-bun run dev          # http://localhost:8080
+npm install
+cp .env.example .env.local   # then fill in (see below)
+npm run dev                  # http://localhost:8080
 ```
 
-You need a Supabase project with the migrations applied (see *Database* below).
+`.env.local` is git-ignored. Never commit real keys.
 
 ## Environment variables
 
-Browser (Vite, public):
+Browser (anything starting with `VITE_` reaches the browser, so only public values):
 
 | Name | Purpose |
 |---|---|
 | `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable (anon) key |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable (public) key |
 | `VITE_SUPABASE_PROJECT_ID` | Project ref (informational) |
 
 Server only (server functions, never exposed to the browser):
@@ -38,41 +39,38 @@ Server only (server functions, never exposed to the browser):
 | Name | Purpose |
 |---|---|
 | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` | Same values as above, read on the server |
-| `SUPABASE_SERVICE_ROLE_KEY` | Staff invites (creates auth users) and outbox processing |
-| `RESEND_API_KEY` | Email sending for the outbox. Not set yet — email stays pending |
-| `OUTBOX_FROM_EMAIL` | Optional sender, e.g. `Hotel <desk@yourdomain>` (domain verified in Resend) |
-| `LOVABLE_API_KEY` | Only used by the Lovable connector gateway path for Resend; see `docs/lovable-notes.md` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Staff invites and outbox processing |
+| `RESEND_API_KEY` | Email for the outbox (Resend). Without it, email stays pending |
+| `OUTBOX_FROM_EMAIL` | Sender, for example `Hotel <desk@yourdomain>`, on a Resend-verified domain |
 
 ## Database
 
-- Canonical schema: `supabase/migrations/*.sql` (timestamped). They run in order on an empty Supabase database: `supabase db reset` locally or `supabase db push` to a project.
-- `drizzle/migrations` is a duplicate kept only because Lovable's migration tool writes there. See `docs/lovable-notes.md`.
-- Edit the schema only by adding a new migration. Never edit applied ones.
+- Canonical schema: `supabase/migrations/*.sql` (timestamped). Never edit an applied migration; add a new one.
+- Local: `supabase start` (Docker). Remote: `supabase db push --linked`.
+- The Supabase CLI reads `SUPABASE_PROJECT_ID` from the environment as the project to use. Do not keep an old one in a `.env` file.
 
 ## Tests
 
 ```bash
-# Replays all migrations on a fresh plain-Postgres database (with a small Supabase stub)
-# and runs the SQL tests in supabase/tests.
-DATABASE_URL=postgresql://postgres@localhost:5432/postgres scripts/check-migrations.sh
+scripts/test-db.sh
 ```
 
-- `supabase/tests/tenant_isolation.sql` — proves hotel A cannot read hotel B's rows. Also runnable directly against a Supabase database: `psql "$DATABASE_URL" -f supabase/tests/tenant_isolation.sql` (rolls back).
-- TypeScript: `bunx tsc --noEmit`. Lint: `bun run lint`.
-- There are **no** frontend unit tests and no end-to-end tests. See known issues.
+Rebuilds the local Supabase database from the migrations, loads test fixtures and runs every file in `supabase/tests/db`. Every check prints ok or not ok, tagged with its requirement. It refuses to run against a non-local database. Open failures are listed in `docs/status-report.md`.
+
+- TypeScript: `npm run typecheck`. Lint: `npm run lint`.
+- No frontend unit or end-to-end tests yet.
 
 ## Deploy
 
-- Frontend/server: `bun run build` produces a Cloudflare-Workers-style bundle (TanStack Start). On Lovable, click Publish. Elsewhere, deploy to Cloudflare Workers or change the TanStack Start target (see `docs/lovable-notes.md`).
-- Database: apply `supabase/migrations` to the target project (`supabase db push`). The pg_cron job is created by migration `20260929170000_schedule_business_date_rollover.sql`.
-- Auth: enable email/password with email confirmation; set Site URL and redirect URLs to the deployed origin.
+- Frontend and server functions: Vercel. `npm run build` produces `.vercel/output` (Build Output API).
+- Database: `supabase db push --linked`. Both pg_cron jobs (business date roll, subscription clock) are created by migrations. Enable the pg_cron extension on the project first.
+- Auth: email and password with email confirmation. Set the Site URL and redirect URLs to the deployed origin.
 
 ## Docs
 
-- `docs/architecture.md` — layers, tenants, permissions, ledger, availability, business date, jobs
-- `docs/data-model.md` — tables, views, relationship diagram
-- `docs/functions.md` — every database function (generated from the migrations)
-- `docs/screens.md` — every screen, route and what it calls
-- `docs/known-issues.md` — what is unfinished or doubtful
-- `docs/lovable-notes.md` — what changes when leaving Lovable
-- `AGENTS.md` — one-line architecture rules
+- `docs/status-report.md`: audit, test results, open failures, plan
+- `docs/decisions.md`: decisions log
+- `docs/architecture.md`, `docs/data-model.md`, `docs/functions.md`, `docs/screens.md`: written by the Lovable build; `functions.md` predates the fixes of 30 Sep 2026
+- `docs/known-issues.md`: what is unfinished or doubtful
+- `docs/lovable-notes.md`: history of the Lovable setup (kept for reference)
+- `AGENTS.md`: one-line architecture rules

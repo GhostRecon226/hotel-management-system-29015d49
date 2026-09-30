@@ -39,3 +39,6 @@ supabase/.branches/
 .env
 .env.*
 !.env.example
+
+# Vercel build output
+.vercel/

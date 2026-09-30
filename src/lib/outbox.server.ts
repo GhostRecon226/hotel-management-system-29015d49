@@ -1,19 +1,19 @@
 // Server-only: sends queued messages from notification_outbox.
-// Email goes through Resend once it is connected; SMS and WhatsApp are stubs.
+// Email goes straight to Resend (decision 5d) once RESEND_API_KEY is set; SMS and WhatsApp are stubs.
 
 type OutboxRow = { id: string; channel: "email" | "sms" | "whatsapp"; recipient: string; subject: string | null; body: string };
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+const RESEND_URL = "https://api.resend.com";
 
 function escapeHtml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-async function sendEmail(row: OutboxRow, lovableKey: string, resendKey: string) {
+async function sendEmail(row: OutboxRow, resendKey: string) {
   const from = process.env["OUTBOX_FROM_EMAIL"] || "Hotel Desk <onboarding@resend.dev>";
-  const res = await fetch(`${GATEWAY_URL}/emails`, {
+  const res = await fetch(`${RESEND_URL}/emails`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": resendKey },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendKey}` },
     body: JSON.stringify({
       from, to: [row.recipient], subject: row.subject ?? "Message from your hotel", text: row.body,
       html: `<div style="font-family:Arial,sans-serif;white-space:pre-wrap">${escapeHtml(row.body)}</div>`,
@@ -24,9 +24,8 @@ async function sendEmail(row: OutboxRow, lovableKey: string, resendKey: string) 
 
 export async function processOutbox(opts: { tenantId?: string | null; limit?: number } = {}) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const lovableKey = process.env["LOVABLE_API_KEY"];
   const resendKey = process.env["RESEND_API_KEY"];
-  const emailReady = !!(lovableKey && resendKey);
+  const emailReady = !!resendKey;
   // Without an email service, email rows stay pending (not lost) until one is connected.
   const channels = emailReady ? ["email", "sms", "whatsapp"] : ["sms", "whatsapp"];
 
@@ -40,7 +39,7 @@ export async function processOutbox(opts: { tenantId?: string | null; limit?: nu
   for (const row of rows) {
     try {
       if (row.channel === "email") {
-        await sendEmail(row, lovableKey!, resendKey!);
+        await sendEmail(row, resendKey!);
         await supabaseAdmin.rpc("outbox_mark", { p_id: row.id, p_ok: true });
         sent++;
       } else {
