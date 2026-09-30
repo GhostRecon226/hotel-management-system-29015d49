@@ -67,7 +67,7 @@ export function LimitsPanel() {
                       size="sm" variant="outline" disabled={locked || setLimit.isPending}
                       onClick={() => setLimit.mutate({
                         p_role_id: role.id, p_permission_key: perm.key,
-                        p_max_amount: values[k] === "" || values[k] == null ? null : Number(values[k]),
+                        p_max_amount: values[k] === "" || values[k] == null ? null : values[k],
                       })}
                     >Save</Button>
                   </TableCell>

@@ -64,7 +64,7 @@ function TicketList() {
             <TableRow key={t.id} className="cursor-pointer" onClick={() => navigate({ to: "/maintenance/$id", params: { id: t.id } })}>
               <TableCell>
                 <Link to="/maintenance/$id" params={{ id: t.id }} className="font-medium text-primary-strong hover:underline">{t.title}</Link>
-                {t.has_active_block && <Badge variant="danger" className="ml-2">Room blocked</Badge>}
+                {t.has_approved_block ? <Badge variant="danger" className="ml-2">Room blocked</Badge> : t.has_active_block ? <Badge variant="warning" className="ml-2">Block requested</Badge> : null}
               </TableCell>
               <TableCell>{t.room_number ? <span className="font-semibold tabular">Room {t.room_number}</span> : null}{t.location && <span className="block text-sm text-muted-foreground">{t.location}</span>}</TableCell>
               <TableCell><StatusBadge map={PRIORITY} value={t.priority} /></TableCell>

@@ -35,13 +35,6 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function policyFee(type: string, value: number, nights: { rate_amount: number }[]) {
-  const total = nights.reduce((s, n) => s + Number(n.rate_amount), 0);
-  if (type === "nights") return nights.slice(0, Math.ceil(value)).reduce((s, n) => s + Number(n.rate_amount), 0);
-  if (type === "percent") return Math.round(total * value) / 100;
-  if (type === "amount") return Number(value);
-  return 0;
-}
 
 function ReservationDetailPage() {
   const { id } = Route.useParams();
@@ -223,16 +216,22 @@ function FeeDialog({ kind, open, onOpenChange, data }: { kind: "cancel" | "nosho
     (d) => `${kind === "cancel" ? "Booking cancelled" : "Marked as no-show"}. Fee: ${formatAmount(d.charged, d.currency)}${d.waived ? " (waived)" : ""}.`,
   );
   const rp = data.rate_plan;
-  const fee = kind === "cancel"
-    ? policyFee(rp.cancellation_policy_type, Number(rp.cancellation_policy_value), data.nights)
-    : policyFee(rp.no_show_policy_type, Number(rp.no_show_policy_value), data.nights);
+  // The fee comes from the database, with the same rule the action uses (including free-cancellation days).
+  const preview = useQuery({
+    queryKey: ["reservations", "fee-preview", data.reservation.id, kind], enabled: open,
+    queryFn: () => callRpc<{ fee: string; free: boolean; free_days: number | null }>("preview_reservation_fee", { p_id: data.reservation.id, p_kind: kind === "cancel" ? "cancel" : "no_show" }),
+  });
+  const fee = Number(preview.data?.fee ?? 0);
   return (
     <FormDialog open={open} onOpenChange={(o) => { if (o) setF({ reason: "", waive: false, waive_reason: "" }); onOpenChange(o); }}
       title={kind === "cancel" ? "Cancel booking" : "Mark as no-show"} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: data.reservation.id, p_reason: f.reason, p_waive_fee: f.waive, p_waive_reason: f.waive ? f.waive_reason : null },
         { onSuccess: () => onOpenChange(false) })}>
       <p className="rounded-md bg-muted p-3 text-[15px]">
-        Fee under the {rp.name} policy: <strong>{formatAmount(fee, data.reservation.currency)}</strong>. Any assigned room is released.
+        {preview.isLoading ? "Working out the fee…" : preview.isError ? "The fee could not be worked out. It is charged by the rule of the rate plan." : (
+          <>Fee under the {rp.name} policy: <strong>{formatAmount(preview.data?.fee, data.reservation.currency)}</strong>
+            {kind === "cancel" && preview.data?.free && preview.data.free_days ? ` (free when cancelled at least ${preview.data.free_days} day${preview.data.free_days === 1 ? "" : "s"} before arrival)` : ""}.</>
+        )} Any assigned room is released.
       </p>
       <Field label="Reason" htmlFor="fee-reason"><Textarea id="fee-reason" required value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })} /></Field>
       {fee > 0 && (

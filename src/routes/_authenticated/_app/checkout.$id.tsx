@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useAccess } from "@/lib/access";
 import { Field, FormDialog, NoAccess } from "@/lib/setup";
 import { formatDateTime, formatDay } from "@/lib/reservations";
-import { useReservationFolios } from "@/lib/folios";
+import { useCheckoutOutstanding, useReservationFolios } from "@/lib/folios";
 import { useCheckoutAction, useCheckoutApprovals, useCheckoutStay } from "@/lib/checkout";
 import { PageHeader } from "@/components/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,6 +25,7 @@ function CheckoutPage() {
   const { can } = useAccess();
   const stay = useCheckoutStay(id);
   const folios = useReservationFolios(id);
+  const outstandingQ = useCheckoutOutstanding(id);
   const approvals = useCheckoutApprovals(id);
   const [dialog, setDialog] = useState<null | "force" | "request" | "undo">(null);
   const checkOut = useCheckoutAction("check_out", "Guest checked out. Room marked dirty and sent to housekeeping.");
@@ -35,8 +36,9 @@ function CheckoutPage() {
   if (!s) return <EmptyState title="No stay found" description="This booking has not been checked in." />;
 
   const list = folios.data ?? [];
-  const outstanding = list.reduce((t, f) => t + Math.abs(Number(f.balance)), 0);
-  const settled = outstanding === 0;
+  // Outstanding comes from the database (checkout_outstanding): owed plus owed back, across folios.
+  const outstanding = outstandingQ.data ?? "0";
+  const settled = outstandingQ.isSuccess && Number(outstanding) === 0;
   const inHouse = s.status === "in_house";
   const approved = (approvals.data ?? []).find((a) => a.status === "approved" && !a.is_used);
   const pending = (approvals.data ?? []).find((a) => a.status === "pending");

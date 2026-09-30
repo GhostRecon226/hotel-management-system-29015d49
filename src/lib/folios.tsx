@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { formatAmount } from "@/components/ui/money";
+import { currencyDecimals, formatAmount } from "@/components/ui/money";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -19,6 +19,8 @@ export interface FolioSummary {
   is_main: boolean; status: "open" | "closed"; currency: string; guest_id: string | null; guest_name: string | null;
   arrival_date: string; departure_date: string; reservation_status: string; room_number: string | null; closed_at: string | null;
   total_debits: number; total_credits: number; balance: number;
+  /** What the guest owes and what the hotel owes back, calculated by the database (never add these up here). */
+  amount_due: number; credit: number;
 }
 export interface FolioTx {
   id: string; folio_id: string; kind: string; charge_code: string | null; charge_code_name: string | null;
@@ -48,6 +50,13 @@ export function useReservationFolios(reservationId?: string) {
       if (error) throw error;
       return data as FolioSummary[];
     },
+  });
+}
+/** What must be settled before check-out, across all the booking's folios, as the database calculates it. */
+export function useCheckoutOutstanding(reservationId?: string) {
+  return useQuery({
+    queryKey: ["folios", "outstanding", reservationId], enabled: !!reservationId,
+    queryFn: () => callRpc<string>("checkout_outstanding", { p_reservation_id: reservationId }),
   });
 }
 export function useFolioList(propertyId: string | undefined, status: string) {
@@ -110,22 +119,21 @@ export function PostChargeDialog({ folio, open, onOpenChange }: { folio: FolioSu
   const [f, setF] = useState({ code: "", amount: "", inclusive: false, description: "", reference: "" });
   useEffect(() => { if (open) setF({ code: "", amount: "", inclusive: false, description: "", reference: "" }); }, [open]);
   const code = codes.find((c) => c.id === f.code);
-  const [preview, setPreview] = useState<{ tax_name: string; amount: number }[]>([]);
+  // Net, tax and total come from the database (preview_charge), with the same maths as post_charge.
+  const [preview, setPreview] = useState<{ net: string; tax: string; total: string; lines: { name: string; amount: string }[] } | null>(null);
   useEffect(() => {
-    const n = Number(f.amount);
-    if (!code?.is_taxable || !(n > 0)) { setPreview([]); return; }
+    if (!code || !(Number(f.amount) > 0)) { setPreview(null); return; }
     const t = setTimeout(() => {
-      callRpc<{ tax_name: string; amount: number }[]>("calculate_tax", { p_property_id: folio.property_id, p_amount: n, p_tax_inclusive: f.inclusive })
-        .then(setPreview).catch(() => setPreview([]));
+      callRpc<{ net: string; tax: string; total: string; lines: { name: string; amount: string }[] }>("preview_charge",
+        { p_property_id: folio.property_id, p_amount: f.amount, p_tax_inclusive: code.is_taxable && f.inclusive })
+        .then((p) => setPreview(code.is_taxable ? p : { ...p, tax: "0", total: p.net, lines: [] })).catch(() => setPreview(null));
     }, 300);
     return () => clearTimeout(t);
   }, [code, f.amount, f.inclusive, folio.property_id]);
-  const taxTotal = preview.reduce((s, l) => s + Number(l.amount), 0);
-  const n = Number(f.amount) || 0;
 
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title={`Post charge · ${folio.number}`} busy={m.isPending}
-      onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_charge_code_id: f.code, p_amount: n, p_tax_inclusive: f.inclusive,
+      onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_charge_code_id: f.code, p_amount: f.amount, p_tax_inclusive: f.inclusive,
         p_description: f.description, p_reference: f.reference, p_idempotency_key: key }, { onSuccess: () => onOpenChange(false) })}>
       <Field label="Charge" htmlFor="pc-code">
         <Select value={f.code} onValueChange={(v) => setF({ ...f, code: v })}>
@@ -139,11 +147,12 @@ export function PostChargeDialog({ folio, open, onOpenChange }: { folio: FolioSu
       {code?.is_taxable && (
         <label className="flex items-center gap-2 text-sm"><Switch checked={f.inclusive} onCheckedChange={(v) => setF({ ...f, inclusive: v })} /> Amount already includes taxes</label>
       )}
-      {preview.length > 0 && (
+      {preview && (
         <div className="rounded-md border bg-muted/40 p-3 text-sm">
-          {preview.map((l) => <div key={l.tax_name} className="flex justify-between"><span>{l.tax_name}</span><span className="tabular">{formatAmount(l.amount, folio.currency)}</span></div>)}
+          {preview.lines.length > 0 && <div className="flex justify-between"><span>Net</span><span className="tabular">{formatAmount(preview.net, folio.currency)}</span></div>}
+          {preview.lines.map((l) => <div key={l.name} className="flex justify-between"><span>{l.name}</span><span className="tabular">{formatAmount(l.amount, folio.currency)}</span></div>)}
           <div className="mt-1 flex justify-between border-t pt-1 font-medium"><span>Total</span>
-            <span className="tabular">{formatAmount(f.inclusive ? n : n + taxTotal, folio.currency)}</span></div>
+            <span className="tabular">{formatAmount(preview.total, folio.currency)}</span></div>
         </div>
       )}
       <Field label="Description (optional)" htmlFor="pc-desc"><Input id="pc-desc" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
@@ -159,13 +168,14 @@ export function RecordPaymentDialog({ folio, open, onOpenChange }: { folio: Foli
   const m = useFolioMutation("post_payment", "Payment recorded.");
   const key = useDialogKey(open);
   const { depositOnly } = useFolioAccess();
-  const due = Math.max(Number(folio.balance), 0);
+  const due = String(folio.amount_due ?? "");
   const [f, setF] = useState({ method: "", amount: "", currency: folio.currency, deposit: false, reference: "" });
-  useEffect(() => { if (open) setF({ method: "", amount: due ? due.toFixed(2) : "", currency: folio.currency, deposit: depositOnly, reference: "" }); }, [open, due, folio.currency, depositOnly]);
+  // Pre-fill with what is owed, as the database states it (no browser arithmetic).
+  useEffect(() => { if (open) setF({ method: "", amount: Number(due) > 0 ? Number(due).toFixed(currencyDecimals(folio.currency)) : "", currency: folio.currency, deposit: depositOnly, reference: "" }); }, [open, due, folio.currency, depositOnly]);
 
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title={`Record payment · ${folio.number}`} busy={m.isPending}
-      onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_payment_method_id: f.method, p_amount: Number(f.amount), p_currency: f.currency,
+      onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_payment_method_id: f.method, p_amount: f.amount, p_currency: f.currency,
         p_is_deposit: f.deposit || depositOnly, p_description: null, p_reference: f.reference, p_idempotency_key: key }, { onSuccess: () => onOpenChange(false) })}>
       <p className="text-sm text-muted-foreground">Take the payment outside the system first, then record it here.</p>
       <Field label="Method" htmlFor="pp-m">

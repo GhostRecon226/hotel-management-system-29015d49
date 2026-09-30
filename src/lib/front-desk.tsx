@@ -16,6 +16,8 @@ import { formatAmount } from "@/components/ui/money";
 export interface ArrivalRow {
   id: string; number: string; guest_id: string; guest_name: string | null; guest_phone: string | null;
   arrival_date: string; departure_date: string; nights: number; adults: number; children: number;
+  /** Deposit still to take, from the database (v_arrivals.deposit_due). */
+  deposit_due: number;
   room_type_id: string; room_type_code: string; status: string; hold_until: string | null; company_name: string | null;
   special_requests: string | null; total_amount: number; currency: string; deposit_required: number; deposit_paid: number;
   room_id: string | null; room_number: string | null; room_condition: string | null; room_is_occupied: boolean | null;
@@ -152,7 +154,8 @@ export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow |
   useEffect(() => { if (arrival) { setReg(EMPTY_REG); setRoom(arrival.room_id ?? ""); setOvr(""); setWaive(""); } }, [arrival]);
   const picked = rooms.data?.find((r) => r.id === room);
   const notReady = !!picked && !picked.is_ready;
-  const due = arrival ? Number(arrival.deposit_required) - Number(arrival.deposit_paid) : 0;
+  // Deposit still to take, from the database (v_arrivals.deposit_due).
+  const due = arrival ? Number(arrival.deposit_due) : 0;
 
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title={`Check in ${arrival?.guest_name ?? ""}`} busy={m.isPending}

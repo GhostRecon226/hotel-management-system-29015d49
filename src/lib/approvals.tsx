@@ -89,7 +89,7 @@ export function DiscountDialog({ folio, rows, initial, open, onOpenChange }: {
   useEffect(() => { if (open) setF({ tx: initial ?? "", amount: "", reason: "" }); }, [open, initial]);
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title="Give a discount" busy={m.isPending}
-      onSubmit={() => m.mutate({ p_transaction_id: f.tx, p_amount: Number(f.amount), p_reason: f.reason, p_idempotency_key: key },
+      onSubmit={() => m.mutate({ p_transaction_id: f.tx, p_amount: f.amount, p_reason: f.reason, p_idempotency_key: key },
         { onSuccess: (r) => { doneToast(r, "Discount posted."); onOpenChange(false); }, onError: (e) => toast.error(errorMessage(e)) })}>
       <p className="text-sm text-muted-foreground">Discounts within your limit are posted at once. Larger ones wait for approval. Tax is reduced in proportion.</p>
       <Field label="Charge" htmlFor="d-tx">
@@ -113,7 +113,7 @@ export function AdjustmentDialog({ folio, open, onOpenChange }: { folio: FolioSu
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title="Request an adjustment" busy={m.isPending}
       onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_charge_code_id: f.code || null,
-        p_amount: (f.dir === "up" ? 1 : -1) * Number(f.amount), p_reason: f.reason, p_idempotency_key: key },
+        p_amount: f.dir === "up" ? f.amount : `-${f.amount}`, p_reason: f.reason, p_idempotency_key: key },
         { onSuccess: (r) => { doneToast(r, "Adjustment posted."); onOpenChange(false); }, onError: (e) => toast.error(errorMessage(e)) })}>
       <p className="text-sm text-muted-foreground">Adjustments always need approval. No tax is added.</p>
       <Field label="Direction" htmlFor="a-dir">
@@ -138,12 +138,13 @@ export function RefundDialog({ folio, open, onOpenChange }: { folio: FolioSummar
   const { data: methods = [] } = useSetupList<{ id: string; name: string; is_active: boolean }>("payment_methods", "code");
   const m = useMoneyAction("request_refund");
   const key = useDialogKey(open);
-  const credit = Math.max(-Number(folio.balance), 0);
+  // Credit comes from the database (v_folio_balances.credit), not from the balance here.
+  const credit = Number(folio.credit ?? 0);
   const [f, setF] = useState({ method: "", amount: "", reference: "", reason: "" });
-  useEffect(() => { if (open) setF({ method: "", amount: credit ? credit.toFixed(2) : "", reference: "", reason: "" }); }, [open, credit]);
+  useEffect(() => { if (open) setF({ method: "", amount: credit > 0 ? String(folio.credit) : "", reference: "", reason: "" }); }, [open, credit]);
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title="Request a refund" busy={m.isPending}
-      onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_payment_method_id: f.method, p_amount: Number(f.amount), p_currency: folio.currency,
+      onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_payment_method_id: f.method, p_amount: f.amount, p_currency: folio.currency,
         p_reference: f.reference, p_reason: f.reason, p_idempotency_key: key },
         { onSuccess: (r) => { doneToast(r, "Refund posted."); onOpenChange(false); }, onError: (e) => toast.error(errorMessage(e)) })}>
       <p className="text-sm text-muted-foreground">Refunds always need approval. Only return the money after it is approved. Credit on this folio: {formatAmount(credit, folio.currency)}.</p>

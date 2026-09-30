@@ -130,7 +130,7 @@ export function ReservationForm({ initial, mode, reservationId, onDone, onCancel
       p_special_requests: f.special_requests, p_notes: f.notes, p_guarantee: f.guarantee,
       p_hold_until: f.status === "tentative" && f.hold_until ? new Date(f.hold_until).toISOString() : null,
       p_group_id: f.group_id === "none" ? null : f.group_id,
-      p_rate_override: f.override && f.rate_override !== "" ? Number(f.rate_override) : null,
+      p_rate_override: f.override && f.rate_override !== "" ? f.rate_override : null,
       p_override_reason: f.override ? f.override_reason : null,
     };
     if (mode === "create") {

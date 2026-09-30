@@ -23,7 +23,7 @@ export interface Ticket {
   location: string | null; priority: string; status: string; assignee_id: string | null; assignee_name: string | null;
   wait_reason: string | null; resolution: string | null; resolved_by: string | null; resolved_by_name: string | null; resolved_at: string | null;
   closed_by_name: string | null; closed_at: string | null; cancel_reason: string | null; reopen_count: number; last_reopen_reason: string | null;
-  created_by: string | null; created_by_name: string | null; created_at: string; updated_at: string; has_active_block: boolean;
+  created_by: string | null; created_by_name: string | null; created_at: string; updated_at: string; has_active_block: boolean; has_approved_block: boolean;
 }
 export interface ServiceRequest {
   id: string; reservation_id: string; reservation_number: string; guest_name: string | null; room_number: string | null;
@@ -258,7 +258,7 @@ export function NewServiceRequestDialog({ guest, onOpenChange }: { guest: Servic
         if (f.chargeable && (!f.code || !(Number(f.amount) > 0))) { toast.error("Enter the amount and pick a charge code."); return; }
         m.mutate({
           p_reservation_id: guest!.reservation_id, p_category: f.category, p_description: f.description,
-          p_chargeable: f.chargeable, p_charge_amount: f.chargeable ? Number(f.amount) : null, p_charge_code_id: f.chargeable ? f.code : null,
+          p_chargeable: f.chargeable, p_charge_amount: f.chargeable ? f.amount : null, p_charge_code_id: f.chargeable ? f.code : null,
           p_assignee_id: f.assignee === "none" ? null : f.assignee,
         }, { onSuccess: () => onOpenChange(false) });
       }}>

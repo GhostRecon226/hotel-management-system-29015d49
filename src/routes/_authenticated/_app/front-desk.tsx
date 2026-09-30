@@ -124,7 +124,7 @@ function FrontDesk() {
                       : <span className="text-muted-foreground">Not assigned</span>}
                   </TableCell>
                   <TableCell><ResStatusBadge status={a.status} holdUntil={a.hold_until} /></TableCell>
-                  <TableCell><Money amount={Math.max(Number(a.deposit_required) - Number(a.deposit_paid), 0)} currency={a.currency} /></TableCell>
+                  <TableCell><Money amount={a.deposit_due} currency={a.currency} /></TableCell>
                   <TableCell className="text-right">{can("fo.checkin") && <Button size="sm" onClick={() => setCheckIn(a)}>Check in</Button>}</TableCell>
                 </TableRow>
               ))}

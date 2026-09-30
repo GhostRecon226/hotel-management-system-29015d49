@@ -70,7 +70,7 @@ function TicketDetail() {
       <div className="mb-4 flex flex-wrap gap-2">
         <StatusBadge map={TICKET_STATUS} value={t.status} />
         <StatusBadge map={PRIORITY} value={t.priority} />
-        {t.has_active_block && <Badge variant="danger">Room blocked</Badge>}
+        {t.has_approved_block ? <Badge variant="danger">Room blocked</Badge> : t.has_active_block ? <Badge variant="warning">Block requested</Badge> : null}
         {t.reopen_count > 0 && <Badge variant="warning">Reopened {t.reopen_count}×</Badge>}
       </div>
       {t.status === "resolved" && t.resolved_by === ctx.user_id && (

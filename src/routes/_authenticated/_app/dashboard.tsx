@@ -1,3 +1,5 @@
+import { callRpc } from "@/lib/setup";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -47,11 +49,15 @@ function Dashboard() {
   const to = property ? addDays(property.business_date, -1) : "";
   const from = to ? addDays(to, -29) : "";
   const kpi = useKpis(from, to, showKpi);
+  // Period totals come from the database (kpi_summary), with the same definitions as the daily figures.
+  const period = useQuery({
+    queryKey: ["kpi-summary", property?.id, from, to], enabled: showKpi && !!property && !!from,
+    queryFn: () => callRpc<{ occupancy: string | null; adr: string | null; revpar: string | null }>("kpi_summary", { p_property_id: property!.id, p_from: from, p_to: to }),
+  });
 
   if (!property) return <PageHeader title="Dashboard" description="You are not assigned to any property yet." />;
   const d = s.data;
   const rows = (kpi.data ?? []).map((r) => ({ ...r, occ: r.occupancy == null ? null : Number(r.occupancy) * 100, label: formatDay(r.business_date, { day: "numeric", month: "short" }) }));
-  const totals = (kpi.data ?? []).reduce((a, r) => ({ sold: a.sold + r.rooms_sold, avail: a.avail + r.rooms_available, rev: a.rev + Number(r.room_revenue) }), { sold: 0, avail: 0, rev: 0 });
 
   return (
     <div className="space-y-6">
@@ -82,9 +88,9 @@ function Dashboard() {
             ) : (
               <>
                 <div className="mb-4 grid grid-cols-3 gap-3">
-                  <div><div className="text-sm text-muted-foreground">Occupancy</div><div className="text-2xl font-semibold tabular">{formatPercent(totals.avail ? totals.sold / totals.avail : null)}</div></div>
-                  <div className="text-right"><div className="text-sm text-muted-foreground">ADR</div><Money className="text-2xl font-semibold" amount={totals.sold ? totals.rev / totals.sold : null} currency={property.base_currency} /></div>
-                  <div className="text-right"><div className="text-sm text-muted-foreground">RevPAR</div><Money className="text-2xl font-semibold" amount={totals.avail ? totals.rev / totals.avail : null} currency={property.base_currency} /></div>
+                  <div><div className="text-sm text-muted-foreground">Occupancy</div><div className="text-2xl font-semibold tabular">{formatPercent(period.data?.occupancy == null ? null : Number(period.data.occupancy))}</div></div>
+                  <div className="text-right"><div className="text-sm text-muted-foreground">ADR</div><Money className="text-2xl font-semibold" amount={period.data?.adr ?? null} currency={property.base_currency} /></div>
+                  <div className="text-right"><div className="text-sm text-muted-foreground">RevPAR</div><Money className="text-2xl font-semibold" amount={period.data?.revpar ?? null} currency={property.base_currency} /></div>
                 </div>
                 <div className="h-72">
                   <ResponsiveContainer width="100%" height="100%">

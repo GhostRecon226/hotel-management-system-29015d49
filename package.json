@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "test:db": "scripts/test-db.sh",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "check:money": "scripts/check-no-browser-money.sh"
   },
   "overrides": {
     "rolldown": "1.2.1"

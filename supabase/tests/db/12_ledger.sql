@@ -28,6 +28,12 @@ begin
   perform t.eq(public.post_charge(t.id('f1'), t.cc('REST'), 10000, false, 'Dinner', null, 'chg-1'), v_tx, '[FIN-008] same idempotency key does not post twice');
   perform t.eq(t.balance(t.id('f1')), 23650.0000, '[FIN-008] duplicate did not change the balance');
   perform t.lives(format('select public.post_charge(%L, %L, 100.50, false, %L, null, %L)', t.id('f1'), t.cc('MINIBAR'), 'Water', 'chg-3'), '[NFR-004] NGN allows two decimals');
+  -- Rounding: the leftover kobo goes on the last tax that has a rate, never on a 0% tax (found in step 4).
+  v_tx2 := public.post_charge(t.id('f1'), t.cc('REST'), 7777.77, false, 'Odd amount', null, 'chg-odd');
+  perform t.eq((select coalesce(sum(amount), 0) from public.folio_tax_lines where transaction_id = v_tx2 and percent = 0), 0::numeric,
+    '[FIN-001] a 0% tax line never carries a rounding remainder');
+  perform t.eq((select sum(amount) from public.folio_tax_lines where transaction_id = v_tx2), round(7777.77 * 0.1825, 2),
+    '[FIN-001] total tax on an odd amount is the rounded combined rate (1,419.44)');
   perform t.raises(format('select public.post_charge(%L, %L, 100.123, false, %L, null, %L)', t.id('f1'), t.cc('MINIBAR'), 'Water', 'chg-4'), 'E_PRECISION|E_INVALID', '[NFR-004][S6] NGN refuses three decimals');
   perform t.raises(format('select public.post_charge(%L, %L, -500, false, %L, null, %L)', t.id('f1'), t.cc('REST'), 'x', 'chg-5'), 'E_INVALID', 'negative amount refused');
   perform t.raises(format('select public.post_payment(%L, %L, 10, %L, false, null, null, %L)', t.id('f1'), t.pm('CASH'), 'EUR', 'pay-eur'), 'E_NO_RATE|E_INVALID', '[SET-007] foreign currency without a rate is refused');
