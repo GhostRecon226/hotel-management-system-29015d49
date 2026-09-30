@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Runs the database tests on LOCAL Supabase (Docker), never on a real project.
+#   1. Rebuilds the local database from supabase/migrations (supabase db reset).
+#   2. Loads the test helpers and the shared fixtures.
+#   3. Runs every supabase/tests/db/[1-9]*.sql file. Each file rolls back at the end.
+# Every check prints "ok" or "not ok" and the run carries on, so you see every failure.
+# Usage: scripts/test-db.sh            (SKIP_RESET=1 to reuse the current database)
+set -uo pipefail
+cd "$(dirname "$0")/.."
+export SUPABASE_PROJECT_ID=hotel-desk
+DB_URL=${DB_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}
+case "$DB_URL" in *127.0.0.1*|*localhost*) ;; *) echo "Refusing to run tests against a non-local database."; exit 2;; esac
+
+if [ "${SKIP_RESET:-0}" != "1" ]; then
+  supabase db reset --local >/tmp/hotel-desk-reset.log 2>&1 || { cat /tmp/hotel-desk-reset.log; exit 2; }
+fi
+
+run() { psql "$DB_URL" -X -q -v ON_ERROR_STOP=1 "$@"; }
+run -f supabase/tests/db/00_helpers.sql >/dev/null || exit 2
+run -f supabase/tests/db/01_fixtures.sql 2>&1 | grep -E "not ok|ERROR" && { echo "Fixtures failed."; exit 2; }
+
+pass=0; fail=0; failures=""
+for f in supabase/tests/db/[1-9]*.sql; do
+  out=$(psql "$DB_URL" -X -q -f "$f" 2>&1)
+  p=$(grep -c "NOTICE:  ok - " <<<"$out")
+  n=$(grep -c "NOTICE:  not ok - " <<<"$out")
+  e=$(grep "ERROR:" <<<"$out" | grep -v "current transaction is aborted")
+  ec=$(grep -c . <<<"$e")
+  pass=$((pass + p)); fail=$((fail + n + ec))
+  printf "%-40s %4d ok  %4d not ok\n" "$(basename "$f")" "$p" "$((n + ec))"
+  if [ "$n" -gt 0 ]; then failures+=$(grep "NOTICE:  not ok - " <<<"$out" | sed "s/.*NOTICE:  not ok - /  $(basename "$f" .sql): /")$'\n'; fi
+  if [ "$ec" -gt 0 ]; then failures+=$(sed "s/^/  $(basename "$f" .sql): FILE ERROR /" <<<"$e")$'\n'; fi
+done
+
+echo
+if [ "$fail" -eq 0 ]; then
+  echo "ALL OK ($pass checks)"
+else
+  echo "FAILURES:"
+  printf "%s" "$failures"
+  echo
+  echo "$pass ok, $fail not ok"
+  exit 1
+fi
