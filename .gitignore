@@ -42,3 +42,7 @@ supabase/.branches/
 
 # Vercel build output
 .vercel/
+
+# Playwright output
+/test-results/
+/playwright-report/

@@ -45,3 +45,12 @@ Blunt list. Nothing here is hidden elsewhere.
 - Some UI lists are capped (e.g. 200 folios) with no pagination.
 - `bulk_add_rooms` is capped at 500 rooms per call.
 - Some `package.json` dependencies from the starter template may be unused (recharts is used; others like embla/cmdk/vaul/react-day-picker/input-otp/resizable-panels likely not). Their UI wrappers were deleted; the packages were left in place to avoid lockfile churn.
+
+## Sign-in and Create your hotel (fixed 30 Sep 2026)
+
+Two bugs stopped the first real signup on the live project. Both are fixed on branch `claude/audit-status-report`, and browser tests in `e2e/sign-in.spec.ts` (`npm run test:e2e`, local Supabase only) cover the three flows.
+
+1. **Blank page after the email link or sign-in.** Console: "Uncaught undefined" in `MatchInnerImpl`, no network error. Cause: Supabase announces `SIGNED_IN` again when it reads the session from the confirmation link, on sign-in and on tab focus. The root listener in `src/routes/__root.tsx` reloaded the router and cancelled the in-flight `my_context` check while the route guards were redirecting from `/dashboard` to `/create-hotel`. The guard failed with an empty error and nothing rendered. Fix: the listener no longer reloads on sign-in (navigation already runs the guards). It resets only when a different user signs in, and on sign-out it clears cached data.
+2. **Create hotel stuck on "Creating…".** `create_hotel` succeeded (the hotel, property, trial, roles and Nigerian defaults were all created), but the page only marked the cached context stale before navigating. The dashboard guard read the stale `has_hotel = false` and sent the user back to the same page, so it never re-rendered. Fix: the page fetches the fresh context before navigating, both guards revalidate stale context, and the button is always released.
+
+Lesson: route guards that read cached React Query data must revalidate, and auth listeners must not reload the router during a navigation.
