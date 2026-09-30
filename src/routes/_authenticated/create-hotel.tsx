@@ -13,7 +13,7 @@ import { AuthLayout } from "@/components/auth-layout";
 
 export const Route = createFileRoute("/_authenticated/create-hotel")({
   beforeLoad: async ({ context }) => {
-    const ctx = await context.queryClient.ensureQueryData(myContextQuery);
+    const ctx = await context.queryClient.ensureQueryData({ ...myContextQuery, revalidateIfStale: true });
     if (ctx.has_hotel) throw redirect({ to: "/dashboard" });
   },
   head: () => ({
@@ -69,8 +69,16 @@ function CreateHotel() {
       setBusy(false);
       return;
     }
-    await queryClient.invalidateQueries({ queryKey: myContextQuery.queryKey });
-    navigate({ to: "/dashboard", replace: true });
+    // Fetch the new context before leaving: the dashboard guard must see has_hotel = true,
+    // or it sends the user straight back here and the button stays on "Creating…".
+    try {
+      await queryClient.fetchQuery({ ...myContextQuery, staleTime: 0 });
+      await navigate({ to: "/dashboard", replace: true });
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (

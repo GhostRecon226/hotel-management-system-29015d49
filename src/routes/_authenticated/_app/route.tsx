@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app-shell";
 
 export const Route = createFileRoute("/_authenticated/_app")({
   beforeLoad: async ({ context }) => {
-    const ctx = await context.queryClient.ensureQueryData(myContextQuery);
+    const ctx = await context.queryClient.ensureQueryData({ ...myContextQuery, revalidateIfStale: true });
     if (!ctx.has_hotel && !ctx.disabled) throw redirect({ to: "/create-hotel" });
   },
   component: AppLayout,
