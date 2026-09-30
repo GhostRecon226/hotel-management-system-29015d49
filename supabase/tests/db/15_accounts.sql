@@ -173,13 +173,36 @@ begin
   perform t.ok((select merged_into = t.id('g2') from public.guests where id = t.id('g3')), '[GST-004] the duplicate points to the kept profile');
   perform t.login('gm');
   perform t.raises(format('select public.anonymise_guest(%L, %L)', t.id('g2'), 'Request'), 'E_INVALID|E_IN_USE', '[GST-005] a guest with upcoming stays cannot be anonymised');
-  perform public.cancel_reservation(v_r, 'Guest asked', true, 'Anonymisation');
+  -- cancel every booking of theirs that is not over (earlier tests booked this guest too)
+  perform public.cancel_reservation(r.id, 'Guest asked', true, 'Anonymisation')
+  from public.reservations r where r.guest_id = t.id('g2') and r.status in ('tentative', 'confirmed');
   perform public.anonymise_guest(t.id('g2'), 'Guest asked to be forgotten');
   perform t.eq((select first_name from public.guests where id = t.id('g2')), 'Anonymised', '[GST-005] personal data is removed');
   perform t.ok((select phone is null and email is null from public.guests where id = t.id('g2')), '[GST-005] contact details are gone');
   perform t.ok(exists (select 1 from public.reservations where id = v_r), '[GST-005] reservation history is kept');
   perform t.admin();
 exception when others then perform t.admin(); perform t.crash('guest privacy', sqlerrm);
+end $$;
+
+-- [GST-005] Anonymising is refused while the guest has a stay that is not over.
+do $$
+declare v_g uuid; v_r uuid;
+begin
+  perform t.login('adminA');
+  perform public.save_room(t.id('propA'), null, '190', t.id('std'), '1', true);
+  perform t.login('fdo');
+  v_g := public.save_guest(null, 'Future', 'Guest', '08030000077', null, 'NG', null, null);
+  v_r := t.book(v_g, t.bdate() + 10, t.bdate() + 12, t.id('std'), t.id('bar'), null, 'tentative');
+  perform t.login('gm');
+  perform t.raises(format('select public.anonymise_guest(%L, %L)', v_g, 'Request'), 'E_IN_USE', '[GST-005] a guest with a tentative future booking cannot be anonymised');
+  perform public.cancel_reservation(v_r, 'Guest asked', true, 'Anonymisation');
+  perform t.login('fdo');
+  v_r := t.book(v_g, t.bdate(), t.bdate() + 1, t.id('std'), t.id('bar'));
+  perform public.check_in(v_r, t.reg(), t.room('190'), null, null);
+  perform t.login('gm');
+  perform t.raises(format('select public.anonymise_guest(%L, %L)', v_g, 'Request'), 'E_IN_USE', '[GST-005] a guest who is in house cannot be anonymised');
+  perform t.admin();
+exception when others then perform t.admin(); perform t.crash('anonymise guard', sqlerrm);
 end $$;
 
 rollback;

@@ -32,4 +32,18 @@ begin
   execute 'reset role';
 exception when others then execute 'reset role'; raise notice 'not ok - [upgrade crashed] %', sqlerrm;
 end $$;
+-- Guests with a booking that is not over cannot be anonymised (20261001100100)
+do $$
+declare v_g uuid;
+begin
+  select guest_id into v_g from public.reservations where id = pg_temp.id('resA');
+  perform pg_temp.as_user('admin');
+  begin
+    perform public.anonymise_guest(v_g, 'Request');
+    perform pg_temp.ok(false, '[upgrade][GST-005] a guest booked before the upgrade cannot be anonymised while the booking is open');
+  exception when others then perform pg_temp.ok(sqlerrm like '%E_IN_USE%', '[upgrade][GST-005] a guest booked before the upgrade cannot be anonymised while the booking is open');
+  end;
+  execute 'reset role';
+exception when others then execute 'reset role'; raise notice 'not ok - [upgrade crashed] %', sqlerrm;
+end $$;
 rollback;
