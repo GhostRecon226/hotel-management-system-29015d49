@@ -113,10 +113,24 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+    // Supabase repeats SIGNED_IN for the same person (after an email link, on tab focus). Reloading then
+    // cancelled route checks that were still running and left a blank page, so only react to real changes.
+    let currentUserId: string | null | undefined;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      const userId = session?.user.id ?? null;
+      if (event === "INITIAL_SESSION") { currentUserId = userId; return; }
+      if (event === "SIGNED_OUT") {
+        currentUserId = null;
+        queryClient.clear(); // never show one user's data to the next
+        router.invalidate();
+        return;
+      }
+      if (event !== "SIGNED_IN" && event !== "USER_UPDATED") return;
+      if (event === "SIGNED_IN" && userId === currentUserId) return;
+      currentUserId = userId;
+      // Let checks that are already running finish instead of cancelling them.
+      queryClient.invalidateQueries(undefined, { cancelRefetch: false });
       router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
