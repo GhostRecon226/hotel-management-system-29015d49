@@ -65,7 +65,7 @@ function FolioPage() {
           {open && can("fin.adjust.post") && <Button variant="outline" onClick={() => setDialog("adjust")}>Adjustment</Button>}
           {open && can("fin.refund.post") && <Button variant="outline" onClick={() => setDialog("refund")}>Refund</Button>}
           {open && perm.charge && <Button variant="outline" onClick={() => setDialog("split")}>Split folio</Button>}
-          {open && perm.charge && <Button variant="outline" onClick={() => { setTransferRow(null); setDialog("transfer"); }}>Transfer</Button>}
+          {open && perm.transfer && <Button variant="outline" onClick={() => { setTransferRow(null); setDialog("transfer"); }}>Transfer</Button>}
           {open && perm.payment && <Button variant="outline" disabled={close.isPending} onClick={() => close.mutate({ p_id: folio.folio_id })}>Close</Button>}
           {can("fin.invoice.issue") && <Button variant="outline" disabled={issue.isPending} onClick={() => issue.mutate({ folioId: folio.folio_id, kind: open ? "interim" : "final" })}>{open ? "Interim invoice" : "Issue invoice"}</Button>}
           {!open && perm.reopen && <Button variant="outline" onClick={() => setDialog("reopen")}>Reopen</Button>}
@@ -130,7 +130,7 @@ function FolioPage() {
             const actions = open ? [
               can("fin.discount.apply") && r.kind === "charge" && !r.is_reversed && !r.is_transferred && <DropdownMenuItem key="d" className="h-10" onClick={() => { setDiscountRow(r.id); setDialog("discount"); }}>Give discount</DropdownMenuItem>,
               perm.reverse && reversible(r) && !pendingTx.has(r.id) && <DropdownMenuItem key="r" className="h-10" onClick={() => setReverse(r)}>Request reversal</DropdownMenuItem>,
-              perm.charge && movableRow(r, rows) && <DropdownMenuItem key="t" className="h-10" onClick={() => { setTransferRow(r.id); setDialog("transfer"); }}>Transfer to another folio</DropdownMenuItem>,
+              perm.transfer && movableRow(r, rows) && <DropdownMenuItem key="t" className="h-10" onClick={() => { setTransferRow(r.id); setDialog("transfer"); }}>Transfer to another folio</DropdownMenuItem>,
             ].filter(Boolean) : [];
             return (
               <TableRow key={r.id} className={cn(greyed && "text-muted-foreground opacity-60")}>

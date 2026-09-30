@@ -196,7 +196,9 @@ export function SplitFolioDialog({ folio, rows, open, onOpenChange }: { folio: F
   const [label, setLabel] = useState("");
   const [picked, setPicked] = useState<string[]>([]);
   useEffect(() => { if (open) { setLabel(""); setPicked([]); } }, [open]);
-  const movable = rows.filter((r) => movableRow(r, rows));
+  // Moving rows while splitting is a transfer, so it needs the transfer permission (FIN-009).
+  const { transfer } = useFolioAccess();
+  const movable = transfer ? rows.filter((r) => movableRow(r, rows)) : [];
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title={`Split folio ${folio.number}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_label: label, p_guest_id: null, p_transaction_ids: picked, p_idempotency_key: key },
@@ -204,7 +206,7 @@ export function SplitFolioDialog({ folio, rows, open, onOpenChange }: { folio: F
       <Field label="New folio name" htmlFor="sf-l" hint="For example: Company, Extras, Second guest."><Input id="sf-l" value={label} onChange={(e) => setLabel(e.target.value)} required /></Field>
       <div className="space-y-1.5">
         <p className="text-sm font-medium">Move these rows to the new folio (optional)</p>
-        {movable.length === 0 && <p className="text-sm text-muted-foreground">No rows can be moved.</p>}
+        {movable.length === 0 && <p className="text-sm text-muted-foreground">{transfer ? "No rows can be moved." : "Moving rows needs a manager. You can still open the new folio."}</p>}
         {movable.map((r) => (
           <label key={r.id} className="flex min-h-11 items-center gap-3 rounded-md border px-3 text-sm">
             <Checkbox checked={picked.includes(r.id)} onCheckedChange={(v) => setPicked(v ? [...picked, r.id] : picked.filter((x) => x !== r.id))} />
@@ -271,5 +273,6 @@ export function useFolioAccess() {
   const { can } = useAccess();
   return {
     charge: can("fin.charge.post"), payment: can("fin.payment.post"), reverse: can("fin.reverse.post"), reopen: can("fin.folio.reopen"),
+    transfer: can("fin.folio.transfer"),
   };
 }
