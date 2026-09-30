@@ -5,7 +5,7 @@ import { useAccess } from "@/lib/access";
 import { formatDay } from "@/lib/reservations";
 import {
   BLOCK_TYPES, BlockRoomDialog, BlockStatusBadge, ConditionBadge, ReasonDialog, SetConditionDialog,
-  useBoardRoom, useRoomBlocks, useRoomMutation, type RoomBlock,
+  useBoardRoom, useRoomBlocks, useRoomMutation, useRoomOpenTasks, type RoomBlock,
 } from "@/lib/rooms";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ function RoomDetail() {
   const { can } = useAccess();
   const { data: room, isLoading } = useBoardRoom(id);
   const { data: blocks = [], isLoading: blocksLoading } = useRoomBlocks(id);
+  const { data: tasks = [], isLoading: tasksLoading } = useRoomOpenTasks(id);
   const [dialog, setDialog] = useState<null | "condition" | "block">(null);
   const [release, setRelease] = useState<RoomBlock | null>(null);
   const [reject, setReject] = useState<RoomBlock | null>(null);
@@ -85,9 +86,24 @@ function RoomDetail() {
 
       <h2 className="mb-3 mt-8 text-xl font-semibold">Open tasks</h2>
       <Card><CardContent className="py-4">
-        {openBlocks.filter((b) => b.status === "pending").length > 0
-          ? <p className="text-[15px]">{openBlocks.filter((b) => b.status === "pending").length} block request waiting for approval.</p>
-          : <p className="text-[15px] text-muted-foreground">No open tasks. Housekeeping and maintenance tasks will show here once those sections are built.</p>}
+        {openBlocks.some((b) => b.status === "pending") && (
+          <p className="mb-3 text-[15px]">{openBlocks.filter((b) => b.status === "pending").length} block request waiting for approval.</p>
+        )}
+        {tasksLoading ? <LoadingState label="Loading tasks…" /> : tasks.length === 0
+          ? <p className="text-[15px] text-muted-foreground">No open housekeeping tasks or maintenance tickets.</p>
+          : (
+            <ul className="divide-y">
+              {tasks.map((t) => (
+                <li key={t.id} className="flex min-h-11 items-center justify-between gap-3 py-2 text-[15px]">
+                  <span>
+                    <Badge variant={t.kind === "maintenance" ? "warning" : "info"} className="mr-2">{t.kind === "maintenance" ? "Maintenance" : "Housekeeping"}</Badge>
+                    <a href={t.link} className="font-medium text-primary-strong hover:underline">{t.title}</a>
+                  </span>
+                  <span className="text-sm text-muted-foreground">{t.status.replace(/_/g, " ")}{t.assignee ? ` · ${t.assignee}` : " · not assigned"}</span>
+                </li>
+              ))}
+            </ul>
+          )}
       </CardContent></Card>
 
       <h2 className="mb-3 mt-8 text-xl font-semibold">Blocks</h2>

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { callRpc } from "@/lib/setup";
+import { formatAmount } from "@/components/ui/money";
 import { errorMessage } from "@/lib/errors";
 import { Badge } from "@/components/ui/badge";
 
@@ -72,6 +73,11 @@ export function addDays(iso: string, n: number) {
   const [y = 1970, m = 1, d = 1] = iso.split("-").map(Number);
   return isoDate(new Date(y, m - 1, d + n));
 }
+/** "1 night", "2 nights". */
+export function nightsLabel(n: number) {
+  return `${n} ${n === 1 ? "night" : "nights"}`;
+}
+
 export function nightsBetween(a: string, b: string) {
   if (!a || !b) return 0;
   return Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000);
@@ -147,7 +153,8 @@ export function describeEvent(e: HistoryEvent): { title: string; changes: string
         continue;
       }
       if (JSON.stringify(b[k]) !== JSON.stringify(a[k])) {
-        const fmt = (v: unknown) => (v === null || v === undefined || v === "" ? "—" : String(v));
+        const money = ["total_amount", "deposit_required", "cancellation_fee", "no_show_fee", "rate_override"].includes(k);
+        const fmt = (v: unknown) => (v === null || v === undefined || v === "" ? "—" : money ? formatAmount(v as string, String(a["currency"] ?? "NGN")) : String(v));
         changes.push(`${FIELD_LABEL[k]}: ${fmt(b[k])} → ${fmt(a[k])}`);
       }
     }

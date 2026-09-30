@@ -2,10 +2,19 @@ import { cn } from "@/lib/utils";
 
 const SYMBOL: Record<string, string> = { NGN: "₦", GHS: "GH₵", KES: "KSh", ZAR: "R", USD: "$", GBP: "£", EUR: "€" };
 
-/** Format an amount with its currency symbol. Naira uses ₦. */
+// Currencies without minor units. Same list as app.currency_decimals in the database.
+const ZERO_DECIMALS = new Set(["XOF", "XAF", "RWF", "UGX", "BIF", "GNF", "KMF", "DJF", "JPY"]);
+
+/** Decimal places for a currency (naira 2, CFA franc 0). */
+export function currencyDecimals(currency = "NGN") {
+  return ZERO_DECIMALS.has(currency.toUpperCase()) ? 0 : 2;
+}
+
+/** Format an amount with its currency symbol and decimals. Naira uses ₦. Formatting only: never used to add up. */
 export function formatAmount(amount: number | string | null | undefined, currency = "NGN") {
   const n = Number(amount ?? 0);
-  const body = new Intl.NumberFormat("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(n));
+  const dp = currencyDecimals(currency);
+  const body = new Intl.NumberFormat("en-NG", { minimumFractionDigits: dp, maximumFractionDigits: dp }).format(Math.abs(n));
   const sym = SYMBOL[currency] ?? `${currency} `;
   return `${n < 0 ? "−" : ""}${sym}${body}`;
 }

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { useAccess } from "@/lib/access";
 import { NoAccess } from "@/lib/setup";
-import { formatDay, ResStatusBadge } from "@/lib/reservations";
+import { formatDay, ResStatusBadge, nightsLabel } from "@/lib/reservations";
 import {
   CheckInDialog, ExtendStayDialog, MoveRoomDialog, RoomStateBadge, useArrivals, useInHouse, VoidCheckInDialog, WalkInDialog,
   type ArrivalRow, type InHouseRow,
@@ -115,7 +115,7 @@ function FrontDesk() {
                   {guestCell(a.id, a.number, a.guest_name, a.company_name)}
                   <TableCell className="tabular">
                     {formatDay(a.arrival_date)} – {formatDay(a.departure_date)}
-                    <span className="block text-sm text-muted-foreground">{a.nights} nights · {a.room_type_code}</span>
+                    <span className="block text-sm text-muted-foreground">{nightsLabel(a.nights)} · {a.room_type_code}</span>
                     {a.is_late && <Badge variant="danger">Late arrival</Badge>}
                   </TableCell>
                   <TableCell>

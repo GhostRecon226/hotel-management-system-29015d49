@@ -150,3 +150,28 @@ export function ReasonDialog({ open, title, label, required, busy, onOpenChange,
     </FormDialog>
   );
 }
+
+export interface RoomOpenTask { id: string; kind: "housekeeping" | "maintenance"; title: string; status: string; assignee: string | null; link: string }
+
+const HK_TYPE: Record<string, string> = { turnover: "Turnover clean", stayover: "Stayover clean", deep_clean: "Deep clean", inspection: "Inspection" };
+
+/** Open housekeeping tasks and maintenance tickets for one room. Each list is filtered by the user's own read rights. */
+export function useRoomOpenTasks(roomId: string) {
+  return useQuery({
+    queryKey: ["room-open-tasks", roomId],
+    queryFn: async (): Promise<RoomOpenTask[]> => {
+      const [hk, mnt] = await Promise.all([
+        (supabase.from as any)("v_hk_board").select("id, type, status, assignee_name")
+          .eq("room_id", roomId).not("status", "in", "(inspected,cancelled)").order("created_at"),
+        (supabase.from as any)("v_maintenance_tickets").select("id, title, status, assignee_name")
+          .eq("room_id", roomId).not("status", "in", "(closed,cancelled)").order("created_at"),
+      ]);
+      if (hk.error) throw hk.error;
+      if (mnt.error) throw mnt.error;
+      return [
+        ...(hk.data ?? []).map((t: any) => ({ id: t.id, kind: "housekeeping" as const, title: HK_TYPE[t.type] ?? t.type, status: t.status, assignee: t.assignee_name, link: "/housekeeping" })),
+        ...(mnt.data ?? []).map((t: any) => ({ id: t.id, kind: "maintenance" as const, title: t.title, status: t.status, assignee: t.assignee_name, link: `/maintenance/${t.id}` })),
+      ];
+    },
+  });
+}

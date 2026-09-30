@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/lib/access";
 import { callRpc, Field, FormDialog, useSetupList } from "@/lib/setup";
 import { DOC_TYPES } from "@/lib/guests";
-import { addDays, formatDay, nightsBetween, useResMutation } from "@/lib/reservations";
+import { addDays, formatDay, nightsBetween, nightsLabel, useResMutation } from "@/lib/reservations";
 import { GuestPicker } from "@/components/reservation-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -162,7 +162,7 @@ export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow |
       }, { onSuccess: () => onOpenChange(false) })}>
       {arrival && (
         <p className="text-sm text-muted-foreground">
-          {arrival.number} · {arrival.room_type_code} · {formatDay(arrival.arrival_date)} to {formatDay(arrival.departure_date)} ({arrival.nights} nights)
+          {arrival.number} · {arrival.room_type_code} · {formatDay(arrival.arrival_date)} to {formatDay(arrival.departure_date)} ({nightsLabel(arrival.nights)})
         </p>
       )}
       <Field label="Room" htmlFor="fd-room"><RoomSelect rooms={rooms.data ?? []} value={room} onChange={setRoom} loading={rooms.isLoading} /></Field>
@@ -207,7 +207,7 @@ export function WalkInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
       <p className="text-sm text-muted-foreground">Creates the booking and checks the guest in. Arrival is today, {formatDay(bdate)}.</p>
       <Field label="Guest" htmlFor="guest"><GuestPicker value={guest.id} label={guest.label} onPick={(id, label) => setGuest({ id, label })} /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Departure" htmlFor="wi-dep" hint={`${Math.max(nightsBetween(bdate, f.departure), 0)} nights`}>
+        <Field label="Departure" htmlFor="wi-dep" hint={nightsLabel(Math.max(nightsBetween(bdate, f.departure), 0))}>
           <Input id="wi-dep" type="date" min={addDays(bdate, 1)} value={f.departure} onChange={(e) => set("departure", e.target.value)} required />
         </Field>
         <Field label="Room type" htmlFor="wi-rt">
