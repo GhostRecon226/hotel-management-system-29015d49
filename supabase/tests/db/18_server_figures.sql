@@ -43,6 +43,16 @@ begin
   perform t.eq((j->>'fee')::numeric, 50000::numeric, '[S9] cancel preview is one night close to arrival');
   c := public.cancel_reservation(v_near, 'Late change', false, null);
   perform t.eq((c->>'charged')::numeric, (j->>'fee')::numeric, '[S9] cancel charges exactly the previewed fee (one night)');
+  -- A plan with 0 free-cancellation days charges however early the cancellation (decision 6d).
+  perform t.login('adminA');
+  perform public.save_rate_plan_price(null, public.save_rate_plan(t.id('propA'), null, 'NOFREE', 'Non-refundable', false, 'nights', 1, 'none', 0, 'none', 0, true, 0),
+    t.id('std'), t.bdate(), t.bdate() + 60, 40000, 'NGN');
+  perform t.login('fom');
+  v_far := t.book(t.id('g2'), t.bdate() + 20, t.bdate() + 21, t.id('std'), (select id from public.rate_plans where property_id = t.id('propA') and code = 'NOFREE'));
+  j := public.preview_reservation_fee(v_far, 'cancel');
+  perform t.eq((j->>'fee')::numeric, 40000::numeric, '[6d] 0 free days: cancelling 20 days ahead still costs one night');
+  c := public.cancel_reservation(v_far, 'Changed mind', false, null);
+  perform t.eq((c->>'charged')::numeric, 40000::numeric, '[6d] and the cancellation charges it');
   v_due := t.book(t.id('g3'), t.bdate(), t.bdate() + 2, t.id('std'), t.id('bar'));
   j := public.preview_reservation_fee(v_due, 'no_show');
   c := public.mark_no_show(v_due, 'Did not arrive', false, null);
