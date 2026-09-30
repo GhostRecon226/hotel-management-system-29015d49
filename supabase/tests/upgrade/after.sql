@@ -75,6 +75,11 @@ begin
   exception when others then perform pg_temp.ok(false, '[upgrade] and the Front Office Manager role (' || sqlerrm || ')');
   end;
 
+  -- Reservation officers do not see ID documents (decision 6b)
+  perform pg_temp.ok(not exists (select 1 from public.role_permissions rp join public.roles r on r.id = rp.role_id
+    where r.tenant_id is null and r.code = 'RES' and rp.permission_key = 'guest.document.view'),
+    '[upgrade][6b] the built-in Reservation Officer role no longer sees ID documents');
+
   -- Other new data on the existing property
   perform pg_temp.ok(exists (select 1 from public.document_sequences where property_id = pg_temp.id('prop') and doc_type = 'interim'),
     '[upgrade] the existing property got the interim invoice number series');
