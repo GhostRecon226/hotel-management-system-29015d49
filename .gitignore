@@ -34,3 +34,8 @@ dist-ssr
 # Supabase CLI local state
 supabase/.temp/
 supabase/.branches/
+
+# Local environment files with real values
+.env
+.env.*
+!.env.example
