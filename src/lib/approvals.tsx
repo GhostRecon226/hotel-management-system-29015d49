@@ -183,7 +183,12 @@ export function DecideDialog({ approval, approve, onOpenChange }: { approval: Ap
   return (
     <FormDialog open={!!approval} onOpenChange={onOpenChange} title={`${approve ? "Approve" : "Reject"} ${approval ? KIND_LABEL[approval.kind].toLowerCase() : ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: approval!.id, p_approve: approve, p_reason: reason }, {
-        onSuccess: () => { toast.success(approve ? "Approved and posted." : "Rejected. Nothing was posted."); onOpenChange(false); },
+        onSuccess: () => {
+          toast.success(!approve ? "Rejected. Nothing was posted."
+            : approval!.kind === "checkout" ? "Approved. The front desk can now check the guest out."
+            : "Approved and posted.");
+          onOpenChange(false);
+        },
         onError: (e) => {
           if (errorCode(e) === "E_SOD") setSod(errorMessage(e));
           else toast.error(errorMessage(e));
