@@ -36,11 +36,16 @@ exception when others then perform t.admin(); perform t.crash('lost and found', 
 end $$;
 
 -- [S5][ADM-006] The audit trail cannot be changed or deleted, even by the database owner.
-do $$ begin
+do $$ declare v uuid; begin
   perform t.admin();
   perform t.raises('update public.audit_events set reason = ''changed''', 'E_IMMUTABLE', '[ADM-006] the audit trail cannot be changed, even by the owner');
   perform t.raises('delete from public.audit_events', 'E_IMMUTABLE', '[ADM-006] the audit trail cannot be deleted');
   perform t.raises('truncate public.audit_events', 'E_IMMUTABLE', '[ADM-006] the audit trail cannot be truncated');
+  perform t.raises(format('truncate public.tenants cascade'), 'E_IMMUTABLE', '[ADM-006] the audit trail cannot be wiped by truncating a table it depends on');
+  perform t.login('fdo');
+  v := public.save_guest(null, 'Audit', 'Check', null, null, 'NG', null, null);
+  perform t.admin();
+  perform t.ok(exists (select 1 from public.audit_events where table_name = 'guests' and record_id = v::text), '[ADM-006] the app still writes audit rows');
 exception when others then perform t.crash('audit immutability', sqlerrm);
 end $$;
 

@@ -91,6 +91,12 @@ begin
   perform t.raises(format('update public.folio_transactions set kind = %L where id = %L', 'payment', t.id('chg1')), 'E_IMMUTABLE', '[FIN-006] posted row cannot change kind');
   perform t.raises(format('delete from public.folio_transactions where id = %L', t.id('chg1')), 'E_IMMUTABLE', '[FIN-006] ledger rows cannot be deleted');
   perform t.raises('truncate public.folio_tax_lines, public.folio_transactions cascade', 'E_IMMUTABLE', '[FIN-006] ledger cannot be truncated');
+  perform t.raises('truncate public.folio_tax_lines', 'E_IMMUTABLE', '[FIN-006] tax lines cannot be truncated on their own');
+  perform t.raises('delete from public.folio_tax_lines where true', 'E_IMMUTABLE', '[FIN-006] tax lines cannot be deleted');
+  perform t.raises(format('insert into public.folio_transactions(tenant_id, property_id, folio_id, kind, charge_code_id, amount, currency, base_amount, business_date, idempotency_key) values (%L, %L, %L, %L, %L, 100, %L, 100, %L, gen_random_uuid()::text)',
+    t.id('tenantA'), t.id('propA'), t.id('f1'), 'charge', t.cc('REST'), 'NGN', t.bdate() + 5), 'E_DATE|E_INVALID', '[FIN-014] posting to a future business date is refused');
+  perform t.raises(format('insert into public.folio_transactions(tenant_id, property_id, folio_id, kind, payment_method_id, amount, currency, base_amount, business_date, idempotency_key) values (%L, %L, %L, %L, %L, 100, %L, 100, %L, gen_random_uuid()::text)',
+    t.id('tenantA'), t.id('propA'), t.id('f1'), 'payment', t.pm('CASH'), 'NGN', t.bdate()), 'check constraint|E_INVALID', '[FIN-006] a payment cannot carry a positive sign');
   perform t.raises(format('insert into public.folio_transactions(tenant_id, property_id, folio_id, kind, charge_code_id, amount, currency, base_amount, business_date, idempotency_key) values (%L, %L, %L, %L, %L, 100, %L, 100, %L, gen_random_uuid()::text)',
     t.id('tenantA'), t.id('propA'), t.id('f1'), 'charge', t.cc('REST'), 'NGN', t.bdate() - 3), 'E_DATE|E_INVALID', '[FIN-014] posting to a past business date is refused');
   perform t.raises(format('insert into public.folio_transactions(tenant_id, property_id, folio_id, kind, charge_code_id, amount, currency, base_amount, business_date, idempotency_key) values (%L, %L, %L, %L, %L, -100, %L, -100, %L, gen_random_uuid()::text)',

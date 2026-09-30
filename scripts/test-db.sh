@@ -18,7 +18,7 @@ pass=0; fail=0; failures=""
 
 # Upgrade test: build only the migrations the live project already has, create a hotel, apply the rest,
 # and check that hotel. UPGRADE_FROM is the last migration applied to the live project.
-UPGRADE_FROM=${UPGRADE_FROM:-20260930110400}
+UPGRADE_FROM=${UPGRADE_FROM:-20260930160100}
 if [ "${SKIP_UPGRADE:-0}" != "1" ]; then
   supabase db reset --local --version "$UPGRADE_FROM" >/tmp/hotel-desk-reset.log 2>&1 || { cat /tmp/hotel-desk-reset.log; exit 2; }
   run -f supabase/tests/upgrade/before.sql >/dev/null || { echo "Upgrade test set-up failed."; exit 2; }
