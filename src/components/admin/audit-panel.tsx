@@ -16,8 +16,17 @@ const ANY = "__any";
 const ACTION_LABEL: Record<string, string> = { insert: "Added", update: "Changed", delete: "Removed" };
 
 function Diff({ before, after }: { before: Record<string, unknown> | null; after: Record<string, unknown> | null }) {
+  // Guest records keep only the names of the fields that changed, never their values (privacy).
+  const names = (after?.["changed"] ?? after?.["fields"]) as string[] | undefined;
+  if (Array.isArray(names)) {
+    const label = after?.["changed"] ? "Changed" : "Filled in";
+    return <span className="text-sm">{label}: {names.length ? names.map((n) => n.replace(/_/g, " ")).join(", ") : "nothing"}</span>;
+  }
+  if (after?.["deleted"] === true) return <span className="text-sm">Removed</span>;
   const keys = Array.from(new Set([...Object.keys(before ?? {}), ...Object.keys(after ?? {})]))
-    .filter((k) => JSON.stringify(before?.[k]) !== JSON.stringify(after?.[k]));
+    .filter((k) => JSON.stringify(before?.[k]) !== JSON.stringify(after?.[k]))
+    // Internal ids and timestamps mean nothing to a manager; the record type and person columns already say what and who.
+    .filter((k) => k !== "id" && k !== "tenant_id" && !k.endsWith("_id") && k !== "created_at" && k !== "updated_at");
   if (keys.length === 0) return <span className="text-sm text-muted-foreground">No field changes</span>;
   const show = (v: unknown) => (v === undefined || v === null || v === "" ? "—" : typeof v === "object" ? JSON.stringify(v) : String(v));
   return (
