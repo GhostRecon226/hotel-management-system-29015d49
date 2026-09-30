@@ -58,6 +58,17 @@ begin
   where not exists (select 1 from public.role_permissions rp join public.roles r on r.id = rp.role_id
                     where r.tenant_id is null and r.code = x.code and rp.permission_key = p.key and rp.grant_level = 'Y');
   perform t.eq(coalesce(v, ''), '', '[ADM-002] System Administrator and General Manager hold every permission at full level');
+
+  -- Supabase loads the safeupdate guard for every API request: an UPDATE or DELETE without WHERE fails
+  -- ("DELETE requires a WHERE clause"). Direct test connections do not load it, so check the code itself.
+  select string_agg(distinct n.nspname || '.' || p.proname, ', ') into v
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace,
+    regexp_matches(regexp_replace(pg_get_functiondef(p.oid), '--[^\n]*', '', 'g'),
+      '(?:^|[;\s(])((?:delete\s+from\s+[a-z_\.]+|update\s+(?!of\M)(?!skip\M)[a-z_\.]+\s+set\M)[^;]*;)', 'gi') m
+  where n.nspname in ('public', 'app') and p.prokind = 'f'
+    and m[1] !~* '\mwhere\M'
+    and not exists (select 1 from regexp_matches(pg_get_functiondef(p.oid), 'do\s+' || regexp_replace(left(m[1], 30), '([\.\(\)\[\]\*\+\?])', '\\\1', 'g'), 'i'));
+  perform t.eq(coalesce(v, ''), '', '[API] no function runs an UPDATE or DELETE without WHERE (the Supabase API refuses them)');
 exception when others then perform t.crash('grants', sqlerrm);
 end $$;
 
