@@ -85,6 +85,18 @@ begin
   perform t.login('hks');
   perform public.close_ticket(v_tk);
   perform t.eq((select status from public.room_blocks where id = v_blk), 'released', '[MNT-002] closing the ticket releases the block');
+  perform t.login('fom');
+  select min(available) into v_avail from public.get_availability(t.id('propA'), d, d + 2) where room_type_code = 'DLX';
+  perform t.eq(v_avail, 1, '[MNT-002] the room is back on sale after the ticket closes');
+  perform t.login('hks');
+  v_tk := public.create_ticket(t.id('propA'), 'Door lock', null, t.room('201'), null, 'normal', t.id('mnt'));
+  perform t.login('mnt');
+  perform public.start_ticket(v_tk);
+  v_blk := public.block_room_for_ticket(v_tk, 'out_of_order', d + 20, d + 21, 'Lock change');
+  perform public.resolve_ticket(v_tk, 'Lock changed');
+  perform t.login('hks');
+  perform public.close_ticket(v_tk);
+  perform t.eq((select status from public.room_blocks where id = v_blk), 'cancelled', '[MNT-002] a block still waiting for approval is cancelled when its ticket closes');
 
   -- a block cannot cover a night a guest is assigned
   perform t.login('fdo');
@@ -103,7 +115,7 @@ end $$;
 
 -- The nightly roll. Move hotel A back one day, put guests in house, then roll.
 do $$
-declare v_r uuid; v_s uuid; v_ns uuid; v_d0 date; j jsonb; v_f uuid; v_n int;
+declare v_r uuid; v_s uuid; v_ns uuid; v_x uuid; v_y uuid; v_d0 date; j jsonb; v_f uuid; v_n int;
 begin
   perform t.admin();
   perform t.set_bdate(t.id('propA'), t.bdate() - 1);
@@ -111,9 +123,17 @@ begin
   perform t.login('fdo');
   v_r := t.book(t.id('g1'), v_d0, v_d0 + 2, t.id('std'), t.id('bar'));   -- staying on
   perform public.check_in(v_r, t.reg(), t.room('101'), null, null);
-  v_s := t.book(t.id('g2'), v_d0, v_d0 + 1, t.id('std'), t.id('bar'));   -- due out after the roll (overstay)
-  perform public.check_in(v_s, t.reg(), t.room('103'), null, null);
   v_ns := t.book(t.id('g3'), v_d0, v_d0 + 1, t.id('std'), t.id('bar'));  -- never arrives
+  -- Two guests who were due to leave today (the closing date) and are still in house at the roll:
+  -- v_s in room 103 (free tonight) and v_x in room 201, which is promised to v_y tonight.
+  perform t.admin(); perform t.set_bdate(t.id('propA'), v_d0 - 1); perform t.login('fdo');
+  v_s := t.book(t.id('g2'), v_d0 - 1, v_d0, t.id('std'), t.id('bar'));
+  perform public.check_in(v_s, t.reg(), t.room('103'), null, null);
+  v_x := t.book(t.id('g3'), v_d0 - 1, v_d0, t.id('dlx'), t.id('bar'));
+  perform public.check_in(v_x, t.reg(), t.room('201'), null, null);
+  perform t.admin(); perform t.set_bdate(t.id('propA'), v_d0); perform t.login('fdo');
+  v_y := t.book(t.id('g1'), v_d0, v_d0 + 1, t.id('dlx'), t.id('bar'));
+  perform public.assign_room(v_y, t.room('201'));
   perform t.login('adminA');
   perform public.set_rollover_time(t.id('propA'), '00:00');
   j := public.run_due_rollovers_now();
@@ -129,8 +149,11 @@ begin
   perform t.eq((select rooms_sold from public.daily_stats where property_id = t.id('propA') and business_date = v_d0), 2, '[RPT-001] daily stats: two rooms sold');
   perform t.eq((select room_revenue from public.daily_stats where property_id = t.id('propA') and business_date = v_d0), 100000.0000, '[RPT-001] daily stats: room revenue is net of tax');
   perform t.ok(exists (select 1 from public.business_date_log where property_id = t.id('propA') and from_date = v_d0 and status = 'success'), '[DAY-001] the roll is logged');
-  perform t.eq((select departure_date from public.reservations where id = v_s), v_d0 + 2, '[DAY-003] an overstay is extended by one night');
-  perform t.eq((select count(*)::int from public.folio_transactions where folio_id = t.main_folio(v_s) and charge_code_id = t.cc('ROOM')), 1, '[DAY-003] the overstay night was charged');
+  perform t.eq((select departure_date from public.reservations where id = v_s), v_d0 + 1, '[DAY-003] a guest still in house after their departure day is extended by one night');
+  perform t.eq((select count(*)::int from public.folio_transactions where folio_id = t.main_folio(v_s) and charge_code_id = t.cc('ROOM') and business_date = v_d0), 1, '[DAY-003] the overstay night was charged');
+  perform t.eq((select departure_date from public.reservations where id = v_x), v_d0, '[DAY-003] an overstay into a room promised to another guest is not extended');
+  perform t.ok(exists (select 1 from public.notifications where user_id = t.id('fom') and kind = 'overstay' and entity_id = v_x), '[DAY-003] managers are told about the overstay they must resolve');
+  perform t.eq((select count(*)::int from public.folio_transactions where folio_id = t.main_folio(v_x) and charge_code_id = t.cc('ROOM') and business_date = v_d0), 0, '[DAY-003] and no night is charged for it until they decide');
   perform t.eq((select occupancy from public.v_kpi_daily where property_id = t.id('propA') and business_date = v_d0),
     round(2::numeric / (select count(*) from public.rooms where property_id = t.id('propA') and is_active), 4), '[RPT-001] occupancy is rooms sold over rooms available');
   perform t.eq((select adr from public.v_kpi_daily where property_id = t.id('propA') and business_date = v_d0), 50000.0000, '[RPT-001] ADR uses revenue net of tax');
@@ -148,6 +171,8 @@ declare v_today date; j jsonb;
 begin
   perform t.admin();
   v_today := t.bdate();
+  -- A date can only be rolled once (business_date_log_once), so start from a clean log like a new hotel.
+  delete from public.business_date_log where property_id = t.id('propA');
   perform t.set_bdate(t.id('propA'), v_today - 3);
   perform t.login('adminA');
   perform public.set_rollover_time(t.id('propA'), '00:00');

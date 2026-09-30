@@ -60,8 +60,19 @@ begin
   perform t.raises(format('select public.post_payment(%L, %L, 100, %L, false, null, null, %L)', t.id('f1'), t.pm('CASH'), 'NGN', 'pay-rsv'),
     'E_FORBIDDEN|E_NOT_FOUND', '[FIN-002] reservation officer cannot take a normal payment');
   v_res := t.book(t.id('g3'), t.bdate() + 30, t.bdate() + 31, t.id('std'), t.id('bar'));
+  perform t.lives(format('select public.post_payment(public.open_main_folio(%L), %L, 10000, %L, true, %L, null, %L)', v_res, t.pm('CASH'), 'NGN', 'Deposit', 'dep-rsv'),
+    '[FIN-015] a reservation officer can take a deposit on their own booking');
   select count(*) into v_n from public.folios;
   perform t.eq(v_n, 1, '[FIN-015] reservation officer sees only folios of own bookings');
+  select count(*) into v_n from public.v_folio_balances;
+  perform t.eq(v_n, 1, '[FIN-015] and only their balances');
+  select count(*) into v_n from public.folio_transactions where folio_id = t.id('f1');
+  perform t.eq(v_n, 0, '[FIN-015] and no rows of a colleague''s folio');
+  perform t.raises(format('select public.post_payment(%L, %L, 100, %L, true, null, null, %L)', t.id('f1'), t.pm('CASH'), 'NGN', 'dep-other'),
+    'E_NOT_FOUND|E_FORBIDDEN', '[FIN-015] and cannot post to a colleague''s folio');
+  perform t.login('fom');
+  select count(*) into v_n from public.folios;
+  perform t.ok(v_n >= 3, '[FIN-015] a manager sees every folio');
   perform t.admin();
 exception when others then perform t.admin(); perform t.crash('payments', sqlerrm);
 end $$;
@@ -184,6 +195,7 @@ begin
   v_f2 := public.split_folio(t.id('f1'), 'Company', null, null, 'split-1');
   perform t.ok(v_f2 is not null, '[FIN-010] staff can add a second folio');
   perform t.raises(format('select public.transfer_transaction(%L, %L, %L)', v_tx, v_f2, 'tr-fdo'), 'E_FORBIDDEN', '[FIN-009] front desk cannot transfer between folios');
+  perform t.ok(exists (select 1 from public.permissions where key = 'fin.folio.transfer'), '[FIN-009] transfers have their own permission');
   perform t.login('fom');
   perform public.transfer_transaction(v_tx, v_f2, 'tr-1');
   perform t.eq(t.balance(v_f2), 4730.0000, '[FIN-009] target folio receives the charge and its tax');
