@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAccess } from "@/lib/access";
+import { formatDay } from "@/lib/reservations";
 import { NoAccess, Field, FormDialog, SectionHeader, StatusText, formatMoney, useSetupList, useSetupMutation } from "@/lib/setup";
 
 import type { RoomType } from "./room-types";
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/_app/setup/rates")({ compo
 type PolicyType = "none" | "nights" | "percent" | "amount";
 interface RatePlan {
   id: string; code: string; name: string; is_corporate: boolean; is_active: boolean;
-  cancellation_policy_type: PolicyType; cancellation_policy_value: number;
+  cancellation_policy_type: PolicyType; cancellation_policy_value: number; cancellation_free_days: number;
   no_show_policy_type: PolicyType; no_show_policy_value: number;
   deposit_policy_type: PolicyType; deposit_policy_value: number;
 }
@@ -26,7 +27,7 @@ interface Price {
 
 const POLICY_LABEL: Record<PolicyType, string> = { none: "None", nights: "Nights", percent: "Percent", amount: "Amount" };
 const describe = (t: PolicyType, v: number) =>
-  t === "none" ? "None" : t === "nights" ? `${Number(v)} night(s)` : t === "percent" ? `${Number(v)}%` : formatMoney(v);
+  t === "none" ? "None" : t === "nights" ? `${Number(v)} night${Number(v) === 1 ? "" : "s"}` : t === "percent" ? `${Number(v)}%` : formatMoney(v);
 
 function PolicyField({ label, id, type, value, onChange }: {
   label: string; id: string; type: PolicyType; value: string; onChange: (t: PolicyType, v: string) => void;
@@ -48,8 +49,7 @@ function PolicyField({ label, id, type, value, onChange }: {
 
 const emptyPlan = {
   id: null as string | null, code: "", name: "", is_corporate: false, is_active: true,
-  ct: "none" as PolicyType, cv: "0", nt: "none" as PolicyType, nv: "0", dt: "none" as PolicyType, dv: "0",
-};
+  ct: "none" as PolicyType, cv: "0", nt: "none" as PolicyType, nv: "0", dt: "none" as PolicyType, dv: "0", fd: "2" };
 
 function Rates() {
   const { property, can } = useAccess();
@@ -69,7 +69,7 @@ function Rates() {
   const editPlan = (r?: RatePlan) => {
     setP(r ? { id: r.id, code: r.code, name: r.name, is_corporate: r.is_corporate, is_active: r.is_active,
       ct: r.cancellation_policy_type, cv: String(r.cancellation_policy_value), nt: r.no_show_policy_type, nv: String(r.no_show_policy_value),
-      dt: r.deposit_policy_type, dv: String(r.deposit_policy_value) } : emptyPlan);
+      dt: r.deposit_policy_type, dv: String(r.deposit_policy_value), fd: String(r.cancellation_free_days ?? 2) } : emptyPlan);
     setPlanOpen(true);
   };
   const editPrice = (planId: string, x?: Price) => {
@@ -90,7 +90,7 @@ function Rates() {
             <div>
               <div className="font-medium">{plan.code} — {plan.name} {plan.is_corporate && <span className="ml-2 rounded bg-secondary px-1.5 py-0.5 text-xs">Corporate</span>}</div>
               <div className="mt-1 text-sm text-muted-foreground">
-                Cancellation: {describe(plan.cancellation_policy_type, plan.cancellation_policy_value)} · No-show: {describe(plan.no_show_policy_type, plan.no_show_policy_value)} · Deposit: {describe(plan.deposit_policy_type, plan.deposit_policy_value)}
+                Cancellation: {describe(plan.cancellation_policy_type, plan.cancellation_policy_value)}{plan.cancellation_policy_type !== "none" && (plan.cancellation_free_days > 0 ? `, free up to ${plan.cancellation_free_days} day${plan.cancellation_free_days === 1 ? "" : "s"} before arrival` : ", always charged")} · No-show: {describe(plan.no_show_policy_type, plan.no_show_policy_value)} · Deposit: {describe(plan.deposit_policy_type, plan.deposit_policy_value)}
               </div>
               <StatusText active={plan.is_active} />
             </div>
@@ -104,7 +104,7 @@ function Rates() {
             <TableBody>
               {prices.filter((x) => x.rate_plan_id === plan.id).map((x) => (
                 <TableRow key={x.id}>
-                  <TableCell>{typeName(x.room_type_id)}</TableCell><TableCell>{x.valid_from}</TableCell><TableCell>{x.valid_to}</TableCell>
+                  <TableCell>{typeName(x.room_type_id)}</TableCell><TableCell>{formatDay(x.valid_from)}</TableCell><TableCell>{formatDay(x.valid_to)}</TableCell>
                   <TableCell><Money amount={x.amount} currency={x.currency} /></TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" onClick={() => editPrice(plan.id, x)}>Edit</Button>
@@ -122,12 +122,19 @@ function Rates() {
           p_property_id: property!.id, p_id: p.id, p_code: p.code, p_name: p.name, p_is_corporate: p.is_corporate,
           p_cancellation_type: p.ct, p_cancellation_value: p.cv || "0", p_no_show_type: p.nt, p_no_show_value: p.nv || "0",
           p_deposit_type: p.dt, p_deposit_value: p.dv || "0", p_is_active: p.is_active,
+          p_cancellation_free_days: p.ct === "none" ? 0 : Number(p.fd || 0),
         }, { onSuccess: () => setPlanOpen(false) })}>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Code" htmlFor="rp-code"><Input id="rp-code" value={p.code} onChange={(e) => setP({ ...p, code: e.target.value })} required /></Field>
           <Field label="Name" htmlFor="rp-name"><Input id="rp-name" value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} required /></Field>
         </div>
         <PolicyField label="Cancellation" id="rp-c" type={p.ct} value={p.cv} onChange={(t, v) => setP({ ...p, ct: t, cv: v })} />
+        {p.ct !== "none" && (
+          <Field label="Free cancellation up to (days before arrival)" htmlFor="rp-fd"
+            hint="Cancelling at least this many days before arrival costs nothing. 0 means the fee always applies.">
+            <Input id="rp-fd" type="number" inputMode="numeric" min={0} step={1} value={p.fd} onChange={(e) => setP({ ...p, fd: e.target.value })} required />
+          </Field>
+        )}
         <PolicyField label="No-show" id="rp-n" type={p.nt} value={p.nv} onChange={(t, v) => setP({ ...p, nt: t, nv: v })} />
         <PolicyField label="Deposit" id="rp-d" type={p.dt} value={p.dv} onChange={(t, v) => setP({ ...p, dt: t, dv: v })} />
         <div className="flex gap-6">

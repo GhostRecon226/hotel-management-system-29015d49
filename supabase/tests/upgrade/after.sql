@@ -80,6 +80,9 @@ begin
     where r.tenant_id is null and r.code = 'RES' and rp.permission_key = 'guest.document.view'),
     '[upgrade][6b] the built-in Reservation Officer role no longer sees ID documents');
 
+  perform pg_temp.ok((select cancellation_free_days = 2 from public.rate_plans where id = pg_temp.id('bar')),
+    '[upgrade][6d] an existing rate plan gets the 2-day free-cancellation default');
+
   -- Other new data on the existing property
   perform pg_temp.ok(exists (select 1 from public.document_sequences where property_id = pg_temp.id('prop') and doc_type = 'interim'),
     '[upgrade] the existing property got the interim invoice number series');

@@ -66,6 +66,20 @@ begin
 exception when others then perform t.admin(); perform t.crash('assignment', sqlerrm);
 end $$;
 
+-- Free cancellation defaults to 2 days (decision 6d).
+do $$
+declare v_rp uuid;
+begin
+  perform t.login('adminA');
+  v_rp := public.save_rate_plan(t.id('propA'), null, 'DFLT', 'Default window', false, 'nights', 1, 'none', 0, 'none', 0, true);
+  perform t.eq((select cancellation_free_days from public.rate_plans where id = v_rp), 2, '[6d] a new rate plan gets 2 free-cancellation days unless told otherwise');
+  perform public.save_rate_plan(t.id('propA'), v_rp, 'DFLT', 'Default window', false, 'nights', 1, 'none', 0, 'none', 0, true, 0);
+  perform t.eq((select cancellation_free_days from public.rate_plans where id = v_rp), 0, '[6d] and it can be changed per rate plan');
+  perform t.admin();
+  perform t.ok(not exists (select 1 from public.rate_plans where cancellation_free_days is null), '[6d] no rate plan is left without a free-cancellation setting');
+exception when others then perform t.admin(); perform t.crash('free cancellation default', sqlerrm);
+end $$;
+
 -- Cancellation and no-show fees (finding M7).
 do $$
 declare v_early uuid; v_late uuid; v_ns uuid; v_w uuid; j jsonb; v_f uuid;

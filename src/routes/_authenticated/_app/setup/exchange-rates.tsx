@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAccess } from "@/lib/access";
+import { formatDay } from "@/lib/reservations";
 import { NoAccess, Field, FormDialog, SectionHeader, useSetupList, useSetupMutation } from "@/lib/setup";
 
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ function ExchangeRates() {
           {rows.length === 0 && <TableStateRow colSpan={4} title="No exchange rates yet." />}
           {rows.map((r) => (
             <TableRow key={r.id}>
-              <TableCell>{r.rate_date}</TableCell><TableCell className="font-medium">{r.currency}</TableCell>
+              <TableCell>{formatDay(r.rate_date)}</TableCell><TableCell className="font-medium">{r.currency}</TableCell>
               <TableCell className="text-right tabular-nums">{Number(r.rate).toLocaleString("en-NG", { maximumFractionDigits: 8 })}</TableCell>
               <TableCell className="text-right"><Button variant="outline" size="sm" onClick={() => { setF({ currency: r.currency, rate_date: r.rate_date, rate: String(r.rate) }); setOpen(true); }}>Change</Button></TableCell>
             </TableRow>
