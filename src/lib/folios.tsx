@@ -158,14 +158,15 @@ export function RecordPaymentDialog({ folio, open, onOpenChange }: { folio: Foli
   const currencies = [folio.currency, ...new Set(rates.map((r) => r.currency.trim()).filter((c) => c !== folio.currency))];
   const m = useFolioMutation("post_payment", "Payment recorded.");
   const key = useDialogKey(open);
+  const { depositOnly } = useFolioAccess();
   const due = Math.max(Number(folio.balance), 0);
   const [f, setF] = useState({ method: "", amount: "", currency: folio.currency, deposit: false, reference: "" });
-  useEffect(() => { if (open) setF({ method: "", amount: due ? due.toFixed(2) : "", currency: folio.currency, deposit: false, reference: "" }); }, [open, due, folio.currency]);
+  useEffect(() => { if (open) setF({ method: "", amount: due ? due.toFixed(2) : "", currency: folio.currency, deposit: depositOnly, reference: "" }); }, [open, due, folio.currency, depositOnly]);
 
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title={`Record payment · ${folio.number}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_payment_method_id: f.method, p_amount: Number(f.amount), p_currency: f.currency,
-        p_is_deposit: f.deposit, p_description: null, p_reference: f.reference, p_idempotency_key: key }, { onSuccess: () => onOpenChange(false) })}>
+        p_is_deposit: f.deposit || depositOnly, p_description: null, p_reference: f.reference, p_idempotency_key: key }, { onSuccess: () => onOpenChange(false) })}>
       <p className="text-sm text-muted-foreground">Take the payment outside the system first, then record it here.</p>
       <Field label="Method" htmlFor="pp-m">
         <Select value={f.method} onValueChange={(v) => setF({ ...f, method: v })}>
@@ -184,7 +185,8 @@ export function RecordPaymentDialog({ folio, open, onOpenChange }: { folio: Foli
       </div>
       {f.currency !== folio.currency && <p className="text-sm text-muted-foreground">The latest exchange rate on or before the business date is used and saved with the payment.</p>}
       <Field label="Reference (optional)" htmlFor="pp-r" hint="POS slip, transfer reference or receipt number."><Input id="pp-r" value={f.reference} onChange={(e) => setF({ ...f, reference: e.target.value })} /></Field>
-      <label className="flex items-center gap-2 text-sm"><Switch checked={f.deposit} onCheckedChange={(v) => setF({ ...f, deposit: v })} /> This is a deposit</label>
+      <label className="flex items-center gap-2 text-sm"><Switch checked={f.deposit || depositOnly} disabled={depositOnly} onCheckedChange={(v) => setF({ ...f, deposit: v })} /> This is a deposit</label>
+      {depositOnly && <p className="text-sm text-muted-foreground">Your role can record deposits only. Other payments are taken by the front desk or cashier.</p>}
     </FormDialog>
   );
 }
@@ -274,5 +276,7 @@ export function useFolioAccess() {
   return {
     charge: can("fin.charge.post"), payment: can("fin.payment.post"), reverse: can("fin.reverse.post"), reopen: can("fin.folio.reopen"),
     transfer: can("fin.folio.transfer"),
+    // Deposits only (decision 6a): fin.deposit.take lets a user record deposits but no other payment.
+    deposit: can("fin.payment.post") || can("fin.deposit.take"), depositOnly: !can("fin.payment.post") && can("fin.deposit.take"),
   };
 }

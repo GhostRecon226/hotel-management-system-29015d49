@@ -34,7 +34,8 @@ if [ "${SKIP_RESET:-0}" != "1" ]; then
   supabase db reset --local >/tmp/hotel-desk-reset.log 2>&1 || { cat /tmp/hotel-desk-reset.log; exit 2; }
 fi
 run -f supabase/tests/db/00_helpers.sql >/dev/null || exit 2
-run -f supabase/tests/db/01_fixtures.sql 2>&1 | grep -E "not ok|ERROR" && { echo "Fixtures failed."; exit 2; }
+fx=$(run -f supabase/tests/db/01_fixtures.sql 2>&1) || { echo "$fx" | grep -E "ERROR|not ok"; echo "Fixtures failed."; exit 2; }
+if grep -qE "not ok|ERROR" <<<"$fx"; then echo "$fx" | grep -E "ERROR|not ok"; echo "Fixtures failed."; exit 2; fi
 
 for f in supabase/tests/db/[1-9]*.sql; do
   out=$(psql "$DB_URL" -X -q -f "$f" 2>&1)

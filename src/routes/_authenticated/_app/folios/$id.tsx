@@ -60,7 +60,7 @@ function FolioPage() {
         description={`${folio.guest_name ?? "Guest"}${folio.room_number ? ` · Room ${folio.room_number}` : ""} · ${formatDay(folio.arrival_date)} → ${formatDay(folio.departure_date)}`}
         actions={<>
           {open && perm.charge && <Button onClick={() => setDialog("charge")}>Post charge</Button>}
-          {open && perm.payment && <Button onClick={() => setDialog("payment")}>Record payment</Button>}
+          {open && perm.deposit && <Button onClick={() => setDialog("payment")}>{perm.depositOnly ? "Record deposit" : "Record payment"}</Button>}
           {open && can("fin.discount.apply") && <Button variant="outline" onClick={() => { setDiscountRow(null); setDialog("discount"); }}>Discount</Button>}
           {open && can("fin.adjust.post") && <Button variant="outline" onClick={() => setDialog("adjust")}>Adjustment</Button>}
           {open && can("fin.refund.post") && <Button variant="outline" onClick={() => setDialog("refund")}>Refund</Button>}

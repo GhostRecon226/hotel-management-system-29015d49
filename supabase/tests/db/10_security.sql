@@ -50,6 +50,14 @@ begin
     and not exists (select 1 from information_schema.columns k where k.table_schema = 'public'
                     and k.table_name = c.relname and k.column_name = 'tenant_id');
   perform t.eq(coalesce(v, ''), '', '[NFR-001] every hotel table has tenant_id');
+
+  -- Only admins hand out roles, and only with permissions they hold (escalation guard). So the built-in
+  -- System Administrator and General Manager roles must hold every permission, or some roles can never be given.
+  select string_agg(p.key || ' (' || x.code || ')', ', ') into v
+  from public.permissions p cross join (values ('SYSADMIN'), ('GM')) x(code)
+  where not exists (select 1 from public.role_permissions rp join public.roles r on r.id = rp.role_id
+                    where r.tenant_id is null and r.code = x.code and rp.permission_key = p.key and rp.grant_level = 'Y');
+  perform t.eq(coalesce(v, ''), '', '[ADM-002] System Administrator and General Manager hold every permission at full level');
 exception when others then perform t.crash('grants', sqlerrm);
 end $$;
 

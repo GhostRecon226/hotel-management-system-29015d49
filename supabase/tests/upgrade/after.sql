@@ -50,6 +50,31 @@ begin
     where r.tenant_id is null and r.code = 'RES' and rp.permission_key = 'fin.payment.post'),
     '[upgrade][6a] and no longer takes other payments');
 
+  -- Every permission is held by the administrator roles, so every built-in role can still be handed out.
+  perform pg_temp.ok(not exists (select 1 from public.permissions p where not exists (
+      select 1 from public.role_permissions rp join public.roles r on r.id = rp.role_id
+      where r.tenant_id is null and r.code = 'SYSADMIN' and rp.permission_key = p.key)),
+    '[upgrade] the System Administrator role holds every permission, including the new ones');
+  perform pg_temp.ok(not exists (select 1 from public.permissions p where not exists (
+      select 1 from public.role_permissions rp join public.roles r on r.id = rp.role_id
+      where r.tenant_id is null and r.code = 'GM' and rp.permission_key = p.key)),
+    '[upgrade] the General Manager role holds every permission, including the new ones');
+  execute 'reset role';
+  insert into auth.users (id, email, email_confirmed_at, aud, role) values ('00000000-0000-0000-0000-00000000ab01', 'upg-new@test.local', now(), 'authenticated', 'authenticated');
+  insert into upg.ids values ('newstaff', '00000000-0000-0000-0000-00000000ab01');
+  perform pg_temp.as_user('admin');
+  perform public.register_invited_user(pg_temp.id('newstaff'), 'New Starter', null);
+  begin
+    perform public.assign_role(pg_temp.id('newstaff'), pg_temp.id('prop'), (select id from public.roles where tenant_id is null and code = 'RES'));
+    perform pg_temp.ok(true, '[upgrade] the existing administrator can still give someone the Reservation Officer role');
+  exception when others then perform pg_temp.ok(false, '[upgrade] the existing administrator can still give someone the Reservation Officer role (' || sqlerrm || ')');
+  end;
+  begin
+    perform public.assign_role(pg_temp.id('newstaff'), pg_temp.id('prop'), (select id from public.roles where tenant_id is null and code = 'FOM'));
+    perform pg_temp.ok(true, '[upgrade] and the Front Office Manager role');
+  exception when others then perform pg_temp.ok(false, '[upgrade] and the Front Office Manager role (' || sqlerrm || ')');
+  end;
+
   -- Other new data on the existing property
   perform pg_temp.ok(exists (select 1 from public.document_sequences where property_id = pg_temp.id('prop') and doc_type = 'interim'),
     '[upgrade] the existing property got the interim invoice number series');
