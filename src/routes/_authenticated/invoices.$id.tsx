@@ -65,8 +65,10 @@ function InvoicePage() {
                 {l.description}
                 {l.tax_lines.length > 0 && <span className="block text-xs text-muted-foreground">{l.tax_lines.map((t) => `${t.name} ${Number(t.percent)}%`).join(" · ")}</span>}
               </TableCell>
-              <TableCell><Money amount={l.net} currency={cur} /></TableCell>
-              <TableCell><Money amount={l.tax} currency={cur} /></TableCell>
+              {/* Payments and refunds are money received or returned, not charges: no net or tax column. */}
+              {l.kind === "payment" || l.kind === "refund"
+                ? <><TableCell className="text-right text-muted-foreground">—</TableCell><TableCell className="text-right text-muted-foreground">—</TableCell></>
+                : <><TableCell><Money amount={l.net} currency={cur} /></TableCell><TableCell><Money amount={l.tax} currency={cur} /></TableCell></>}
               <TableCell><Money amount={l.total} currency={cur} /></TableCell>
             </TableRow>
           ))}

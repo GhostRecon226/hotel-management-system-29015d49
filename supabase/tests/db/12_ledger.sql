@@ -109,7 +109,11 @@ begin
   perform t.login('fom');
   perform t.eq((select count(*)::int from public.approvals where id = v_ap and status = 'pending'), 1, '[ADM-008] manager sees the pending discount');
   perform public.decide_approval(v_ap, true, 'Agreed');
-  perform t.eq(t.balance(t.id('f1')), v_b - 6000 * 1.1825, '[FIN-004] approved discount also reduces service charge and VAT (accountant to confirm)');
+  -- The discount amount includes tax, and the tax is reduced in proportion (the screen says so).
+  perform t.eq(t.balance(t.id('f1')), v_b - 6000, '[FIN-004] an approved discount of 6,000 (tax included) lowers the balance by 6,000');
+  perform t.ok((select count(*) = 2 and sum(x.amount) < 0 from public.folio_tax_lines x join public.folio_transactions d on d.id = x.transaction_id
+    where d.folio_id = t.id('f1') and d.kind = 'discount' and d.idempotency_key like 'approval:%' and x.amount <> 0),
+    '[FIN-004] and reduces service charge and VAT in proportion (accountant to confirm the treatment)');
   perform t.ok(t.balance(t.id('f1')) < v_b, '[FIN-004] approved discount posts');
   perform t.raises(format('select public.decide_approval(%L, true, %L)', v_ap, 'again'), 'E_INVALID', 'a decided approval cannot be decided again');
   perform t.login('fdo');
