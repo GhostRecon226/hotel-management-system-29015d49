@@ -115,7 +115,7 @@ end $$;
 
 -- The nightly roll. Move hotel A back one day, put guests in house, then roll.
 do $$
-declare v_r uuid; v_s uuid; v_ns uuid; v_x uuid; v_y uuid; v_d0 date; j jsonb; v_f uuid; v_n int;
+declare v_r uuid; v_s uuid; v_ns uuid; v_x uuid; v_y uuid; v_m uuid; v_o uuid; v_nr uuid; v_short uuid; v_d0 date; j jsonb; v_f uuid; v_n int;
 begin
   perform t.admin();
   perform t.set_bdate(t.id('propA'), t.bdate() - 1);
@@ -124,6 +124,19 @@ begin
   v_r := t.book(t.id('g1'), v_d0, v_d0 + 2, t.id('std'), t.id('bar'));   -- staying on
   perform public.check_in(v_r, t.reg(), t.room('101'), null, null);
   v_ns := t.book(t.id('g3'), v_d0, v_d0 + 1, t.id('std'), t.id('bar'));  -- never arrives
+  -- Three more rooms for the overstay cases below.
+  perform t.login('adminA');
+  perform public.save_room(t.id('propA'), null, '104', t.id('std'), '1', true);
+  perform public.save_room(t.id('propA'), null, '105', t.id('std'), '1', true);
+  perform public.save_room(t.id('propA'), null, '106', t.id('std'), '1', true);
+  -- A rate plan whose price stops the day before the closing date (no rate for the overstay night).
+  v_short := public.save_rate_plan(t.id('propA'), null, 'SHORT', 'Ends soon', false, 'none', 0, 'none', 0, 'none', 0, true);
+  perform public.save_rate_plan_price(null, v_short, t.id('std'), v_d0 - 3, v_d0 - 1, 45000, 'NGN');
+  -- v_m has reached the maximum stay (3 nights) and is still in house.
+  perform t.admin(); update public.properties set max_stay_nights = 3 where id = t.id('propA');
+  perform t.set_bdate(t.id('propA'), v_d0 - 3); perform t.login('fdo');
+  v_m := t.book(t.id('g1'), v_d0 - 3, v_d0, t.id('std'), t.id('bar'));
+  perform public.check_in(v_m, t.reg(), t.room('104'), null, null);
   -- Two guests who were due to leave today (the closing date) and are still in house at the roll:
   -- v_s in room 103 (free tonight) and v_x in room 201, which is promised to v_y tonight.
   perform t.admin(); perform t.set_bdate(t.id('propA'), v_d0 - 1); perform t.login('fdo');
@@ -131,6 +144,14 @@ begin
   perform public.check_in(v_s, t.reg(), t.room('103'), null, null);
   v_x := t.book(t.id('g3'), v_d0 - 1, v_d0, t.id('dlx'), t.id('bar'));
   perform public.check_in(v_x, t.reg(), t.room('201'), null, null);
+  -- v_o is on a manager's special rate; v_nr is on the plan with no price for the closing date.
+  perform t.login('fom');
+  v_o := public.create_reservation(t.id('propA'), gen_random_uuid()::text, t.id('g2'), v_d0 - 1, v_d0, t.id('std'), t.id('bar'), 1, 0,
+    'confirmed', 'direct', null, null, null, 'none', null, null, 30000, 'Long-standing guest');
+  perform t.login('fdo');
+  perform public.check_in(v_o, t.reg(), t.room('105'), null, null);
+  v_nr := t.book(t.id('g3'), v_d0 - 1, v_d0, t.id('std'), v_short);
+  perform public.check_in(v_nr, t.reg(), t.room('106'), null, null);
   perform t.admin(); perform t.set_bdate(t.id('propA'), v_d0); perform t.login('fdo');
   v_y := t.book(t.id('g1'), v_d0, v_d0 + 1, t.id('dlx'), t.id('bar'));
   perform public.assign_room(v_y, t.room('201'));
@@ -146,17 +167,30 @@ begin
   perform t.eq((select business_date from public.folio_transactions where folio_id = v_f and charge_code_id = t.cc('ROOM') limit 1), v_d0, '[FIN-014] the charge carries the business date it belongs to');
   perform t.eq((select status from public.reservations where id = v_ns), 'no_show', '[RES-007] the guest who did not arrive was marked no-show');
   perform t.ok(exists (select 1 from public.hk_tasks where room_id = t.room('101') and type = 'stayover' and business_date = v_d0 + 1), '[HK-005] a stayover task exists for the guest staying on');
-  perform t.eq((select rooms_sold from public.daily_stats where property_id = t.id('propA') and business_date = v_d0), 2, '[RPT-001] daily stats: two rooms sold');
-  perform t.eq((select room_revenue from public.daily_stats where property_id = t.id('propA') and business_date = v_d0), 100000.0000, '[RPT-001] daily stats: room revenue is net of tax');
+  perform t.eq((select rooms_sold from public.daily_stats where property_id = t.id('propA') and business_date = v_d0), 3, '[RPT-001] daily stats: three rooms sold (staying guest and two extended overstays)');
+  perform t.eq((select room_revenue from public.daily_stats where property_id = t.id('propA') and business_date = v_d0), 130000.0000, '[RPT-001] daily stats: room revenue is net of tax (50,000 + 50,000 + 30,000)');
   perform t.ok(exists (select 1 from public.business_date_log where property_id = t.id('propA') and from_date = v_d0 and status = 'success'), '[DAY-001] the roll is logged');
   perform t.eq((select departure_date from public.reservations where id = v_s), v_d0 + 1, '[DAY-003] a guest still in house after their departure day is extended by one night');
   perform t.eq((select count(*)::int from public.folio_transactions where folio_id = t.main_folio(v_s) and charge_code_id = t.cc('ROOM') and business_date = v_d0), 1, '[DAY-003] the overstay night was charged');
   perform t.eq((select departure_date from public.reservations where id = v_x), v_d0, '[DAY-003] an overstay into a room promised to another guest is not extended');
   perform t.ok(exists (select 1 from public.notifications where user_id = t.id('fom') and kind = 'overstay' and entity_id = v_x), '[DAY-003] managers are told about the overstay they must resolve');
   perform t.eq((select count(*)::int from public.folio_transactions where folio_id = t.main_folio(v_x) and charge_code_id = t.cc('ROOM') and business_date = v_d0), 0, '[DAY-003] and no night is charged for it until they decide');
+  -- The overstay night uses the booked rate.
+  perform t.eq((select rate_amount from public.reservation_nights where reservation_id = v_s and stay_date = v_d0), 50000.0000, '[DAY-003] the overstay night uses the booked rate plan''s price');
+  perform t.eq((select rate_amount from public.reservation_nights where reservation_id = v_o and stay_date = v_d0), 30000.0000, '[DAY-003] a guest on a special rate keeps that rate for the overstay night');
+  perform t.eq((select departure_date from public.reservations where id = v_o), v_d0 + 1, '[DAY-003] and is extended');
+  -- No rate for the overstay night: not extended, managers told why.
+  perform t.eq((select departure_date from public.reservations where id = v_nr), v_d0, '[DAY-003] an overstay with no price for tonight is not extended');
+  perform t.ok(exists (select 1 from public.notifications where user_id = t.id('fom') and kind = 'overstay' and entity_id = v_nr and body ilike '%no price%'),
+    '[DAY-003] managers are told there is no price for the night');
+  -- Maximum stay reached: not extended, managers told why.
+  perform t.eq((select departure_date from public.reservations where id = v_m), v_d0, '[DAY-003] an overstay at the maximum stay length is not extended');
+  perform t.ok(exists (select 1 from public.notifications where user_id = t.id('fom') and kind = 'overstay' and entity_id = v_m and body ilike '%3 nights%'),
+    '[DAY-003] managers are told the maximum stay is reached');
+  perform t.admin(); update public.properties set max_stay_nights = 30 where id = t.id('propA');
   perform t.eq((select occupancy from public.v_kpi_daily where property_id = t.id('propA') and business_date = v_d0),
-    round(2::numeric / (select count(*) from public.rooms where property_id = t.id('propA') and is_active), 4), '[RPT-001] occupancy is rooms sold over rooms available');
-  perform t.eq((select adr from public.v_kpi_daily where property_id = t.id('propA') and business_date = v_d0), 50000.0000, '[RPT-001] ADR uses revenue net of tax');
+    round(3::numeric / (select count(*) from public.rooms where property_id = t.id('propA') and is_active), 4), '[RPT-001] occupancy is rooms sold over rooms available');
+  perform t.eq((select adr from public.v_kpi_daily where property_id = t.id('propA') and business_date = v_d0), round(130000::numeric / 3, 2), '[RPT-001] ADR uses revenue net of tax (130,000 / 3)');
   -- running again the same day posts nothing twice
   perform t.login('adminA');
   j := public.run_due_rollovers_now();
