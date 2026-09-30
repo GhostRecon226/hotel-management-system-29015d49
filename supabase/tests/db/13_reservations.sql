@@ -170,6 +170,8 @@ begin
   perform t.ok(not (select is_occupied from public.rooms where id = t.room('108')), '[FO-006] old room is vacant');
   perform t.eq((select condition from public.rooms where id = t.room('108')), 'dirty', '[FO-006] old room is dirty');
   perform t.ok(exists (select 1 from public.hk_tasks where room_id = t.room('108') and status not in ('cancelled')), '[FO-006][HK-001] a cleaning task was created for the old room');
+  perform t.ok(exists (select 1 from public.hk_tasks where room_id = t.room('108') and type = 'turnover' and status = 'open' and stay_id is not null), '[FO-006][HK-001] it is an open turnover task linked to the stay that left the room');
+  perform t.ok(not exists (select 1 from public.hk_tasks where room_id = t.room('109') and type = 'turnover' and status = 'open'), '[FO-006] no cleaning task for the new room');
   perform t.eq((select count(*)::int from public.stays where reservation_id = v_r and status = 'in_house'), 1, '[FO-006] one active room at a time');
   perform t.raises(format('select public.move_room(%L, %L, %L, null)', v_r, t.room('108'), 'Back'), 'E_ROOM_NOT_READY', '[FO-006] a dirty room is not a move target');
   perform t.ok(exists (select 1 from pg_proc where proname = 'move_room' and pg_get_function_arguments(oid) ~* 'complimentary|keep_rate'),
