@@ -48,7 +48,8 @@ function Reports() {
   const fin = can("rpt.finance.view");
   const [range, setRange] = useState({ from: "", to: "" });
   useEffect(() => {
-    if (property && !range.to) { const to = addDays(property.business_date, -1); setRange({ from: addDays(to, -29), to }); }
+    // Default: the last 30 days up to today, so today's payments and revenue show. Daily KPIs exist only for closed dates.
+    if (property && !range.to) { const to = property.business_date; setRange({ from: addDays(to, -29), to }); }
   }, [property, range.to]);
   const kpi = useKpis(range.from, range.to, ops);
   const revenue = useReport<RevenueRow>("report_revenue_by_charge_code", { p_from: range.from, p_to: range.to }, fin && !!range.from);

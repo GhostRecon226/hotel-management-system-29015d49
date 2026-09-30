@@ -15,6 +15,10 @@ env_file=.env.localdb.local
   echo "VITE_SUPABASE_URL=$API_URL"
   echo "VITE_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY"
   echo "VITE_SUPABASE_PROJECT_ID=local"
+  echo "# Server functions (invite, exports, outbox) must use LOCAL Supabase too, never the real project in .env.local."
+  echo "SUPABASE_URL=$API_URL"
+  echo "SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY"
+  echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
 } > "$env_file"
 
 ids=""
