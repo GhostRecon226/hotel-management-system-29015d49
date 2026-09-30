@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, UserPlus, X } from "lucide-react";
+import { Mail, Plus, UserPlus, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAccess } from "@/lib/access";
 import { errorMessage } from "@/lib/errors";
 import { Field, FormDialog, NoAccess, SectionHeader } from "@/lib/setup";
 import { formatDateTime } from "@/lib/reservations";
 import { useAdminAction, useAdminRoles, useAdminUsers, useMyProperties, type AdminUser } from "@/lib/admin";
-import { inviteStaffMember } from "@/lib/invite.functions";
+import { inviteStaffMember, resendStaffInvite } from "@/lib/invite.functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,9 +48,17 @@ export function UsersPanel() {
       qc.invalidateQueries({ queryKey: ["admin"] });
       setInvite(false);
       setEmail(""); setFullName(""); setPhone(""); setRoleId("");
-      if (res.emailed) toast.success("Invitation sent. They will get an email to set a password.");
-      else toast.success(`Account created. Temporary password: ${res.tempPassword}`, { duration: 30_000 });
+      toast.success(res.emailed
+        ? "Invitation sent. They will get an email to set a password."
+        : "They already have a sign-in account and have been added to this hotel.");
     },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+
+  const resendFn = useServerFn(resendStaffInvite);
+  const resendInvite = useMutation({
+    mutationFn: (userId: string) => resendFn({ data: { userId, redirectTo: `${window.location.origin}/auth` } }),
+    onSuccess: () => toast.success("Invitation sent again."),
     onError: (e) => toast.error(errorMessage(e)),
   });
 
@@ -72,7 +80,7 @@ export function UsersPanel() {
         <Table>
           <TableHeader><TableRow>
             <TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Roles</TableHead>
-            <TableHead>Last signed in</TableHead><TableHead>Status</TableHead><TableHead className="w-44" />
+            <TableHead>Last signed in</TableHead><TableHead>Status</TableHead><TableHead className="w-72" />
           </TableRow></TableHeader>
           <TableBody>
             {users.isLoading && <TableSkeletonRows cols={6} />}
@@ -100,6 +108,11 @@ export function UsersPanel() {
                 <TableCell>{u.status === "active" ? <Badge variant="success" dot>Active</Badge> : <Badge variant="neutral" dot>Switched off</Badge>}</TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-2">
+                    {!u.email_confirmed && u.email && (
+                      <Button size="sm" variant="outline" disabled={resendInvite.isPending} onClick={() => resendInvite.mutate(u.id)}>
+                        <Mail className="mr-1 size-4" />Resend invite
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline" onClick={() => { setAddRoleFor(u); setRProperty(properties[0]?.id ?? ""); setRRole(""); }}>
                       <Plus className="mr-1 size-4" />Role
                     </Button>
