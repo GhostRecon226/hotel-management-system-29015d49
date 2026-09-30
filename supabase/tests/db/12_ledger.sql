@@ -57,11 +57,11 @@ begin
   perform t.login('fdo');
   perform t.eq((select deposit_required from public.reservations where id = v_res), 50000.0000, '[RES-010] deposit rate plan asks for half of the stay');
   perform t.login('rsv');
-  perform t.raises(format('select public.post_payment(%L, %L, 100, %L, false, null, null, %L)', t.id('f1'), t.pm('CASH'), 'NGN', 'pay-rsv'),
-    'E_FORBIDDEN|E_NOT_FOUND', '[FIN-002] reservation officer cannot take a normal payment');
   v_res := t.book(t.id('g3'), t.bdate() + 30, t.bdate() + 31, t.id('std'), t.id('bar'));
   perform t.lives(format('select public.post_payment(public.open_main_folio(%L), %L, 10000, %L, true, %L, null, %L)', v_res, t.pm('CASH'), 'NGN', 'Deposit', 'dep-rsv'),
     '[FIN-015] a reservation officer can take a deposit on their own booking');
+  perform t.raises(format('select public.post_payment(public.open_main_folio(%L), %L, 100, %L, false, null, null, %L)', v_res, t.pm('CASH'), 'NGN', 'pay-rsv'),
+    'E_FORBIDDEN', '[FIN-002][6a] reservation officer cannot take a normal payment, even on their own booking');
   select count(*) into v_n from public.folios;
   perform t.eq(v_n, 1, '[FIN-015] reservation officer sees only folios of own bookings');
   select count(*) into v_n from public.v_folio_balances;
@@ -112,8 +112,8 @@ begin
   perform t.eq(t.balance(t.id('f1')), v_b - 6000 * 1.1825, '[FIN-004] approved discount also reduces service charge and VAT (accountant to confirm)');
   perform t.ok(t.balance(t.id('f1')) < v_b, '[FIN-004] approved discount posts');
   perform t.raises(format('select public.decide_approval(%L, true, %L)', v_ap, 'again'), 'E_INVALID', 'a decided approval cannot be decided again');
-  perform t.login('rsv');
-  j := public.apply_discount(t.id('chg1'), 900, 'Too much', 'disc-4');
+  perform t.login('fdo');
+  j := public.apply_discount(public.post_charge(t.id('f1'), t.cc('REST'), 20000, false, 'Party', null, 'chg-rej'), 6000, 'Too much', 'disc-4');
   perform t.login('fom');
   perform t.raises(format('select public.decide_approval(%L, false, %L)', (j->>'approval_id')::uuid, ''), 'E_REQUIRED', 'rejection needs a reason');
   perform public.decide_approval((j->>'approval_id')::uuid, false, 'No');
