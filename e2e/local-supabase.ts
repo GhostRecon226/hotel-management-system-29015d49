@@ -3,6 +3,7 @@ import { execSync } from "node:child_process";
 
 export interface LocalSupabase {
   url: string;
+  mailUrl: string;
   publishableKey: string;
   serviceRoleKey: string;
 }
@@ -20,7 +21,7 @@ export function localSupabase(): LocalSupabase {
   if (!/^http:\/\/(127\.0\.0\.1|localhost):/.test(url)) {
     throw new Error(`Browser tests only run against local Supabase. Got "${url}". Run: supabase start`);
   }
-  cached = { url, publishableKey: get("PUBLISHABLE_KEY") || get("ANON_KEY"), serviceRoleKey: get("SERVICE_ROLE_KEY") };
+  cached = { url, mailUrl: get("MAILPIT_URL") || get("INBUCKET_URL"), publishableKey: get("PUBLISHABLE_KEY") || get("ANON_KEY"), serviceRoleKey: get("SERVICE_ROLE_KEY") };
   return cached;
 }
 
@@ -48,4 +49,22 @@ export async function passwordTokens(email: string, password: string) {
   });
   if (!res.ok) throw new Error(`Local sign-in failed: ${res.status} ${await res.text()}`);
   return (await res.json()) as { access_token: string; refresh_token: string; expires_in: number; expires_at: number };
+}
+
+/** Waits for the newest email to an address in the local test mailbox (Mailpit) and returns its first link to Auth. */
+export async function latestAuthLink(to: string, subject: RegExp, timeoutMs = 15_000) {
+  const s = localSupabase();
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const list = await (await fetch(`${s.mailUrl}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`)).json() as
+      { messages: { ID: string; Subject: string }[] };
+    const m = list.messages.find((x) => subject.test(x.Subject));
+    if (m) {
+      const msg = await (await fetch(`${s.mailUrl}/api/v1/message/${m.ID}`)).json() as { HTML: string; Text: string };
+      const link = (msg.HTML.match(/href="([^"]*\/auth\/v1\/verify[^"]*)"/)?.[1] ?? msg.Text.match(/(https?:\/\/\S*\/auth\/v1\/verify\S*)/)?.[1]);
+      if (link) return link.replace(/&amp;/g, "&");
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error(`No "${subject}" email for ${to} in the local mailbox`);
 }

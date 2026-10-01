@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -103,6 +103,9 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
           value={password} onChange={(e) => setPassword(e.target.value)} required />
         {mode === "signup" && <p className="text-sm text-muted-foreground">At least 8 characters.</p>}
+        {mode === "signin" && (
+          <p className="text-sm"><Link to="/forgot-password" className="text-primary hover:underline">Forgot password?</Link></p>
+        )}
       </div>
       {error && <p className="rounded-md bg-danger-soft px-3 py-2.5 text-sm text-danger-strong" role="alert">{error}</p>}
       <Button type="submit" size="lg" className="w-full" disabled={busy}>

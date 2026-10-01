@@ -26,7 +26,7 @@ Blunt list. Nothing here is hidden elsewhere.
 - The notification bell polls every 60 s instead of using realtime.
 
 ## Features that are partial
-- Forgot password / reset password is not built. Google sign-in is not built.
+- Forgot password works (1 Oct 2026): Sign in > Forgot password? emails a one-hour link to /reset-password. On a live project, Supabase > Authentication > URL Configuration must allow `<app address>/reset-password` (or `<app address>/**`), otherwise the link lands on the Site URL instead. Google sign-in is not built.
 - Dark theme tokens exist but there is no toggle.
 - Hold room blocks reduce availability only when approved; OOO/OOS/hold all behave the same for availability.
 - Stayover tasks are created only by the rollover. No auto tickets from failed inspections. Housekeeping checklists are generic starter lists.
