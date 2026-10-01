@@ -59,6 +59,14 @@ export function useCheckoutOutstanding(reservationId?: string) {
     queryFn: () => callRpc<string>("checkout_outstanding", { p_reservation_id: reservationId }),
   });
 }
+export type CheckOutNight = { applies: boolean; posted: boolean; amount: string; total: string; currency: string };
+/** One night owed by a guest leaving on the day they checked in (DAY-006), worked out by the database. */
+export function useCheckOutNight(reservationId?: string) {
+  return useQuery({
+    queryKey: ["folios", "same-day-night", reservationId], enabled: !!reservationId,
+    queryFn: () => callRpc<CheckOutNight>("preview_check_out_charge", { p_id: reservationId }),
+  });
+}
 export function useFolioList(propertyId: string | undefined, status: string) {
   return useQuery({
     queryKey: ["folios", "list", propertyId, status], enabled: !!propertyId,

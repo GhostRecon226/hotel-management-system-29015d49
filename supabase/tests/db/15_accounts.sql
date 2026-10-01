@@ -25,7 +25,7 @@ begin
   perform t.login('adminA');
   perform t.raises(format('select public.save_room(%L, null, %L, %L, %L, true)', t.id('propA'), '150', t.id('std'), '1'), 'E_READ_ONLY', '[PLT-005] expired account cannot add rooms');
   perform t.login('fdo');
-  perform t.lives(format('select public.post_payment(%L, %L, %s, %L, false, null, null, %L)', v_f, t.pm('CASH'), t.balance(v_f), 'NGN', 'ro-pay'),
+  perform t.lives(format('select public.post_payment(%L, %L, %s, %L, false, null, null, %L)', v_f, t.pm('CASH'), public.checkout_outstanding(v_r), 'NGN', 'ro-pay'),
     '[M3][PLT-006] an in-house guest can still pay');
   perform t.lives(format('select public.check_out(%L, null, null)', v_r), '[M3][PLT-006] and check out');
   perform t.login('fom');

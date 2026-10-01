@@ -188,4 +188,26 @@ begin
   end;
 exception when others then execute 'reset role'; raise notice 'not ok - [upgrade crashed: money flows and roll] %', sqlerrm;
 end $$;
+-- Leaving on the arrival day is charged one night (20261001100600)
+do $$
+declare v_r uuid; v_bd date; v_f uuid;
+begin
+  select business_date into v_bd from public.properties where id = pg_temp.id('prop');
+  perform pg_temp.as_user('fd');
+  v_r := public.create_reservation(pg_temp.id('prop'), 'upg-sdc', (select guest_id from public.reservations where id = pg_temp.id('resA')),
+    v_bd, v_bd + 2, (select room_type_id from public.reservations where id = pg_temp.id('resA')), pg_temp.id('bar'),
+    1, 0, 'confirmed', 'direct', null, null, null, 'none', null, null, null, null);
+  perform public.check_in(v_r, '{"id_type":"passport","id_number":"U3","nationality":"NG"}'::jsonb,
+    (select id from public.rooms where property_id = pg_temp.id('prop') and room_number = '3'), null, null);
+  perform pg_temp.ok((public.preview_check_out_charge(v_r)->>'amount')::numeric = 40000,
+    '[upgrade][DAY-006b] a guest of the existing hotel leaving on the arrival day owes one night');
+  v_f := public.open_main_folio(v_r);
+  perform public.post_payment(v_f, (select id from public.payment_methods where property_id = pg_temp.id('prop') and code = 'CASH'),
+    public.checkout_outstanding(v_r), 'NGN', false, null, null, 'upg-sdc-pay');
+  perform public.check_out(v_r, null, null);
+  execute 'reset role';
+  perform pg_temp.ok((select status = 'checked_out' from public.reservations where id = v_r) and app.folio_balance(v_f) = 0,
+    '[upgrade][DAY-006b] paid the amount shown, checked out, folio at zero');
+exception when others then execute 'reset role'; raise notice 'not ok - [upgrade crashed: same-day check-out] %', sqlerrm;
+end $$;
 rollback;

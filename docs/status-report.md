@@ -33,7 +33,9 @@ Tests: **488 database checks, 476 pass, 12 fail**; 6 upgrade checks pass; 4 brow
 
 Remaining failures (12): FO-003 (registration card step), FO-007 (complimentary upgrade), FO-008 x2 (shorten a stay), HK-002 x2 (task with no assignee, attendants see every task), HK-003 (failed-inspection notice), ROOM-004 (reason for dirty override), PLT-007 (second property), PLT-004 (Ghana currency), RES-013 (arrival-ready flag), SET-008 (inspection on/off).
 
-Migrations waiting for your yes (6, in order): `20261001100000_lock_ledger_and_audit`, `20261001100100_anonymise_upcoming_guard`, `20261001100200_void_check_in_keeps_room_ready`, `20261001100300_room_move_cleaning_task`, `20261001100400_same_day_stays`, `20261001100500_builtin_role_limits`.
+Migrations waiting for your yes (7, in order): `20261001100000_lock_ledger_and_audit`, `20261001100100_anonymise_upcoming_guard`, `20261001100200_void_check_in_keeps_room_ready`, `20261001100300_room_move_cleaning_task`, `20261001100400_same_day_stays`, `20261001100500_builtin_role_limits`, `20261001100600_same_day_check_out_charge`.
+
+Later on 1 Oct: a guest booked overnight who leaves on the arrival day is charged one night (`21_same_day_checkout.sql`, 28 checks). The upgrade test now proves refunds, adjustments, discounts, reversals and a three-day catch-up roll (with an overstay) under the ledger lock: 29 of 29 checks pass. Tests: 539 database checks, 527 pass, the same 12 fail.
 
 ## Update: step 4 (30 Sep 2026)
 

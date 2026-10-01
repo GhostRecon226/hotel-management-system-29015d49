@@ -8,6 +8,7 @@ begin
   perform t.login('fdo');
   v_r := t.book(t.id('g1'), t.bdate(), t.bdate() + 1, t.id('std'), t.id('bar'));
   perform public.check_in(v_r, t.reg(), t.room('101'), null, null);
+  perform public.post_payment(t.main_folio(v_r), t.pm('CASH'), public.checkout_outstanding(v_r), 'NGN', false, null, null, 'hk-pay');
   perform public.check_out(v_r, null, null);
   perform t.admin();
   select id into v_task from public.hk_tasks where room_id = t.room('101') and type = 'turnover' and status = 'open';

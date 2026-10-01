@@ -74,7 +74,7 @@ begin
   perform public.post_charge(v_f1, t.cc('REST'), 10000, false, 'Dinner', null, 'sf-2');
   v_f2 := public.split_folio(v_f1, 'Extras', null, null, 'sf-split');
   perform public.post_payment(v_f2, t.pm('CASH'), 3000, 'NGN', false, null, null, 'sf-3');
-  perform t.eq(public.checkout_outstanding(v_res), 11825 + 3000::numeric, '[S9] check-out outstanding = what is owed plus what is owed back, across folios');
+  perform t.eq(public.checkout_outstanding(v_res), 11825 + 59125 + 3000::numeric, '[S9] check-out outstanding = what is owed plus what is owed back, across folios (with the arrival-day night, DAY-006b)');
   perform t.eq((select amount_due from public.v_folio_balances where folio_id = v_f1), 11825.0000, '[S9] amount due on a folio that owes');
   perform t.eq((select credit from public.v_folio_balances where folio_id = v_f1), 0.0000, '[S9] no credit on it');
   perform t.eq((select amount_due from public.v_folio_balances where folio_id = v_f2), 0.0000, '[S9] no amount due on a folio in credit');

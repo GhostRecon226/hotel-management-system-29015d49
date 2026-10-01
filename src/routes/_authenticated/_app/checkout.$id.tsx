@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useAccess } from "@/lib/access";
 import { Field, FormDialog, NoAccess } from "@/lib/setup";
 import { formatDateTime, formatDay } from "@/lib/reservations";
-import { useCheckoutOutstanding, useReservationFolios } from "@/lib/folios";
+import { useCheckOutNight, useCheckoutOutstanding, useReservationFolios } from "@/lib/folios";
 import { useCheckoutAction, useCheckoutApprovals, useCheckoutStay } from "@/lib/checkout";
 import { PageHeader } from "@/components/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -27,7 +27,9 @@ function CheckoutPage() {
   const folios = useReservationFolios(id);
   const outstandingQ = useCheckoutOutstanding(id);
   const approvals = useCheckoutApprovals(id);
-  const [dialog, setDialog] = useState<null | "force" | "request" | "undo">(null);
+  const night = useCheckOutNight(id);
+  const [dialog, setDialog] = useState<null | "force" | "request" | "undo" | "waive">(null);
+  const postNight = useCheckoutAction("post_check_out_charge", "One night posted to the folio.");
   const checkOut = useCheckoutAction("check_out", "Guest checked out. Room marked dirty and sent to housekeeping.");
 
   if (!can("fo.view")) return <NoAccess />;
@@ -66,6 +68,22 @@ function CheckoutPage() {
             <Button variant="outline" onClick={() => setDialog("undo")}>Undo check-out</Button>}
         </>} />
 
+      {inHouse && (night.data?.applies || night.data?.posted) && (
+        <Alert className="mb-4">
+          <AlertTitle>Same-day stay: one night is charged</AlertTitle>
+          <AlertDescription>
+            {night.data.applies
+              ? <>The guest checked in today, so one night ({formatAmount(night.data.total, night.data.currency)} with tax) is charged at check-out. It is already in the outstanding amount. Post it now to see it on the folio.</>
+              : <>One night for this same-day stay is on the folio.</>}
+            <span className="mt-2 flex flex-wrap gap-2">
+              {night.data.applies && can("fo.checkout") &&
+                <Button size="sm" variant="outline" disabled={postNight.isPending} onClick={() => postNight.mutate({ p_id: id })}>Post it now</Button>}
+              {can("res.rate.override") &&
+                <Button size="sm" variant="outline" onClick={() => setDialog("waive")}>Waive with a reason</Button>}
+            </span>
+          </AlertDescription>
+        </Alert>
+      )}
       {inHouse && !settled && (
         <Alert className="mb-4">
           <AlertTitle>Outstanding {formatAmount(outstanding, s.currency)}</AlertTitle>
@@ -122,6 +140,9 @@ function CheckoutPage() {
       <ReasonDialog open={dialog === "undo"} onOpenChange={(o) => setDialog(o ? "undo" : null)} title="Undo check-out"
         note="The guest goes back in house, the room is occupied again, the turnover task is cancelled and folios closed at check-out reopen."
         action="undo_checkout" success="Check-out undone." args={(reason) => ({ p_id: id, p_reason: reason })} />
+      <ReasonDialog open={dialog === "waive"} onOpenChange={(o) => setDialog(o ? "waive" : null)} title="Waive same-day charge"
+        note="The one-night charge for leaving on the arrival day is not charged (or is reversed if already posted). The reason is kept in the booking history."
+        action="waive_same_day_charge" success="Same-day charge waived." args={(reason) => ({ p_id: id, p_reason: reason })} />
     </div>
   );
 }

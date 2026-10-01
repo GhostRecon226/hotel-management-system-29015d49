@@ -212,11 +212,12 @@ begin
   v_r := t.book(t.id('g1'), t.bdate(), t.bdate() + 2, t.id('std'), t.id('bar'));
   perform public.check_in(v_r, t.reg(), t.room('111'), null, null);
   v_f := t.main_folio(v_r);
+  perform public.post_check_out_charge(v_r);  -- leaving on the arrival day: one night (59,125 with tax)
   perform public.post_charge(v_f, t.cc('REST'), 10000, false, 'Dinner', null, 'co-chg');
   perform t.raises(format('select public.check_out(%L, null, null)', v_r), 'E_BALANCE_DUE|E_REQUIRED|E_FORBIDDEN', '[FO-009] an unpaid balance blocks check-out');
-  perform public.post_payment(v_f, t.pm('CASH'), 20000, 'NGN', false, null, null, 'co-pay');
+  perform public.post_payment(v_f, t.pm('CASH'), 80000, 'NGN', false, null, null, 'co-pay');
   perform t.raises(format('select public.check_out(%L, null, null)', v_r), 'E_BALANCE_DUE|E_CREDIT|E_INVALID', '[FO-009] a credit balance blocks check-out until refunded');
-  j := public.request_refund(v_f, t.pm('CASH'), 20000 - 11825, 'NGN', null, 'Change', 'co-ref');
+  j := public.request_refund(v_f, t.pm('CASH'), 80000 - 11825 - 59125, 'NGN', null, 'Change', 'co-ref');
   perform t.login('acc');
   perform public.decide_approval((j->>'approval_id')::uuid, true, 'ok');
   perform t.login('fdo');
