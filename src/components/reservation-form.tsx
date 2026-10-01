@@ -80,7 +80,7 @@ export function GuestPicker({ value, label, onPick, disabled }: { value: string;
           ))}
         </div>
       )}
-      <GuestFormDialog open={open} onOpenChange={setOpen} onSaved={(id) => onPick(id, "New guest")} />
+      <GuestFormDialog open={open} onOpenChange={setOpen} onSaved={(id, name) => onPick(id, name)} />
     </div>
   );
 }

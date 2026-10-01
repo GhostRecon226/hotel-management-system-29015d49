@@ -64,7 +64,7 @@ export function useGuestMutation(name: string, success = "Saved.") {
 const EMPTY = { first_name: "", last_name: "", phone: "", email: "", nationality: "", address: "", notes: "" };
 
 export function GuestFormDialog({ open, onOpenChange, guest, onSaved }: {
-  open: boolean; onOpenChange: (o: boolean) => void; guest?: Guest | null; onSaved?: (id: string) => void;
+  open: boolean; onOpenChange: (o: boolean) => void; guest?: Guest | null; onSaved?: (id: string, name: string) => void;
 }) {
   const save = useGuestMutation("save_guest", guest ? "Guest updated." : "Guest created.");
   const [f, setF] = useState(EMPTY);
@@ -82,7 +82,7 @@ export function GuestFormDialog({ open, onOpenChange, guest, onSaved }: {
       onSubmit={() => save.mutate({
         p_id: guest?.id ?? null, p_first_name: f.first_name, p_last_name: f.last_name, p_phone: f.phone,
         p_email: f.email, p_nationality: f.nationality, p_address: f.address, p_notes: f.notes,
-      }, { onSuccess: (id) => { onOpenChange(false); if (id) onSaved?.(id); } })}>
+      }, { onSuccess: (id) => { onOpenChange(false); if (id) onSaved?.(id, [f.first_name, f.last_name].map((x) => x.trim()).filter(Boolean).join(" ")); } })}>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="First name" htmlFor="g-fn"><Input id="g-fn" value={f.first_name} onChange={set("first_name")} required maxLength={100} /></Field>
         <Field label="Last name" htmlFor="g-ln"><Input id="g-ln" value={f.last_name} onChange={set("last_name")} maxLength={100} /></Field>

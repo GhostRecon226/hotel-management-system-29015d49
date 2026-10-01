@@ -66,7 +66,9 @@ export function FormDialog({
         <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
         <form
           className="space-y-4"
-          onSubmit={(e: FormEvent) => { e.preventDefault(); onSubmit(); }}
+          // stopPropagation: a pop-up opened from inside another form (New guest in the booking form or the
+          // walk-in) must not submit that form too. React passes events up through portals.
+          onSubmit={(e: FormEvent) => { e.preventDefault(); e.stopPropagation(); onSubmit(); }}
         >
           {children}
           <DialogFooter>

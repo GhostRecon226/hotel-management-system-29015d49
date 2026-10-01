@@ -58,3 +58,7 @@ Lesson: route guards that read cached React Query data must revalidate, and auth
 ## Slow first load (fixed 1 Oct 2026)
 
 On a slow first load, a click on Sign in before the page had started up made the browser submit the form itself (a reload to `/auth?`), and text typed before start-up was lost. This made one browser test flaky. The sign-in and Create hotel forms are now locked until the page is ready. Still open: React reported a "hydration mismatch" on the first load of `/auth` once in about ten cold starts. It does no harm now that the form is locked, but the cause is not found yet.
+
+## New guest inside the booking form (fixed 1 Oct 2026)
+
+Found in the hand test on the live project. Saving a new guest from inside the booking form also submitted the booking behind it, before a guest was chosen, and the database refused it with "Guest not found". The walk-in pop-up had the same fault. Cause: React passes a pop-up's submit up to the form it was opened from, even though the pop-up is drawn elsewhere on the page. The shared pop-up form (`FormDialog`) now keeps its submit to itself. The guest box also showed "New guest" instead of the name; it now shows the name. Only these two screens open a pop-up form inside another form. Browser tests in `e2e/desk-journey.spec.ts` click through new guest, booking, check-in, charge, payment and check-out, and check the walk-in case.
