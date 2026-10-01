@@ -1,6 +1,6 @@
 # Status report: Hotel Desk (Lovable build)
 
-First written 30 Sep 2026 after a read-only audit of `main` at commit `ef56121`. Updated the same day after steps 1, 2 and 4 of the plan, on branch `claude/audit-status-report`. Written by Claude Code for Peter.
+First written 30 Sep 2026 after a read-only audit of `main` at commit `ef56121`. Updated after steps 1, 2 and 4 of the plan and again on 1 Oct 2026, on branch `claude/audit-status-report`. Written by Claude Code for Peter.
 
 This report covers the app Lovable built (`hotel-management-system-29015d49`). It measures that app against the 107 R1 requirements in the reference repo (`hms-reference-backend`, `docs/HMS_R1_Requirements.xlsx`). The "Built" marks in that workbook describe the older reference backend, not this app. Every status below comes from this audit and from the tests.
 
@@ -12,6 +12,20 @@ This report covers the app Lovable built (`hotel-management-system-29015d49`). I
 - Your real project has the first 24 migrations. **12 new migrations wait for your yes.** Nothing from step 4 has touched the real project.
 - Screens no longer add up money. Every total, tax preview, fee preview and KPI comes from the database. A check (`npm run check:money`) fails if browser code starts doing money sums again.
 - It is still not ready for a real hotel: 21 failures, tax rules wait for the accountant, email is not connected, and 6c and DAY-006 are not built.
+
+## Update: 1 Oct 2026, afternoon (live project complete)
+
+**Live project `urbpxybyrfjczqbrpdsq`: all 43 migrations applied and recorded.** The last 7 went up in one batch after a dry run. Checked on the live project afterwards:
+- Both scheduled jobs are active (business date roll every 5 minutes, subscription clock daily at 00:15 UTC).
+- Built-in roles: System Administrator, General Manager, Front Office Manager and Accountant can move charges; Reservation Officer has own-records folio access, deposits only, and no ID documents. System Administrator holds every permission.
+- As the database owner (`postgres`, not a superuser), every attempt to edit, delete or wipe the ledger, its tax lines or the audit trail was refused (E_IMMUTABLE), and a backdated entry was refused (E_DATE). The test undid itself, so nothing changed.
+- RES-000001, its folio, its charge and its tax lines are byte-for-byte the same as before the apply. Test Guest is still in house in room 101 with ₦11,825 due.
+
+**Hand test on the live project: passed** (room type, room, rate plan with the 2-day free-cancellation default, booking, check-in, a ₦10,000 restaurant charge whose tax preview ₦11,825.00 equals the folio balance, dated the open business date). The first attempt found a screen bug: saving a new guest inside the booking form also submitted the booking ("Guest not found"); the walk-in pop-up had the same fault. Fixed test first, with new browser tests that click the real desk journey.
+
+**Tests:** 539 database checks (527 pass, the same 12 fail), 29 upgrade checks pass, 6 browser tests pass. The production build for Vercel works.
+
+**Next stage:** deployment. See `docs/deployment-plan.md`.
 
 ## Update: 1 Oct 2026
 
@@ -564,4 +578,4 @@ Steps 1 and 2 are done. You approve each step before I start the next.
 ## Supabase status
 
 - **Local Supabase: running** in Docker, from the app repo (project name `hotel-desk`). All 36 migrations apply. Scheduled jobs: the business date roll every 5 minutes, and the subscription clock daily.
-- **Your project** `urbpxybyrfjczqbrpdsq` (West EU, Ireland): linked, pg_cron on, 36 migrations applied and recorded (1 Oct 2026). Your account and hotel exist. The 6 migrations of 1 Oct are not applied.
+- **Your project** `urbpxybyrfjczqbrpdsq` (West EU, Ireland): linked, pg_cron on, all 43 migrations applied and recorded (1 Oct 2026). Your account and hotel (Euro Hotel) exist, with the hand-test booking RES-000001 in house.
