@@ -46,4 +46,18 @@ begin
   execute 'reset role';
 exception when others then execute 'reset role'; raise notice 'not ok - [upgrade crashed] %', sqlerrm;
 end $$;
+-- Same-day stays (20261001100400)
+do $$
+declare v_r uuid; v_bd date;
+begin
+  select business_date into v_bd from public.properties where id = pg_temp.id('prop');
+  perform pg_temp.as_user('admin');
+  v_r := public.create_reservation(pg_temp.id('prop'), 'upg-sameday', (select guest_id from public.reservations where id = pg_temp.id('resA')),
+    v_bd + 9, v_bd + 9, (select room_type_id from public.reservations where id = pg_temp.id('resA')), pg_temp.id('bar'),
+    1, 0, 'confirmed', 'direct', null, null, null, 'none', null, null, null, null);
+  perform pg_temp.ok((select total_amount = 40000 from public.reservations where id = v_r), '[upgrade][DAY-006] the existing hotel can book a same-day stay, priced at one night');
+  perform pg_temp.ok((select total_amount = 40000 from public.reservations where id = pg_temp.id('resA')), '[upgrade][DAY-006] bookings made before the upgrade keep their totals');
+  execute 'reset role';
+exception when others then execute 'reset role'; raise notice 'not ok - [upgrade crashed] %', sqlerrm;
+end $$;
 rollback;

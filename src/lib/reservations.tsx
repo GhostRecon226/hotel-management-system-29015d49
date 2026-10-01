@@ -75,6 +75,7 @@ export function addDays(iso: string, n: number) {
 }
 /** "1 night", "2 nights". */
 export function nightsLabel(n: number) {
+  if (n === 0) return "Same day";  // arrival and departure on one day, charged one night (DAY-006)
   return `${n} ${n === 1 ? "night" : "nights"}`;
 }
 
@@ -111,7 +112,7 @@ export function useReservation(id: string) {
 export function useAvailability(propertyId: string | undefined, arrival: string, departure: string) {
   return useQuery({
     queryKey: ["reservations", "availability", propertyId, arrival, departure],
-    enabled: !!propertyId && !!arrival && !!departure && departure > arrival,
+    enabled: !!propertyId && !!arrival && !!departure && departure >= arrival,
     queryFn: () => callRpc<AvailabilityCell[]>("get_availability", { p_property_id: propertyId, p_arrival: arrival, p_departure: departure }),
   });
 }
@@ -132,6 +133,7 @@ export function useResMutation<T = unknown>(name: string, success?: string | ((d
 const ACTION_LABEL: Record<string, string> = {
   insert: "Booking created", update: "Booking changed", assign_room: "Room assigned", unassign_room: "Room removed",
   set_reservation_guests: "Guests changed", check_in: "Checked in", void_check_in: "Check-in voided", move_room: "Room moved", waive_cancellation_fee: "Cancellation fee waived", waive_no_show_fee: "No-show fee waived",
+  waive_same_day_charge: "Same-day charge waived", check_out: "Checked out",
 };
 const FIELD_LABEL: Record<string, string> = {
   arrival_date: "Arrival", departure_date: "Departure", room_type_id: "Room type", rate_plan_id: "Rate plan",

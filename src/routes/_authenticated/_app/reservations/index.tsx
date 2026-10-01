@@ -64,7 +64,7 @@ function ReservationList() {
               <TableCell>{r.guest_name}{r.company_name && <span className="block text-sm text-muted-foreground">{r.company_name}</span>}</TableCell>
               <TableCell className="tabular">{formatDay(r.arrival_date)}</TableCell>
               <TableCell className="tabular">{formatDay(r.departure_date)}</TableCell>
-              <TableCell className="tabular">{nightsBetween(r.arrival_date, r.departure_date)}</TableCell>
+              <TableCell className="tabular">{nightsBetween(r.arrival_date, r.departure_date) || "Same day"}</TableCell>
               <TableCell>{r.room_type_code}{r.room_number && <span className="text-muted-foreground"> · {r.room_number}</span>}</TableCell>
               <TableCell><ResStatusBadge status={r.status} holdUntil={r.hold_until} /></TableCell>
               <TableCell><Money amount={r.total_amount} currency={r.currency} /></TableCell>

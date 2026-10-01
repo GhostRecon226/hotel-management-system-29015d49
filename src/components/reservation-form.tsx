@@ -159,10 +159,10 @@ export function ReservationForm({ initial, mode, reservationId, onDone, onCancel
             )}
             <div className="grid gap-4 sm:grid-cols-3">
               <Field label="Arrival" htmlFor="arrival"><Input id="arrival" type="date" required value={f.arrival}
-                onChange={(e) => { const v = e.target.value; setF((x) => ({ ...x, arrival: v, departure: x.departure <= v ? addDays(v, 1) : x.departure })); }} /></Field>
-              <Field label="Departure" htmlFor="departure"><Input id="departure" type="date" required min={f.arrival ? addDays(f.arrival, 1) : undefined}
+                onChange={(e) => { const v = e.target.value; setF((x) => ({ ...x, arrival: v, departure: x.departure < v ? addDays(v, 1) : x.departure })); }} /></Field>
+              <Field label="Departure" htmlFor="departure"><Input id="departure" type="date" required min={f.arrival || undefined}
                 value={f.departure} onChange={(e) => set("departure", e.target.value)} /></Field>
-              <Field label="Nights" htmlFor="nights"><Input id="nights" readOnly value={nights > 0 ? nights : "—"} className="bg-muted" /></Field>
+              <Field label="Nights" htmlFor="nights"><Input id="nights" readOnly value={nights > 0 ? nights : nights === 0 && f.arrival ? "Same day (1 night charged)" : "—"} className="bg-muted" /></Field>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Room type" htmlFor="room_type">

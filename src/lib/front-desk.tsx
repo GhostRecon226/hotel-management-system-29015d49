@@ -56,7 +56,7 @@ function useFdRooms(roomTypeId: string | null, from: string, to: string, reserva
   const { property } = useAccess();
   return useQuery({
     queryKey: ["reservations", "fd", "rooms", property?.id, roomTypeId, from, to, reservationId],
-    enabled: enabled && !!property && !!from && !!to && to > from,
+    enabled: enabled && !!property && !!from && !!to && to >= from,
     queryFn: () => callRpc<FdRoom[]>("get_front_desk_rooms", {
       p_property_id: property!.id, p_room_type_id: roomTypeId, p_from: from, p_to: to, p_reservation_id: reservationId,
     }),
@@ -211,7 +211,7 @@ export function WalkInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
       <Field label="Guest" htmlFor="guest"><GuestPicker value={guest.id} label={guest.label} onPick={(id, label) => setGuest({ id, label })} /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Departure" htmlFor="wi-dep" hint={nightsLabel(Math.max(nightsBetween(bdate, f.departure), 0))}>
-          <Input id="wi-dep" type="date" min={addDays(bdate, 1)} value={f.departure} onChange={(e) => set("departure", e.target.value)} required />
+          <Input id="wi-dep" type="date" min={bdate} value={f.departure} onChange={(e) => set("departure", e.target.value)} required />
         </Field>
         <Field label="Room type" htmlFor="wi-rt">
           <Select value={f.room_type_id} onValueChange={(v) => set("room_type_id", v)}>

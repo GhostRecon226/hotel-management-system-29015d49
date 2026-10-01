@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useAccess } from "@/lib/access";
 import { callRpc, Field, FormDialog } from "@/lib/setup";
 import { fullName, useGuestSearch } from "@/lib/guests";
 import {
-  describeEvent, formatDateTime, formatDay, GUARANTEES, nightsBetween, ResStatusBadge, SOURCES, useReservation, useResMutation,
+  describeEvent, formatDateTime, formatDay, GUARANTEES, nightsBetween, nightsLabel, ResStatusBadge, SOURCES, useReservation, useResMutation,
   type ReservationDetail,
 } from "@/lib/reservations";
 import { useOpenMainFolio } from "@/lib/folios";
@@ -24,7 +24,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 export const Route = createFileRoute("/_authenticated/_app/reservations/$id")({ component: ReservationDetailPage });
 
-type Dialog = null | "cancel" | "noshow" | "reinstate" | "assign" | "guests";
+type Dialog = null | "cancel" | "noshow" | "reinstate" | "assign" | "guests" | "waive";
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -71,7 +71,7 @@ function ReservationDetailPage() {
       </Link>
       <PageHeader
         title={<span className="inline-flex flex-wrap items-center gap-3">{r.number} <ResStatusBadge status={r.status} holdUntil={r.hold_until} /></span>}
-        description={`${primary ? fullName(primary) : ""} · ${formatDay(r.arrival_date)} → ${formatDay(r.departure_date)} · ${nights} night${nights === 1 ? "" : "s"}`}
+        description={`${primary ? fullName(primary) : ""} · ${formatDay(r.arrival_date)} → ${formatDay(r.departure_date)} · ${nightsLabel(nights)}`}
         actions={<>
           {can("fin.folio.view") && r.status !== "cancelled" && r.status !== "no_show" &&
             <Button variant="outline" disabled={openFolio.isPending} onClick={() => openFolio.mutate(r.id)}>Folio</Button>}
@@ -82,6 +82,8 @@ function ReservationDetailPage() {
           {open && can("res.noshow") && <Button variant="outline" onClick={() => setDialog("noshow")}>No-show</Button>}
           {open && can("res.cancel") && <Button variant="destructive" onClick={() => setDialog("cancel")}>Cancel booking</Button>}
           {(r.status === "cancelled" || r.status === "no_show") && can("res.edit") && <Button onClick={() => setDialog("reinstate")}>Reinstate</Button>}
+          {nights === 0 && r.status === "checked_in" && can("res.rate.override") &&
+            <Button variant="outline" onClick={() => setDialog("waive")}>Waive same-day charge</Button>}
         </>} />
 
       {r.status_reason && (r.status === "cancelled" || r.status === "no_show") && (
@@ -201,6 +203,7 @@ function ReservationDetailPage() {
       <ReinstateDialog open={dialog === "reinstate"} onOpenChange={(o) => setDialog(o ? "reinstate" : null)} id={r.id} />
       <AssignDialog open={dialog === "assign"} onOpenChange={(o) => setDialog(o ? "assign" : null)} id={r.id} current={data.room?.id} />
       <GuestsDialog open={dialog === "guests"} onOpenChange={(o) => setDialog(o ? "guests" : null)} data={data} />
+      <WaiveSameDayDialog open={dialog === "waive"} onOpenChange={(o) => setDialog(o ? "waive" : null)} id={r.id} />
     </div>
   );
 }
@@ -241,6 +244,19 @@ function FeeDialog({ kind, open, onOpenChange, data }: { kind: "cancel" | "nosho
         </label>
       )}
       {f.waive && <Field label="Reason for waiving" htmlFor="waive-reason"><Input id="waive-reason" required value={f.waive_reason} onChange={(e) => setF({ ...f, waive_reason: e.target.value })} /></Field>}
+    </FormDialog>
+  );
+}
+
+function WaiveSameDayDialog({ open, onOpenChange, id }: { open: boolean; onOpenChange: (o: boolean) => void; id: string }) {
+  const [reason, setReason] = useState("");
+  const qc = useQueryClient();
+  const m = useResMutation("waive_same_day_charge", "Same-day charge waived.");
+  return (
+    <FormDialog open={open} onOpenChange={(o) => { if (o) setReason(""); onOpenChange(o); }} title="Waive same-day charge" busy={m.isPending}
+      onSubmit={() => m.mutate({ p_id: id, p_reason: reason }, { onSuccess: () => { qc.invalidateQueries({ queryKey: ["folios"] }); onOpenChange(false); } })}>
+      <p className="text-[15px] text-muted-foreground">The one-night charge for this same-day stay is reversed on the folio. The reason is kept in the booking history.</p>
+      <Field label="Reason" htmlFor="waive-sd-reason"><Textarea id="waive-sd-reason" required value={reason} onChange={(e) => setReason(e.target.value)} /></Field>
     </FormDialog>
   );
 }

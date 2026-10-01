@@ -31,7 +31,7 @@ begin
   perform t.lives(format('select t.book(%L, %L, %L, %L, %L)', t.id('g2'), d + 2, d + 3, t.id('std'), t.id('bar')), '[RES-001] the check-out day of other bookings is open for a new arrival');
   perform t.raises(format('select t.book(%L, %L, %L, %L, %L, null, %L, 5)', t.id('g2'), d + 10, d + 11, t.id('std'), t.id('bar'), 'confirmed'), 'E_INVALID|E_OCCUPANCY', '[RES-003] occupancy limit is enforced');
   perform t.raises(format('select t.book(%L, %L, %L, %L, %L)', t.id('g2'), t.bdate() - 1, t.bdate() + 1, t.id('std'), t.id('bar')), 'E_INVALID|E_DATES', '[RES-003] arrival in the past is refused');
-  perform t.raises(format('select t.book(%L, %L, %L, %L, %L)', t.id('g2'), d + 10, d + 10, t.id('std'), t.id('bar')), 'E_INVALID|E_DATES|check constraint', '[RES-003] departure must be after arrival');
+  perform t.raises(format('select t.book(%L, %L, %L, %L, %L)', t.id('g2'), d + 10, d + 9, t.id('std'), t.id('bar')), 'E_INVALID|E_DATES|check constraint', '[RES-003] departure cannot be before arrival (same-day stays are allowed, DAY-006)');
   v_a := t.book(t.id('g3'), d + 20, d + 22, t.id('std'), t.id('bar'), 'same-key');
   v_b := t.book(t.id('g3'), d + 20, d + 22, t.id('std'), t.id('bar'), 'same-key');
   perform t.eq(v_a, v_b, '[RES-002][NFR-003] the same idempotency key returns the same reservation');
