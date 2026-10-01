@@ -60,4 +60,15 @@ begin
   execute 'reset role';
 exception when others then execute 'reset role'; raise notice 'not ok - [upgrade crashed] %', sqlerrm;
 end $$;
+-- Approval limits on built-in roles (20261001100500)
+do $$
+declare v_fdo uuid := (select id from public.roles where tenant_id is null and code = 'FDO');
+begin
+  perform pg_temp.as_user('admin');
+  perform public.set_approval_limit(v_fdo, 'fin.discount.apply', 2500);
+  perform pg_temp.ok((select max_amount = 2500 and tenant_id = pg_temp.id('tenant') from public.approval_limits where role_id = v_fdo),
+    '[upgrade][6c] the existing hotel can set a limit on the built-in Front Desk role, kept for that hotel only');
+  execute 'reset role';
+exception when others then execute 'reset role'; raise notice 'not ok - [upgrade crashed] %', sqlerrm;
+end $$;
 rollback;

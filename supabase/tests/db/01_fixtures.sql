@@ -23,7 +23,7 @@ begin
   update public.tenant_subscriptions set plan_code = 'standard' where tenant_id = t.id('tenantA');
 end $$;
 
--- Staff for hotel A. Built-in roles cannot carry approval limits, so FDO and FOM get limited copies.
+-- Staff for hotel A. FDO and FOM get copied roles with limits (built-in roles can carry limits too since 6c; see 20_builtin_limits.sql).
 do $$
 declare n text; v_role uuid; v_fdol uuid; v_foml uuid;
 begin

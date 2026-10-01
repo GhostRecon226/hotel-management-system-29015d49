@@ -36,7 +36,7 @@ export function LimitsPanel() {
       <CardContent className="pt-6">
         <SectionHeader
           title="Approval limits"
-          description="The most a role may approve by itself. A role set to L with no limit can approve nothing — anything above the limit goes to an approver."
+          description="The most a role may approve by itself in this hotel, built-in roles included. A role set to L with no limit can approve nothing. Anything above the limit goes to an approver."
         />
         <Table>
           <TableHeader><TableRow>
@@ -49,22 +49,21 @@ export function LimitsPanel() {
             )}
             {rows.map(({ role, perm }) => {
               const k = `${role.id}|${perm.key}`;
-              const locked = role.is_system;
               return (
                 <TableRow key={k}>
                   <TableCell className="font-medium">
-                    {role.name}{locked && <Badge variant="info" className="ml-2">Built-in</Badge>}
+                    {role.name}{role.is_system && <Badge variant="info" className="ml-2">Built-in</Badge>}
                   </TableCell>
                   <TableCell>{describe(perm.key)}</TableCell>
                   <TableCell className="text-right">
                     <Input
-                      className="ml-auto w-44 text-right tabular" inputMode="decimal" placeholder="0" disabled={locked}
+                      className="ml-auto w-44 text-right tabular" inputMode="decimal" placeholder="0"
                       value={values[k] ?? ""} onChange={(e) => setValues((v) => ({ ...v, [k]: e.target.value }))}
                     />
                   </TableCell>
                   <TableCell>
                     <Button
-                      size="sm" variant="outline" disabled={locked || setLimit.isPending}
+                      size="sm" variant="outline" disabled={setLimit.isPending}
                       onClick={() => setLimit.mutate({
                         p_role_id: role.id, p_permission_key: perm.key,
                         p_max_amount: values[k] === "" || values[k] == null ? null : values[k],
