@@ -11,6 +11,8 @@ test("a user who forgot their password resets it from the emailed link and signs
   await page.goto("/auth");
   await page.getByRole("link", { name: "Forgot password?" }).click();
   await expect(page).toHaveURL(/\/forgot-password/);
+  // The address changes before the new page is drawn; wait for it, or the email goes into the old sign-in form.
+  await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
   await page.getByLabel("Email").fill(user.email);
   await page.getByRole("button", { name: "Send reset link" }).click();
   await expect(page.getByText(/If an account exists for that email/)).toBeVisible();
@@ -42,6 +44,7 @@ test("a user who forgot their password resets it from the emailed link and signs
     await supabase.auth.signOut();
   });
   await page.goto("/auth");
+  await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
   await page.getByLabel("Email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
