@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { myContextQuery } from "@/lib/access";
 import { errorMessage } from "@/lib/errors";
 import { AuthLayout } from "@/components/auth-layout";
+import { useHydrated } from "@/lib/use-hydrated";
 
 export const Route = createFileRoute("/_authenticated/create-hotel")({
   beforeLoad: async ({ context }) => {
@@ -45,6 +46,7 @@ function CreateHotel() {
   const [form, setForm] = useState({ business_name: "", country: "Nigeria", property_name: "", full_name: "", city: "" });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const hydrated = useHydrated();
   const set = (k: keyof typeof form) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   async function submit(e: FormEvent) {
@@ -83,7 +85,9 @@ function CreateHotel() {
 
   return (
     <AuthLayout wide>
-      <form onSubmit={submit} className="space-y-5">
+      <form onSubmit={submit}>
+        {/* Locked until the page is ready, so nothing typed or clicked during a slow first load is lost. */}
+        <fieldset disabled={!hydrated} className="space-y-5">
         <div className="mb-2">
           <h1 className="text-[28px] font-semibold">Create your hotel</h1>
           <p className="mt-1 text-[15px] text-muted-foreground">You get a 30-day free trial on the Starter plan.</p>
@@ -103,6 +107,7 @@ function CreateHotel() {
         <Field id="city" label="City" value={form.city} onChange={set("city")} />
         {error && <p className="rounded-md bg-danger-soft px-3 py-2.5 text-sm text-danger-strong" role="alert">{error}</p>}
         <Button type="submit" size="lg" className="w-full" disabled={busy}>{busy ? "Creating…" : "Create hotel"}</Button>
+        </fieldset>
       </form>
     </AuthLayout>
   );

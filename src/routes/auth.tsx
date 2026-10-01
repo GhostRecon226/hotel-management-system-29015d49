@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorMessage } from "@/lib/errors";
 import { AuthLayout } from "@/components/auth-layout";
+import { useHydrated } from "@/lib/use-hydrated";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -53,6 +54,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const hydrated = useHydrated();
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -87,7 +89,9 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-5">
+    <form onSubmit={submit}>
+      {/* Locked until the page is ready, so nothing typed or clicked during a slow first load is lost. */}
+      <fieldset disabled={!hydrated} className="space-y-5">
       <div className="space-y-1.5">
         <Label htmlFor={`${mode}-email`}>Email</Label>
         <Input id={`${mode}-email`} type="email" autoComplete="email" value={email}
@@ -104,6 +108,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       <Button type="submit" size="lg" className="w-full" disabled={busy}>
         {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </Button>
+      </fieldset>
     </form>
   );
 }
