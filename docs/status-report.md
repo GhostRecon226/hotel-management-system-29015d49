@@ -13,6 +13,28 @@ This report covers the app Lovable built (`hotel-management-system-29015d49`). I
 - Screens no longer add up money. Every total, tax preview, fee preview and KPI comes from the database. A check (`npm run check:money`) fails if browser code starts doing money sums again.
 - It is still not ready for a real hotel: 21 failures, tax rules wait for the accountant, email is not connected, and 6c and DAY-006 are not built.
 
+## Update: 1 Oct 2026
+
+**Live project:** all 36 migrations applied and recorded on `urbpxybyrfjczqbrpdsq`. Both scheduled jobs are active. The built-in roles hold the new permissions (move charges for System Administrator, General Manager, Front Office Manager and Accountant; own-records folio access, deposits only and no ID documents for Reservation Officer).
+
+**Built today on the local copy (test first, one commit each), waiting for your yes:**
+
+| Item | What it does now | Proof |
+|---|---|---|
+| FIN-006, FIN-014, ADM-006 | Nobody, not even the database owner, can edit, delete or wipe the ledger or the audit trail. Ledger rows must carry the open business date, and the sign must suit the kind (no negative charges, no positive payments) | `12_ledger.sql`, `16_structure.sql` |
+| GST-005 | A guest with a booking that is not over cannot be anonymised | `15_accounts.sql` |
+| FO-012 | Voiding a check-in made by mistake leaves the room ready to use again | `17_more_features.sql` |
+| FO-006, HK-001 | A room move creates a cleaning task for the old room | `13_reservations.sql` |
+| DAY-006 | Same-day stays can be booked, are charged one night at check-in, and a manager can waive it with a reason | `19_same_day.sql` (23 checks), checked on screen |
+| 6c | Built-in roles carry approval limits, set per hotel | `20_builtin_limits.sql` (17 checks), checked on screen |
+| Flaky test | Sign-in and Create hotel forms are locked until the page is ready (cause found in the trace) | Failed 4 of 4 before, passes 3 of 3 after |
+
+Tests: **488 database checks, 476 pass, 12 fail**; 6 upgrade checks pass; 4 browser tests pass. The upgrade test now starts from what the live project has (20260930160100).
+
+Remaining failures (12): FO-003 (registration card step), FO-007 (complimentary upgrade), FO-008 x2 (shorten a stay), HK-002 x2 (task with no assignee, attendants see every task), HK-003 (failed-inspection notice), ROOM-004 (reason for dirty override), PLT-007 (second property), PLT-004 (Ghana currency), RES-013 (arrival-ready flag), SET-008 (inspection on/off).
+
+Migrations waiting for your yes (6, in order): `20261001100000_lock_ledger_and_audit`, `20261001100100_anonymise_upcoming_guard`, `20261001100200_void_check_in_keeps_room_ready`, `20261001100300_room_move_cleaning_task`, `20261001100400_same_day_stays`, `20261001100500_builtin_role_limits`.
+
 ## Update: step 4 (30 Sep 2026)
 
 ### What changed
@@ -540,4 +562,4 @@ Steps 1 and 2 are done. You approve each step before I start the next.
 ## Supabase status
 
 - **Local Supabase: running** in Docker, from the app repo (project name `hotel-desk`). All 36 migrations apply. Scheduled jobs: the business date roll every 5 minutes, and the subscription clock daily.
-- **Your project** `urbpxybyrfjczqbrpdsq` (West EU, Ireland): linked, pg_cron on, the first 24 migrations applied and recorded. Your account and hotel exist. The 12 new migrations are not applied.
+- **Your project** `urbpxybyrfjczqbrpdsq` (West EU, Ireland): linked, pg_cron on, 36 migrations applied and recorded (1 Oct 2026). Your account and hotel exist. The 6 migrations of 1 Oct are not applied.

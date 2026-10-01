@@ -54,3 +54,7 @@ Two bugs stopped the first real signup on the live project. Both are fixed on br
 2. **Create hotel stuck on "Creating…".** `create_hotel` succeeded (the hotel, property, trial, roles and Nigerian defaults were all created), but the page only marked the cached context stale before navigating. The dashboard guard read the stale `has_hotel = false` and sent the user back to the same page, so it never re-rendered. Fix: the page fetches the fresh context before navigating, both guards revalidate stale context, and the button is always released.
 
 Lesson: route guards that read cached React Query data must revalidate, and auth listeners must not reload the router during a navigation.
+
+## Slow first load (fixed 1 Oct 2026)
+
+On a slow first load, a click on Sign in before the page had started up made the browser submit the form itself (a reload to `/auth?`), and text typed before start-up was lost. This made one browser test flaky. The sign-in and Create hotel forms are now locked until the page is ready. Still open: React reported a "hydration mismatch" on the first load of `/auth` once in about ten cold starts. It does no harm now that the form is locked, but the cause is not found yet.

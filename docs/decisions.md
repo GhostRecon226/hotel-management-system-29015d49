@@ -22,8 +22,8 @@ Newest changes go at the bottom of each row's notes. Date format is day month ye
 | D6 | Read-only tenants can still settle and check out. | Confirmed | Never trap a guest at the desk. Fixed 30 Sep 2026 (finding M3). |
 | D7 | Past due for more than 14 days suspends the tenant. | Confirmed | Grace period before suspension. Built 30 Sep 2026 (daily subscription clock). |
 | D8 | First admin gets the System Administrator and General Manager roles. | Confirmed | One person runs a small hotel. |
-| D9 | Same-day arrival and departure keeps the dates and deletes the night rows. | Confirmed | Charge rule still open (DAY-006). Note 30 Sep 2026: this app refuses bookings whose departure is not after arrival. |
-| DAY-006 | Same-day arrival and departure is charged one night. A manager can waive the charge with a reason. | Confirmed 30 Sep 2026 | Simple rule for the desk. Needs a build change: today such bookings are refused. |
+| D9 | Same-day arrival and departure keeps the dates and deletes the night rows. | Confirmed | Built 1 Oct 2026 with DAY-006. A same-day stay has no night rows, so it does not use up a room for the night in availability. |
+| DAY-006 | Same-day arrival and departure is charged one night. A manager can waive the charge with a reason. | Confirmed 30 Sep 2026 | Built 1 Oct 2026. Charged at check-in on the room charge code, same key as the nightly charge (no double charge). Waiver needs `res.rate.override` and a reason. Only bookings made as same-day stays: a guest booked overnight who leaves on the arrival day is an early departure and is not charged (question for Peter). |
 | Ops | Enable pg_cron. Business date roll every 5 minutes, subscription clock daily at 00:15 UTC. | Confirmed | Both are scheduled by migrations. pg_cron must be enabled on the project. |
 | 5a | Unpaid check-out: a holder of the approval permission may check out a guest who owes, with a reason, and it is audited. Everyone else needs a second approver. | Confirmed 30 Sep 2026 | Balances collection against control. |
 | 5b | No temporary passwords for invited staff. A "Resend invite" button instead. | Confirmed 30 Sep 2026 | A password shown on screen is weak. |
@@ -31,7 +31,7 @@ Newest changes go at the bottom of each row's notes. Date format is day month ye
 | 5d | Send email through Resend. | Confirmed 30 Sep 2026 | The outbox code already supports it. |
 | 5e | Activate, suspend and change plans by hand for the first pilots (`app.platform_set_subscription`). No platform console yet. | Confirmed 30 Sep 2026 | Faster to first pilot. |
 | 5f | Keep the permission names the Lovable build uses (for example `fo.room.move`, `rpt.finance.view`, `setup.rate.manage`). Design documents use these names from now on. | Confirmed 30 Sep 2026 | The code and database already use them. The list is `select key from public.permissions`. |
-| 6a | Reservation officers take deposits only, not other payments. | Confirmed 30 Sep 2026 | Matches the original role design. Needs a build change. |
-| 6b | Reservation officers do not see ID documents. | Confirmed 30 Sep 2026 | Data minimisation. Needs a build change. |
-| 6c | Built-in roles can carry approval limits, set per hotel. | Confirmed 30 Sep 2026 | Hotels should not have to copy a role to set a limit. Needs a build change. |
-| 6d | Free cancellation defaults to 2 days before arrival, changeable per rate plan. | Confirmed 30 Sep 2026 | Reference design default. Needs a build change: new and existing plans get 2. |
+| 6a | Reservation officers take deposits only, not other payments. | Confirmed 30 Sep 2026 | Matches the original role design. Built 30 Sep 2026, live 1 Oct 2026. |
+| 6b | Reservation officers do not see ID documents. | Confirmed 30 Sep 2026 | Data minimisation. Built 30 Sep 2026, live 1 Oct 2026. |
+| 6c | Built-in roles can carry approval limits, set per hotel. | Confirmed 30 Sep 2026 | Hotels should not have to copy a role to set a limit. Built 1 Oct 2026: the limit belongs to the hotel's account (all its properties). |
+| 6d | Free cancellation defaults to 2 days before arrival, changeable per rate plan. | Confirmed 30 Sep 2026 | Reference design default. Built 30 Sep 2026, live 1 Oct 2026. |
