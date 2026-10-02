@@ -71,7 +71,7 @@ Placeholders: wherever you see `yourdomain.com`, use the domain you buy in step 
 
 ## E. Vercel (hosting)
 
-Vercel normally builds and publishes a site the moment it is connected to GitHub. The steps below avoid that, because `main` on GitHub is still Lovable's old version and nothing should go live yet.
+Vercel builds and publishes a site every time code reaches GitHub: `main` goes to the live address and every other branch gets its own preview address.
 
 - [ ] **E1. YOU.** Sign up at vercel.com **with GitHub** (the account that owns `GhostRecon226/hotel-management-system-29015d49`). Create a **team** (for example `hotel-desk`) and choose the **Pro** plan. Write down the team's short name; it is used in C10.
 - [ ] **E2. YOU.** Avatar > **Account Settings** > **Authentication** > turn on two-step sign-in. Team **Settings** > **Members** > invite your second person as **Owner**, and ask them to turn on two-step sign-in.

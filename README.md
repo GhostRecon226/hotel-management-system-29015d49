@@ -12,7 +12,7 @@ Start with `docs/architecture.md`, then `docs/known-issues.md`.
 - Tailwind CSS v4 (tokens in `src/styles.css`), shadcn/ui components in `src/components/ui`
 - Supabase (Postgres, Auth, RLS, pg_cron). Business rules live in Postgres functions called with `supabase.rpc(...)`
 - TanStack Query for data fetching
-- Hosting: Vercel (Nitro `vercel` preset). No Lovable dependency.
+- Hosting: Vercel (Nitro `vercel` preset).
 
 ## Run locally
 
@@ -70,7 +70,6 @@ Rebuilds the local Supabase database from the migrations, loads test fixtures an
 
 - `docs/status-report.md`: audit, test results, open failures, plan
 - `docs/decisions.md`: decisions log
-- `docs/architecture.md`, `docs/data-model.md`, `docs/functions.md`, `docs/screens.md`: written by the Lovable build; `functions.md` predates the fixes of 30 Sep 2026
+- `docs/architecture.md`, `docs/data-model.md`, `docs/functions.md`, `docs/screens.md`: written during the first build; `functions.md` predates the fixes of 30 Sep 2026
 - `docs/known-issues.md`: what is unfinished or doubtful
-- `docs/lovable-notes.md`: history of the Lovable setup (kept for reference)
 - `AGENTS.md`: one-line architecture rules

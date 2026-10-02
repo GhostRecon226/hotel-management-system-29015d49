@@ -40,7 +40,6 @@ Blunt list. Nothing here is hidden elsewhere.
 - `housekeeping_tasks` is deprecated (replaced by `hk_tasks`) but still in the schema because tables are never dropped.
 - Frontend calls to views/rpc use `(supabase.from as any)` / a `callRpc` wrapper, so many are untyped. `src/integrations/supabase/types.ts` is generated but not used strictly.
 - `docs/functions.md` permission/error columns were extracted by regex from function bodies. Helpers that check permissions indirectly (e.g. via a row's property) may show fewer keys than they really need. Read the function when it matters.
-- Migrations exist twice (`supabase/migrations` canonical, `drizzle/migrations` from the Lovable tool). Keep only one after leaving Lovable.
 - `pg_cron` is required by one migration; plain Postgres without it fails there (the check script stubs it).
 - Some UI lists are capped (e.g. 200 folios) with no pagination.
 - `bulk_add_rooms` is capped at 500 rooms per call.

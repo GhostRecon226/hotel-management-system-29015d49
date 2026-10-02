@@ -27,4 +27,4 @@ One line per rule. Why: the reason.
 - Outbound messages are rows in public.notification_outbox, added only by app.enqueue_message (dedupe key per tenant); src/lib/outbox.server.ts claims batches via outbox_claim/outbox_mark (service role) with exponential back-off. CSV exports go through public.export_data (rpt.export, audit row) via src/lib/exports.functions.ts. Why: queue and permissions in Postgres, no Edge Functions on this stack.
 - Migrations must replay from empty. Run scripts/test-db.sh (local Supabase in Docker) after every change; it must not add any "not ok". Why: supabase/migrations is the only source of truth, and the tests are the proof.
 - The browser has no table write rights (default-deny, 20260930100000). New tables need RLS and tenant_id; new public functions need an explicit grant to authenticated. Why: every change goes through a permission-checked function.
-- Keep Lovable's permission names (decision 5f). Why: the code and database already use them.
+- Keep the existing permission names (decision 5f). Why: the code and database already use them.

@@ -30,7 +30,7 @@ Newest changes go at the bottom of each row's notes. Date format is day month ye
 | 5c | Host the app on Vercel. | Confirmed 30 Sep 2026 | Already in use. |
 | 5d | Send email through Resend. | Confirmed 30 Sep 2026 | The outbox code already supports it. |
 | 5e | Activate, suspend and change plans by hand for the first pilots (`app.platform_set_subscription`). No platform console yet. | Confirmed 30 Sep 2026 | Faster to first pilot. |
-| 5f | Keep the permission names the Lovable build uses (for example `fo.room.move`, `rpt.finance.view`, `setup.rate.manage`). Design documents use these names from now on. | Confirmed 30 Sep 2026 | The code and database already use them. The list is `select key from public.permissions`. |
+| 5f | Keep the permission names the first build uses (for example `fo.room.move`, `rpt.finance.view`, `setup.rate.manage`). Design documents use these names from now on. | Confirmed 30 Sep 2026 | The code and database already use them. The list is `select key from public.permissions`. |
 | 6a | Reservation officers take deposits only, not other payments. | Confirmed 30 Sep 2026 | Matches the original role design. Built 30 Sep 2026, live 1 Oct 2026. |
 | 6b | Reservation officers do not see ID documents. | Confirmed 30 Sep 2026 | Data minimisation. Built 30 Sep 2026, live 1 Oct 2026. |
 | 6c | Built-in roles can carry approval limits, set per hotel. | Confirmed 30 Sep 2026 | Hotels should not have to copy a role to set a limit. Built 1 Oct 2026: the limit belongs to the hotel's account (all its properties). |

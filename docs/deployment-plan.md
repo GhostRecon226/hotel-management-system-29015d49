@@ -6,7 +6,7 @@ Written 1 Oct 2026 for Peter's review. Nothing in this plan has been done yet. E
 
 - **Database (Supabase project `urbpxybyrfjczqbrpdsq`, West EU, Ireland):** all 43 migrations applied and recorded. Both scheduled jobs are active. The hand test passed on it: room type, room, rate plan, booking, check-in and a charge whose tax preview matched the folio.
 - **App:** runs on your Mac only (`npm run dev`, port 8080). The production build for Vercel works today (`npm run build` creates `.vercel/output`), and the browser files contain no server-only key.
-- **Code:** on branch `claude/audit-status-report`, pushed to GitHub. `main` is still Lovable's last version.
+- **Code:** `main` on GitHub holds the current app (the redesign merged 2 Oct 2026). Vercel deploys every push: `main` goes live, every other branch gets a preview address.
 - **Tests:** 539 database checks (527 pass, 12 known failures), 29 upgrade checks, 6 browser tests.
 
 ## 1. Hosting on Vercel (decision 5c)
@@ -61,7 +61,7 @@ Two kinds of email leave the system, and both should come from your domain.
 | 4.1 | You | Create a Resend account. Add the domain `mail.yourdomain` and add the DNS records Resend shows (SPF, DKIM, and a DMARC record). Wait for "Verified". |
 | 4.2 | You | **Sign-up and invite emails (Supabase Auth).** Supabase > Authentication > SMTP: host `smtp.resend.com`, port 465, user `resend`, password = a Resend API key. Sender `no-reply@mail.yourdomain`. Supabase's built-in email sender allows only a few emails per hour, so without this, sign-ups and staff invites will fail as soon as a few people use them. |
 | 4.3 | You | Put `RESEND_API_KEY` and `OUTBOX_FROM_EMAIL` in Vercel (section 2). |
-| 4.4 | Done 2 Oct 2026 | **Scheduled sender for app emails (booking confirmations, approval alerts).** `GET /api/cron/outbox`, called by Vercel Cron every 5 minutes. To switch it on: set `CRON_SECRET`, `RESEND_API_KEY` and `OUTBOX_FROM_EMAIL` in Vercel. Until then it refuses every call and emails stay queued, never lost. |
+| 4.4 | Built 2 Oct 2026, schedule off for now | **Scheduled sender for app emails (booking confirmations, approval alerts).** `GET /api/cron/outbox`. The 5-minute schedule is switched off while we are on Vercel Hobby, which rejects it. Emails queue in the database and are never lost; they wait until the schedule is back. **To put it back when we move to Pro:** in `vite.config.ts`, restore the commented `vercel: { config: { ... crons ... } }` line inside `nitro({ ... })`, and check `CRON_SECRET`, `RESEND_API_KEY` and `OUTBOX_FROM_EMAIL` are set in Vercel. |
 | 4.5 | Claude | Send a test confirmation and an invite to an address you choose, and check they arrive, are not marked as spam, and their links work. |
 
 ## 5. Automatic checks before anything reaches `main`
@@ -92,7 +92,7 @@ Two kinds of email leave the system, and both should come from your domain.
 - [ ] **Supabase on a paid plan, with daily backups.** Free projects pause after a week without use and have no backups you can restore. Check your plan in Supabase > Billing.
 - [ ] **Data protection.** Advice under Nigeria's data protection law (A14) before real guest data goes in, a privacy notice and terms of use the hotel accepts at sign-up, and a named person who answers data requests.
 - [ ] **The live address passes the hand test** (step 6), including a check-out with payment.
-- [ ] **Error alerts.** Lovable's error reporting was removed. Turn on Vercel's logs and alerts at minimum, so a failing page reaches you before a hotel tells you.
+- [ ] **Error alerts.** The app has no error reporting of its own. Turn on Vercel's logs and alerts at minimum, so a failing page reaches you before a hotel tells you.
 - [ ] **How a pilot is activated** (decision 5e), written down: who runs it, with what reason, and how the subscription history is checked.
 
 **Should be done for the pilot, small each:**
