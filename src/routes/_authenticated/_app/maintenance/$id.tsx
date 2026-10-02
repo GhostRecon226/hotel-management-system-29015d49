@@ -74,7 +74,7 @@ function TicketDetail() {
         {t.reopen_count > 0 && <Badge variant="warning">Reopened {t.reopen_count}×</Badge>}
       </div>
       {t.status === "resolved" && t.resolved_by === ctx.user_id && (
-        <p className="mb-4 rounded-md border border-warning/40 bg-warning/10 p-3 text-[15px]">You resolved this ticket, so a different person must check and close it.</p>
+        <p className="mb-4 rounded-xl border border-warning/40 bg-warning-soft px-4 py-2.5 text-sm text-warning-strong">You resolved this ticket, so a different person must check and close it.</p>
       )}
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

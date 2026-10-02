@@ -22,14 +22,28 @@ const sizes = process.env.ONLY_EXTRA ? extra : [{ w: 1366, h: 768, tag: "1366x76
 for (const vp of sizes) {
   const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h }, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
+  // Pages before signing in: "public:/path".
+  for (const p of pages.filter((x) => x.startsWith("public:"))) {
+    const path0 = p.slice("public:".length);
+    await page.goto(`${base}${path0}`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(1200);
+    await page.screenshot({ path: path.join(outDir, `public-${path0.replace(/^\//, "").replace(/\//g, "-")}-${vp.tag}.png`), fullPage: vp.full });
+    console.log("saved", p, vp.tag);
+  }
   await page.goto(`${base}/auth`);
   await page.getByRole("heading", { name: "Welcome" }).waitFor();
   await page.getByLabel("Email").fill(env[`DEMO_${who}_EMAIL`]);
   await page.getByLabel("Password").fill(env[`DEMO_${who}_PASSWORD`]);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.waitForURL(/\/dashboard/);
-  for (const p of pages) {
-    if (p === "folio-detail") {
+  for (const p of pages.filter((x) => !x.startsWith("public:"))) {
+    // "/admin#Roles" opens a page and then clicks the tab with that name.
+    const [route, tab] = p.split("#");
+    if (tab) {
+      await page.goto(`${base}${route}`);
+      await page.getByRole("tab", { name: tab.replace(/_/g, " ") }).click();
+    } else if (p === "folio-detail") {
       await page.goto(`${base}/folios`);
       await page.locator('main a[href^="/folios/"]').first().click();
       await page.waitForURL(/\/folios\/[0-9a-f-]{36}/);
@@ -38,7 +52,7 @@ for (const vp of sizes) {
     }
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(1200);
-    const name = p === "folio-detail" ? "folio-detail" : p.replace(/^\//, "").replace(/\//g, "-") || "home";
+    const name = p === "folio-detail" ? "folio-detail" : p.replace(/^\//, "").replace(/[/#]/g, "-").toLowerCase() || "home";
     await page.screenshot({ path: path.join(outDir, `${name}-${vp.tag}.png`), fullPage: vp.full });
     console.log("saved", name, vp.tag);
   }

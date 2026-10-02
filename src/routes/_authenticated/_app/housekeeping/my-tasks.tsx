@@ -47,7 +47,7 @@ function TaskCard({ task }: { task: HkTask }) {
           <div className="flex flex-col items-end gap-1"><TaskStatusBadge status={task.status} /><PriorityBadge priority={task.priority} /></div>
         </div>
         {task.status === "failed" && task.defects.length > 0 && (
-          <div className="rounded-md border border-destructive/30 bg-danger-soft p-3 text-[15px] text-danger-strong">
+          <div className="rounded-xl border border-destructive/30 bg-danger-soft px-4 py-2.5 text-sm text-danger-strong">
             <div className="font-medium">Inspection failed. Please fix:</div>
             <ul className="ml-5 list-disc">{task.defects.map((d) => <li key={d}>{d}</li>)}</ul>
           </div>

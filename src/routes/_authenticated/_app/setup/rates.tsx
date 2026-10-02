@@ -96,7 +96,7 @@ function Rates() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => editPlan(plan)}>Edit plan</Button>
-              <Button size="sm" onClick={() => editPrice(plan.id)} disabled={types.length === 0}>Add price</Button>
+              <Button size="sm" variant="outline" onClick={() => editPrice(plan.id)} disabled={types.length === 0}>Add price</Button>
             </div>
           </div>
           <Table>

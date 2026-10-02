@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 type BadgeTone = "success" | "warning" | "danger" | "neutral" | "info";
 
 const STATUS: Record<string, { label: string; variant: BadgeTone }> = {
+  trial: { label: "Free trial", variant: "info" },
   trialing: { label: "On trial", variant: "info" },
   active: { label: "Active", variant: "success" },
   past_due: { label: "Payment overdue", variant: "warning" },
@@ -48,7 +49,7 @@ export function SubscriptionPanel() {
             {line("Trial ends", s.trial_ends_at ? `${formatDateTime(s.trial_ends_at)}${s.trial_days_left != null ? ` (${s.trial_days_left} days left)` : ""}` : "—")}
           </div>
           {!s.writable && (
-            <p className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-[15px] text-destructive">
+            <p className="mt-4 rounded-xl border border-destructive/30 bg-danger-soft px-4 py-2.5 text-sm text-danger-strong">
               Your hotel is read-only. You can still settle bills and check guests out, but nothing new can be added until the subscription is active again.
             </p>
           )}

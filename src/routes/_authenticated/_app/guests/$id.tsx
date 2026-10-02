@@ -88,12 +88,12 @@ function GuestProfile() {
         </>} />
 
       {g.status === "merged" && g.merged_into && (
-        <p className="mb-4 rounded-md border border-info/30 bg-info-soft p-3 text-[15px] text-info-strong">
+        <p className="mb-4 rounded-xl border border-info/30 bg-info-soft px-4 py-2.5 text-sm text-info-strong">
           This profile was merged. <Link className="underline" to="/guests/$id" params={{ id: g.merged_into }}>Open the kept profile</Link>.
         </p>
       )}
       {g.anonymised_at && (
-        <p className="mb-4 rounded-md border border-info/30 bg-info-soft p-3 text-[15px] text-info-strong">
+        <p className="mb-4 rounded-xl border border-info/30 bg-info-soft px-4 py-2.5 text-sm text-info-strong">
           Personal details were removed on {formatDate(g.anonymised_at)}. Stay history is kept.
         </p>
       )}

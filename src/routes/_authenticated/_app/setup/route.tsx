@@ -34,11 +34,11 @@ function SetupLayout() {
   return (
     <div>
       <PageHeader title="Setup" description={`Settings for ${property?.name ?? "this property"}.`} className="mb-4" />
-      <nav className="mb-6 flex gap-1 overflow-x-auto border-b">
+      <nav aria-label="Setup" className="mb-5 inline-flex max-w-full gap-1 overflow-x-auto rounded-full border border-border/70 bg-card p-1 shadow-xs">
         {TABS.filter((t) => canAny([...t.perms])).map((t) => (
           <Link key={t.to} to={t.to}
-            className="-mb-px flex h-11 shrink-0 items-center whitespace-nowrap border-b-2 border-transparent px-4 text-[15px] text-muted-foreground hover:text-foreground"
-            activeProps={{ className: "!border-primary font-medium !text-primary-strong" }}>
+            className="flex h-9 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/40"
+            activeProps={{ className: "bg-primary-soft !text-primary-strong" }}>
             {t.label}
           </Link>
         ))}
