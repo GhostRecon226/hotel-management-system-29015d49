@@ -111,9 +111,9 @@ Vercel normally builds and publishes a site the moment it is connected to GitHub
   Never tick **Development** for these; your Mac uses its own `.env.local`. Only the publishable key may ever be in a key whose name starts with `VITE_`.
 - [ ] **E9. YOU.** **Settings** > **Domains** > **Add** > `app.yourdomain.com` > choose **Production**. Vercel shows one DNS record (usually a CNAME with a value ending in `vercel-dns.com`).
 - [ ] **E10. YOU.** Add that record in your registrar's DNS page, exactly as shown. Back in Vercel, wait for the domain to show **Valid Configuration**. The address will show an error page until the first deploy; that is expected.
-- [ ] **E11. YOU, only once `https://app.yourdomain.com` loads the Hotel Desk sign-in page.** That happens after the first live deploy (step H4), so leave this unticked until then; I will remind you. Switch the web address to your domain on **both** Supabase projects:
+- [ ] **E11. YOU, only once `https://app.yourdomain.com` loads the Hotel Desk sign-in page.** That happens after the first live deploy (step H4), so leave this unticked until then; I will remind you. Switch the live project's web address to your domain:
   - Live project > **Authentication** > **URL Configuration** > **Site URL:** `https://app.yourdomain.com`. **Redirect URLs** > **Add URL:** `https://app.yourdomain.com/**`. Keep `http://localhost:8080/**` in the list. Save.
-  - Practice project > same page > **Site URL:** `https://app.yourdomain.com`. **Redirect URLs** > **Add URL:** `https://app.yourdomain.com/**`. Keep `http://localhost:8080/**` and the `vercel.app` preview pattern from C10. Save.
+  - Practice project: no change. Its **Site URL** stays `http://localhost:8080`, and its trusted links stay `http://localhost:8080/**` and the `vercel.app` test-address pattern from C10, so practice emails never point at the live site.
   - Until this step, sign-up and password emails link to `localhost:8080`, which is right while the app only runs on your Mac.
 
 ## F. GitHub
@@ -133,5 +133,5 @@ Vercel normally builds and publishes a site the moment it is connected to GitHub
 - [ ] **H1. CLAUDE.** Apply all migrations to the practice project, with a dry run first. You say yes before I apply.
 - [ ] **H2. CLAUDE.** Add the automatic checks (tests on every change) to GitHub, test first. Then you protect `main` (repository > **Settings** > **Branches** > **Add rule** for `main` > require a pull request and passing checks).
 - [ ] **H3. CLAUDE.** Ask you to switch builds back on (E4 > **Automatic**). Then I check a preview of the branch against the practice project, and test sign-up, invite, password reset and booking-confirmation emails.
-- [ ] **H4. YOU.** Approve the merge. I open a pull request to `main`; the checks must pass; you merge it. Vercel then publishes the site on `app.yourdomain.com`. As soon as the sign-in page loads there, do step **E11** (switch the Supabase web address to your domain on both projects).
+- [ ] **H4. YOU.** Approve the merge. I open a pull request to `main`; the checks must pass; you merge it. Vercel then publishes the site on `app.yourdomain.com`. As soon as the sign-in page loads there, do step **E11** (switch the live Supabase project's web address to your domain; the practice project stays on `localhost:8080`).
 - [ ] **H5. CLAUDE.** Repeat the hand test on `https://app.yourdomain.com`, then go through the "before the first real hotel" list in the deployment plan with you.
