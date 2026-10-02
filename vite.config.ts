@@ -8,7 +8,8 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { nitro } from "nitro/vite";
 
 export default defineConfig(({ command }) => ({
-  server: { host: "::", port: 8080 },
+  // "localhost" only: the dev server answers on this Mac and not to other devices on the same network.
+  server: { host: "localhost", port: 8080 },
   resolve: {
     alias: { "@": `${process.cwd()}/src` },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
