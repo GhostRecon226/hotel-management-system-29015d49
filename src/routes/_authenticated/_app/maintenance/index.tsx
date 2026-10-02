@@ -5,6 +5,8 @@ import { useAccess } from "@/lib/access";
 import { formatDateTime } from "@/lib/reservations";
 import { NewTicketDialog, PRIORITY, StatusBadge, TICKET_STATUS, useTickets } from "@/lib/maintenance";
 import { FilterBar, PageHeader } from "@/components/page-header";
+import { AlertTriangle, UserX, UserCheck, Wrench } from "lucide-react";
+import { FilledStat, StatTile } from "@/components/stats";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,14 +31,21 @@ function TicketList() {
     (priority === "all" || t.priority === priority) &&
     (!q || `${t.title} ${t.room_number ?? ""} ${t.location ?? ""}`.toLowerCase().includes(q.toLowerCase())));
 
+  const active = data.filter((t) => ACTIVE.includes(t.status));
   return (
     <div>
       <PageHeader title="Maintenance" description="Repair tickets for rooms and public areas."
         actions={can("mnt.ticket.create") && <Button onClick={() => setAdding(true)}><Plus className="h-4 w-4" /> Report a problem</Button>} />
+      <div className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <FilledStat icon={Wrench} label="Open tickets" value={isLoading ? "—" : active.length} sub="Not finished yet" />
+        <StatTile icon={AlertTriangle} tone="danger" label="Urgent" value={isLoading ? "—" : active.filter((t) => t.priority === "urgent").length} sub="Open and urgent" />
+        <StatTile icon={UserX} tone="warning" label="Nobody assigned" value={isLoading ? "—" : active.filter((t) => !t.assignee_id).length} sub="Open, waiting for someone" />
+        <StatTile icon={UserCheck} tone="accent" label="Assigned to me" value={isLoading ? "—" : active.filter((t) => t.assignee_id === ctx.user_id).length} sub="Open" />
+      </div>
       <FilterBar>
-        <Input className="w-64" placeholder="Search problem, room or place" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Input className="w-64" placeholder="Search problem, room or place" aria-label="Search tickets" value={q} onChange={(e) => setQ(e.target.value)} />
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-48" aria-label="Status"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="active">Not finished</SelectItem>
             <SelectItem value="mine">Assigned to me</SelectItem>
@@ -45,7 +54,7 @@ function TicketList() {
           </SelectContent>
         </Select>
         <Select value={priority} onValueChange={setPriority}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-40" aria-label="Priority"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Any priority</SelectItem>
             {Object.entries(PRIORITY).map(([k, p]) => <SelectItem key={k} value={k}>{p.label}</SelectItem>)}

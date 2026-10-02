@@ -28,11 +28,11 @@ function HousekeepingLayout() {
   ].filter((t) => t.show);
   return (
     <div>
-      <nav className="-mx-1 mb-5 flex gap-1 overflow-x-auto border-b">
+      <nav aria-label="Housekeeping" className="mb-5 inline-flex max-w-full gap-1 overflow-x-auto rounded-full border border-border/70 bg-card p-1 shadow-xs">
         {tabs.map((t) => (
           <Link key={t.to} to={t.to} activeOptions={{ exact: t.exact }}
-            className={cn("flex h-11 shrink-0 items-center border-b-2 border-transparent px-3 text-[15px] text-muted-foreground hover:text-foreground")}
-            activeProps={{ className: "!border-primary font-medium !text-foreground" }}>
+            className={cn("flex h-9 shrink-0 items-center rounded-full px-4 text-sm font-semibold text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/40")}
+            activeProps={{ className: "bg-primary-soft !text-primary-strong" }}>
             {t.label}
           </Link>
         ))}
