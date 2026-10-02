@@ -35,3 +35,13 @@ Newest changes go at the bottom of each row's notes. Date format is day month ye
 | 6b | Reservation officers do not see ID documents. | Confirmed 30 Sep 2026 | Data minimisation. Built 30 Sep 2026, live 1 Oct 2026. |
 | 6c | Built-in roles can carry approval limits, set per hotel. | Confirmed 30 Sep 2026 | Hotels should not have to copy a role to set a limit. Built 1 Oct 2026: the limit belongs to the hotel's account (all its properties). |
 | 6d | Free cancellation defaults to 2 days before arrival, changeable per rate plan. | Confirmed 30 Sep 2026 | Reference design default. Built 30 Sep 2026, live 1 Oct 2026. |
+
+## Deployment decisions (2 Oct 2026)
+
+| # | Decision | Status | Note |
+|---|---|---|---|
+| D1 | A practice Supabase project for previews and tests, set up before the first pilot. | Confirmed 2 Oct 2026 | Previews never touch live hotel data. |
+| D2 | Peter's own domain: app on `app.`, email from `mail.`. | Confirmed 2 Oct 2026 | |
+| D3 | Euro Hotel on the live project stays as Peter's demo hotel. | Confirmed 1 Oct 2026 | Keep it active by hand before its trial ends (about 30 Oct 2026). |
+| D4 | A second trusted person with access to Vercel, Supabase, Resend and GitHub; two-step sign-in everywhere. | Confirmed 2 Oct 2026 | |
+| D5 | Vercel Pro and Supabase Pro. | Confirmed 2 Oct 2026 | Resend free tier for the pilot. |
