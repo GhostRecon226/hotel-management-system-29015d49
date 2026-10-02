@@ -2,6 +2,7 @@
 // Run: npm run test:e2e   (local Supabase must be running: supabase start)
 import { defineConfig, devices } from "@playwright/test";
 import { localSupabase } from "./e2e/local-supabase";
+import { TEST_CRON_SECRET, TEST_FROM_EMAIL, TEST_RESEND_PORT } from "./e2e/test-env";
 
 const local = localSupabase();
 
@@ -26,6 +27,13 @@ export default defineConfig({
       VITE_SUPABASE_PROJECT_ID: "local",
       SUPABASE_URL: local.url,
       SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
+      // Local only. Without these, the server would read .env.local, which holds the real project's keys.
+      SUPABASE_SERVICE_ROLE_KEY: local.serviceRoleKey,
+      // The scheduled sender talks to a stand-in for Resend started by e2e/outbox-cron.spec.ts, never the real one.
+      CRON_SECRET: TEST_CRON_SECRET,
+      RESEND_API_KEY: "local-test-resend-key",
+      RESEND_API_URL: `http://127.0.0.1:${TEST_RESEND_PORT}`,
+      OUTBOX_FROM_EMAIL: TEST_FROM_EMAIL,
     },
   },
 });

@@ -32,6 +32,7 @@ import { Route as AuthenticatedAppRoomsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppServiceRequestsRouteImport } from './routes/_authenticated/_app/service-requests'
 import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
 import { Route as AuthenticatedInvoicesIdRouteImport } from './routes/_authenticated/invoices.$id'
+import { Route as ApiCronOutboxRouteImport } from './routes/api/cron/outbox'
 import { Route as AuthenticatedAppCheckoutIdRouteImport } from './routes/_authenticated/_app/checkout.$id'
 import { Route as AuthenticatedAppFoliosIndexRouteImport } from './routes/_authenticated/_app/folios/index'
 import { Route as AuthenticatedAppFoliosIdRouteImport } from './routes/_authenticated/_app/folios/$id'
@@ -182,6 +183,11 @@ const AuthenticatedInvoicesIdRoute = AuthenticatedInvoicesIdRouteImport.update({
   id: '/invoices/$id',
   path: '/invoices/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiCronOutboxRoute = ApiCronOutboxRouteImport.update({
+  id: '/api/cron/outbox',
+  path: '/api/cron/outbox',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppCheckoutIdRoute =
   AuthenticatedAppCheckoutIdRouteImport.update({
@@ -355,6 +361,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -396,6 +403,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/reports': typeof AuthenticatedAppReportsRoute
   '/_authenticated/_app/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/_authenticated/_app/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/_authenticated/_app/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/_authenticated/_app/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -497,6 +506,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
+    | '/api/cron/outbox'
     | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
@@ -538,6 +548,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
+    | '/api/cron/outbox'
     | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
@@ -588,6 +599,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/reports'
     | '/_authenticated/_app/service-requests'
     | '/_authenticated/invoices/$id'
+    | '/api/cron/outbox'
     | '/_authenticated/_app/checkout/$id'
     | '/_authenticated/_app/folios/$id'
     | '/_authenticated/_app/guests/$id'
@@ -623,6 +635,7 @@ export interface RootRouteChildren {
   DesignRoute: typeof DesignRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiCronOutboxRoute: typeof ApiCronOutboxRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -787,6 +800,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/invoices/$id'
       preLoaderRoute: typeof AuthenticatedInvoicesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/cron/outbox': {
+      id: '/api/cron/outbox'
+      path: '/api/cron/outbox'
+      fullPath: '/api/cron/outbox'
+      preLoaderRoute: typeof ApiCronOutboxRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/_app/checkout/$id': {
       id: '/_authenticated/_app/checkout/$id'
@@ -1173,6 +1193,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesignRoute: DesignRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiCronOutboxRoute: ApiCronOutboxRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -3,7 +3,8 @@
 
 type OutboxRow = { id: string; channel: "email" | "sms" | "whatsapp"; recipient: string; subject: string | null; body: string };
 
-const RESEND_URL = "https://api.resend.com";
+// RESEND_API_URL exists only so the browser tests can point at a local stand-in. Leave it unset in production.
+const resendUrl = () => process.env["RESEND_API_URL"] || "https://api.resend.com";
 
 function escapeHtml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -11,7 +12,7 @@ function escapeHtml(s: string) {
 
 async function sendEmail(row: OutboxRow, resendKey: string) {
   const from = process.env["OUTBOX_FROM_EMAIL"] || "Hotel Desk <onboarding@resend.dev>";
-  const res = await fetch(`${RESEND_URL}/emails`, {
+  const res = await fetch(`${resendUrl()}/emails`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendKey}` },
     body: JSON.stringify({

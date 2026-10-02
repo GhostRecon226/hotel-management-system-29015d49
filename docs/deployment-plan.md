@@ -61,7 +61,7 @@ Two kinds of email leave the system, and both should come from your domain.
 | 4.1 | You | Create a Resend account. Add the domain `mail.yourdomain` and add the DNS records Resend shows (SPF, DKIM, and a DMARC record). Wait for "Verified". |
 | 4.2 | You | **Sign-up and invite emails (Supabase Auth).** Supabase > Authentication > SMTP: host `smtp.resend.com`, port 465, user `resend`, password = a Resend API key. Sender `no-reply@mail.yourdomain`. Supabase's built-in email sender allows only a few emails per hour, so without this, sign-ups and staff invites will fail as soon as a few people use them. |
 | 4.3 | You | Put `RESEND_API_KEY` and `OUTBOX_FROM_EMAIL` in Vercel (section 2). |
-| 4.4 | Claude, test first | **Scheduled sender for app emails (booking confirmations, approval alerts).** Today they wait in the outbox until someone presses Admin > Messages > Run now. Build a protected server route that sends the outbox, and a Vercel Cron job every 5 minutes that calls it with `CRON_SECRET`. |
+| 4.4 | Done 2 Oct 2026 | **Scheduled sender for app emails (booking confirmations, approval alerts).** `GET /api/cron/outbox`, called by Vercel Cron every 5 minutes. To switch it on: set `CRON_SECRET`, `RESEND_API_KEY` and `OUTBOX_FROM_EMAIL` in Vercel. Until then it refuses every call and emails stay queued, never lost. |
 | 4.5 | Claude | Send a test confirmation and an invite to an address you choose, and check they arrive, are not marked as spam, and their links work. |
 
 ## 5. Automatic checks before anything reaches `main`

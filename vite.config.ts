@@ -22,7 +22,12 @@ export default defineConfig(({ command }) => ({
       // Server-only code must never be bundled for the browser.
       importProtection: { behavior: "error", client: { files: ["**/server/**"], specifiers: ["server-only"] } },
     }),
-    ...(command === "build" ? [nitro({ preset: process.env["NITRO_PRESET"] ?? "vercel" })] : []),
+    ...(command === "build" ? [nitro({
+      preset: process.env["NITRO_PRESET"] ?? "vercel",
+      // Scheduled sender for booking confirmations and approval alerts. Every 5 minutes needs Vercel Pro.
+      // It does nothing until CRON_SECRET is set in Vercel, and emails stay queued until RESEND_API_KEY is set.
+      vercel: { config: { version: 3, crons: [{ path: "/api/cron/outbox", schedule: "*/5 * * * *" }] } },
+    })] : []),
     viteReact(),
   ],
 }));

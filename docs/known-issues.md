@@ -21,7 +21,7 @@ Blunt list. Nothing here is hidden elsewhere.
 - Rollover pg_cron runs every 5 minutes (288 runs/day). A roll has been run by hand on the local copy and checked (charges, no-shows, stayover tasks, KPIs). A scheduled roll has not been observed on the real project yet.
 - `daily_stats` is only written by rollovers; there is no backfill, so KPIs start empty.
 - **Email is not connected.** Booking confirmations and approval alerts sit in `notification_outbox` as `pending` until `RESEND_API_KEY` is set. `OUTBOX_FROM_EMAIL` must be on a Resend-verified domain.
-- **No outbox schedule.** Sending runs only from Admin → Messages → Run now. When email is connected, add a scheduled caller (e.g. a pg_cron + `pg_net` call to a `/api/public/...` route that verifies a secret and runs `processOutbox()`).
+- **Outbox schedule built, not switched on (2 Oct 2026).** `GET /api/cron/outbox` sends due messages for all hotels; Vercel Cron calls it every 5 minutes (set in `vite.config.ts`, needs Vercel Pro). It refuses every call until `CRON_SECRET` is set, and emails stay queued until `RESEND_API_KEY` is set. Admin → Messages → Run now still works for one hotel.
 - SMS and WhatsApp are stubs: messages are marked failed "not set up yet".
 - The notification bell polls every 60 s instead of using realtime.
 
