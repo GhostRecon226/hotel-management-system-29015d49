@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "node scripts/check-to-confirm.mjs && vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "check:money": "scripts/check-no-browser-money.sh",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check:confirm": "node scripts/check-to-confirm.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

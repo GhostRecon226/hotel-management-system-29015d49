@@ -31,6 +31,8 @@ for (const vp of sizes) {
     await page.screenshot({ path: path.join(outDir, `public-${path0.replace(/^\//, "").replace(/\//g, "-")}-${vp.tag}.png`), fullPage: vp.full });
     console.log("saved", p, vp.tag);
   }
+  // SIGNED_OUT=1: only the public pages, never signing in.
+  if (process.env.SIGNED_OUT) { await ctx.close(); continue; }
   await page.goto(`${base}/auth`);
   await page.getByRole("heading", { name: "Welcome" }).waitFor();
   await page.getByLabel("Email").fill(env[`DEMO_${who}_EMAIL`]);
