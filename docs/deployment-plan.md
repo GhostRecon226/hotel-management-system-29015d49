@@ -105,10 +105,30 @@ Two kinds of email leave the system, and both should come from your domain.
 
 ## Decisions for you
 
-| # | Question | My recommendation |
-|---|---|---|
-| D1 | One database or two? | Two. Keep the current project for live hotels and add a small second project for previews and tests. A preview should never write to real hotel data. |
-| D2 | The domain name | Yours to choose. The app on `app.`, email from `mail.`. |
-| D3 | Your current test data on the live project | The ledger and audit trail can never be deleted, by design, so RES-000001, its charge and the setup records stay forever. They belong only to your own hotel account (Euro Hotel), which no other hotel can see. My recommendation: keep it as your demo hotel. The other option is a fresh live project, with the current one becoming the preview database (D1); that costs one more migration run and keeps the live project spotless. |
-| D4 | Who else gets access to Vercel, Supabase and Resend? | One trusted person besides you, with two-factor sign-in. |
-| D5 | Paid plans | Vercel Pro and Supabase Pro are needed for a commercial service with backups. Resend's free tier covers a pilot's email volume. Check current prices on each site before signing up. |
+Five decisions, in plain business terms. Number 3 is already settled.
+
+### 1. One live system, or a live system plus a practice copy?
+- **The question:** before any change reaches your hotels, should it first run on a separate practice copy of the system (a second, small database), or go straight to the live one?
+- **My recommendation:** have a practice copy. Every change is tried there by you and me before it reaches a real hotel, and a half-finished change can never touch real guests or real money.
+- **If you decline:** previews would have to use the live database, so any test booking or charge made while checking a change would sit among real hotels' records for good (the ledger cannot be deleted). The alternative is to skip previews and test only after a change is live, which means mistakes are found by hotels instead of by us.
+- **Cost:** a second small database; check Supabase's current price.
+
+### 2. The web address
+- **The question:** what address will staff type to open the system, and which address will emails come from?
+- **My recommendation:** a domain you own, with the system on `app.` (for example `app.yourbrand.com`) and emails from `mail.` (for example `no-reply@mail.yourbrand.com`). Owning it means you can move hosting later without changing what staff use.
+- **If you decline:** the system would live on a free Vercel address (something like `hotel-desk.vercel.app`) and emails would come from a generic sender. Both look less trustworthy to hotels and guests, emails are more likely to land in spam, and changing the address later means retraining every hotel and updating every bookmark.
+
+### 3. Your test data on the live system (settled: keep Euro Hotel as your demo hotel)
+- **Decision:** Euro Hotel stays as your demo hotel, with the hand-test booking RES-000001 and its ₦11,825 charge.
+- **What this means:** no other hotel can see it, and you can use it to show prospects the system. Its 30-day trial clock runs like any hotel's; I will keep it active by hand, using the pilot activation step (5e), so it is never switched to read-only.
+
+### 4. Who else can get into the accounts behind the system
+- **The question:** besides you, should one trusted person also have access to the hosting (Vercel), the database (Supabase) and the email service (Resend)?
+- **My recommendation:** yes, one person, with two-step sign-in on all three accounts, and both of you able to reset keys.
+- **If you decline:** if you are unreachable, or lose your phone or password, nobody can fix an outage, renew a payment or stop a leaked key, and the hotels would be stuck until you are back.
+
+### 5. Paid plans
+- **The question:** do we pay for the hosting and database plans meant for businesses?
+- **My recommendation:** yes for both. Vercel Pro is required for any commercial use and is needed to send emails every 5 minutes. Supabase Pro gives daily backups you can restore and stops the database being paused when it is quiet. Resend's free tier is enough for a pilot's email volume.
+- **If you decline:** Vercel's free plan is not allowed for a paid service and only allows one scheduled run a day, so booking confirmations would go out once a day. On Supabase's free plan the database pauses after a quiet week (the system goes offline until someone wakes it), and there is no backup to restore if data is lost.
+- **Cost:** check each site's current price before signing up.
