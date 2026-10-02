@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { BedDouble, CalendarCheck, CalendarClock, CalendarDays, Search } from "lucide-react";
+import { FilledStat, StatTile } from "@/components/stats";
 import { useAccess } from "@/lib/access";
 import { RES_STATUS, ResStatusBadge, formatDay, nightsBetween, useReservationSearch } from "@/lib/reservations";
 import { PageHeader, FilterBar } from "@/components/page-header";
@@ -19,6 +20,7 @@ function ReservationList() {
   const [f, setF] = useState({ q: "", status: "all", from: property?.business_date ?? "", to: "" });
   const { data = [], isLoading } = useReservationSearch(property?.id, f);
   const filtered = f.q || f.status !== "all" || f.from || f.to;
+  const count = (status: string) => data.filter((r) => r.status === status).length;
 
   return (
     <div>
@@ -27,9 +29,15 @@ function ReservationList() {
           <Button variant="outline" asChild><Link to="/reservations/availability">Availability</Link></Button>
           {can("res.create") && <Button asChild><Link to="/reservations/new">New booking</Link></Button>}
         </>} />
+      <div className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <FilledStat icon={CalendarDays} label="Bookings in this list" value={isLoading ? "—" : data.length} sub={filtered ? "Matching the filters below" : "From the business date on"} />
+        <StatTile icon={BedDouble} tone="info" label="In house" value={isLoading ? "—" : count("checked_in")} sub="In this list" />
+        <StatTile icon={CalendarCheck} tone="success" label="Confirmed" value={isLoading ? "—" : count("confirmed")} sub="In this list" />
+        <StatTile icon={CalendarClock} tone="warning" label="Tentative" value={isLoading ? "—" : count("tentative")} sub="Held, not confirmed" />
+      </div>
       <FilterBar>
         <div className="relative w-full max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-[18px] -translate-y-1/2 text-muted-foreground" />
           <Input className="pl-10" placeholder="Search" aria-label="Search reservations" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
         </div>
         <Select value={f.status} onValueChange={(v) => setF({ ...f, status: v })}>

@@ -68,9 +68,19 @@ function CheckoutPage() {
             <Button variant="outline" onClick={() => setDialog("undo")}>Undo check-out</Button>}
         </>} />
 
+      {inHouse && !settled && (
+        <Alert variant="filled" className="mb-4 p-5">
+          <AlertTitle className="mb-2 text-2xl font-bold tabular">Outstanding {formatAmount(outstanding, s.currency)}</AlertTitle>
+          <AlertDescription className="text-on-primary-muted">
+            Every folio must be at zero before check-out. Record payments or refunds on the folios below.
+            {pending && <> A request to check out with a balance is waiting for approval ({pending.reason}).</>}
+            {approved && <> Approved by {approved.decided_by_name ?? "a manager"} for up to {formatAmount(approved.amount, approved.currency)}.</>}
+          </AlertDescription>
+        </Alert>
+      )}
       {inHouse && (night.data?.applies || night.data?.posted) && (
-        <Alert className="mb-4">
-          <AlertTitle>Same-day stay: one night is charged</AlertTitle>
+        <Alert variant="warning" className="mb-4">
+          <AlertTitle className="font-semibold">Same-day stay: one night is charged</AlertTitle>
           <AlertDescription>
             {night.data.applies
               ? <>The guest checked in today, so one night ({formatAmount(night.data.total, night.data.currency)} with tax) is charged at check-out. It is already in the outstanding amount. Post it now to see it on the folio.</>
@@ -84,18 +94,8 @@ function CheckoutPage() {
           </AlertDescription>
         </Alert>
       )}
-      {inHouse && !settled && (
-        <Alert className="mb-4">
-          <AlertTitle>Outstanding {formatAmount(outstanding, s.currency)}</AlertTitle>
-          <AlertDescription>
-            Every folio must be at zero before check-out. Record payments or refunds on the folios below.
-            {pending && <> A request to check out with a balance is waiting for approval ({pending.reason}).</>}
-            {approved && <> Approved by {approved.decided_by_name ?? "a manager"} for up to {formatAmount(approved.amount, approved.currency)}.</>}
-          </AlertDescription>
-        </Alert>
-      )}
       {!inHouse && (
-        <p className="mb-4 rounded-md border border-info/30 bg-info-soft p-3 text-[15px] text-info-strong">
+        <p className="mb-4 rounded-xl border border-info/25 bg-info-soft px-4 py-2.5 text-sm text-info-strong">
           Checked out {formatDateTime(s.checked_out_at)}{s.checkout_reason ? ` · Reason: ${s.checkout_reason}` : ""}.
           {s.can_undo ? " This can be undone today." : ""}
         </p>

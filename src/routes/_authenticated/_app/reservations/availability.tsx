@@ -47,14 +47,14 @@ function AvailabilityGrid() {
         : error ? <EmptyState title="Could not load availability" />
         : rows.length === 0 ? <EmptyState title="No room types yet" description="Add room types and rooms in Setup first." />
         : (
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full border-collapse text-[15px]">
-              <thead className="sticky top-0 bg-muted">
+          <div className="overflow-x-auto rounded-xl border border-border/70 bg-card shadow-card">
+            <table className="w-full border-collapse text-sm">
+              <thead className="sticky top-0 bg-surface">
                 <tr>
-                  <th className="sticky left-0 z-10 min-w-40 bg-muted px-3 py-2 text-left font-medium">Room type</th>
+                  <th className="sticky left-0 z-10 min-w-40 bg-surface px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Room type</th>
                   {dates.map((d) => (
-                    <th key={d} className="min-w-14 px-2 py-2 text-center font-medium">
-                      <span className="block text-xs text-muted-foreground">{formatDay(d, { weekday: "short" })}</span>
+                    <th key={d} className="min-w-14 px-1.5 py-2.5 text-center text-[13px] font-semibold">
+                      <span className="block text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{formatDay(d, { weekday: "short" })}</span>
                       {formatDay(d, { day: "numeric", month: "short" })}
                     </th>
                   ))}
@@ -62,16 +62,17 @@ function AvailabilityGrid() {
               </thead>
               <tbody>
                 {rows.map(([id, r]) => (
-                  <tr key={id} className="border-t">
-                    <td className="sticky left-0 z-10 bg-card px-3 py-2"><span className="font-medium">{r.code}</span> <span className="text-sm text-muted-foreground">{r.name}</span></td>
+                  <tr key={id} className="border-t border-border/70">
+                    <td className="sticky left-0 z-10 bg-card px-4 py-2"><span className="font-semibold">{r.code}</span> <span className="text-sm text-muted-foreground">{r.name}</span></td>
                     {dates.map((d) => {
                       const c = r.cells[d];
                       const n = c?.available ?? 0;
                       return (
-                        <td key={d} title={c ? `${n} of ${c.sellable} free` : undefined}
-                          className={cn("px-2 py-2 text-center tabular font-medium",
-                            n <= 0 ? "bg-danger-soft text-danger-strong" : n <= 2 ? "bg-warning-soft text-warning-strong" : "")}>
-                          {n}
+                        <td key={d} title={c ? `${n} of ${c.sellable} free` : undefined} className="px-1.5 py-2 text-center">
+                          <span className={cn("inline-flex h-8 min-w-9 items-center justify-center rounded-full px-2 text-sm font-semibold tabular",
+                            n <= 0 ? "bg-danger-soft text-danger-strong" : n <= 2 ? "bg-warning-soft text-warning-strong" : "bg-success-soft text-success-strong")}>
+                            {n}
+                          </span>
                         </td>
                       );
                     })}
@@ -81,7 +82,7 @@ function AvailabilityGrid() {
             </table>
           </div>
         )}
-      <p className="mt-3 text-sm text-muted-foreground">Red means no rooms left. Amber means two or fewer.</p>
+      <p className="mt-3 text-sm text-muted-foreground">Each figure is the number of free rooms. Green means three or more, amber two or fewer, red none left.</p>
     </div>
   );
 }

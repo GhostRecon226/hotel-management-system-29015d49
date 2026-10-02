@@ -12,8 +12,9 @@
 
 :root {
   /* Fonts */
-  --font-sans-app: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono-app: "JetBrains Mono", ui-monospace, monospace;
+  /* Plus Jakarta Sans is bundled with the app (src/styles.css imports it); no font is loaded from another site. */
+  --font-sans-app: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono-app: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* Radius: cards use radius-xl (16px), controls radius-md (10px), chips are fully round */
   --radius: 0.75rem;

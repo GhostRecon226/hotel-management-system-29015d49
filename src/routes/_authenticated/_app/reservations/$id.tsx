@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Wallet } from "lucide-react";
+import { FilledStat } from "@/components/stats";
 import { useAccess } from "@/lib/access";
 import { callRpc, Field, FormDialog } from "@/lib/setup";
 import { fullName, useGuestSearch } from "@/lib/guests";
@@ -28,9 +29,9 @@ type Dialog = null | "cancel" | "noshow" | "reinstate" | "assign" | "guests" | "
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-3 gap-2 border-b py-3 text-[15px] last:border-0">
+    <div className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] gap-3 border-b border-border/70 py-2.5 text-sm">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="col-span-2 whitespace-pre-wrap">{children || "—"}</dd>
+      <dd className="whitespace-pre-wrap font-medium">{children || "—"}</dd>
     </div>
   );
 }
@@ -87,14 +88,16 @@ function ReservationDetailPage() {
         </>} />
 
       {r.status_reason && (r.status === "cancelled" || r.status === "no_show") && (
-        <p className="mb-4 rounded-md border border-info/30 bg-info-soft p-3 text-[15px] text-info-strong">
+        <p className="mb-4 rounded-xl border border-info/25 bg-info-soft px-4 py-2.5 text-sm text-info-strong">
           Reason: {r.status_reason}
           {r.cancellation_fee !== null && <> · Cancellation fee {formatAmount(r.cancellation_fee, r.currency)}{r.fee_waived && " (waived)"}</>}
           {r.no_show_fee !== null && <> · No-show fee {formatAmount(r.no_show_fee, r.currency)}{r.fee_waived && " (waived)"}</>}
         </p>
       )}
 
-      <div className="mb-4 grid gap-4 sm:grid-cols-4">
+      <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <FilledStat icon={Wallet} label="Booking total" value={<Money amount={r.total_amount} currency={r.currency} className="text-left" />}
+          sub={`${nightsLabel(nights)} · ${data.rate_plan.code}`} />
         <Stat label="Room">{data.room ? <span className="font-semibold">{data.room.room_number}</span> : <span className="text-muted-foreground">Not assigned</span>}
           {open && can("res.edit") && (
             <div className="mt-2 flex gap-2">
@@ -104,8 +107,7 @@ function ReservationDetailPage() {
           )}
         </Stat>
         <Stat label="Room type">{data.room_type.code} — {data.room_type.name}</Stat>
-        <Stat label="Total"><Money amount={r.total_amount} currency={r.currency} className="text-left text-lg font-semibold" /></Stat>
-        <Stat label="Deposit required"><Money amount={r.deposit_required} currency={r.currency} className="text-left text-lg font-semibold" /></Stat>
+        <Stat label="Deposit required"><Money amount={r.deposit_required} currency={r.currency} className="text-left text-xl font-bold" /></Stat>
       </div>
 
       <Tabs defaultValue="details">
@@ -117,7 +119,7 @@ function ReservationDetailPage() {
         </TabsList>
 
         <TabsContent value="details">
-          <Card><CardContent className="pt-6"><dl>
+          <Card><CardContent className="pt-3"><dl className="grid gap-x-10 md:grid-cols-2">
             <Row label="Main guest">{primary && <Link className="text-primary-strong hover:underline" to="/guests/$id" params={{ id: primary.id }}>{fullName(primary)}</Link>}</Row>
             <Row label="People">{`${r.adults} adult${r.adults === 1 ? "" : "s"}, ${r.children} child${r.children === 1 ? "" : "ren"}`}</Row>
             <Row label="Rate plan">{`${data.rate_plan.code} — ${data.rate_plan.name}`}</Row>
@@ -209,7 +211,7 @@ function ReservationDetailPage() {
 }
 
 function Stat({ label, children }: { label: string; children: ReactNode }) {
-  return <Card><CardContent className="pt-5"><p className="text-sm text-muted-foreground">{label}</p><div className="mt-1 text-[15px]">{children}</div></CardContent></Card>;
+  return <Card className="h-full"><CardContent className="p-4"><p className="text-sm font-medium text-muted-foreground">{label}</p><div className="mt-1.5 text-xl font-bold">{children}</div></CardContent></Card>;
 }
 
 function FeeDialog({ kind, open, onOpenChange, data }: { kind: "cancel" | "noshow"; open: boolean; onOpenChange: (o: boolean) => void; data: ReservationDetail }) {

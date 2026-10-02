@@ -258,7 +258,7 @@ export function ReservationForm({ initial, mode, reservationId, onDone, onCancel
       </div>
 
       <div className="space-y-4">
-        <Card className="lg:sticky lg:top-4">
+        <Card className="lg:sticky lg:top-20">
           <CardHeader><CardTitle className="text-base">Availability</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-[15px]">
             {nights > 0 ? <p>{formatDay(f.arrival)} → {formatDay(f.departure)} · {nights} night{nights === 1 ? "" : "s"}</p> : <p className="text-destructive">Departure must be after arrival.</p>}

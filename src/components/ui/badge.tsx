@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * danger = out of order, overdue, error · info = in house, information
  */
 const badgeVariants = cva(
-  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold leading-5",
+  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold leading-5 tracking-normal",
   {
     variants: {
       variant: {
