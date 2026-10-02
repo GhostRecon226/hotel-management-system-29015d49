@@ -46,7 +46,10 @@ function GuestList() {
           {data.map((g) => (
             <TableRow key={g.id} className="cursor-pointer" onClick={() => navigate({ to: "/guests/$id", params: { id: g.id } })}>
               <TableCell className="font-medium">
-                <Link to="/guests/$id" params={{ id: g.id }} className="text-primary-strong hover:underline" onClick={(e) => e.stopPropagation()}>{fullName(g)}</Link>
+                <span className="inline-flex items-center gap-3">
+                  <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-bold text-primary-strong">{initials(fullName(g))}</span>
+                  <Link to="/guests/$id" params={{ id: g.id }} className="text-primary-strong hover:underline" onClick={(e) => e.stopPropagation()}>{fullName(g)}</Link>
+                </span>
                 {g.anonymised_at && <Badge variant="neutral" className="ml-2">Anonymised</Badge>}
               </TableCell>
               <TableCell>{g.phone}</TableCell><TableCell>{g.email}</TableCell>
@@ -59,4 +62,8 @@ function GuestList() {
         onSaved={(id) => navigate({ to: "/guests/$id", params: { id } })} />
     </div>
   );
+}
+
+function initials(name: string) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("");
 }

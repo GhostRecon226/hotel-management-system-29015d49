@@ -33,9 +33,9 @@ const FEEDBACK_TONE: Record<string, "warning" | "info" | "success" | "neutral"> 
 
 function Row({ label, value }: { label: string; value: string | null | undefined }) {
   return (
-    <div className="grid grid-cols-3 gap-2 border-b py-3 text-[15px] last:border-0">
+    <div className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] gap-3 border-b border-border/70 py-2.5 text-sm">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="col-span-2 whitespace-pre-wrap">{value || "—"}</dd>
+      <dd className="whitespace-pre-wrap font-medium">{value || "—"}</dd>
     </div>
   );
 }
@@ -77,7 +77,7 @@ function GuestProfile() {
       <Link to="/guests" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> All guests
       </Link>
-      <PageHeader title={fullName(g)} description={<span className="inline-flex flex-wrap items-center gap-2">Guest since {formatDate(g.created_at)}
+      <PageHeader title={<span className="inline-flex items-center gap-3"><span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-full bg-accent-fill text-base font-bold text-primary-foreground">{fullName(g).split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("")}</span>{fullName(g)}</span>} description={<span className="inline-flex flex-wrap items-center gap-2">Guest since {formatDate(g.created_at)}
           {g.status === "merged" && <Badge variant="neutral">Merged</Badge>}
           {g.anonymised_at && <Badge variant="neutral">Anonymised</Badge>}</span>}
         actions={<>
@@ -108,7 +108,7 @@ function GuestProfile() {
 
         <TabsContent value="details">
           <Card><CardContent className="pt-6">
-            <dl>
+            <dl className="grid gap-x-10 md:grid-cols-2">
               <Row label="First name" value={g.first_name} /><Row label="Last name" value={g.last_name} />
               <Row label="Phone" value={g.phone} /><Row label="Email" value={g.email} />
               <Row label="Nationality" value={g.nationality} /><Row label="Address" value={g.address} />

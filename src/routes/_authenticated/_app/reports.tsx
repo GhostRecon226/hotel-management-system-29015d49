@@ -1,7 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Download } from "lucide-react";
+import { BedDouble, Download, Gauge, Wallet } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { callRpc } from "@/lib/setup";
+import { FilledStat, StatTile } from "@/components/stats";
 import { toast } from "sonner";
 import { errorMessage } from "@/lib/errors";
 import { exportCsv, type ExportKind } from "@/lib/exports.functions";
@@ -52,6 +55,11 @@ function Reports() {
     if (property && !range.to) { const to = property.business_date; setRange({ from: addDays(to, -29), to }); }
   }, [property, range.to]);
   const kpi = useKpis(range.from, range.to, ops);
+  // Period totals from the database (kpi_summary), same definitions as the daily rows.
+  const period = useQuery({
+    queryKey: ["kpi-summary", property?.id, range.from, range.to], enabled: ops && !!property && !!range.from && !!range.to,
+    queryFn: () => callRpc<{ occupancy: string | null; adr: string | null; revpar: string | null; rooms_sold: number; days: number }>("kpi_summary", { p_property_id: property!.id, p_from: range.from, p_to: range.to }),
+  });
   const revenue = useReport<RevenueRow>("report_revenue_by_charge_code", { p_from: range.from, p_to: range.to }, fin && !!range.from);
   const balances = useReport<BalanceRow>("report_outstanding_balances", {}, fin);
   const payments = useReport<PaymentRow>("report_payments", { p_from: range.from, p_to: range.to }, fin && !!range.from);
@@ -88,6 +96,13 @@ function Reports() {
         <div className="flex items-center gap-2"><Label htmlFor="r-from">From</Label><Input id="r-from" type="date" className="w-44" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} /></div>
         <div className="flex items-center gap-2"><Label htmlFor="r-to">To</Label><Input id="r-to" type="date" className="w-44" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} /></div>
       </FilterBar>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <FilledStat icon={Gauge} label="Occupancy in this period" value={formatPercent(period.data?.occupancy == null ? null : Number(period.data.occupancy))}
+          sub={`${formatDay(range.from)} to ${formatDay(range.to)}`} />
+        <StatTile icon={Wallet} tone="accent" label="ADR" value={<Money amount={period.data?.adr ?? null} currency={cur} className="text-left" />} sub="Room revenue per room sold" />
+        <StatTile icon={Wallet} tone="accent" label="RevPAR" value={<Money amount={period.data?.revpar ?? null} currency={cur} className="text-left" />} sub="Room revenue per room available" />
+        <StatTile icon={BedDouble} tone="info" label="Rooms sold" value={period.data?.rooms_sold ?? "—"} sub="Nights stayed in this period" />
+      </div>
       <Tabs defaultValue="kpi">
         <TabsList className="mb-3">
           <TabsTrigger value="kpi">Daily KPIs</TabsTrigger>
@@ -113,7 +128,7 @@ function Reports() {
               {!kpi.isLoading && k.length === 0 && <TableStateRow colSpan={12} title="No closed dates in this range" description="Figures are saved at each business date roll." />}
               {k.map((r) => (
                 <TableRow key={r.business_date}>
-                  <TableCell className="tabular">{formatDay(r.business_date)}</TableCell>
+                  <TableCell className="whitespace-nowrap tabular">{formatDay(r.business_date)}</TableCell>
                   <TableCell className="text-right tabular">{r.rooms_available}</TableCell>
                   <TableCell className="text-right tabular">{r.rooms_sold}</TableCell>
                   <TableCell className="text-right tabular">{formatPercent(r.occupancy)}</TableCell>
