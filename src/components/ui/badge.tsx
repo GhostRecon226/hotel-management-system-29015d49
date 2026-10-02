@@ -4,12 +4,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 /**
- * Status colours are the same everywhere:
+ * Chips. Status colours are the same everywhere and every chip carries a text label:
  * success = clean, ready, paid · warning = pending, dirty
  * danger = out of order, overdue, error · info = in house, information
  */
 const badgeVariants = cva(
-  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[13px] font-medium",
+  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold leading-5",
   {
     variants: {
       variant: {

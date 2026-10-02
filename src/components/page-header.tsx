@@ -6,10 +6,10 @@ export function PageHeader({ title, description, actions, className }: {
   title: ReactNode; description?: ReactNode; actions?: ReactNode; className?: string;
 }) {
   return (
-    <header className={cn("mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between", className)}>
+    <header className={cn("mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between", className)}>
       <div className="min-w-0">
-        <h1 className="truncate text-2xl font-semibold sm:text-[28px]">{title}</h1>
-        {description && <p className="mt-1 text-[15px] text-muted-foreground">{description}</p>}
+        <h1 className="truncate text-2xl font-bold tracking-tight sm:text-[26px]">{title}</h1>
+        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </header>

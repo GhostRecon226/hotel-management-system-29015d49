@@ -13,7 +13,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { formatBusinessDate, useAccess } from "@/lib/access";
-import { SubscriptionBanner } from "@/components/subscription-banner";
+import { SubscriptionBanner, TrialCard } from "@/components/subscription-banner";
 import { cn } from "@/lib/utils";
 import { SETUP_PERMS } from "@/lib/setup";
 import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
@@ -42,30 +42,33 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
   const { canAny, ctx } = useAccess();
   const items = MENU.filter((m) => !m.perms || canAny(m.perms));
   return (
-    <nav className="flex h-full flex-col gap-1 p-3">
-      <div className="mb-4 flex items-center gap-2.5 px-2 py-1">
-        <div className="grid size-9 shrink-0 place-items-center rounded-md bg-sidebar-primary text-sm font-bold text-sidebar-primary-foreground">HD</div>
+    <nav className="flex h-full flex-col px-4 pb-4 pt-5">
+      <div className="mb-5 flex items-center gap-3 px-2">
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-fill text-sm font-extrabold text-primary-foreground shadow-accent">HD</div>
         <div className="min-w-0">
-          <div className="text-base font-semibold text-sidebar-primary">Hotel Desk</div>
-          <div className="truncate text-xs text-sidebar-foreground/70">{ctx.tenant?.name}</div>
+          <div className="text-[17px] font-bold leading-tight text-foreground">Hotel Desk</div>
+          <div className="truncate text-xs text-muted-foreground">{ctx.tenant?.name}</div>
         </div>
       </div>
-      {items.map((m) => {
-        const Icon = m.icon;
-        const cls = "flex h-11 items-center gap-3 rounded-md px-3 text-[15px]";
-        return m.to ? (
-          <Link key={m.label} to={m.to} onClick={onNavigate}
-            className={cn(cls, "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground")}
-            activeProps={{ className: "bg-sidebar-accent font-medium !text-sidebar-accent-foreground shadow-[inset_3px_0_0_var(--sidebar-primary)]" }}>
-            <Icon className="h-5 w-5" /> {m.label}
-          </Link>
-        ) : (
-          <span key={m.label} className={cn(cls, "cursor-not-allowed text-sidebar-foreground/45")} title="Coming soon">
-            <Icon className="h-5 w-5" /> {m.label}
-            <span className="ml-auto text-[11px] uppercase tracking-wide">Soon</span>
-          </span>
-        );
-      })}
+      <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-1">
+        {items.map((m) => {
+          const Icon = m.icon;
+          const cls = "group flex h-10 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-sidebar-ring/40";
+          return m.to ? (
+            <Link key={m.label} to={m.to} onClick={onNavigate}
+              className={cn(cls, "text-sidebar-foreground hover:bg-muted hover:text-foreground")}
+              activeProps={{ className: "bg-sidebar-accent font-semibold !text-sidebar-accent-foreground" }}>
+              <Icon className="size-[18px] shrink-0 group-data-[status=active]:text-sidebar-primary" /> {m.label}
+            </Link>
+          ) : (
+            <span key={m.label} className={cn(cls, "cursor-not-allowed text-sidebar-foreground/45")} title="Coming soon">
+              <Icon className="size-[18px]" /> {m.label}
+              <span className="ml-auto text-[11px] uppercase tracking-wide">Soon</span>
+            </span>
+          );
+        })}
+      </div>
+      <div className="mt-4"><TrialCard /></div>
     </nav>
   );
 }
@@ -86,11 +89,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 bg-sidebar lg:block">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-sidebar-border bg-sidebar lg:block">
         <Nav />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b bg-card px-3 sm:px-5">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 bg-background/85 px-3 backdrop-blur-md sm:px-6">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu"><Menu className="h-5 w-5" /></Button>
@@ -100,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {properties.length > 0 && (
             <Select value={property?.id ?? ""} onValueChange={setPropertyId}>
-              <SelectTrigger className="w-44 sm:w-60" aria-label="Property"><SelectValue placeholder="Property" /></SelectTrigger>
+              <SelectTrigger className="h-10 w-44 rounded-full border-border bg-card px-4 font-semibold sm:w-56" aria-label="Property"><SelectValue placeholder="Property" /></SelectTrigger>
               <SelectContent>
                 {properties.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
@@ -108,9 +111,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
 
           {property && (
-            <div className="hidden h-11 items-center gap-2 rounded-md bg-primary-soft px-3 text-[15px] text-primary-strong sm:flex" title="Business date">
-              <CalendarClock className="h-5 w-5" />
-              <span>Business date</span>
+            <div className="hidden h-10 items-center gap-2 whitespace-nowrap rounded-full bg-primary-soft px-4 text-sm text-primary-strong sm:flex" title="Business date">
+              <CalendarClock className="size-[18px]" />
+              <span className="sr-only xl:not-sr-only">Business date</span>
               <span className="font-semibold tabular">{formatBusinessDate(property.business_date)}</span>
             </div>
           )}
@@ -119,11 +122,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2 px-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                <Button variant="ghost" className="h-11 gap-2.5 rounded-full py-1 pl-1 pr-3">
+                  <span className="flex size-9 items-center justify-center rounded-full bg-accent-fill text-sm font-bold text-primary-foreground">
                     {(ctx.profile?.full_name ?? "?").slice(0, 1).toUpperCase()}
                   </span>
-                  <span className="hidden max-w-32 truncate text-sm md:inline">{ctx.profile?.full_name}</span>
+                  <span className="hidden max-w-40 text-left leading-tight md:block">
+                    <span className="block truncate text-sm font-semibold">{ctx.profile?.full_name}</span>
+                    <span className="block truncate text-xs font-normal text-muted-foreground">{ctx.tenant?.name}</span>
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
@@ -138,7 +144,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <SubscriptionBanner />
-        <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 pb-10 pt-2 sm:px-6">{children}</main>
       </div>
     </div>
   );

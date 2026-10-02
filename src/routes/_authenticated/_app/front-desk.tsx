@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, BedDouble, MoreHorizontal, Sparkles } from "lucide-react";
 import { useAccess } from "@/lib/access";
 import { NoAccess } from "@/lib/setup";
 import { formatDay, ResStatusBadge, nightsLabel } from "@/lib/reservations";
@@ -12,6 +12,8 @@ import { useOpenMainFolio } from "@/lib/folios";
 import { NewServiceRequestDialog, type ServiceGuest } from "@/lib/maintenance";
 import { usePostRoomCharges } from "@/lib/checkout";
 import { PageHeader } from "@/components/page-header";
+import { FilledStat, StatTile } from "@/components/stats";
+import { useDashboardSummary } from "@/lib/reports";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Money } from "@/components/ui/money";
@@ -37,6 +39,7 @@ function FrontDesk() {
   const [svc, setSvc] = useState<ServiceGuest | null>(null);
   const openFolio = useOpenMainFolio();
   const roomCharges = usePostRoomCharges();
+  const summary = useDashboardSummary();
   if (!can("fo.view")) return <NoAccess />;
 
   const departures = (inHouse.data ?? []).filter((s) => s.is_departing);
@@ -95,6 +98,13 @@ function FrontDesk() {
           {can("fin.nightaudit.run") && property && <Button variant="outline" disabled={roomCharges.isPending} onClick={() => roomCharges.mutate(property.id)}>Post room charges</Button>}
           {can("fo.walkin") && can("fo.checkin") && <Button onClick={() => setWalkIn(true)}>Walk-in</Button>}
         </>} />
+      <div className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <FilledStat icon={ArrowDownRight} label="Arrivals today" value={arrivals.data?.length}
+          sub={`${(arrivals.data ?? []).filter((a) => !a.room_number).length} without a room yet`} />
+        <StatTile icon={BedDouble} tone="info" label="In house" value={inHouse.data?.length} sub="Guests staying tonight" />
+        <StatTile icon={ArrowUpRight} tone="accent" label="Departures today" value={departures.length} sub="Due to check out" />
+        <StatTile icon={Sparkles} tone="success" label="Rooms ready" value={summary.data?.vacant_clean} sub="Vacant and clean" to={can("room.view") ? "/rooms" : undefined} />
+      </div>
       <Tabs defaultValue="arrivals">
         <TabsList className="mb-3">
           <TabsTrigger value="arrivals">Arrivals ({arrivals.data?.length ?? 0})</TabsTrigger>

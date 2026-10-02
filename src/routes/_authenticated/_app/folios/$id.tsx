@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, Info, MoreHorizontal } from "lucide-react";
+import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Info, MoreHorizontal, Wallet } from "lucide-react";
+import { FilledStat, StatTile } from "@/components/stats";
 import {
   movableRow, PostChargeDialog, RecordPaymentDialog, ReopenDialog, SplitFolioDialog, TransferDialog,
   useFolio, useFolioAccess, useFolioMutation, useFolioTransactions, useReservationFolios, type FolioTx,
@@ -12,7 +13,6 @@ import { AdjustmentDialog, DiscountDialog, KIND_LABEL as APPROVAL_KIND, RefundDi
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Money, formatAmount } from "@/components/ui/money";
 import { EmptyState, LoadingState, TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -59,24 +59,24 @@ function FolioPage() {
           {open ? <Badge variant="info">Open</Badge> : <Badge variant="neutral">Closed</Badge>}</span>}
         description={`${folio.guest_name ?? "Guest"}${folio.room_number ? ` · Room ${folio.room_number}` : ""} · ${formatDay(folio.arrival_date)} → ${formatDay(folio.departure_date)}`}
         actions={<>
-          {open && perm.charge && <Button onClick={() => setDialog("charge")}>Post charge</Button>}
-          {open && perm.deposit && <Button onClick={() => setDialog("payment")}>{perm.depositOnly ? "Record deposit" : "Record payment"}</Button>}
-          {open && can("fin.discount.apply") && <Button variant="outline" onClick={() => { setDiscountRow(null); setDialog("discount"); }}>Discount</Button>}
-          {open && can("fin.adjust.post") && <Button variant="outline" onClick={() => setDialog("adjust")}>Adjustment</Button>}
-          {open && can("fin.refund.post") && <Button variant="outline" onClick={() => setDialog("refund")}>Refund</Button>}
-          {open && perm.charge && <Button variant="outline" onClick={() => setDialog("split")}>Split folio</Button>}
-          {open && perm.transfer && <Button variant="outline" onClick={() => { setTransferRow(null); setDialog("transfer"); }}>Transfer</Button>}
-          {open && perm.payment && <Button variant="outline" disabled={close.isPending} onClick={() => close.mutate({ p_id: folio.folio_id })}>Close</Button>}
-          {can("fin.invoice.issue") && <Button variant="outline" disabled={issue.isPending} onClick={() => issue.mutate({ folioId: folio.folio_id, kind: open ? "interim" : "final" })}>{open ? "Interim invoice" : "Issue invoice"}</Button>}
-          {!open && perm.reopen && <Button variant="outline" onClick={() => setDialog("reopen")}>Reopen</Button>}
+          {open && perm.charge && <Button size="sm" onClick={() => setDialog("charge")}>Post charge</Button>}
+          {open && perm.deposit && <Button size="sm" onClick={() => setDialog("payment")}>{perm.depositOnly ? "Record deposit" : "Record payment"}</Button>}
+          {open && can("fin.discount.apply") && <Button size="sm" variant="outline" onClick={() => { setDiscountRow(null); setDialog("discount"); }}>Discount</Button>}
+          {open && can("fin.adjust.post") && <Button size="sm" variant="outline" onClick={() => setDialog("adjust")}>Adjustment</Button>}
+          {open && can("fin.refund.post") && <Button size="sm" variant="outline" onClick={() => setDialog("refund")}>Refund</Button>}
+          {open && perm.charge && <Button size="sm" variant="outline" onClick={() => setDialog("split")}>Split folio</Button>}
+          {open && perm.transfer && <Button size="sm" variant="outline" onClick={() => { setTransferRow(null); setDialog("transfer"); }}>Transfer</Button>}
+          {open && perm.payment && <Button size="sm" variant="outline" disabled={close.isPending} onClick={() => close.mutate({ p_id: folio.folio_id })}>Close</Button>}
+          {can("fin.invoice.issue") && <Button size="sm" variant="outline" disabled={issue.isPending} onClick={() => issue.mutate({ folioId: folio.folio_id, kind: open ? "interim" : "final" })}>{open ? "Interim invoice" : "Issue invoice"}</Button>}
+          {!open && perm.reopen && <Button size="sm" variant="outline" onClick={() => setDialog("reopen")}>Reopen</Button>}
         </>} />
 
-      <p className="mb-4 flex items-start gap-2 rounded-md border border-info/30 bg-info-soft p-3 text-[15px] text-info-strong">
-        <Info className="mt-0.5 h-5 w-5 shrink-0" /> Payments are taken outside the system and recorded here. Nothing is charged to a card from this screen.
+      <p className="mb-4 flex items-start gap-2 rounded-xl border border-info/25 bg-info-soft px-4 py-2.5 text-sm text-info-strong">
+        <Info className="mt-0.5 size-4 shrink-0" /> Payments are taken outside the system and recorded here. Nothing is charged to a card from this screen.
       </p>
 
       {pending.length > 0 && (
-        <div className="mb-4 rounded-md border border-warning/40 bg-warning-soft p-3 text-[15px] text-warning-strong">
+        <div className="mb-4 rounded-xl border border-warning/40 bg-warning-soft px-4 py-3 text-sm text-warning-strong">
           <p className="font-medium">Waiting for approval</p>
           {pending.map((a) => (
             <p key={a.id}>{APPROVAL_KIND[a.kind]} of {formatAmount(Math.abs(a.amount), a.currency)} by {a.requested_by_name ?? "someone"}: {a.reason}{" "}
@@ -86,10 +86,10 @@ function FolioPage() {
       )}
 
       {(invoices.data ?? []).length > 0 && (
-        <div className="mb-4 flex flex-wrap items-center gap-2 text-[15px]">
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
           <span className="text-muted-foreground">Invoices:</span>
           {(invoices.data ?? []).map((inv) => (
-            <Link key={inv.id} to="/invoices/$id" params={{ id: inv.id }} className="inline-flex h-11 items-center gap-2 rounded-md border px-3 hover:bg-muted">
+            <Link key={inv.id} to="/invoices/$id" params={{ id: inv.id }} className="inline-flex h-9 items-center gap-2 rounded-full border bg-card px-3.5 text-sm hover:bg-primary-tint">
               {inv.number} <span className="text-muted-foreground">{inv.kind === "final" ? "Final" : "Interim"} · {formatAmount(inv.gross_total, inv.currency)}</span>
             </Link>
           ))}
@@ -100,20 +100,18 @@ function FolioPage() {
         <div className="mb-4 flex flex-wrap gap-2">
           {siblings.map((s) => (
             <Link key={s.folio_id} to="/folios/$id" params={{ id: s.folio_id }}
-              className={cn("inline-flex h-11 items-center gap-2 rounded-md border px-3 text-[15px]", s.folio_id === id ? "border-primary bg-primary-soft text-primary-strong" : "hover:bg-muted")}>
+              className={cn("inline-flex h-9 items-center gap-2 rounded-full border bg-card px-3.5 text-sm", s.folio_id === id ? "border-primary/40 bg-primary-soft font-semibold text-primary-strong" : "hover:bg-primary-tint")}>
               {s.number} · {s.label} <span className="tabular text-muted-foreground">{formatAmount(s.balance, s.currency)}</span>
             </Link>
           ))}
         </div>
       )}
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <Card><CardContent className="py-4"><p className="text-sm text-muted-foreground">Charges</p><Money amount={folio.total_debits} currency={cur} className="text-left text-xl font-semibold" /></CardContent></Card>
-        <Card><CardContent className="py-4"><p className="text-sm text-muted-foreground">Payments and credits</p><Money amount={folio.total_credits} currency={cur} className="text-left text-xl font-semibold" /></CardContent></Card>
-        <Card className={cn(balance > 0 && "border-warning/50", balance < 0 && "border-info/50")}><CardContent className="py-4">
-          <p className="text-sm text-muted-foreground">{balance > 0 ? "Balance due" : balance < 0 ? "In credit" : "Balance"}</p>
-          <span className="block text-xl font-semibold tabular">{formatAmount(Math.abs(balance), cur)}</span>
-        </CardContent></Card>
+      <div className="mb-5 grid gap-4 sm:grid-cols-3">
+        <FilledStat icon={Wallet} label={balance > 0 ? "Balance due" : balance < 0 ? "In credit" : "Balance"} value={formatAmount(Math.abs(balance), cur)}
+          sub={balance > 0 ? "Owed by the guest" : balance < 0 ? "Owed back to the guest" : "Nothing owed"} />
+        <StatTile icon={ArrowUpRight} tone="accent" label="Charges" value={<Money amount={folio.total_debits} currency={cur} className="text-left" />} />
+        <StatTile icon={ArrowDownLeft} tone="accent" label="Payments and credits" value={<Money amount={folio.total_credits} currency={cur} className="text-left" />} />
       </div>
 
       <Table>

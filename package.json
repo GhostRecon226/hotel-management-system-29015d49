@@ -13,7 +13,8 @@
     "test:db": "scripts/test-db.sh",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
-    "check:money": "scripts/check-no-browser-money.sh"
+    "check:money": "scripts/check-no-browser-money.sh",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
