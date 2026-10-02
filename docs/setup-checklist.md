@@ -121,6 +121,7 @@ Vercel normally builds and publishes a site the moment it is connected to GitHub
 - [ ] **F1. YOU.** github.com > avatar > **Settings** > **Password and authentication** > turn on two-factor authentication.
 - [ ] **F2. YOU.** Repository > **Settings** > **Collaborators** > add your second person (role Admin).
 - [ ] **F3. YOU.** Disconnect Lovable: github.com > avatar > **Settings** > **Applications** > **Installed GitHub Apps** > **Lovable** > **Configure** > remove this repository (or **Uninstall** if you no longer use Lovable). Also disconnect GitHub in the Lovable project's settings. After this, only you and I change the code.
+- [ ] **F4. YOU.** Turn on Dependabot for the app repository: repository > **Settings** > **Advanced Security** (or **Code security**) > turn on **Dependabot alerts** and **Dependabot security updates**. GitHub then emails you when a package the app uses has a known flaw, and opens a proposed fix on a branch. Nothing reaches `main` without your approval.
 
 ## G. Tell me the accounts are ready
 
