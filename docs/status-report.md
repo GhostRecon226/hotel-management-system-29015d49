@@ -403,6 +403,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | FIN-014 | Every posting takes the open business date, and a past date is refused. | Must | Partly built | 1 pass, 1 fail: posting to a past business date is refused (expected [E_DATE/E_INVALID], but it succeeded) |
 | FIN-015 | Folio visibility follows the role: managers see all folios, a reservation officer sees only those of their own bookings. | Must | Missing | Test fails: reservation officer sees only folios of own bookings (got 2, expected 1) |
 | FIN-016 | Cashier shifts and reconciliation by cashier, shift and method. | Should | Missing | R2. Not due yet. (no automated test yet) |
+| FIN-017 | A payment matching one on the same bill (amount, method, reference) within 10 minutes is refused unless the cashier confirms it with a reason; the refusal names the earlier payment and the confirmation is audited. Added 6 Oct 2026 (wave 1). | Must | Built and works | 20 test checks pass (`25_duplicate_payments.sql`), plus browser test `e2e/duplicate-payment.spec.ts`. |
 
 ### Business Date
 
