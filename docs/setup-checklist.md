@@ -101,7 +101,7 @@ Vercel builds and publishes a site every time code reaches GitHub: `main` goes t
   - If a deployment starts anyway, open **Deployments**, click it, and choose **Cancel**. Tell me if this happens.
 - [x] **E5. YOU.** (Done 2 Oct.) **Settings** > **Build and Deployment**: Framework Preset **Other**, Build Command `npm run build`, Install Command `npm ci`, Output Directory left empty, Node.js Version **22.x**. Save.
 - [x] **E6. YOU.** (Done 5 Oct, checked on the live deploy.) **Settings** > **Functions** > **Function Region**: **Dublin, Ireland (dub1)**, next to the database. Save.
-- [ ] **E7. YOU.** (Not needed until Vercel Pro, when the email sender is switched back on.) Make the cron key. In Terminal run the command below and copy the long line it prints into the shared vault, labelled `CRON_SECRET (production)`. Run it a second time for `CRON_SECRET (preview)`.
+- [ ] **E7. YOU.** (Needed before ID photos go live: the daily ID photo clean-up uses it. The email sender also uses it once we move to Pro.) Make the cron key. In Terminal run the command below and copy the long line it prints into the shared vault, labelled `CRON_SECRET (production)`. Run it a second time for `CRON_SECRET (preview)`.
   ```bash
   openssl rand -hex 32
   ```

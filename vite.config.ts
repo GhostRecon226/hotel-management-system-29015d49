@@ -23,9 +23,13 @@ export default defineConfig(({ command }) => ({
       // Server-only code must never be bundled for the browser.
       importProtection: { behavior: "error", client: { files: ["**/server/**"], specifiers: ["server-only"] } },
     }),
-    // No Vercel cron yet: Hobby rejects a 5-minute schedule. Put it back on Pro (docs/deployment-plan.md, 4.4):
-    // vercel: { config: { version: 3, crons: [{ path: "/api/cron/outbox", schedule: "*/5 * * * *" }] } },
-    ...(command === "build" ? [nitro({ preset: process.env["NITRO_PRESET"] ?? "vercel" })] : []),
+    // Vercel Cron. Hobby allows once a day only, so the 5-minute email sender waits for Pro (docs/deployment-plan.md, 4.4):
+    //   { path: "/api/cron/outbox", schedule: "*/5 * * * *" }
+    // The daily ID photo clean-up (GST-009, GST-010) runs at 02:00 UTC. Both need CRON_SECRET set in Vercel.
+    ...(command === "build" ? [nitro({
+      preset: process.env["NITRO_PRESET"] ?? "vercel",
+      vercel: { config: { version: 3, crons: [{ path: "/api/cron/id-photo-cleanup", schedule: "0 2 * * *" }] } },
+    })] : []),
     viteReact(),
   ],
 }));

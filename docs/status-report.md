@@ -15,6 +15,14 @@ This report covers the app Lovable built (`hotel-management-system-29015d49`). I
 - Screens no longer add up money. Every total, tax preview, fee preview and KPI comes from the database. A check (`npm run check:money`) fails if browser code starts doing money sums again.
 - It is still not ready for a real hotel: 21 failures, tax rules wait for the accountant, email is not connected, and 6c and DAY-006 are not built.
 
+## Update: 7 Oct 2026 (stage 2: ID document photos, on branch `claude/id-photos`)
+
+- **A hotel can keep a photo or scan of a guest's ID** (front and back), if a manager switches on "Allow ID photos" in Setup > Property. Off by default. "Require ID photo at check-in" makes check-in and walk-in wait for a photo.
+- **Private:** the files sit in private storage. Staff open a photo only through a link that works for 60 seconds, and every upload, view and deletion is recorded. Reservation officers and accountants cannot upload or see them.
+- **Smaller and cleaner:** photos are shrunk on the device before upload (longest side 1600 pixels), which also removes hidden data such as the GPS location.
+- **Deleted:** when the guest is anonymised, when a manager deletes one (with a reason), and automatically 12 months after the guest's last check-out. The 12 is one setting and can change without a new migration.
+- **Needs before going live:** `CRON_SECRET` in Vercel for the daily clean-up (02:00 UTC), the practice project first, then your separate yes for the live database. The privacy notice draft (branch `claude/public-pages`) now describes ID photos.
+
 ## Update: 6 Oct 2026 (stage 1: room labels, on branch `claude/room-labels`)
 
 - **Rooms can be added from the Rooms page** ("Add room" and "Add several rooms"), only by roles that may set up rooms (System Administrator and General Manager).
@@ -286,6 +294,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | SET-006 | Charge codes and payment methods per property. | Must | Built, untested | Charge codes and payment methods seeded per property. (no automated test yet) |
 | SET-007 | Exchange rates per property per day, entered by hand. | Should | Built and works | 1 test checks pass. |
 | SET-008 | Inspection can be switched off per property. | Should | Missing | Test fails: inspection can be switched off per property |
+| SET-009 | Per hotel: "Allow ID photos" (off by default) and "Require ID photo at check-in" (applies only when allowed). While Allow is off, uploading and opening ID photos are refused. | Must | Built and works (branch `claude/id-photos`, not yet live) | Database and browser tests pass. |
 
 ### Reservations
 
@@ -328,11 +337,15 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
 | GST-001 | One guest profile per person across stays; search by name, phone, email or ID number. | Must | Built and works | 2 test checks pass. |
-| GST-002 | ID documents are stored apart and shown only to roles that may see them. | Must | Partly built | 3 pass, 1 fail: reservation officers do not see ID documents |
+| GST-002 | ID documents are stored apart and shown only to roles that may see them. ID photos follow the same roles (6 Oct 2026). | Must | Partly built | 3 pass, 1 fail: reservation officers do not see ID documents |
 | GST-003 | Personal data never appears in audit records; only the names of changed fields do. | Must | Built and works | 2 test checks pass. |
 | GST-004 | Merge duplicate guest profiles; history moves to the kept profile. | Should | Built and works | 3 test checks pass. |
 | GST-005 | Anonymise a guest on request; the ledger and stay history stay intact. | Should | Partly built | 4 pass, 1 fail: a guest with upcoming stays cannot be anonymised (expected [E_INVALID/E_IN_USE], but it succeeded) |
 | GST-006 | Feedback and complaints logged against a guest. | Should | Built, untested | add_guest_feedback exists. (no automated test yet) |
+| GST-007 | A photo or scan of an ID document (front and back; JPEG, PNG, WebP or PDF, 2 MB) is kept in private storage, shrunk in the browser first (longest side 1600 px, hidden photo data such as GPS removed), and opened only through a 60-second link. Upload and view: System Administrator, General Manager, Front Office Manager, Front Desk. Delete by hand with a reason: the first three. | Must | Built and works (branch `claude/id-photos`, not yet live) | Database and browser tests pass. |
+| GST-008 | Every upload, view and deletion of an ID photo is audited with ids only, no personal data. | Must | Built and works (branch `claude/id-photos`) | Database tests pass. |
+| GST-009 | ID photos are removed from storage when the guest is anonymised or the document is removed, and move with the guest when two profiles are merged. | Must | Built and works (branch `claude/id-photos`) | Database and browser tests pass. |
+| GST-010 | ID photos are deleted automatically a set number of months (one setting, now 12) after the guest's last check-out, unless the guest has a booking that is not over. A daily clean-up removes the files. | Must | Built and works (branch `claude/id-photos`) | Database tests pass. |
 
 ### Rooms
 

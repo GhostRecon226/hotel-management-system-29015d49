@@ -13,6 +13,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatAmount } from "@/components/ui/money";
 import { sortByRoom } from "@/lib/room-label";
+import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
+import { IdPhotoPicker, uploadIdPhoto, useGuestIdPhotos, useIdPhotoAccess, useIdPhotosChanged } from "@/lib/id-photos";
 
 export interface ArrivalRow {
   id: string; number: string; guest_id: string; guest_name: string | null; guest_phone: string | null;
@@ -94,10 +97,36 @@ function RoomSelect({ rooms, value, onChange, loading }: { rooms: FdRoom[]; valu
   );
 }
 
-export interface Registration { id_type: string; id_number: string; nationality: string; address: string; vehicle_plate: string }
-const EMPTY_REG: Registration = { id_type: "national_id", id_number: "", nationality: "", address: "", vehicle_plate: "" };
+export interface Registration { id_type: string; id_number: string; id_expiry: string; nationality: string; address: string; vehicle_plate: string }
+const EMPTY_REG: Registration = { id_type: "national_id", id_number: "", id_expiry: "", nationality: "", address: "", vehicle_plate: "" };
 
-function RegistrationFields({ reg, setReg }: { reg: Registration; setReg: (r: Registration) => void }) {
+/** The ID photo step of check-in and walk-in (SET-009). Shown only when the hotel allows ID photos. */
+function usePhotoStep(guestId: string | null | undefined, open: boolean) {
+  const { property } = useAccess();
+  const access = useIdPhotoAccess();
+  const existing = useGuestIdPhotos(guestId ?? undefined, open && access.canView);
+  const changed = useIdPhotosChanged();
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const hasPhoto = (existing.data?.length ?? 0) > 0;
+  /** Uploads the chosen photo first. Returns false (and says why) if check-in should not go ahead. */
+  const run = async (reg: Registration) => {
+    if (!file) return true;
+    if (!guestId) { toast.error("Choose the guest first."); return false; }
+    setUploading(true);
+    try {
+      await uploadIdPhoto({ propertyId: property!.id, guestId, docType: reg.id_type, docNumber: reg.id_number,
+        expiry: reg.id_expiry || null, side: "front", file });
+      changed();
+      return true;
+    } catch (e) { toast.error(errorMessage(e)); return false; }
+    finally { setUploading(false); }
+  };
+  return { show: access.canUpload, required: access.required && !hasPhoto, hasPhoto, file, setFile, uploading, run, reset: () => setFile(null) };
+}
+type PhotoStep = ReturnType<typeof usePhotoStep>;
+
+function RegistrationFields({ reg, setReg, photo }: { reg: Registration; setReg: (r: Registration) => void; photo?: PhotoStep }) {
   const set = (k: keyof Registration) => (e: { target: { value: string } }) => setReg({ ...reg, [k]: e.target.value });
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -108,6 +137,14 @@ function RegistrationFields({ reg, setReg }: { reg: Registration; setReg: (r: Re
         </Select>
       </Field>
       <Field label="ID number" htmlFor="reg-num"><Input id="reg-num" value={reg.id_number} onChange={set("id_number")} required maxLength={50} autoComplete="off" /></Field>
+      <Field label="ID expiry" htmlFor="reg-exp" hint="Optional."><Input id="reg-exp" type="date" value={reg.id_expiry} onChange={set("id_expiry")} /></Field>
+      {photo?.show && (
+        <div className="sm:col-span-2">
+          {photo.hasPhoto && !photo.file
+            ? <p className="text-sm text-muted-foreground">An ID photo is already on file for this guest. Add a new one only if it has changed.</p> : null}
+          <IdPhotoPicker id="reg-photo" label={photo.required ? "ID photo (required by this hotel)" : "ID photo"} file={photo.file} onFile={photo.setFile} required={photo.required} />
+        </div>
+      )}
       <Field label="Nationality" htmlFor="reg-nat"><Input id="reg-nat" placeholder="Nigerian" value={reg.nationality} onChange={set("nationality")} maxLength={60} /></Field>
       <Field label="Vehicle plate" htmlFor="reg-plate" hint="Leave empty if none."><Input id="reg-plate" value={reg.vehicle_plate} onChange={set("vehicle_plate")} maxLength={20} /></Field>
       <div className="sm:col-span-2">
@@ -141,7 +178,7 @@ function DepositBlock({ due, currency, value, onChange }: { due: number; currenc
   );
 }
 
-const regArgs = (r: Registration) => ({ id_type: r.id_type, id_number: r.id_number, nationality: r.nationality, address: r.address, vehicle_plate: r.vehicle_plate });
+const regArgs = (r: Registration) => ({ id_type: r.id_type, id_number: r.id_number, id_expiry: r.id_expiry || null, nationality: r.nationality, address: r.address, vehicle_plate: r.vehicle_plate });
 
 export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow | null; onOpenChange: (o: boolean) => void }) {
   const { property } = useAccess();
@@ -152,18 +189,22 @@ export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow |
   const open = !!arrival;
   const rooms = useFdRooms(arrival?.room_type_id ?? null, property?.business_date ?? "", arrival?.departure_date ?? "", arrival?.id ?? null, open);
   const m = useResMutation("check_in", "Guest checked in.");
-  useEffect(() => { if (arrival) { setReg(EMPTY_REG); setRoom(arrival.room_id ?? ""); setOvr(""); setWaive(""); } }, [arrival]);
+  const photo = usePhotoStep(arrival?.guest_id, open);
+  useEffect(() => { if (arrival) { setReg(EMPTY_REG); setRoom(arrival.room_id ?? ""); setOvr(""); setWaive(""); photo.reset(); } }, [arrival]); // eslint-disable-line react-hooks/exhaustive-deps
   const picked = rooms.data?.find((r) => r.id === room);
   const notReady = !!picked && !picked.is_ready;
   // Deposit still to take, from the database (v_arrivals.deposit_due).
   const due = arrival ? Number(arrival.deposit_due) : 0;
 
   return (
-    <FormDialog open={open} onOpenChange={onOpenChange} title={`Check in ${arrival?.guest_name ?? ""}`} busy={m.isPending}
-      onSubmit={() => m.mutate({
-        p_id: arrival!.id, p_registration: regArgs(reg), p_room_id: room || null,
-        p_room_override_reason: notReady ? ovr : null, p_deposit_waive_reason: due > 0 ? waive : null,
-      }, { onSuccess: () => onOpenChange(false) })}>
+    <FormDialog open={open} onOpenChange={onOpenChange} title={`Check in ${arrival?.guest_name ?? ""}`} busy={m.isPending || photo.uploading}
+      onSubmit={async () => {
+        if (!(await photo.run(reg))) return;
+        m.mutate({
+          p_id: arrival!.id, p_registration: regArgs(reg), p_room_id: room || null,
+          p_room_override_reason: notReady ? ovr : null, p_deposit_waive_reason: due > 0 ? waive : null,
+        }, { onSuccess: () => onOpenChange(false) });
+      }}>
       {arrival && (
         <p className="text-sm text-muted-foreground">
           {arrival.number} · {arrival.room_type_code} · {formatDay(arrival.arrival_date)} to {formatDay(arrival.departure_date)} ({nightsLabel(arrival.nights)})
@@ -172,7 +213,7 @@ export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow |
       <Field label="Room" htmlFor="fd-room"><RoomSelect rooms={rooms.data ?? []} value={room} onChange={setRoom} loading={rooms.isLoading} /></Field>
       <OverrideReason show={notReady} value={ovr} onChange={setOvr} />
       <DepositBlock due={due} currency={arrival?.currency ?? "NGN"} value={waive} onChange={setWaive} />
-      <RegistrationFields reg={reg} setReg={setReg} />
+      <RegistrationFields reg={reg} setReg={setReg} photo={photo} />
     </FormDialog>
   );
 }
@@ -191,23 +232,24 @@ export function WalkInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const [reg, setReg] = useState(EMPTY_REG);
   const rooms = useFdRooms(f.room_type_id || null, bdate, f.departure, null, open && !!f.room_type_id);
   const m = useResMutation<string>("walk_in_check_in", "Walk-in checked in.");
+  const photo = usePhotoStep(guest.id || null, open);
   useEffect(() => {
     if (!open) return;
-    setKey(crypto.randomUUID()); setGuest({ id: "", label: "" }); setReg(EMPTY_REG);
+    setKey(crypto.randomUUID()); setGuest({ id: "", label: "" }); setReg(EMPTY_REG); photo.reset();
     setF({ departure: addDays(bdate, 1), room_type_id: "", rate_plan_id: "", adults: "1", children: "0", company_name: "", room: "", ovr: "" });
-  }, [open, bdate]);
+  }, [open, bdate]); // eslint-disable-line react-hooks/exhaustive-deps
   const picked = rooms.data?.find((r) => r.id === f.room);
   const notReady = !!picked && !picked.is_ready;
   const set = (k: keyof typeof f, v: string) => setF((x) => ({ ...x, [k]: v, ...(k === "room_type_id" || k === "departure" ? { room: "" } : {}) }));
 
   return (
-    <FormDialog open={open} onOpenChange={onOpenChange} title="Walk-in guest" busy={m.isPending}
-      onSubmit={() => m.mutate({
+    <FormDialog open={open} onOpenChange={onOpenChange} title="Walk-in guest" busy={m.isPending || photo.uploading}
+      onSubmit={async () => { if (!(await photo.run(reg))) return; m.mutate({
         p_property_id: property!.id, p_idempotency_key: key, p_guest_id: guest.id || null, p_departure: f.departure,
         p_room_type_id: f.room_type_id || null, p_rate_plan_id: f.rate_plan_id || null, p_adults: Number(f.adults),
         p_children: Number(f.children || 0), p_room_id: f.room || null, p_registration: regArgs(reg),
         p_company_name: f.company_name || null, p_room_override_reason: notReady ? f.ovr : null,
-      }, { onSuccess: () => onOpenChange(false) })}>
+      }, { onSuccess: () => onOpenChange(false) }); }}>
       <p className="text-sm text-muted-foreground">Creates the booking and checks the guest in. Arrival is today, {formatDay(bdate)}.</p>
       <Field label="Guest" htmlFor="guest"><GuestPicker value={guest.id} label={guest.label} onPick={(id, label) => setGuest({ id, label })} /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -232,7 +274,7 @@ export function WalkInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
       </div>
       <OverrideReason show={notReady} value={f.ovr} onChange={(v) => set("ovr", v)} />
       <Field label="Company" htmlFor="wi-co" hint="Optional."><Input id="wi-co" value={f.company_name} onChange={(e) => set("company_name", e.target.value)} maxLength={200} /></Field>
-      <RegistrationFields reg={reg} setReg={setReg} />
+      <RegistrationFields reg={reg} setReg={setReg} photo={photo} />
     </FormDialog>
   );
 }

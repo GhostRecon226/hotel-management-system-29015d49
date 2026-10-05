@@ -6,6 +6,13 @@ import { useAccess, myContextQuery } from "@/lib/access";
 import { Field, SectionHeader, useSetupMutation } from "@/lib/setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { callRpc } from "@/lib/setup";
+import { errorMessage } from "@/lib/errors";
+import { useIdPhotoSettings, type IdPhotoSettings } from "@/lib/id-photos";
 
 export const Route = createFileRoute("/_authenticated/_app/setup/property")({
   component: PropertyDetails,
@@ -44,6 +51,7 @@ function PropertyDetails() {
 
   if (!data) return <p className="text-sm text-muted-foreground">Loading…</p>;
   return (
+    <>
     <form onSubmit={submit} className="max-w-xl space-y-4">
       <SectionHeader title="Property details" />
       <div className="grid gap-4 sm:grid-cols-2">
@@ -60,5 +68,44 @@ function PropertyDetails() {
       </div>
       {canEdit && <Button type="submit" disabled={save.isPending}>{save.isPending ? "Saving…" : "Save changes"}</Button>}
     </form>
+    <IdPhotoSettingsSection canEdit={canEdit} />
+    </>
+  );
+}
+
+/** SET-009: "Allow ID photos" (off by default) and "Require ID photo at check-in" (only when allowed). */
+function IdPhotoSettingsSection({ canEdit }: { canEdit: boolean }) {
+  const { property } = useAccess();
+  const qc = useQueryClient();
+  const { data } = useIdPhotoSettings();
+  const m = useMutation({
+    mutationFn: (v: { allow: boolean; require: boolean }) =>
+      callRpc<IdPhotoSettings>("set_id_photo_settings", { p_property_id: property!.id, p_allow: v.allow, p_require: v.require }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["id-photos"] }); toast.success("ID photo settings saved."); },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  if (!data) return null;
+  return (
+    <section className="mt-10 max-w-xl space-y-4" aria-labelledby="idp-title">
+      <div>
+        <h2 id="idp-title" className="text-xl font-semibold">ID photos</h2>
+        <p className="mt-0.5 text-[15px] text-muted-foreground">
+          Let staff keep a photo or scan of each guest's ID document. Photos are stored privately, only managers and front
+          desk can see them, every view is recorded, and they are deleted {data.keep_months} months after the guest's last check-out.
+        </p>
+      </div>
+      <div className="flex items-start gap-3">
+        <Switch id="idp-allow" checked={data.allow} disabled={!canEdit || m.isPending}
+          onCheckedChange={(v) => m.mutate({ allow: v, require: v ? data.require : false })} />
+        <div><Label htmlFor="idp-allow">Allow ID photos</Label>
+          <p className="text-sm text-muted-foreground">Off: nobody can add or open ID photos at this property.</p></div>
+      </div>
+      <div className="flex items-start gap-3">
+        <Switch id="idp-require" checked={data.allow && data.require} disabled={!canEdit || !data.allow || m.isPending}
+          onCheckedChange={(v) => m.mutate({ allow: data.allow, require: v })} />
+        <div><Label htmlFor="idp-require">Require ID photo at check-in</Label>
+          <p className="text-sm text-muted-foreground">Check-in and walk-in wait until the guest has an ID photo. Works only when ID photos are allowed.</p></div>
+      </div>
+    </section>
   );
 }

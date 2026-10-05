@@ -17,7 +17,12 @@ function sameText(a: string, b: string) {
 }
 
 export async function outboxCronResponse(request: Request, env: CronEnv, run: () => Promise<OutboxResult>) {
-  if (!env.CRON_SECRET) return json(503, { ok: false, error: "The scheduled sender is switched off: CRON_SECRET is not set." });
+  return cronResponse(request, env, run, "The scheduled sender is switched off: CRON_SECRET is not set.");
+}
+
+/** The same gate for any scheduled job (also the daily ID photo clean-up). */
+export async function cronResponse(request: Request, env: CronEnv, run: () => Promise<object>, offMessage: string) {
+  if (!env.CRON_SECRET) return json(503, { ok: false, error: offMessage });
   if (!sameText(request.headers.get("authorization") ?? "", `Bearer ${env.CRON_SECRET}`)) return json(401, { ok: false, error: "Not allowed." });
   try {
     return json(200, { ok: true, ...(await run()) });

@@ -32,6 +32,7 @@ import { Route as AuthenticatedAppRoomsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppServiceRequestsRouteImport } from './routes/_authenticated/_app/service-requests'
 import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
 import { Route as AuthenticatedInvoicesIdRouteImport } from './routes/_authenticated/invoices.$id'
+import { Route as ApiCronIdPhotoCleanupRouteImport } from './routes/api/cron/id-photo-cleanup'
 import { Route as ApiCronOutboxRouteImport } from './routes/api/cron/outbox'
 import { Route as AuthenticatedAppCheckoutIdRouteImport } from './routes/_authenticated/_app/checkout.$id'
 import { Route as AuthenticatedAppFoliosIndexRouteImport } from './routes/_authenticated/_app/folios/index'
@@ -183,6 +184,11 @@ const AuthenticatedInvoicesIdRoute = AuthenticatedInvoicesIdRouteImport.update({
   id: '/invoices/$id',
   path: '/invoices/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiCronIdPhotoCleanupRoute = ApiCronIdPhotoCleanupRouteImport.update({
+  id: '/api/cron/id-photo-cleanup',
+  path: '/api/cron/id-photo-cleanup',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCronOutboxRoute = ApiCronOutboxRouteImport.update({
   id: '/api/cron/outbox',
@@ -361,6 +367,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
@@ -403,6 +410,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
@@ -455,6 +463,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/reports': typeof AuthenticatedAppReportsRoute
   '/_authenticated/_app/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/_authenticated/_app/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/_authenticated/_app/folios/$id': typeof AuthenticatedAppFoliosIdRoute
@@ -506,6 +515,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
+    | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
     | '/checkout/$id'
     | '/folios/$id'
@@ -548,6 +558,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
+    | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
     | '/checkout/$id'
     | '/folios/$id'
@@ -599,6 +610,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/reports'
     | '/_authenticated/_app/service-requests'
     | '/_authenticated/invoices/$id'
+    | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
     | '/_authenticated/_app/checkout/$id'
     | '/_authenticated/_app/folios/$id'
@@ -635,6 +647,7 @@ export interface RootRouteChildren {
   DesignRoute: typeof DesignRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiCronIdPhotoCleanupRoute: typeof ApiCronIdPhotoCleanupRoute
   ApiCronOutboxRoute: typeof ApiCronOutboxRoute
 }
 
@@ -800,6 +813,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/invoices/$id'
       preLoaderRoute: typeof AuthenticatedInvoicesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/cron/id-photo-cleanup': {
+      id: '/api/cron/id-photo-cleanup'
+      path: '/api/cron/id-photo-cleanup'
+      fullPath: '/api/cron/id-photo-cleanup'
+      preLoaderRoute: typeof ApiCronIdPhotoCleanupRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/cron/outbox': {
       id: '/api/cron/outbox'
@@ -1193,6 +1213,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesignRoute: DesignRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiCronIdPhotoCleanupRoute: ApiCronIdPhotoCleanupRoute,
   ApiCronOutboxRoute: ApiCronOutboxRoute,
 }
 export const routeTree = rootRouteImport
