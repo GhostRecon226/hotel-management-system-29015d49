@@ -15,6 +15,15 @@ This report covers the app Lovable built (`hotel-management-system-29015d49`). I
 - Screens no longer add up money. Every total, tax preview, fee preview and KPI comes from the database. A check (`npm run check:money`) fails if browser code starts doing money sums again.
 - It is still not ready for a real hotel: 21 failures, tax rules wait for the accountant, email is not connected, and 6c and DAY-006 are not built.
 
+## Update: 5 Oct 2026 (first live deploy)
+
+- **The app is live on Vercel** at https://hotel-management-system-29015d49.vercel.app, deployed from `main` (the redesign, merged 2 Oct). Every push to GitHub now deploys by itself: `main` goes live, other branches get preview addresses.
+- **Hand test passed on the live address on 5 Oct 2026**, in a test hotel (Euro Bar Hotel): sign-in with the Supabase links, set-up, a new guest made inside the booking form, booking RES-000001, check-in, room charge ₦11,825 (₦10,000 + ₦1,000 service + ₦825 VAT, the same as the Euro Hotel test), cash payment, check-out, and the turnover task in housekeeping.
+- **Function region: Dublin (dub1)**, next to the database in Ireland. Checked from the live deploy.
+- **Vercel Hobby for now, so the 5-minute email sender is off** until we move to Pro (`docs/deployment-plan.md`, step 4.4). Emails wait in the queue.
+- **Lovable sweep done on 2 Oct.** No Lovable package, preset, file or setting is left in the code or in Vercel, and Lovable is disconnected from GitHub.
+- **Still to do before a real hotel:** the practice Supabase project for previews, your own domain, email through Resend, and the "before the first real hotel" list in `docs/deployment-plan.md`.
+
 ## Update: 1 Oct 2026, afternoon (live project complete)
 
 **Live project `urbpxybyrfjczqbrpdsq`: all 43 migrations applied and recorded.** The last 7 went up in one batch after a dry run. Checked on the live project afterwards:

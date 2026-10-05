@@ -43,10 +43,10 @@ function FrontDesk() {
   if (!can("fo.view")) return <NoAccess />;
 
   const departures = (inHouse.data ?? []).filter((s) => s.is_departing);
-  const guestCell = (id: string, number: string, name: string | null, company: string | null) => (
+  const guestCell = (id: string, number: string, name: string | null, company: string | null, noWrap = false) => (
     <TableCell>
       <Link to="/reservations/$id" params={{ id }} className="font-medium text-primary-strong hover:underline">{name ?? "Guest"}</Link>
-      <span className="block text-sm text-muted-foreground">{number}{company ? ` · ${company}` : ""}</span>
+      <span className={`block text-sm text-muted-foreground${noWrap ? " whitespace-nowrap" : ""}`}>{number}{company ? ` · ${company}` : ""}</span>
     </TableCell>
   );
 
@@ -54,7 +54,7 @@ function FrontDesk() {
     <Table>
       <TableHeader><TableRow>
         <TableHead>Room</TableHead><TableHead>Guest</TableHead><TableHead>Arrived</TableHead><TableHead>Departure</TableHead>
-        <TableHead>Guests</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="w-12" />
+        <TableHead>Guests</TableHead><TableHead className="text-right">Total</TableHead><TableHead />
       </TableRow></TableHeader>
       <TableBody>
         {loading && <TableSkeletonRows cols={7} />}
@@ -71,12 +71,18 @@ function FrontDesk() {
           return (
             <TableRow key={s.stay_id}>
               <TableCell className="font-semibold tabular">{s.room_number}<span className="block text-sm font-normal text-muted-foreground">{s.room_type_code}</span></TableCell>
-              {guestCell(s.reservation_id, s.number, s.guest_name, s.company_name)}
+              {guestCell(s.reservation_id, s.number, s.guest_name, s.company_name, true)}
               <TableCell className="tabular">{formatDay(s.arrival_date)}</TableCell>
               <TableCell className="tabular">{formatDay(s.departure_date)}{s.is_departing && <Badge variant="warning" className="ml-2">Due out</Badge>}</TableCell>
               <TableCell className="tabular">{s.adults}{s.children ? ` + ${s.children}` : ""}</TableCell>
               <TableCell><Money amount={s.total_amount} currency={s.currency} /></TableCell>
-              <TableCell>
+              <TableCell className="text-right whitespace-nowrap">
+                {/* Plain button for the most common action; the same link stays in the menu. DOM order = keyboard order. */}
+                {can("fo.checkout") && (
+                  <Button size="sm" variant="outline" className="mr-1" asChild>
+                    <Link to="/checkout/$id" params={{ id: s.reservation_id }} aria-label={`Check out room ${s.room_number}`}>Check out</Link>
+                  </Button>
+                )}
                 {actions.length > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={`Actions for room ${s.room_number}`}><MoreHorizontal className="h-5 w-5" /></Button></DropdownMenuTrigger>
