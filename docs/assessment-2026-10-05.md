@@ -8,7 +8,7 @@ How to read it:
 - Every claim names its evidence (file, test, table, function or command). UNVERIFIED marks what I could not check.
 - "Code at" means branch `main`, commit `f94222b` (stage 1 and 2 merged and live).
 
-Status of each part: Part 1 done. Part 2 modules 1 to 12 done, 13 to 19 in progress.
+Status of each part: Part 1 done. Part 2 done. Part 3 in progress.
 
 ---
 
@@ -281,3 +281,104 @@ Test counts come from tags in `supabase/tests/db` (for example 54 checks tagged 
 - **Test coverage:** thin.
 - **Rating:** AMBER.
 - **Next three actions:** (1) more tests for service request charges and ticket reopen, S; (2) preventive maintenance schedule with reminders, M; (3) repeat-fault view per room, S.
+
+### Module 13. Lost and found
+
+- **What exists:** table `lost_found_items`; functions `save_lost_found_item`, `set_lost_found_status`; screen Housekeeping > Lost and found (item, location, room, status). Tests: 1 check (`16_structure.sql`, `[HK-006]` "housekeeping logs a lost and found item").
+- **Works:** logging an item with where and when it was found, and changing its status.
+- **Broken or risky:** almost untested (1 check). No owner contact, no photo, no hand-over record (who collected it, with what ID). A valuable item handed to the wrong person leaves no trail.
+- **Not built:** link to the guest who stayed in the room, notify the guest, disposal after a set number of days, hand-over signature.
+- **Test coverage:** none to speak of.
+- **Rating:** AMBER (usable as a log; weak as a control).
+- **Next three actions:** (1) tests for status changes and permissions, S; (2) hand-over record with who collected and a reason, S; (3) suggest the last guest of the room and offer to notify them, S.
+
+### Module 14. Reports and exports
+
+- **What exists:** functions `dashboard_summary`, `kpi_summary`, `report_revenue_by_charge_code`, `report_payments`, `report_outstanding_balances`, `report_balances_by_guest`, `report_cancellation_rate`, `report_length_of_stay`, `audit_log`, `audit_filters`, `export_data` (CSV of reservations, guests or transactions, permission `rpt.export`, each export audited); table `daily_stats` written by the night roll; view `v_kpi_daily`; screens Dashboard, Reports, Admin > Audit log. Tests: `[RPT-001]` 4 checks (`14_lifecycle.sql`: rooms sold, room revenue, occupancy = rooms sold over rooms, ADR = revenue over rooms sold); `18_server_figures.sql` (33 checks on server-side money figures).
+- **Works:** occupancy, ADR and RevPAR come from the database, not the browser, and the formulas are tested; outstanding balances; payments by method; revenue by charge code; audited CSV exports.
+- **Broken or risky:**
+  - "Every figure traces to ledger rows" (RPT-003) and the report screens (RPT-004) are untested.
+  - Figures for a day exist only after that day's roll (`daily_stats`), so a missed roll (Module 10) leaves gaps.
+  - No aged debt (30, 60, 90 days) because there is no city ledger.
+- **Not built:** daily flash report for the owner, manager's report (the standard hotel daily report), forecast of the next 30 days, tax summary for VAT and service charge returns, PDF and scheduled reports, comparison with last year.
+- **Test coverage:** thin.
+- **Rating:** AMBER.
+- **Next three actions:** (1) a "ledger equals report" test for each report (RPT-003), S; (2) manager's daily report with a tax summary, M; (3) a 30-day on-the-books forecast, M.
+
+### Module 15. Email and messages
+
+- **What exists:** table `notification_outbox` (channel, recipient, subject, body, attempts, back-off, dedupe key); triggers `outbox_reservation_confirmed` (email to the guest when a booking is confirmed) and `outbox_approval_alert` (email to staff for new notifications such as approvals); sender `src/lib/outbox.server.ts` through Resend; scheduled route `/api/cron/outbox`; Admin > Messages ("Run now" per hotel); tests `outbox-cron.spec.ts` (2), `outbox-cron-unit.spec.ts` (4).
+- **Works:** the queue, retries with back-off, no duplicates, and the secret-protected sender (browser tests against a local stand-in for Resend).
+- **Broken or risky:**
+  - **Nothing is sent from live today.** The Vercel Production settings have no `RESEND_API_KEY` and no `OUTBOX_FROM_EMAIL` (Vercel variable list, 7 Oct), and the 5-minute schedule is off on Hobby (`vite.config.ts`). Booking confirmations and approval alerts pile up in the queue.
+  - Sign-up, invite and password emails use Supabase's rate-limited built-in sender (Module 2).
+  - Only two message types exist, both email. No templates per hotel, no hotel logo.
+- **Not built:** WhatsApp and SMS (the main channels in Nigeria), pre-arrival and post-stay messages, payment reminders, the owner's daily summary.
+- **Test coverage:** strong for the queue; none against the real Resend service.
+- **Rating:** RED. A hotel would expect a guest to get a confirmation; none goes out.
+- **Next three actions:** (1) your steps: verify a sending domain in Resend, add `RESEND_API_KEY` and `OUTBOX_FROM_EMAIL` to Vercel, set Resend SMTP in Supabase (checklist D), S; (2) on Hobby, run the sender once a day or move to Vercel Pro for every 5 minutes, S; (3) WhatsApp channel through a provider such as Twilio or Meta's Cloud API, M.
+
+### Module 16. Audit trail and data protection
+
+- **What exists:** `audit_events` (insert-only, blocked against update, delete and truncate, `20261001100000_lock_ledger_and_audit.sql`); guest audit stores only the names of changed fields (`20260930110200_guest_audit_privacy.sql`, GST-003); ID photo audit with ids only; Admin > Audit log with filters; `anonymise_guest`; ID photo keep period in `app.settings`; draft privacy notice (branch `claude/public-pages`). Tests: `[NFR-...]` 9 checks, GST-003 and GST-008 checks.
+- **Works:** who did what and when, for bookings, money, roles, rooms and photos; the trail cannot be edited; guest personal data stays out of it; anonymise on request; ID photos private and deleted after 12 months.
+- **Broken or risky:**
+  - No general retention rule. Guest profiles, bookings and audit rows are kept forever; only ID photos have a keep period. The privacy notice says retention is "[TO CONFIRM]".
+  - The NDPA 2023 items are open: legal basis for ID photos, the transfer safeguard for data in Ireland, a named data protection contact, a data processing clause with each hotel (privacy blanks, decision A14). UNVERIFIED whether a hotel of this size must register with the Nigeria Data Protection Commission; the lawyer should answer.
+  - No subject access export for one guest (a hotel can export all guests as CSV, not "everything about Mrs X").
+  - The audit log has no export and no "who viewed this guest" for ordinary profile views (only ID photo views are logged).
+- **Not built:** retention schedule with automatic anonymisation of old guests, subject access report, consent records, data processing agreement acceptance at sign-up, breach log.
+- **Test coverage:** strong for immutability and privacy of the trail; none for retention (not built).
+- **Rating:** AMBER. Technically careful; the legal and policy half is not done.
+- **Next three actions:** (1) lawyer's advice under the NDPA 2023 (your step, A14), S for us, unknown for the lawyer; (2) one-guest subject access report (PDF or CSV), S; (3) retention rule: anonymise guests with no stay for N years, M.
+
+### Module 17. Public pages
+
+- **What exists:** on branch `claude/public-pages`, not merged: home, pricing, FAQ, about, contact, privacy (draft), terms (draft), with a build check that refuses to build while blanks remain. On live, `/` only sends people to the sign-in page or the dashboard (`src/routes/index.tsx`).
+- **Works:** 5 browser tests on that branch; legal pages marked as drafts; the build check works (21 blanks found today).
+- **Broken or risky:** live has no public website, so a hotel that hears of Hotel Desk finds only a sign-in page. 21 blanks: company name, contact details, about text, payment terms, liability, the dates, and the privacy items above.
+- **Not built:** sign-up from the pricing page with a chosen plan, demo request form, blog or case studies.
+- **Test coverage:** thin but adequate for static pages.
+- **Rating:** AMBER (ready except for your answers and legal text).
+- **Next three actions:** (1) your answers for the 13 non-legal blanks, S; (2) lawyer's text for the 8 legal blanks, S for us; (3) merge and publish, S.
+
+### Module 18. Design system and screens
+
+- **What exists:** one theme file `src/theme.css`; shared components (`PageHeader`, `StatTile`, `RoomName`, `EmptyState`, `LoadingState`, `TableStateRow`, `FormDialog`); bundled font (no Google Fonts); contrast check (25 pairs, all pass AA); screenshots at 1366, 1440 and 1024 pixels (stage 1 and 2 reports).
+- **Works:** consistent look across 30 screens; loading, empty and error states exist on lists; status colours always come with a text label; keyboard order checked on Front Desk (browser test); dialogs return focus.
+- **Broken or risky:**
+  - Phone use is UNVERIFIED for most screens. I saw the app at 560 pixels wide on practice (menu button, stacked cards) and at 1024; tables crowd at 1024 (dates wrap onto two lines). Housekeeping staff will use phones.
+  - Wide tables do not switch to cards on small screens.
+  - No offline mode: a lost connection stops every action (Part 3).
+  - Bundle: charts library `recharts` is large (561 KB on the server side); UNVERIFIED first-load time on a slow Nigerian mobile connection.
+- **Not built:** phone layout for housekeeping and maintenance, dark mode switch (tokens exist), print layouts for registration card and invoice, language other than English.
+- **Test coverage:** none for layout; contrast only.
+- **Rating:** AMBER.
+- **Next three actions:** (1) phone layouts for My tasks, Maintenance and Front Desk lists, M; (2) measure load time on a throttled 3G connection and trim the charts library, S; (3) print layouts for invoice and registration card, S.
+
+### Module 19. Deployment and operations
+
+- **What exists:** Vercel project `hotel-management-system-29015d49` on the **Hobby** plan, functions in Dublin (dub1), every push deploys (main to Production, branches to previews); Supabase live `urbpxybyrfjczqbrpdsq` and practice `vxkresricneodgvqphrn`, both West EU (Ireland); daily ID photo clean-up (Vercel Cron 02:00 UTC); a manual backup of live taken 7 Oct (`~/hotel-desk-backups/live-2026-10-07-before-stage1-2`); release practice: practice first, dry run, live with a separate yes, fingerprint comparison.
+- **Works:** fast, repeatable deploys; instant rollback of the app in Vercel (Deployments > Promote an older deploy); a tested release routine for database changes.
+- **Broken or risky:**
+  - **Vercel Hobby does not allow commercial use** (Vercel terms; third-party summaries, sources below). Charging hotels while on Hobby breaks the terms. Pro is about $20 per seat per month.
+  - Live Supabase plan is UNVERIFIED. If it is Free: the project pauses after a week without traffic (no date roll, no access), and there are no restorable daily backups. Pro is $25 per month.
+  - No error tracking or alerts: a failing page or a failed roll reaches you only if a hotel calls (deployment plan section 7; Lovable's error reporting was removed).
+  - No automatic tests on GitHub before deploy (deployment plan 5.1 not built) and `main` is not protected (5.2): any push to main goes live untested.
+  - Database rollback is forward-only: a bad migration is undone by a new migration or a restore from backup. No restore has been rehearsed.
+- **Not built:** monitoring (uptime check on the sign-in page and the cron routes), error tracking (for example Sentry), database alerts, status page, staged rollout, runbook for "the database is down".
+- **Test coverage:** none for operations.
+- **Rating:** RED for paid production use (plan terms, no monitoring, no automatic checks); fine for a free pilot.
+- **Cost at scale (rough, monthly, before AI; check the official price pages):**
+
+| Hotels | Vercel | Supabase | Email (Resend) | Total about |
+|---|---|---|---|---|
+| 10 | Pro, 1 to 2 seats: $20 to $40 | Pro $25 plus Micro compute (covered by the $10 credit) | Free tier or Pro $20 | $45 to $85 |
+| 100 | Pro $40 plus usage, about $60 to $100 | Pro $25 plus Small or Medium compute $15 to $60, storage for ID photos | Pro $20 to $35 | $120 to $220 |
+| 1000 | Pro plus usage, about $200 to $500 | Pro or Team plus Large compute or more ($110 and up), read replica, point-in-time recovery add-on | $90 and up | $500 to $1,500 |
+
+  Assumptions: one property per hotel, about 30 rooms, light usage; ID photos at about 250 KB each. At 1000 hotels a single database is still possible but needs load testing first (Part 3).
+- **Rating:** RED (see above).
+- **Next three actions:** (1) move Vercel to Pro and confirm Supabase Pro with daily backups before the first paying hotel (your steps), S; (2) automatic test run on GitHub and protection on `main` (deployment plan 5.1, 5.2), M; (3) error tracking and an uptime check with alerts to your phone, S.
+
+Price sources: [Supabase pricing summary (MakerKit)](https://makerkit.dev/blog/saas/supabase-pricing), [Vercel cost summary (MakerKit)](https://makerkit.dev/blog/saas/vercel-cost), [Resend pricing](https://www.resend.com/pricing.md).
