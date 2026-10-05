@@ -71,7 +71,7 @@ The 12 known failures. "Hotel feels it" means a hotel would notice in normal use
 
 ### 1.4 Requirements against tests
 
-Source: the requirement table in `docs/status-report.md` (113 rows, the copy of the R1 workbook kept with this app). The workbook itself (`hms-reference-backend/docs/HMS_R1_Requirements.xlsx`) could not be parsed by my reader: UNVERIFIED that the two match row for row.
+Source: the requirement table in `docs/status-report.md` (113 rows). The workbook itself was checked in the follow-up (section F2): it has 107 rows, the same 14 have no test, and it lacks 7 rows that this app's tests use.
 
 - **Rows with no test tag (14):** ADM-009 exports, DAY-005 night audit gate, FIN-016 cashier shifts, GST-006 feedback, PLT-009 platform staff role, PLT-010 break-glass access, PLT-012 subscription billing, RES-012 groups, RPT-002 live views, RPT-003 figures trace to the ledger, RPT-004 report screens, SET-002 room types, SET-003 room inventory, SET-006 charge codes and payment methods. Of these, SET-002, SET-003, SET-006 and RPT-002 are used by every other test, so they are covered indirectly, not by name.
 - **Test tags with no row (1):** DAY-006b (same-day check-out charge, 28 checks in `21_same_day_checkout.sql`). Add a row.
@@ -139,7 +139,7 @@ Test counts come from tags in `supabase/tests/db` (for example 54 checks tagged 
 - **What exists:** screens `auth.tsx` (sign in, create account), `check-email.tsx`, `forgot-password.tsx`, `reset-password.tsx`, `create-hotel.tsx`; server function `src/lib/invite.functions.ts` (permission checked first, service role sends the invite, orphan accounts removed on failure); `register_invited_user`, `update_my_profile`; session handling in `src/routes/__root.tsx` (clears all cached data on sign-out or user switch). Tests: `e2e/sign-in.spec.ts` (3), `e2e/password-reset.spec.ts` (2), `[ADM-...]` 24 checks.
 - **Works:** sign-up with email confirmation, sign-in, sign-out, password reset from the email link (browser test), staff invites without temporary passwords, a second person in the same browser never sees the first person's data (`__root.tsx` lines 119 to 135). Proven on live on 5 Oct (sign-in) and on practice on 7 Oct (sign-up, confirmation).
 - **Broken or risky:**
-  - Sign-up, invite and reset emails go through Supabase's built-in sender, which allows only a few emails per hour (setup checklist D, Resend SMTP not set). With more than a handful of sign-ups or invites in an hour, emails stop and people cannot get in. Evidence: checklist section D 0 of 7 done; deployment plan 4.2.
+  - Sign-up, invite and reset emails go through Supabase's built-in sender, which delivers **only to addresses on the Supabase project's team** and **at most 2 messages per hour** (Supabase docs, follow-up F3). Any real hotel staff member is refused ("Email address not authorized"). Evidence: checklist section D 0 of 7 done; deployment plan 4.2. UNVERIFIED that live has no custom SMTP; Supabase > Authentication > Emails > SMTP Settings shows it.
   - No two-step sign-in for hotel staff, even for administrators who can see guest ID photos and all money. UNVERIFIED whether Supabase multi-factor could be switched on without app changes; the app has no screen for it.
   - Live Site URL and redirect list depend on the vercel.app address; moving to your own domain (checklist E9 to E11) needs the order you agreed.
 - **Not built:** two-step sign-in, "sign out everywhere", session time-out for shared front desk computers, staff PIN or quick switch, single sign-on for chains.
@@ -457,9 +457,9 @@ Importance: must, should, nice, for an independent Nigerian hotel of 20 to 150 r
 | Group blocks, corporate accounts, city ledger, credit control | Partly (group table, no screen; no city ledger) | OPERA has accounts receivable and back office interfaces; Hotelogix handles group bookings | Must (city ledger for corporate clients) | L |
 | Rate management, packages, seasons, promotions | Partly (date-range prices only) | Cloudbeds promo codes and rate plans; Hotelogix "smart pricing across booking sites" | Must | M |
 | Guest messaging: WhatsApp, SMS, email, pre-arrival, post-stay | Partly (email queue, not sending) | Cloudbeds automated guest emails; Mews guest journey and online check-in | Must (WhatsApp first) | M |
-| Guest register and statutory returns | Partly (ID type, number, expiry, photo; nationality) | Not advertised by the global players | Must: Regulation 29 of the Nigeria Immigration Regulations 2017 requires hotels to record each foreign guest's full name, last address, occupation, nationality, passport number, arrival and departure dates, destination and signature; some states (Rivers, Sokoto) ask for ID capture at every check-in | S (add the missing fields and a printable register) |
-| Taxes: VAT, service charge, state consumption tax, tourism levy | Partly (VAT 7.5%, service charge 10%, levy 0%, unconfirmed) | Configurable tax tables in all products | Must: VAT stays 7.5% under the Nigeria Tax Act 2025 from 1 Jan 2026; Lagos charges a 5% hotel occupancy and restaurant consumption tax collected by LIRS; states levy a tourism development levy (reported as 5% of income in some states); one hotel may face several state levies | S (rules exist), plus your accountant (A11) |
-| Nigerian e-invoicing (FIRS MBS) | No | Hotelogix supports fiscal e-invoicing in Tanzania; no Nigerian connector found | Must for large and medium taxpayers: FIRS e-invoicing through the Merchant Buyer Solution became mandatory for large taxpayers (turnover N5 billion or more) from 1 Nov 2025; medium taxpayers (N1 to N5 billion) from 1 July 2026; smaller businesses from 2027, enforced by 2028. Most of our target hotels are below N1 billion today, so this is "should" now and "must" before 2027 | L |
+| Guest register and statutory returns | Partly (ID type, number, expiry, photo; nationality) | Not advertised by the global players | Must: Immigration Regulations 2017 (gazette of 1 Mar 2017): Regulation 29 requires every hotel to keep a register in the Fourth Schedule form, with **every** guest's full name, address and occupation and further particulars for foreign guests (the form shows name in block letters, address, occupation, passport number; other columns unreadable in the scan, UNVERIFIED); Regulation 31: open to inspection by an Immigration Officer at all times; Regulation 32: on written notice, a daily list of foreign guests of the previous 24 hours. Some states (Rivers, Sokoto) ask for ID capture at every check-in | S to M (missing fields, printable register, daily foreign-guest list) |
+| Taxes: VAT, service charge, state consumption tax, tourism levy | Partly (VAT 7.5%, service charge 10%, levy 0%, unconfirmed) | Configurable tax tables in all products | Must: VAT stays 7.5% under the Nigeria Tax Act 2025 from 1 Jan 2026; Lagos charges a 5% hotel occupancy and restaurant consumption tax (HORCT) collected by LIRS, and its Fiscalization Regulation 2017 requires hotels to run LIRS's Eco Fiscal System, which sends every sale to LIRS in real time (follow-up F6); states levy a tourism development levy (reported as 5% of income in some states); one hotel may face several state levies | S (rules exist), plus your accountant (A11) |
+| Nigerian e-invoicing (FIRS MBS) | No | Hotelogix supports fiscal e-invoicing in Tanzania; no Nigerian connector found | Must: the Nigeria Revenue Service (NRS, formerly FIRS) runs e-invoicing through the Merchant Buyer Solution: large taxpayers (N5 billion or more) live from 1 Nov 2025 with enforcement from April 2026; medium (N1 to N5 billion) go-live 1 July 2026, enforcement from January 2027; emerging and small (below N1 billion) go-live 1 July 2027, enforcement from January 2028 (NRS timeline as reported by Fonoa and Nairametrics, Feb 2026; the official portal einvoice.nrs.gov.ng shows no timeline text, so the dates are from secondary sources). Most target hotels are small, so build by mid-2027 | L |
 | Door locks and key cards, phone and TV systems | No | OPERA and Mews integrate with lock vendors through partners | Should (larger hotels) | M per vendor |
 | Accounting links (QuickBooks, Xero, Sage) and exports | Partly (CSV of reservations, guests, transactions) | OPERA night audit summaries feed accounting tools (AccountsIQ example) | Should | M |
 | Multi-property and chain view, franchise, management companies | No (one property per account in practice) | Hotelogix manages single or multiple properties from anywhere | Should | L |
@@ -620,3 +620,140 @@ Sources for Part 5: [WhatsApp pricing in Nigeria (Yournotify)](https://yournotif
 | Competitor features in detail | Vendor demos; my table relies on their public pages and review sites. |
 | Nigerian legal duties (NDPC registration, ID photo basis, transfer safeguard, state levies) | Your lawyer and accountant (A14, A11). |
 | AI provider data retention and terms for our account | Anthropic Console > organisation settings and the commercial terms; ask for a data processing addendum. |
+
+---
+
+## Follow-up, 6 October 2026
+
+### F1. The 12 known test failures
+
+They are listed in Part 1.1 (name, cause in one line, whether a hotel feels it, fix size). In short: 10 of the 12 are felt by a hotel; 9 are size S, 3 are size M (complimentary upgrade, second property, registration card with signature).
+
+### F2. Requirements workbook against the tests
+
+Read with `openpyxl` from `hms-reference-backend/docs/HMS_R1_Requirements.xlsx` (version 0.5, 28 Sep 2026; sheets README, R1 Requirements, BR Coverage, Decisions, Build Gaps). Tags taken from `supabase/tests` and `e2e`.
+
+- **Workbook rows:** 107.
+- **Rows with no test (14):** ADM-009 exports (Should), DAY-005 night audit gate (Should), FIN-016 cashier shifts (Should), GST-006 feedback (Should), PLT-009 platform staff (Must), PLT-010 break-glass access (Should), PLT-012 subscription billing (Should), RES-012 groups (Should), RPT-002 live views (Must), RPT-003 figures trace to the ledger (Must), RPT-004 report screens (Must), SET-002 room types with an overbooking allowance (Must), SET-003 room inventory (Must), SET-006 charge codes and payment methods (Must). Same list as Part 1.4.
+- **Tests with no workbook row (7):** DAY-006b, GST-007, GST-008, GST-009, GST-010, ROOM-005, SET-009. The status report has 6 of these (all but DAY-006b); the workbook has none, because it predates stages 1 and 2.
+- **Rows the workbook marks "Built+tested" that fail in this app (10):** FO-003, FO-007, FO-008, HK-002, HK-003, ROOM-004, PLT-004, PLT-007, RES-013, SET-008. The workbook's Status column describes the old reference backend, not this app. Its counts: 97 "Built+tested", 4 "Built (UI or Edge Function work remains)", 3 R1b, 2 not built, 1 decision needed.
+- **Workbook Build Gaps sheet is out of date:** it lists ADM-009 exports as "not built" (built: `export_data`, audited) and ADM-001 invites as "Edge Function" (built as a Vercel server function).
+- **Recommendation:** make one register the source of truth (see F8) and regenerate the other from it.
+
+### F3. Email on live today, and the steps to fix it
+
+**What Supabase's built-in sender allows** (official docs, [Supabase custom SMTP guide](https://supabase.com/docs/guides/auth/auth-smtp)):
+- It delivers only to addresses that are members of the Supabase project's **team**; any other address fails with "Email address not authorized".
+- At most **2 messages per hour**.
+- No delivery guarantee; Supabase says it is for testing, not production.
+- After custom SMTP is set, Supabase starts at **30 messages per hour**, which can be raised under Authentication > Rate Limits.
+
+**What a hotel's staff see today** (from the app code and the docs; UNVERIFIED on live because I may not send email from live, and because live may already have custom SMTP: check Supabase > live project > Authentication > Emails > SMTP Settings):
+- **Sign-up** (`src/routes/auth.tsx`): the sign-up form shows the error from Supabase in red, most likely "Email address not authorized", or a rate-limit message after 2 emails in an hour. No account can be confirmed. Your own sign-up worked on 5 Oct because your email is on the Supabase team.
+- **Staff invite** (`src/lib/invite.functions.ts`, Admin > Staff): a red message "The invitation email could not be sent: ... Nothing was created. Try again later."
+- **Password reset** (`src/routes/forgot-password.tsx`): the form shows the error in red. The app never says whether an account exists.
+- **Booking confirmations and approval alerts** (outbox): nothing is sent; Vercel Production has no `RESEND_API_KEY` or `OUTBOX_FROM_EMAIL`, and the 5-minute schedule is off. They wait in the queue; Admin > Messages shows them.
+
+**Steps, in order** (your steps unless marked Claude Code):
+1. Choose the sending address, for example `no-reply@mail.yourdomain.com` (needs your own domain, checklist B1). Until then, Resend's test sender works only for your own inbox.
+2. Resend: sign up, turn on two-step sign-in, **Domains > Add domain** `mail.yourdomain.com`.
+3. At your domain registrar, add the DNS records Resend shows (SPF, DKIM, and a DMARC record). Wait until Resend shows **Verified**.
+4. Resend: **API Keys > Create**, permission **Sending access**, restricted to that domain. Copy it into your password manager only.
+5. Supabase live project: **Authentication > Emails > SMTP Settings > Enable custom SMTP**. Host `smtp.resend.com`, port `465`, username `resend`, password = the Resend key, sender email `no-reply@mail.yourdomain.com`, sender name `Hotel Desk`. Save.
+6. Supabase live project: **Authentication > Rate Limits**: raise emails per hour from 30 to, for example, 100.
+7. Repeat 5 and 6 on the practice project with a separate key and sender `practice@mail.yourdomain.com`.
+8. Vercel > Settings > Environment Variables, **Production** only: `RESEND_API_KEY` (Sensitive) and `OUTBOX_FROM_EMAIL` = `Hotel Desk <no-reply@mail.yourdomain.com>`. Redeploy Production.
+9. Decide the outbox schedule: on Vercel **Pro**, Claude Code restores the 5-minute schedule line in `vite.config.ts` (one line, deployment plan 4.4); on Hobby, a once-a-day run is the most Vercel allows; in both cases Admin > Messages > Run now sends at once.
+10. Claude Code: test on practice first (invite, sign-up, reset, a booking confirmation), then on live with an address you choose; check they arrive, are not in spam, and their links open the live address.
+
+### F4. Duplicate payments: proposed fix (not built)
+
+**The problem in business terms.** A cashier records ₦50,000 cash. The connection drops just after the server saved it, so the screen looks as if nothing happened. The cashier opens Record payment again and saves. The folio now shows ₦100,000 paid. Fixing it needs a reversal with a manager's approval, and until then the guest's balance and the cash-up are wrong.
+
+| | (a) One retry key for the whole cashier session | (b) Server refuses a likely repeat unless the cashier confirms |
+|---|---|---|
+| How it works | The screen keeps one key per cashier and folio until the cashier leaves the folio | The database checks for a payment on the same folio with the same amount, method and reference in the last N minutes (for example 10). If found, it refuses with a clear message showing the earlier payment; the cashier can press "Yes, this is a second payment" and give a reason |
+| Stops the dropped-connection case | Only if the cashier stays on the same screen; not after a page reload, a second device or a colleague | Yes, wherever the second attempt comes from |
+| Risk of blocking a real second payment | High: two genuine ₦10,000 payments in one visit would be treated as one and the second silently dropped | Low: the cashier sees the earlier payment and confirms |
+| Audit | Nothing to audit | The confirmation and its reason are recorded |
+| Where the rule lives | In the browser, so a rule outside the database (against `AGENTS.md`) | In the database (`post_payment`), like every other money rule |
+| Size | S | S to M (one migration, one confirm step on the payment form, tests) |
+
+**Recommendation: (b).** It protects against the real failure from any device, keeps the rule in the database, never drops a genuine payment silently, and leaves an audit trail. Keep today's per-form key as well; it already stops double clicks.
+
+### F5. AI providers
+
+Prices per million tokens, input / output. Secondary sources where noted; check each official price page before budgeting.
+
+| | Anthropic Claude | OpenAI | Google Gemini |
+|---|---|---|---|
+| Models we would use | Haiku 4.5 $1 / $5; Sonnet 5.5 $2 / $10 (vision); batch half price | GPT-5 mini $0.25 / $2 (third-party summary, Sep 2026) | Gemini 3.6 Flash $0.75 / $3.75 until 31 Dec 2026, then $1.50 / $7.50 (third-party summary) |
+| Training on our data | Not by default for commercial API use ([Anthropic privacy centre](https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-training)) | Not since 1 Mar 2023 unless opted in ([OpenAI "your data"](https://developers.openai.com/api/docs/guides/your-data)) | Not for paid services; free tier may be used and reviewed (third-party summary) |
+| Retention | Inputs and outputs deleted within 30 days by default; zero data retention by agreement ([Anthropic retention](https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data)) | Abuse logs up to 30 days; zero data retention or modified monitoring after approval | Limited logging for abuse checks; zero data retention on request per project (third-party summary) |
+| Regional processing | UNVERIFIED for Europe; Anthropic offers an `inference_geo` request setting, I could not confirm which regions | Europe, United States and UAE process locally; residency endpoints cost 10% more for newer models (third-party summary) | Vertex AI EU regions; Google has a Johannesburg region, but Gemini availability there is unclear (Vertex locations page) |
+| Africa-hosted option | No | Through Microsoft Azure, some OpenAI models deploy in South Africa North (third-party summary) | Johannesburg region exists; Gemini not confirmed there |
+| Speed from Lagos | UNVERIFIED | UNVERIFIED | UNVERIFIED |
+
+**About speed.** Our AI calls would run in our Vercel server in Dublin, not on the hotel's computer. So the delay a Lagos user feels is the existing Lagos to Dublin trip (the same as every screen today) plus Dublin to the provider. EU processing (OpenAI EU, Vertex EU) is closest to Dublin. To measure: Claude Code adds a timing-only test function to a preview (no guest data) that calls each provider 20 times, and you open it from a Lagos connection. Size S.
+
+**Recommendation.** Keep Anthropic as the main provider for quality on vision and wording, with the gateway built to switch provider. Re-check the EU processing question with Anthropic before any guest data is sent; if EU processing is required by the lawyer, OpenAI EU or Vertex EU are the fallbacks.
+
+**Before ID reading can run (A14):**
+1. The lawyer's written opinion under the NDPA 2023 and the GAID 2025 covers the legal basis for ID photos, the transfer to Ireland, and the second transfer to the AI provider; and whether we must register with the Commission.
+2. A data processing agreement with the AI provider, with no training and zero or minimal retention confirmed in writing.
+3. The privacy notice updated and published: AI reading of IDs, provider and country, a person checks every field, how to opt out.
+4. The hotel has "Allow ID photos" on and has switched AI ID reading on separately; off by default.
+5. Staff confirm every field before Save; the manual path stays.
+6. An evaluation set of fake test IDs (never real ones) passes before release.
+7. Every AI call is logged without personal data.
+
+### F6. E-invoicing, Lagos consumption tax and the guest register: sources
+
+| Claim | Status | Source |
+|---|---|---|
+| E-invoicing phases | Replaced in Part 4. Large taxpayers (N5 billion or more): live 1 Nov 2025, enforcement from April 2026. Medium (N1 to N5 billion): go-live 1 July 2026, enforcement from January 2027. Emerging and small (below N1 billion): go-live 1 July 2027, enforcement from January 2028. | NRS timeline as reported by [Fonoa, 19 Feb 2026](https://www.fonoa.com/resources/blog/nigeria-releases-phased-rollout-plan-for-e-invoicing) and [Nairametrics, 17 Feb 2026](https://nairametrics.com/2026/02/17/nrs-launches-phased-e-invoicing-fiscal-monitoring-system/). The official portal [einvoice.nrs.gov.ng](https://einvoice.nrs.gov.ng) has no timeline text: UNVERIFIED against an NRS page. |
+| Lagos 5% consumption tax (HORCT) | Confirmed by secondary sources: 5% on goods and services in hotels, restaurants and event centres; remit by the 20th of the next month; 10% penalty plus interest. | [Legalnaija](https://legalnaija.com/compliance-challenges-of-lagos-state/), [Techeconomy](https://techeconomy.ng/lirs-tasks-businesses-on-consumption-5-tax-compliance). The official [LIRS site](https://lirs.gov.ng) links the HORCT law and FAQs as PDFs but states no rate in page text: rate UNVERIFIED against LIRS directly. |
+| Lagos fiscal system (new) | Lagos hotels must run the LIRS Eco Fiscal System, linked to their point of sale, which sends every sale to LIRS in real time, under the Hotel Occupancy and Restaurant Consumption Fiscalization Regulation 2017. For a Lagos hotel, Hotel Desk is the billing system, so an EFS link is a **must** for Lagos pilots. Size M to L, UNVERIFIED until we read the LIRS technical guideline. | [LIRS EFS page](https://lirs.gov.ng/efs), [KPMG tax alert, Dec 2023](https://kpmg.com/ng/en/home/insights/2023/12/tax-alert---issue-no--12-4.html) |
+| Guest register | Corrected in Part 4 from the gazette itself: Regulation 29 (register for every guest, more particulars for foreigners, Fourth Schedule form), Regulation 31 (inspection), Regulation 32 (daily list of foreign guests on notice). | [Immigration Regulations 2017, gazette of 1 Mar 2017](https://archive.gazettes.africa/archive/ng/2017/ng-government-gazette-supplement-dated-2017-03-01-no-25.pdf), page B378 and Fourth Schedule page B395 |
+
+### F7. Ready for a paying pilot hotel
+
+Every gate must be green before the first hotel pays. "Proof" is what you or I can show.
+
+| # | Gate | Owner | Proof it is done |
+|---|---|---|---|
+| 1 | Vercel on Pro (commercial use allowed) | You | Vercel > Settings > Billing shows Pro |
+| 2 | Supabase live on Pro with daily backups | You | Supabase > Billing shows Pro; Database > Backups lists daily backups |
+| 3 | A restore practised into the practice project | Claude Code (your yes) | A written restore log with time taken |
+| 4 | Email from your domain: Resend verified, Supabase SMTP on both projects, outbox keys in Vercel | You (steps F3 1 to 8), Claude Code (test) | Test invite, sign-up, reset and booking confirmation arrive, not in spam, links open the live address |
+| 5 | Tax rates signed off (VAT, service charge, state consumption tax, levies) | Accountant, then Claude Code | Written sign-off; migration applied; a test invoice matches the accountant's example |
+| 6 | Lagos only: EFS link or LIRS written confirmation of how we comply | Accountant and LIRS, then Claude Code | LIRS confirmation or a working EFS test |
+| 7 | Legal: privacy notice, terms, data processing clause for hotels, NDPA opinion (incl. ID photos and Ireland) | Lawyer | Signed opinion; final texts replace the `[TO CONFIRM]` blanks; `check:confirm` passes |
+| 8 | Public pages merged and live | You (13 non-legal blanks), Claude Code (merge) | The live home, pricing, privacy and terms pages open |
+| 9 | Guest register meets Regulation 29 (all guests) and Regulation 32 (daily foreign-guest list) | Claude Code | A printed register and a daily list from practice; your review |
+| 10 | Duplicate payment guard (F4 option b) | Claude Code | Tests pass; a hand test shows the warning |
+| 11 | Housekeeping fixes and inspection switch (5 known failures) | Claude Code | Those tests pass |
+| 12 | Error tracking and uptime alerts to your phone | Claude Code (set-up), you (account) | A test error and a test outage reach your phone |
+| 13 | Automatic tests on GitHub; `main` protected | Claude Code, you (protection setting) | A pull request shows green checks; a direct push to `main` is refused |
+| 14 | Platform admin screen for activating and extending hotels (no hand SQL on live) | Claude Code | You activate a test hotel on practice from the screen; audit row shows it |
+| 15 | Second trusted person on Vercel, Supabase, Resend, GitHub with two-step sign-in (decision D4) | You | Member lists show two owners with two-step sign-in |
+| 16 | Pilot agreement: price, support hours, data processing clause, what happens at the end | You and lawyer | Signed agreement |
+| 17 | Live hand test on the pilot's own setup | Claude Code with you | A recorded walk-through: booking, check-in, charge, payment, check-out, invoice, night roll |
+| 18 | ID photos stay off for the pilot unless gate 7 covers them | You | Setup > Property shows "Allow ID photos" off |
+
+### F8. Where the project rules live, and one place for them
+
+**Today there are four places:**
+1. `AGENTS.md` in this repository: about 25 one-line architecture rules for this app (current, but says `src/styles.css` where it should say `src/theme.css`).
+2. `hms-reference-backend/CLAUDE.md` in the reference repository: the 10 rules you quoted, written for the old Lovable stack ("Lovable builds the UI", "Edge Functions only", `reqs_data.py`). Rules 9 and 10 do not fit this app.
+3. `docs/decisions.md` in this repository: decisions with dates.
+4. The requirement register, split between the workbook in the reference repository and the table in `docs/status-report.md` (F2).
+
+This repository has no `CLAUDE.md`, so Claude Code here does not read the reference rules automatically; it reads `AGENTS.md` only when asked to.
+
+**Proposal: this repository holds all rules, in one file, `AGENTS.md`.**
+- Merge the still-valid reference rules (immutable ledger, idempotency keys, `app.fail` codes, default-deny grants, test with every function) into `AGENTS.md`, rewritten for this stack.
+- Add a two-line `CLAUDE.md` in this repository that only imports `AGENTS.md` (Claude Code supports `@AGENTS.md` imports), so every Claude Code session reads the same rules without a copy that can drift.
+- Mark `hms-reference-backend/CLAUDE.md` as archived, with one line pointing here.
+- Move the requirement register into this repository (for example `docs/requirements.csv`) as the single source; generate the workbook and the status table from it, and add a check (like `check:money`) that fails the build if a test tag has no row or a row has no test.
+- Size: S. Needs your yes, because it changes repository files.
