@@ -8,7 +8,7 @@ How to read it:
 - Every claim names its evidence (file, test, table, function or command). UNVERIFIED marks what I could not check.
 - "Code at" means branch `main`, commit `f94222b` (stage 1 and 2 merged and live).
 
-Status of each part: Part 1 done. Part 2 in progress.
+Status of each part: Part 1 done. Part 2 modules 1 to 6 done, 7 to 19 in progress.
 
 ---
 
@@ -113,3 +113,89 @@ The rules below are the 10 rules in `hms-reference-backend/CLAUDE.md`. This repo
 | Email sender every 5 minutes | Off while on Vercel Hobby; booking confirmations and alerts queue and are not sent. | `vite.config.ts`, deployment plan 4.4 |
 | Public pages | Built on `claude/public-pages`, not merged; 21 blanks. | check:confirm |
 | Vercel Authentication on the long team address | Still on for `...-peters-projects-ee85d5d5.vercel.app`; the short live address is open. | earlier curl checks |
+
+---
+
+## Part 2. Module by module
+
+Test counts come from tags in `supabase/tests/db` (for example 54 checks tagged `[PLT-...]`) and the 28 browser tests in `e2e/`.
+
+### Module 1. Platform and tenancy
+
+- **What exists:** tables `tenants`, `properties`, `plans` (4 plans: Starter 20 rooms, 1 property, 10 users; Standard 60, 1, 25; two more), `tenant_subscriptions`, `subscription_history`; functions `create_hotel`, `subscription_info`, `change_subscription`, `cancel_subscription`, server-only `app.platform_set_subscription`, `app.run_subscription_clock` (pg_cron job `subscription-clock`, daily 00:15 UTC); read-only guard `app.assert_writable` on every write, with a settlement exception so guests in house can still pay and leave; plan limit trigger `app.enforce_plan_limit`. Screen: Create your hotel; trial banner; Admin > subscription. Tests: 54 `[PLT-...]` checks in `15_accounts.sql`, `17_more_features.sql`, `11_isolation.sql`.
+- **Works:** one-step hotel creation for a confirmed email (PLT-001, 002); one hotel never sees another (PLT-003, 14 checks; 18 checks in `11_isolation.sql`); the 30-day trial ends by itself and the hotel becomes read-only (PLT-005); a read-only hotel can still settle and check out (PLT-006); plan limits stop new rooms and users without deleting anything (PLT-007 partly; proven again for rooms in `23_room_labels.sql`).
+- **Broken or risky:**
+  - No second property can be created, so hotel groups cannot use one account and the property limit never applies (PLT-007, failing test).
+  - A Ghana (or any non-Nigerian) hotel gets naira and Nigerian taxes (PLT-004, failing test, `app.seed_property_defaults`).
+  - Activating a paying hotel or a pilot is only possible by running SQL as the database owner (`app.platform_set_subscription`); there is no platform staff screen (PLT-009, missing). One typing mistake in SQL on live could affect the wrong hotel.
+  - No billing: plans have no price and no payment link (PLT-012, missing; decision A16 open).
+- **Not built:** platform admin console (tenant list, plan change, suspend, notes); subscription billing through Paystack or Flutterwave; second property and a group view; country templates for Ghana, Kenya and others.
+- **Test coverage:** strong for isolation, trial and read-only; none for billing and platform staff (not built).
+- **Rating:** AMBER. Safe and correct for a single-property Nigerian hotel; not ready to sell to groups or to bill automatically.
+- **Next three actions:** (1) a small platform admin screen with audit for activate, extend and suspend, replacing hand SQL, M; (2) country templates (currency, taxes, payment methods) starting with Ghana, S; (3) create-property function and screen with the plan limit, M.
+
+### Module 2. Sign-up, sign-in, password reset, staff invites, sessions
+
+- **What exists:** screens `auth.tsx` (sign in, create account), `check-email.tsx`, `forgot-password.tsx`, `reset-password.tsx`, `create-hotel.tsx`; server function `src/lib/invite.functions.ts` (permission checked first, service role sends the invite, orphan accounts removed on failure); `register_invited_user`, `update_my_profile`; session handling in `src/routes/__root.tsx` (clears all cached data on sign-out or user switch). Tests: `e2e/sign-in.spec.ts` (3), `e2e/password-reset.spec.ts` (2), `[ADM-...]` 24 checks.
+- **Works:** sign-up with email confirmation, sign-in, sign-out, password reset from the email link (browser test), staff invites without temporary passwords, a second person in the same browser never sees the first person's data (`__root.tsx` lines 119 to 135). Proven on live on 5 Oct (sign-in) and on practice on 7 Oct (sign-up, confirmation).
+- **Broken or risky:**
+  - Sign-up, invite and reset emails go through Supabase's built-in sender, which allows only a few emails per hour (setup checklist D, Resend SMTP not set). With more than a handful of sign-ups or invites in an hour, emails stop and people cannot get in. Evidence: checklist section D 0 of 7 done; deployment plan 4.2.
+  - No two-step sign-in for hotel staff, even for administrators who can see guest ID photos and all money. UNVERIFIED whether Supabase multi-factor could be switched on without app changes; the app has no screen for it.
+  - Live Site URL and redirect list depend on the vercel.app address; moving to your own domain (checklist E9 to E11) needs the order you agreed.
+- **Not built:** two-step sign-in, "sign out everywhere", session time-out for shared front desk computers, staff PIN or quick switch, single sign-on for chains.
+- **Test coverage:** strong for the happy paths (browser tests); thin for email failure cases (none simulate Supabase's hourly email limit).
+- **Rating:** AMBER. Works today; will fail under real sign-up volume until Resend SMTP is set.
+- **Next three actions:** (1) set Resend SMTP on both Supabase projects (your step, checklist D), S; (2) two-step sign-in for administrators and managers, M; (3) automatic sign-out after a chosen idle time on front desk computers, S.
+
+### Module 3. Roles, permissions, custom roles, approvals
+
+- **What exists:** tables `roles` (10 built-in), `permissions` (73), `role_permissions` (304 for built-in roles), `user_property_roles`, `approval_limits`, `approvals`, `notifications`; functions `copy_role`, `rename_role`, `set_role_permissions`, `delete_role`, `assign_role`, `remove_role`, `set_user_status`, `set_approval_limit`, request functions for discount, adjustment, reversal, refund and checkout, `decide_approval`; guards `app.assert_can_grant` (E_ESCALATION), last-administrator guard (E_LAST_ADMIN), segregation of duties (E_SOD and `approvals_sod` check). Screens: Admin (users, roles, limits), Approvals. Tests: `20_builtin_limits.sql` (17), ADM checks (24), approval checks in `12_ledger.sql`.
+- **Works:** nobody can hand out a permission or limit they do not hold; the last System Administrator cannot be removed; the requester can never approve their own request; built-in roles carry per-hotel limits (decision 6c); reservation officers see no ID numbers or photos (6b, GST-002).
+- **Broken or risky:**
+  - A copied role keeps only the permissions it had when copied. When we add a permission (for example the three ID photo permissions on 7 Oct), copied roles do not get it and nobody is told. Live has no copied roles today (checked 7 Oct), so no hotel is affected yet.
+  - Approvals arrive as in-app notifications only; with the email sender off (Module 15), a manager away from the screen does not know a discount is waiting.
+- **Not built:** approval by phone or email link; delegation while a manager is on leave; a "what can this role do" plain-language summary; role templates by hotel size.
+- **Test coverage:** strong.
+- **Rating:** GREEN for control and safety; the notification gap belongs to Module 15.
+- **Next three actions:** (1) when new permissions ship, list copied roles that lack them on the Admin screen with one "add" button, S; (2) approval alerts by email or WhatsApp once Module 15 sends, S after Module 15; (3) a printable role summary for hotel owners, S.
+
+### Module 4. Setup
+
+- **What exists:** screens Setup > Property details, Room types, Rooms, Rate plans and prices, Tax, charges and payments, Exchange rates; ID photo switches (stage 2); functions `update_property`, `save_tax_rate` and related, `save_charge_code`, `save_payment_method`, exchange rate save, `set_id_photo_settings`, `get_id_photo_settings`; default charge codes, payment methods (cash, POS, transfer), document numbers and Nigerian taxes seeded for each new property (`app.seed_property_defaults`). Tests: 19 `[SET-...]` checks; `18_server_figures.sql` (tax previews from the server).
+- **Works:** property details; tax lines with a rounding remainder rule (`20260930160100_tax_rounding_remainder.sql`); charge codes and payment methods per property; money with 4 decimal places (`20260930110400_money_precision.sql`); ID photo Allow and Require switches with audit (24_id_photos.sql).
+- **Broken or risky:**
+  - Service charge 10% and VAT 7.5% are placeholders until your accountant confirms (A11, `docs/accountant-brief.md`). If they are wrong, every bill a hotel issues is wrong, and issued invoices cannot be changed (they are insert-only).
+  - No switch to turn off inspection for small hotels (SET-008, failing test).
+  - The business date and base currency cannot be changed after creation (by design, SET-001), but there is also no guided first-day setup, so a new hotel can start trading before it has set taxes.
+- **Not built:** a setup wizard with a "ready to trade" checklist; consumption tax and tourism levy options per state (see Part 4); hotel logo and invoice footer; cancellation policy text for confirmations.
+- **Test coverage:** thin for screens, strong for tax maths.
+- **Rating:** AMBER. Mechanics are sound; tax content is not signed off.
+- **Next three actions:** (1) accountant sign-off of the tax seed and the questions in `accountant-brief.md` (your step), S; (2) inspection on or off per property (SET-008), S; (3) first-day setup checklist screen, M.
+
+### Module 5. Room types, rooms, rates, rate plans, availability, restrictions
+
+- **What exists:** tables `room_types`, `rooms`, `rate_plans`, `rate_plan_prices` (room type, date range, amount, currency), `room_blocks`, `reservation_nights`; functions `save_room_type`, `save_room`, `bulk_add_rooms`, `add_rooms_range`, `add_rooms_named`, `save_rate_plan`, `save_rate_plan_price`, `get_availability`, `request_room_block`, `approve_room_block`; screens Rooms board, Room detail, Setup rooms, Availability. Tests: 58 `[ROOM-...]` checks; 48 in `23_room_labels.sql`; 4 browser tests in `rooms-add.spec.ts`.
+- **Works:** free-text room labels (numbers, prefixes, names, accents), natural order, add one or several rooms with a preview, the plan room limit; out-of-order and out-of-service blocks with approval that cannot oversell (ROOM-002, 003); safe last-room booking under a lock (`app.assert_available`).
+- **Broken or risky:**
+  - Prices are one amount per room type per date range. There is no weekday or weekend price, no minimum stay, no closed-to-arrival or closed-to-departure, no seasons by name and no length-of-stay discount (`rate_plan_prices` columns: `valid_from`, `valid_to`, `amount`, `currency` only). A hotel that charges more on Fridays must create a date range for every Friday.
+  - A dirty override needs no reason (ROOM-004, failing test).
+  - No overbooking allowance. UNVERIFIED: the requirement SET-002 mentions an overbooking allowance; I found no column for it on `room_types`.
+- **Not built:** rate calendar screen, weekday prices, restrictions, packages (room plus breakfast), promotions and codes, derived rates (corporate = BAR minus 10%), channel rate push.
+- **Test coverage:** strong for rooms and blocks; thin for rates (prices only).
+- **Rating:** AMBER. Rooms GREEN; rates too basic for revenue management.
+- **Next three actions:** (1) weekday prices on a rate plan, M; (2) minimum stay and closed-to-arrival per date, M; (3) a rate calendar screen showing prices by day and room type, M.
+
+### Module 6. Reservations
+
+- **What exists:** tables `reservations` (source, guarantee, hold, group, fees, override), `reservation_nights`, `reservation_guests`, `group_bookings`; functions `create_reservation`, `modify_reservation`, `confirm_reservation`, `cancel_reservation`, `mark_no_show`, `reinstate_reservation`, `assign_room`, `unassign_room`, `set_reservation_guests`, `preview_reservation_fee`, `walk_in_check_in`; screens Reservations list, New booking, Booking detail, Availability. Tests: 42 `[RES-...]` checks, `desk-journey.spec.ts` (2).
+- **Works:** booking with price taken from the rate plan, tentative holds that expire, deposits by plan policy, cancellation and no-show fees with free-cancellation days, reinstating, walk-ins, same-day stays (DAY-006); a new guest made inside the booking form does not submit the booking (browser test).
+- **Broken or risky:**
+  - A stay cannot be shortened before check-out (FO-008, 2 failing checks); the room stays unavailable for the nights the guest will not use.
+  - No complimentary upgrade that keeps the rate (FO-007).
+  - Groups: the `group_bookings` table and `group_id` exist but group booking is untested (RES-012 "built, untested") and there is no group screen for 20 rooms at once.
+  - Booking confirmations to guests are queued but not sent (Module 15).
+  - No arrival-ready flag (RES-013).
+- **Not built:** online booking engine, channel manager (Part 4), group block with rooming list, corporate accounts, booking by WhatsApp, waitlist.
+- **Test coverage:** strong for single bookings; none for groups.
+- **Rating:** AMBER.
+- **Next three actions:** (1) shorten a stay (FO-008), S; (2) complimentary upgrade (FO-007), M; (3) group booking screen with a rooming list, L.
