@@ -8,7 +8,7 @@ How to read it:
 - Every claim names its evidence (file, test, table, function or command). UNVERIFIED marks what I could not check.
 - "Code at" means branch `main`, commit `f94222b` (stage 1 and 2 merged and live).
 
-Status of each part: Part 1 done. Part 2 modules 1 to 6 done, 7 to 19 in progress.
+Status of each part: Part 1 done. Part 2 modules 1 to 12 done, 13 to 19 in progress.
 
 ---
 
@@ -199,3 +199,85 @@ Test counts come from tags in `supabase/tests/db` (for example 54 checks tagged 
 - **Test coverage:** strong for single bookings; none for groups.
 - **Rating:** AMBER.
 - **Next three actions:** (1) shorten a stay (FO-008), S; (2) complimentary upgrade (FO-007), M; (3) group booking screen with a rooming list, L.
+
+### Module 7. Front desk
+
+- **What exists:** screens Front Desk (Arrivals, In house, Departures today, with a plain Check out button), Check-out page, Walk-in, Move room, Extend stay, Void check-in; views `v_arrivals`, `v_in_house`, `v_checkouts`; functions `check_in`, `walk_in_check_in`, `check_out`, `undo_checkout`, `move_room`, `extend_stay`, `void_check_in`, `post_room_charges`, `post_check_out_charge`, `waive_same_day_charge`, `get_front_desk_rooms`. Tests: 63 `[FO-...]` checks, `19_same_day.sql` (23), `21_same_day_checkout.sql` (28), browser tests `desk-journey.spec.ts`, `front-desk-checkout.spec.ts`, `id-photos.spec.ts` (Require at check-in).
+- **Works:** check-in with ID type, number and expiry, room readiness check with a manager override reason, deposit check with waiver, optional ID photo (stage 2); check-out only at zero balance or with an approved unsettled check-out; undo check-out the same day; room moves create a cleaning task; same-day stays and same-day check-outs charge one night (DAY-006, DAY-006b). Hand-tested on live on 5 Oct (Euro Bar Hotel) and on practice on 7 Oct.
+- **Broken or risky:**
+  - No registration card acceptance step (FO-003).
+  - A check-in form open for a long time can lose what was typed if the page reloads (seen on practice, 7 Oct); the form keeps a draft only in the open page.
+  - No early check-in or late check-out charge: no charge code or function for it (`grep` for late or early check-out in migrations finds nothing). Hotels charge these by hand with "Post charge".
+  - Front Desk lists show "Check out room 101" to screen readers (kept for an existing test).
+- **Not built:** registration card print and e-signature, key card encoding (Part 4), express check-out by link, pre-arrival online check-in, a night-by-night room rack.
+- **Test coverage:** strong.
+- **Rating:** GREEN for the core desk flow; the gaps are conveniences.
+- **Next three actions:** (1) registration card step with print and acceptance (FO-003), M; (2) early check-in and late check-out charge with a preset amount, S; (3) keep a draft of the check-in form across reloads, S.
+
+### Module 8. Guests
+
+- **What exists:** tables `guests` (name, phone, email, nationality, address, notes, status, merged, anonymised), `guest_documents`, `guest_document_files`, `guest_feedback`; functions `save_guest`, `get_guest` (masks ID numbers), `search_guests` UNVERIFIED name, `save_guest_document`, `remove_guest_document`, `merge_guests`, `anonymise_guest`, `add_guest_feedback`, ID photo functions; screens Guests list, Guest profile (Details, Documents, Stay history, Feedback), Merge. Tests: 72 `[GST-...]` checks, `24_id_photos.sql` (63), `id-photos.spec.ts` (5).
+- **Works:** one profile per person across stays; ID numbers masked for roles without permission; personal data never written into the audit trail (GST-003); merge moves bookings, folios, documents and photos; anonymise removes personal data and photos while keeping the ledger, and is refused while a booking is not over (GST-005); ID photos private, audited and deleted on schedule.
+- **Broken or risky:**
+  - Feedback is built but untested (GST-006).
+  - No duplicate warning when a new guest looks like an existing one; staff must search first.
+  - No blacklist or "do not rent" flag: `guests` has no such column. A hotel cannot warn the desk about a guest who left without paying.
+- **Not built:** VIP and blacklist flags, preferences (room, pillow, diet), birthdays and anniversaries, loyalty points, marketing consent, guest portal.
+- **Test coverage:** strong.
+- **Rating:** GREEN for data protection and correctness; AMBER for guest service features.
+- **Next three actions:** (1) VIP and "do not rent" flags with a reason, visible at booking and check-in, S; (2) duplicate warning on new guest (same phone or email), S; (3) preferences and marketing consent fields, S.
+
+### Module 9. Folios, charges, payments, refunds, adjustments, reversals, invoices, tax, the ledger
+
+- **What exists:** tables `folios`, `folio_transactions` (insert-only), `folio_tax_lines` (insert-only), `invoices` (insert-only snapshots), `document_sequences`, `charge_codes`, `payment_methods`, `tax_rates`, `exchange_rates`; views `v_folio_balances`, `v_folio_transactions`; functions `post_charge`, `post_payment`, `apply_discount`, request functions for adjustment, reversal, refund, `transfer_transaction`, split folio, `close_folio`, `issue_invoice`, `calculate_tax`, `preview_charge`, `checkout_outstanding`; screens Folios list, Folio detail (Post charge, Record payment, Discount, Adjustment, Refund, Split folio, Transfer, Close, Interim invoice), Invoice page. Tests: 67 `[FIN-...]` checks, `12_ledger.sql` (82 checks), `18_server_figures.sql` (33), `22_accountant_brief.sql` (10).
+- **Works:**
+  - The ledger cannot be edited or deleted, even by the database owner (E_IMMUTABLE triggers, tested on live on 1 Oct and in `12_ledger.sql`).
+  - Entries must carry the open business date (E_DATE).
+  - Every posting has a unique retry key at database level (Part 1, rule 7).
+  - Discounts, adjustments, reversals and refunds above a limit wait for a second person; nobody approves their own.
+  - A refund cannot exceed the credit on the folio (FIN-007).
+  - All totals, taxes and balances come from the database; the browser does no money sums (`check:money`).
+  - Invoices are numbered in sequence and never change after issue.
+- **Broken or risky:**
+  - Tax rates are placeholders (Module 4, A11).
+  - Payments are recorded, not taken: no card or transfer gateway, no matching of bank transfers (Part 4).
+  - A payment entered twice after a dropped connection is recorded twice. The retry key lives only while the payment form is open (`src/lib/folios.tsx` line 116: "stable idempotency key per open dialog"). Staff would see two lines and need a reversal with approval.
+  - `issue_invoice` gets a fresh key on every click (`src/lib/checkout.tsx` line 101); a double click while the first request is slow could issue two interim invoices. UNVERIFIED whether the button is disabled while waiting.
+  - No cashier shift close or cash-up report (FIN-016, missing).
+- **Not built:** cashier shifts and cash drawer, city ledger and accounts receivable for companies, credit limits, deposits ledger report, FIRS e-invoice submission (Part 4), PDF invoice by email.
+- **Test coverage:** strong (the best-tested module).
+- **Rating:** GREEN for integrity. The money cannot be quietly changed or double-posted by retries. AMBER for features a finance team expects (shifts, city ledger).
+- **Next three actions:** (1) warn before recording a payment that matches one made in the last few minutes on the same folio, S; (2) cashier shift open and close with a cash count (FIN-016), M; (3) city ledger for company accounts with statements, L.
+
+### Module 10. Business date and night audit
+
+- **What exists:** `app.roll_property` (one property, one sub-transaction: room charges, expire holds, no-shows, date plus one, stayovers, daily statistics; any error undoes all steps and notifies `fin.nightaudit.run` users once), `app.run_due_rollovers` (all hotels, up to 7 catch-up days per run, at each property's own time zone and roll time: `app.rollover_due`), pg_cron job `business-date-rollover` every 5 minutes, `business_date_log`, Admin > Business date ("Run due rolls now"), `post_room_charges`. Tests: 70 `[DAY-...]` checks, upgrade test runs a 3-day catch-up under the ledger lock.
+- **Works:** automatic roll at the hotel's local roll time; catch-up after missed days; guests still in house past departure are extended and charged one night, up to the maximum stay (DAY-003, works though the old table says "Missing"); a failed roll changes nothing and alerts the managers.
+- **Broken or risky:**
+  - There is no night audit gate (DAY-005, missing): the date rolls even if the day has unposted problems; nobody signs off the day.
+  - If the Supabase project is paused (free plan after a quiet week) or pg_cron stops, no hotel's date moves and no room charges post. UNVERIFIED which Supabase plan live is on; if it is Free, this is real.
+  - Roll alerts are in-app notifications only (Module 15).
+- **Not built:** a night audit checklist screen (unposted charges, unbalanced folios, no-shows to review), an end-of-day report sent to the owner.
+- **Test coverage:** strong.
+- **Rating:** AMBER. Correct and robust; missing the audit sign-off hotels expect and dependent on the database plan staying awake.
+- **Next three actions:** (1) confirm live is on Supabase Pro, which does not pause (your step, checklist C), S; (2) night audit checklist screen before the roll, M; (3) daily end-of-day summary email or WhatsApp to the owner (needs Module 15), S after Module 15.
+
+### Module 11. Housekeeping
+
+- **What exists:** table `hk_tasks` (old `housekeeping_tasks` kept, unused), view `v_hk_board`; functions `create_hk_task`, `assign_hk_task`, `start_hk_task`, `complete_hk_task`, `inspect_hk_task`, `cancel_hk_task`, `set_room_condition`, `hk_staff`; automatic turnover task at check-out and room move; screens Housekeeping board, My tasks, Inspections, Lost and found. Tests: 19 `[HK-...]` checks.
+- **Works:** turnover tasks appear by themselves; the inspector cannot be the cleaner (E_SOD and `hk_tasks_sod` check); a failed inspection reopens the task with the defects.
+- **Broken or risky:** five known failures here: a task with nobody assigned can be started (HK-002); attendants see every task, not only their own (HK-002); the attendant is not told about a failed inspection (HK-003); no inspection on or off switch (SET-008); a dirty override needs no reason (ROOM-004). A small hotel without a supervisor will see rooms stuck in "waiting inspection".
+- **Not built:** daily room assignment by floor or section, linen and amenity counts, minibar posting by the attendant, a phone-friendly attendant screen with large buttons. UNVERIFIED how My tasks looks on a phone; I checked tablet width only.
+- **Test coverage:** thin (19 checks, 5 failing).
+- **Rating:** AMBER.
+- **Next three actions:** (1) fix the four housekeeping rules (HK-002 twice, HK-003, ROOM-004) in one migration, S; (2) inspection switch per property (SET-008), S; (3) daily assignment screen by section with a print-out, M.
+
+### Module 12. Maintenance and service requests
+
+- **What exists:** tables `maintenance_tickets`, `service_requests`; views `v_maintenance_tickets`, `v_service_requests`; functions `create_ticket`, `assign_ticket`, start, wait, resolve, `close_ticket`, `reopen_ticket`, `cancel_ticket`, `block_room_for_ticket`, `mnt_staff`, `create_service_request`, `assign_service_request`, `complete_service_request` (posts a charge once with key `svc:<id>`), `cancel_service_request`; screens Maintenance list, Ticket detail, Service requests. Tests: 10 `[MNT-...]` and 6 `[SVC-...]` checks.
+- **Works:** ticket lifecycle with closer not equal to resolver (E_SOD); blocking a room from a ticket goes through the normal approval; closing a ticket releases its blocks; chargeable service requests post once.
+- **Broken or risky:** thin tests for a module with a money path (service request charges). No photo on a ticket. No due time or priority alert.
+- **Not built:** preventive maintenance schedule (generator, AC, pool), spare parts, contractor tracking, repeat-fault view per room.
+- **Test coverage:** thin.
+- **Rating:** AMBER.
+- **Next three actions:** (1) more tests for service request charges and ticket reopen, S; (2) preventive maintenance schedule with reminders, M; (3) repeat-fault view per room, S.
