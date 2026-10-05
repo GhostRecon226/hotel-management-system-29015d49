@@ -499,7 +499,7 @@ Importance: must, should, nice, for an independent Nigerian hotel of 20 to 150 r
 
 ## Part 5. AI as our competitive edge
 
-Prices used (Anthropic API, per million tokens, input / output): Claude Haiku 4.5 $1 / $5; Claude Sonnet 5.5 $2 / $10; Claude Opus 5.5 $4 / $20. Batch jobs cost half. Cached prompt text costs about a tenth on re-use. Source: Anthropic model table (cached 25 Sep 2026, in the Claude API reference used for this report); check the live price page before budgeting. One Naira figure: N1,450 to the dollar is assumed only where noted; UNVERIFIED rate.
+Prices used (Anthropic API, per million tokens, input / output): Claude Haiku 4.5 $1 / $5; Claude Sonnet 5.5 $2 / $10; Claude Opus 5.5 $4 / $20. Batch jobs cost half. Cached prompt text costs about a tenth on re-use. Source: Anthropic model table (cached 25 Sep 2026, in the Claude API reference used for this report); check the live price page before budgeting. Naira amounts in the examples are illustrative prices, not conversions.
 
 Where it runs: this app has no Supabase Edge Functions by design (`AGENTS.md`: "no Edge Functions on this stack"). AI calls would run in Vercel server functions, like invites and ID photo links, never in the browser, so the AI key stays server-side.
 
@@ -620,4 +620,3 @@ Sources for Part 5: [WhatsApp pricing in Nigeria (Yournotify)](https://yournotif
 | Competitor features in detail | Vendor demos; my table relies on their public pages and review sites. |
 | Nigerian legal duties (NDPC registration, ID photo basis, transfer safeguard, state levies) | Your lawyer and accountant (A14, A11). |
 | AI provider data retention and terms for our account | Anthropic Console > organisation settings and the commercial terms; ask for a data processing addendum. |
-| Exchange rate used for Naira figures | Your preferred rate source. |
