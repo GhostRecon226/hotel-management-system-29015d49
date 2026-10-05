@@ -8,7 +8,7 @@ How to read it:
 - Every claim names its evidence (file, test, table, function or command). UNVERIFIED marks what I could not check.
 - "Code at" means branch `main`, commit `f94222b` (stage 1 and 2 merged and live).
 
-Status of each part: Part 1 done. Parts 1 to 4 done. Part 5 in progress.
+Status of each part: Part 1 done. All five parts done.
 
 ---
 
@@ -494,3 +494,130 @@ Importance: must, should, nice, for an independent Nigerian hotel of 20 to 150 r
 - Guest register: [The Nigeria Lawyer on Regulation 29](https://thenigerialawyer.com/what-hotel-owners-must-do-before-accommodating-immigrants/), [TheCable on Sokoto](https://thecable.ng/tambuwal-tasks-sokoto-hoteliers-security)
 - Taxes: [Forvis Mazars on VAT under the Nigeria Tax Act 2025](https://www.forvismazars.com/ng/en/services/tax/nigeria-s-tax-reform-in-focus/2025-nta-vat-key-business-changes), [Lagos consumption tax (Legalnaija)](https://legalnaija.com/compliance-challenges-of-lagos-state/), [ICIR on hotel taxes in Cross River](https://www.icirnigeria.org/how-21-taxes-are-stifling-hotel-business-in-cross-river-state/)
 - E-invoicing: [VATupdate, large taxpayers](https://www.vatupdate.com/2025/09/09/firs-extends-e-invoicing-compliance-deadline-for-large-nigerian-taxpayers-to-november-2025/), [vatcalc on the 2026 wave](https://www.vatcalc.com/nigeria/nigeria-automated-tax-administration-system-april-2021/), [Global VAT Compliance 2026 update](https://www.globalvatcompliance.com/globalvatnews/nigeria-e-invoicing-rollout-key-updates-2026/)
+
+---
+
+## Part 5. AI as our competitive edge
+
+Prices used (Anthropic API, per million tokens, input / output): Claude Haiku 4.5 $1 / $5; Claude Sonnet 5.5 $2 / $10; Claude Opus 5.5 $4 / $20. Batch jobs cost half. Cached prompt text costs about a tenth on re-use. Source: Anthropic model table (cached 25 Sep 2026, in the Claude API reference used for this report); check the live price page before budgeting. One Naira figure: N1,450 to the dollar is assumed only where noted; UNVERIFIED rate.
+
+Where it runs: this app has no Supabase Edge Functions by design (`AGENTS.md`: "no Edge Functions on this stack"). AI calls would run in Vercel server functions, like invites and ID photo links, never in the browser, so the AI key stays server-side.
+
+### 5.1 AI features
+
+"Cost per use" assumes typical sizes stated in the row; all UNVERIFIED until measured.
+
+| # | Feature | What the hotel user sees | Tables and screens used | Model or service | Runs | Cost per use | Accuracy risk | Human approval step |
+|---|---|---|---|---|---|---|---|---|
+| 1 | ID document reading | At check-in, staff photograph the ID; type, number, name, expiry and nationality fill in | `guest_documents`, `guest_document_files`, check-in and walk-in forms (stage 2 photo step) | Sonnet 5.5 vision | Vercel server function, after the photo is stored | About $0.006 (1 image plus short prompt, 200-token answer) | Medium: misread digits, worn cards | Staff confirm each field before Save; nothing saves without the click |
+| 2 | WhatsApp concierge and booking assistant | Guests ask about rooms, prices, directions on WhatsApp; the bot answers and can hold a room | `rate_plan_prices`, `get_availability`, `create_reservation` (tentative only), `guests` | Haiku 4.5 for chat, Sonnet 5.5 for hard turns; WhatsApp Business API | Server function plus WhatsApp webhook | About $0.01 to $0.03 per conversation in model cost, plus Meta's fee (utility message about $0.01 in Nigeria) | Medium: wrong price or promise | Bot creates tentative holds only; staff confirm; prices come from the database, never from the model |
+| 3 | Occupancy and demand forecast | "Next 30 days: 72% expected; Friday 3 Oct may sell out" | `reservation_nights`, `daily_stats`, `v_kpi_daily` | Statistics in the database (no language model) | Database job after the night roll | Near zero | Low to medium; needs 3 to 6 months of history | Information only |
+| 4 | Price suggestions | "Raise Deluxe on Friday from N45,000 to N50,000 (forecast 90%)" | forecast, `rate_plan_prices`, Setup > Rates | Rules on the forecast; Haiku 4.5 writes the one-line reason | Database plus server function | Under $0.001 | Medium: wrong demand signal | Manager clicks Apply; the change goes through `save_rate_plan_price` and is audited |
+| 5 | No-show and cancellation risk | A risk badge on arrivals ("high risk: no deposit, booked 2 hours ago, past no-show") | `reservations`, `guests`, past no-shows, deposits | A simple scoring model in SQL | Database | Near zero | Medium | Staff decide to call or ask for a deposit |
+| 6 | Night audit anomaly and fraud flags | "3 things to check before the roll: a 100% discount, a refund after check-out, a room charged twice by hand" | `folio_transactions`, `approvals`, `audit_events`, `stays` | Rules in SQL first; Sonnet 5.5 to explain a flagged pattern | Database plus server function | Rules: zero; explanation about $0.01 | Low for rules; medium for explanations | The auditor marks each flag reviewed; nothing posts or reverses automatically |
+| 7 | Plain-language reports | "How did we do last week?" gets a short answer with numbers and a chart link | `kpi_summary`, `report_*` functions, `daily_stats` | Sonnet 5.5 with tools that call our report functions (it never writes SQL) | Server function | About $0.01 to $0.03 per question | Medium: wrong reading of numbers | Answers cite the report rows; numbers come from the database, the model only words them |
+| 8 | Housekeeping and room assignment planning | "Suggested assignment: Ada floors 1 and 2 (9 rooms), Musa floor 3 (8 rooms)"; room picks for arrivals | `hk_tasks`, `rooms`, `room_assignments`, `v_arrivals` | Rules and a simple optimiser; no language model needed | Database or server | Near zero | Low | Supervisor accepts or drags tasks |
+| 9 | Maintenance triage and repeat faults | New ticket "AC leaking room 204" gets a category, priority, and "third AC ticket in 30 days" | `maintenance_tickets`, `rooms` | Haiku 4.5 for category; SQL for repeat counts | Server function | About $0.001 | Low | Maintenance lead confirms priority |
+| 10 | Guest message drafting | Staff click "Draft reply" on a guest email or WhatsApp; a polite reply appears | outbox, guest profile, booking | Haiku 4.5 or Sonnet 5.5 | Server function | About $0.002 to $0.01 | Low | Staff edit and send |
+| 11 | Review reply drafting and sentiment | Reviews from Google or Booking.com are summarised; draft replies ready | `guest_feedback` (and imported reviews, not built) | Haiku 4.5 | Batch job | About $0.002 per review (half in batch) | Low | Manager edits and posts |
+| 12 | Upsell offers at check-in | "Offer late check-out N10,000 or upgrade to Deluxe N15,000; guest is a repeat corporate guest" | `guests`, `stays`, `rate_plan_prices`, room availability | Rules plus Haiku 4.5 for wording | Server function | Under $0.001 | Low | Staff choose; posting a charge goes through `post_charge` with its retry key |
+| 13 | Invoice and receipt capture | Photograph a supplier receipt; amount, date, vendor fill in (for a future expenses or purchases module) | not built yet | Sonnet 5.5 vision | Server function | About $0.006 | Medium | Staff confirm; never touches the guest ledger |
+| 14 | Staff question answering from hotel procedures | "How do we handle a guest who wants to pay in dollars?" answered from the hotel's own manual | a new procedures table or uploaded document | Sonnet 5.5 with the hotel's documents cached | Server function | About $0.005 per question with caching | Medium: outdated procedure | Answer shows its source paragraph |
+| 15 | Daily owner summary | 7 am WhatsApp or email: occupancy, revenue, cash, balances, 3 things to watch | `dashboard_summary`, `kpi_summary`, `report_outstanding_balances`, night audit flags | Sonnet 5.5 for wording; numbers from the database | Scheduled server job | About $0.01 per day | Low | Information only |
+| 16 | Guest register and immigration return helper | Fills the Regulation 29 register for foreign guests from booking and ID data; flags missing fields | `guests`, `guest_documents`, `stays` | Rules; Haiku 4.5 only to flag odd entries | Database | Near zero | Low | Front office manager reviews before printing |
+| 17 | Tax return pack | Monthly VAT, service charge and state consumption tax totals with a plain explanation for the accountant | `folio_tax_lines`, `invoices` | SQL totals; Sonnet 5.5 for the cover note | Server function | About $0.02 per month | Low for totals | Accountant files it |
+| 18 | Duplicate guest finder | "These two profiles look like the same person" | `guests`, `guest_documents` | SQL similarity; Haiku 4.5 to judge close cases | Batch job | Under $0.001 per pair | Medium | Staff use the existing Merge screen, which asks for a reason |
+
+### 5.2 Ranking and three quick wins
+
+| Feature | Value to hotel | Effort for us | Risk | Rank |
+|---|---|---|---|---|
+| 15 Daily owner summary | High (owners are often away) | S, once a message channel works | Low | 1 |
+| 1 ID document reading | High (saves typing at every check-in; feeds the statutory register) | S to M (photo step exists since stage 2) | Medium, controlled by confirmation | 2 |
+| 6 Night audit anomaly flags | High (fraud and error control) | M (rules first) | Low | 3 |
+| 7 Plain-language reports | Medium to high | M | Medium | 4 |
+| 2 WhatsApp concierge | High, but needs WhatsApp first | L | Medium | 5 |
+| 3 and 4 Forecast and price suggestions | High after 3 to 6 months of data | M | Medium | 6 |
+| 10 Message drafting | Medium | S | Low | 7 |
+| 9 Maintenance triage | Medium | S | Low | 8 |
+| 5 No-show risk | Medium | S | Medium | 9 |
+| 8, 11 to 14, 16 to 18 | Medium to low today | S to M | Low to medium | later |
+
+**Quick wins for the next month:**
+1. **Daily owner summary** (15): the numbers already exist (`dashboard_summary`, `kpi_summary`, balances); the model only writes them up; cost about $0.30 per hotel per month. Depends on email being switched on (Module 15).
+2. **ID document reading** (1): the stage 2 photo step already captures the image privately; reading it fills fields that staff type today; every field is confirmed by a person. Must wait for the lawyer's view on ID photos (A14) and stays off unless the hotel has "Allow ID photos" on.
+3. **Night audit anomaly flags, rules only** (6): no model at all for the first version (SQL rules over `folio_transactions` and `approvals`); a model explains a flag later. Directly protects hotel revenue.
+
+### 5.3 Rule: AI never changes money or the ledger without a person approving each action
+
+How the database enforces it:
+- **No new power for AI.** AI runs in a server function that calls the same `public` functions a person would, signed in as that person (the auth middleware passes the user's token). It gets no service key for writes to hotel data.
+- **AI only proposes.** Every AI suggestion is stored as a row in a new `ai_suggestions` table (hotel, user, feature, proposal as data, model and prompt version, status). Turning a suggestion into money (a price change, an upsell charge, a discount) needs the person to click Apply, which calls the normal function (`save_rate_plan_price`, `post_charge`, `apply_discount`) with the normal permission, limits, approval rules and retry key.
+- **Ledger stays locked.** The insert-only triggers on `folio_transactions`, `folio_tax_lines`, `invoices` and `audit_events` apply to AI exactly as to people; nothing can edit or delete.
+- **Audit.** Each Apply writes an `audit_events` row with the suggestion id, so we can always tell "accepted from AI" apart from "typed by staff".
+- **Permission.** A new permission `ai.use` per feature (for example `ai.pricing.suggest`), off by default for built-in roles that handle money, so an owner chooses who sees suggestions.
+
+### 5.4 Data protection for AI
+
+- **May go to the AI provider:** aggregated hotel numbers (occupancy, revenue), room and rate data, ticket text, procedures, guest messages the guest sent to the hotel (for drafting), and ID images only for ID reading when the hotel has ID photos switched on.
+- **Must stay out:** full card or bank details (we hold none), passwords and keys, the audit trail, other guests' data in the same request, and any guest data for features that do not need it (reports and forecasts use totals, not names).
+- **NDPA 2023 and transfer abroad:** sending personal data to a provider outside Nigeria is a cross-border transfer. The NDPA and the GAID 2025 allow it only with adequate protection, an adequacy decision, an approved transfer instrument, or another lawful basis (section 43). Our data already sits in Ireland; adding a US or EU AI provider adds a second transfer. The lawyer should cover both in one opinion (A14). We may also need to register as a data controller or processor of major importance; the lawyer must say.
+- **What to tell guests:** in the privacy notice: which features use AI, what data goes, the provider's name and country, that a person checks every result, and how to object (for example, type the ID by hand instead of reading it).
+- **Logging without personal data:** an `ai_calls` table with hotel, feature, model, prompt version, tokens in and out, cost, time, outcome (accepted, edited, rejected) and a hash of the input, never the input itself. Same idea as the ID photo audit (ids only).
+- **Provider settings:** use the commercial API, not a consumer app. Anthropic's commercial terms state API data is not used for training by default; zero data retention is available by agreement for eligible models (Claude Fable 5.1 is not available under zero data retention). UNVERIFIED for our account: confirm the retention period and sign a data processing addendum before any guest data is sent.
+
+### 5.5 Architecture
+
+- **Provider:** Anthropic Claude as the main provider (Haiku 4.5 for simple, high-volume work; Sonnet 5.5 for vision and reasoning; Opus 5.5 only for rare hard cases). Keep the gateway provider-neutral so a second provider can be added for fallback.
+- **One AI gateway:** a single Vercel server function (`src/lib/ai.functions.ts`, not built) that every feature calls. It checks the `ai.*` permission and the hotel's plan through the database first (same pattern as `startIdPhotoUpload`), applies the cost cap, calls the model, logs to `ai_calls`, and returns a proposal.
+- **Prompts stored and versioned:** prompts live in the repository as files with a version number, recorded on every call, so a change can be traced and rolled back.
+- **Cost caps per hotel:** a monthly budget per hotel in a settings row; the gateway refuses once it is used, and the owner sees "AI paused until 1 Nov" rather than a surprise bill.
+- **Rate limits:** per hotel and per user per minute, enforced in the gateway with a counter table.
+- **When the provider is down:** every AI feature has a manual path that already works (type the ID, read the report); the gateway times out quickly and shows "suggestion unavailable".
+- **Evaluation tests:** a fixed set of examples per feature (for example 50 test ID images with known answers, 30 report questions with known numbers) run before each prompt or model change; quality below the last score blocks release. Track the accept, edit and reject rate in `ai_calls` as the live quality signal.
+- **Caching:** the fixed part of each prompt (hotel facts, procedures) is cached so repeat calls cost about a tenth.
+
+### 5.6 Business model (ties to decision A16)
+
+Rough monthly AI cost per hotel in model fees only (assumptions: 60% occupancy, 2-night average stay, so about 180, 540 and 1,350 check-ins a month; one ID read per check-in; daily owner summary; 30 report questions; 20 drafted replies; night audit explanations on 10 flags; WhatsApp concierge on 1 conversation per booking where switched on). WhatsApp's own per-message fees from Meta are extra and pass through.
+
+| Hotel size | Without WhatsApp concierge | With WhatsApp concierge (model cost only) |
+|---|---|---|
+| 20 rooms | about $2 to $4 | about $4 to $9 |
+| 60 rooms | about $5 to $9 | about $12 to $25 |
+| 150 rooms | about $11 to $20 | about $30 to $60 |
+
+Suggested packaging (to decide under A16):
+- **Starter (20 rooms):** daily owner summary and night audit flags included (cheap, high value, sells the product).
+- **Standard (60 rooms):** plus ID reading, plain-language reports, message drafting, maintenance triage.
+- **Pro (150 rooms) and Enterprise:** plus WhatsApp concierge, forecast and price suggestions, review replies.
+- **Price:** charge an AI add-on of about 3 times the model cost to cover gateway, support and spikes, for example $10, $25 and $60 a month (UNVERIFIED willingness to pay; test with pilots), or fold it into the plan price. WhatsApp fees billed at cost.
+
+### 5.7 Where AI would be a mistake right now
+
+- **Automatic price changes** without a person: a wrong forecast on a holiday weekend costs real money and trust.
+- **Anything that posts, reverses or discounts money by itself:** breaks the control model and the audit story.
+- **A chatbot that confirms bookings or quotes prices from its own memory:** prices must come from the database.
+- **ID reading before the lawyer's NDPA opinion** and before hotels switch ID photos on.
+- **Forecasting for a hotel with under 3 months of data:** it would be noise.
+- **Building our own AI models:** the provider models are cheaper and better for our volume.
+- **AI before the basics:** email sending (Module 15), Vercel Pro and backups (Module 19) and the tax sign-off (A11) matter more to a paying hotel than any AI feature.
+
+Sources for Part 5: [WhatsApp pricing in Nigeria (Yournotify)](https://yournotify.com/blog/whatsapp-pricing-update-2026/), [Meta WhatsApp pricing](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing), [DLA Piper on the GAID 2025](https://privacymatters.dlapiper.com/2025/06/nigeria-ndpc-issues-gaid-key-compliance-insights/), [Legal500 on cross-border transfers in Nigeria](https://www.legal500.com/developments/thought-leadership/cross-border-data-transfers-an-overview-of-legal-requirements-and-compliance-mechanisms-in-nigeria/).
+
+---
+
+## What I could not verify, and how you can help
+
+| Item | How to verify |
+|---|---|
+| Dependabot alerts | GitHub > repository > Security > Dependabot alerts; or install the GitHub command-line tool on this Mac and sign in. |
+| Live Supabase plan (Free or Pro) and its backups | Supabase > live project > Settings > Billing, and Database > Backups. |
+| The workbook matches the status report row for row | Send me the workbook exported as CSV, or allow me to install a spreadsheet reader. |
+| Phone layouts and load time on slow mobile data | Open the live site on a phone on mobile data; or let me run a throttled phone test locally. |
+| Load at 200 rooms and 1000 bookings a day | A load test on the practice project (needs your yes; costs nothing extra on the current plan but uses practice resources). |
+| Foreign-currency payment with no rate for the day | A test on practice (needs your yes). |
+| Competitor features in detail | Vendor demos; my table relies on their public pages and review sites. |
+| Nigerian legal duties (NDPC registration, ID photo basis, transfer safeguard, state levies) | Your lawyer and accountant (A14, A11). |
+| AI provider data retention and terms for our account | Anthropic Console > organisation settings and the commercial terms; ask for a data processing addendum. |
+| Exchange rate used for Naira figures | Your preferred rate source. |
