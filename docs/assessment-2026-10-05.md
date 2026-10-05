@@ -216,7 +216,7 @@ Test counts come from tags in `supabase/tests/db` (for example 54 checks tagged 
 
 ### Module 8. Guests
 
-- **What exists:** tables `guests` (name, phone, email, nationality, address, notes, status, merged, anonymised), `guest_documents`, `guest_document_files`, `guest_feedback`; functions `save_guest`, `get_guest` (masks ID numbers), `search_guests` UNVERIFIED name, `save_guest_document`, `remove_guest_document`, `merge_guests`, `anonymise_guest`, `add_guest_feedback`, ID photo functions; screens Guests list, Guest profile (Details, Documents, Stay history, Feedback), Merge. Tests: 72 `[GST-...]` checks, `24_id_photos.sql` (63), `id-photos.spec.ts` (5).
+- **What exists:** tables `guests` (name, phone, email, nationality, address, notes, status, merged, anonymised), `guest_documents`, `guest_document_files`, `guest_feedback`; functions `save_guest`, `get_guest` (masks ID numbers), `search_guests`, `save_guest_document`, `remove_guest_document`, `merge_guests`, `anonymise_guest`, `add_guest_feedback`, ID photo functions; screens Guests list, Guest profile (Details, Documents, Stay history, Feedback), Merge. Tests: 72 `[GST-...]` checks, `24_id_photos.sql` (63), `id-photos.spec.ts` (5).
 - **Works:** one profile per person across stays; ID numbers masked for roles without permission; personal data never written into the audit trail (GST-003); merge moves bookings, folios, documents and photos; anonymise removes personal data and photos while keeping the ledger, and is refused while a booking is not over (GST-005); ID photos private, audited and deleted on schedule.
 - **Broken or risky:**
   - Feedback is built but untested (GST-006).
@@ -229,7 +229,7 @@ Test counts come from tags in `supabase/tests/db` (for example 54 checks tagged 
 
 ### Module 9. Folios, charges, payments, refunds, adjustments, reversals, invoices, tax, the ledger
 
-- **What exists:** tables `folios`, `folio_transactions` (insert-only), `folio_tax_lines` (insert-only), `invoices` (insert-only snapshots), `document_sequences`, `charge_codes`, `payment_methods`, `tax_rates`, `exchange_rates`; views `v_folio_balances`, `v_folio_transactions`; functions `post_charge`, `post_payment`, `apply_discount`, request functions for adjustment, reversal, refund, `transfer_transaction`, split folio, `close_folio`, `issue_invoice`, `calculate_tax`, `preview_charge`, `checkout_outstanding`; screens Folios list, Folio detail (Post charge, Record payment, Discount, Adjustment, Refund, Split folio, Transfer, Close, Interim invoice), Invoice page. Tests: 67 `[FIN-...]` checks, `12_ledger.sql` (82 checks), `18_server_figures.sql` (33), `22_accountant_brief.sql` (10).
+- **What exists:** tables `folios`, `folio_transactions` (insert-only), `folio_tax_lines` (insert-only), `invoices` (insert-only snapshots), `document_sequences`, `charge_codes`, `payment_methods`, `tax_rates`, `exchange_rates`; views `v_folio_balances`, `v_folio_transactions`; functions `post_charge`, `post_payment`, `apply_discount`, request functions for adjustment, reversal, refund, `transfer_transaction`, `split_folio`, `close_folio`, `reopen_folio`, `issue_invoice`, `calculate_tax`, `preview_charge`, `checkout_outstanding`; screens Folios list, Folio detail (Post charge, Record payment, Discount, Adjustment, Refund, Split folio, Transfer, Close, Interim invoice), Invoice page. Tests: 67 `[FIN-...]` checks, `12_ledger.sql` (82 checks), `18_server_figures.sql` (33), `22_accountant_brief.sql` (10).
 - **Works:**
   - The ledger cannot be edited or deleted, even by the database owner (E_IMMUTABLE triggers, tested on live on 1 Oct and in `12_ledger.sql`).
   - Entries must carry the open business date (E_DATE).
@@ -242,7 +242,7 @@ Test counts come from tags in `supabase/tests/db` (for example 54 checks tagged 
   - Tax rates are placeholders (Module 4, A11).
   - Payments are recorded, not taken: no card or transfer gateway, no matching of bank transfers (Part 4).
   - A payment entered twice after a dropped connection is recorded twice. The retry key lives only while the payment form is open (`src/lib/folios.tsx` line 116: "stable idempotency key per open dialog"). Staff would see two lines and need a reversal with approval.
-  - `issue_invoice` gets a fresh key on every click (`src/lib/checkout.tsx` line 101); a double click while the first request is slow could issue two interim invoices. UNVERIFIED whether the button is disabled while waiting.
+  - `issue_invoice` gets a fresh key on every click (`src/lib/checkout.tsx` line 101). The button is disabled while a request is running (`folios/$id.tsx` line 70), so a double click is safe; two separate clicks a few seconds apart issue two interim invoices. Low risk: interim invoices are informational.
   - No cashier shift close or cash-up report (FIN-016, missing).
 - **Not built:** cashier shifts and cash drawer, city ledger and accounts receivable for companies, credit limits, deposits ledger report, FIRS e-invoice submission (Part 4), PDF invoice by email.
 - **Test coverage:** strong (the best-tested module).
