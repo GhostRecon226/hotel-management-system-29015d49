@@ -65,7 +65,7 @@ function TicketDetail() {
   return (
     <div>
       <Link to="/maintenance" className="mb-3 inline-flex h-11 items-center gap-2 text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> All tickets</Link>
-      <PageHeader title={t.title} description={t.room_number ? `Room ${t.room_number}${t.location ? ` · ${t.location}` : ""}` : t.location ?? ""}
+      <PageHeader title={t.title} description={t.room_number ? `${t.room_number}${t.location ? ` · ${t.location}` : ""}` : t.location ?? ""}
         actions={<div className="flex flex-wrap gap-2">{actions}</div>} />
       <div className="mb-4 flex flex-wrap gap-2">
         <StatusBadge map={TICKET_STATUS} value={t.status} />
@@ -112,7 +112,7 @@ function TicketDetail() {
                       <Badge variant={BLOCK_STATUS[b.status]?.tone ?? "neutral"}>{BLOCK_STATUS[b.status]?.label ?? b.status}</Badge>
                     </li>))}
                   </ul>}
-              <Link to="/rooms/$id" params={{ id: t.room_id }} className="mt-3 inline-flex h-11 items-center text-primary-strong hover:underline">Open room {t.room_number} to release blocks</Link>
+              <Link to="/rooms/$id" params={{ id: t.room_id }} className="mt-3 inline-flex h-11 items-center text-primary-strong hover:underline">Open {t.room_number} to release blocks</Link>
             </CardContent>
           </Card>
         )}

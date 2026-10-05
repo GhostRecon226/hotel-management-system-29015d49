@@ -21,6 +21,7 @@ import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/front-desk")({
   head: () => ({ meta: [{ title: "Front Desk · Hotel Desk" }] }),
@@ -70,7 +71,7 @@ function FrontDesk() {
           ].filter(Boolean);
           return (
             <TableRow key={s.stay_id}>
-              <TableCell className="font-semibold tabular">{s.room_number}<span className="block text-sm font-normal text-muted-foreground">{s.room_type_code}</span></TableCell>
+              <TableCell><RoomName label={s.room_number} /></TableCell>
               {guestCell(s.reservation_id, s.number, s.guest_name, s.company_name, true)}
               <TableCell className="tabular">{formatDay(s.arrival_date)}</TableCell>
               <TableCell className="tabular">{formatDay(s.departure_date)}{s.is_departing && <Badge variant="warning" className="ml-2">Due out</Badge>}</TableCell>
@@ -136,7 +137,7 @@ function FrontDesk() {
                   </TableCell>
                   <TableCell>
                     {a.room_number
-                      ? <span className="inline-flex items-center gap-2"><span className="font-semibold tabular">{a.room_number}</span><RoomStateBadge condition={a.room_condition} occupied={a.room_is_occupied} /></span>
+                      ? <span className="inline-flex items-center gap-2"><RoomName label={a.room_number} /><RoomStateBadge condition={a.room_condition} occupied={a.room_is_occupied} /></span>
                       : <span className="text-muted-foreground">Not assigned</span>}
                   </TableCell>
                   <TableCell><ResStatusBadge status={a.status} holdUntil={a.hold_until} /></TableCell>

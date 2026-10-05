@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/service-requests")({
   head: () => ({
@@ -83,7 +84,7 @@ function ServiceRequests() {
             ].filter(Boolean);
             return (
               <TableRow key={r.id}>
-                <TableCell className="font-semibold tabular">{r.room_number ?? "—"}
+                <TableCell>{r.room_number ? <RoomName label={r.room_number} /> : "—"}
                   <Link to="/reservations/$id" params={{ id: r.reservation_id }} className="block text-sm font-normal text-primary-strong hover:underline">{r.guest_name ?? r.reservation_number}</Link>
                 </TableCell>
                 <TableCell>

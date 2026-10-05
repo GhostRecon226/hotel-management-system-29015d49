@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatAmount } from "@/components/ui/money";
+import { sortByRoom } from "@/lib/room-label";
 
 export interface ArrivalRow {
   id: string; number: string; guest_id: string; guest_name: string | null; guest_phone: string | null;
@@ -45,9 +46,9 @@ export function useInHouse(propertyId?: string) {
   return useQuery({
     queryKey: ["reservations", "fd", "in-house", propertyId], enabled: !!propertyId,
     queryFn: async () => {
-      const { data, error } = await (supabase.from as any)("v_in_house").select("*").eq("property_id", propertyId).order("room_number");
+      const { data, error } = await (supabase.from as any)("v_in_house").select("*").eq("property_id", propertyId);
       if (error) throw error;
-      return data as InHouseRow[];
+      return sortByRoom(data as InHouseRow[]);
     },
   });
 }
@@ -248,7 +249,7 @@ export function MoveRoomDialog({ stay, onOpenChange }: { stay: InHouseRow | null
   const picked = rooms.data?.find((r) => r.id === room);
   const notReady = !!picked && !picked.is_ready;
   return (
-    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Move ${stay?.guest_name ?? "guest"} from room ${stay?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Move ${stay?.guest_name ?? "guest"} from ${stay?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_room_id: room || null, p_reason: reason, p_room_override_reason: notReady ? ovr : null },
         { onSuccess: () => onOpenChange(false) })}>
       <Field label="New room" htmlFor="fd-room">
@@ -259,7 +260,7 @@ export function MoveRoomDialog({ stay, onOpenChange }: { stay: InHouseRow | null
       )}
       <OverrideReason show={notReady} value={ovr} onChange={setOvr} />
       <Field label="Reason for the move" htmlFor="mv-reason"><Input id="mv-reason" value={reason} onChange={(e) => setReason(e.target.value)} required maxLength={300} /></Field>
-      <p className="text-sm text-muted-foreground">Room {stay?.room_number} will be marked vacant and dirty.</p>
+      <p className="text-sm text-muted-foreground">{stay?.room_number} will be marked vacant and dirty.</p>
     </FormDialog>
   );
 }
@@ -271,7 +272,7 @@ export function ExtendStayDialog({ stay, onOpenChange }: { stay: InHouseRow | nu
   useEffect(() => { if (stay) { setDep(addDays(stay.departure_date, 1)); setReason(""); } }, [stay]);
   const extra = stay ? nightsBetween(stay.departure_date, dep) : 0;
   return (
-    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Extend stay · Room ${stay?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Extend stay · ${stay?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_new_departure: dep, p_reason: reason || null }, { onSuccess: () => onOpenChange(false) })}>
       <p className="text-sm text-muted-foreground">Current departure: {formatDay(stay?.departure_date)}</p>
       <Field label="New departure" htmlFor="ex-dep" hint={extra > 0 ? `${extra} extra night${extra === 1 ? "" : "s"}` : ""}>
@@ -291,7 +292,7 @@ export function VoidCheckInDialog({ stay, onOpenChange }: { stay: InHouseRow | n
       onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_reason: reason }, { onSuccess: () => onOpenChange(false) })}>
       <Alert variant="destructive">
         <AlertDescription>
-          {stay?.guest_name} goes back to arrivals, and room {stay?.room_number} is marked vacant and dirty. Use this only for a check-in made in error today.
+          {stay?.guest_name} goes back to arrivals, and {stay?.room_number} is marked vacant and dirty. Use this only for a check-in made in error today.
         </AlertDescription>
       </Alert>
       <Field label="Reason" htmlFor="void-reason"><Input id="void-reason" value={reason} onChange={(e) => setReason(e.target.value)} required maxLength={300} /></Field>

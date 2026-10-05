@@ -26,6 +26,7 @@ import { Money } from "@/components/ui/money";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/reports")({
   head: () => ({
@@ -185,7 +186,7 @@ function Reports() {
                   <TableRow key={b.folio_id}>
                     <TableCell>{b.guest_name ?? "Guest"}<span className="block text-sm text-muted-foreground">{b.reservation_number}</span></TableCell>
                     <TableCell><Link to="/folios/$id" params={{ id: b.folio_id }} className="text-primary-strong hover:underline">{b.folio_number}</Link><span className="block text-sm text-muted-foreground">{b.label} · {b.folio_status}</span></TableCell>
-                    <TableCell className="tabular">{b.room_number ?? "—"}</TableCell>
+                    <TableCell>{b.room_number ? <RoomName label={b.room_number} className="font-normal" /> : "—"}</TableCell>
                     <TableCell className="tabular">{formatDay(b.departure_date)}</TableCell>
                     <TableCell className="capitalize">{b.reservation_status.replace("_", " ")}</TableCell>
                     <TableCell><Money amount={b.balance} currency={b.currency} className="font-semibold" /></TableCell>

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/housekeeping/inspections")({ component: Inspections });
 
@@ -35,7 +36,7 @@ function Inspections() {
             const own = t.completed_by === ctx.user_id;
             return (
               <TableRow key={t.id}>
-                <TableCell className="text-base font-semibold">Room {t.room_number}</TableCell>
+                <TableCell className="text-base"><RoomName label={t.room_number} typeName={t.room_type_name} /></TableCell>
                 <TableCell>{TASK_TYPES[t.type]}{t.fail_count > 0 && <Badge variant="warning" className="ml-2">Re-clean</Badge>}
                   {t.notes && <span className="block text-sm text-muted-foreground">{t.notes}</span>}</TableCell>
                 <TableCell>{t.completed_by_name ?? "—"}</TableCell>
@@ -65,7 +66,7 @@ function PassDialog({ task, onOpenChange }: { task: HkTask | null; onOpenChange:
   const [notes, setNotes] = useState("");
   useEffect(() => { if (task) { setResult("inspected"); setNotes(""); } }, [task]);
   return (
-    <FormDialog open={!!task} onOpenChange={onOpenChange} title={`Pass · Room ${task?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!task} onOpenChange={onOpenChange} title={`Pass · ${task?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: task!.id, p_pass: true, p_result: result, p_notes: notes || null }, { onSuccess: () => onOpenChange(false) })}>
       <Field label="Mark room as" htmlFor="p-res">
         <Select value={result} onValueChange={setResult}>
@@ -83,7 +84,7 @@ function FailDialog({ task, onOpenChange }: { task: HkTask | null; onOpenChange:
   const [defects, setDefects] = useState("");
   useEffect(() => { if (task) setDefects(""); }, [task]);
   return (
-    <FormDialog open={!!task} onOpenChange={onOpenChange} title={`Fail · Room ${task?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!task} onOpenChange={onOpenChange} title={`Fail · ${task?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: task!.id, p_pass: false, p_defects: defects.split("\n").map((d) => d.trim()).filter(Boolean) },
         { onSuccess: () => onOpenChange(false) })}>
       <Field label="What needs fixing" htmlFor="f-def" hint="One item per line. The task goes back to the attendant with this list.">

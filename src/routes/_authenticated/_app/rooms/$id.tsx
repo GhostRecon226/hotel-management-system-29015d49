@@ -49,7 +49,7 @@ function RoomDetail() {
       <Link to="/rooms" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Rooms
       </Link>
-      <PageHeader title={`Room ${room.room_number}`} description={`${room.room_type_name}${room.floor ? ` · Floor ${room.floor}` : ""}`}
+      <PageHeader title={room.room_number} description={`${room.room_type_name}${room.floor ? ` · Floor ${room.floor}` : ""}`}
         actions={<>
           {can("room.status.set") && <Button variant="outline" onClick={() => setDialog("condition")}>Set condition</Button>}
           {can("room.ooo.set") && <Button onClick={() => setDialog("block")}>Block room</Button>}

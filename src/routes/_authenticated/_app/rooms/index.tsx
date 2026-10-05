@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { BedDouble } from "lucide-react";
 import { AvailabilityBar, FilledStat } from "@/components/stats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AddRoomDialog, AddSeveralRoomsDialog } from "@/components/rooms/add-rooms";
 
 const EDGE: Record<string, string> = { success: "border-l-success", warning: "border-l-warning", danger: "border-l-destructive" };
 
@@ -20,9 +22,10 @@ function Tile({ r }: { r: BoardRoom }) {
     <Link to="/rooms/$id" params={{ id: r.id }}
       className={cn("flex min-h-28 flex-col gap-2 rounded-xl border border-l-4 border-border/70 bg-card p-3.5 shadow-card outline-none transition-shadow hover:shadow-raised focus-visible:ring-3 focus-visible:ring-ring/40",
         EDGE[CONDITIONS[r.condition]?.tone ?? "warning"], !r.is_sellable && "bg-danger-soft/40")}>
-      <div className="flex items-center justify-between gap-2">
+      {/* Label as typed, then the room type: "Zurich (Deluxe)". */}
+      <div className="min-w-0 break-words">
         <span className="text-xl font-bold tabular">{r.room_number}</span>
-        <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground">{r.room_type_code}</span>
+        <span className="text-sm font-medium text-muted-foreground"> ({r.room_type_name})</span>
       </div>
       <div className="flex flex-wrap gap-1">
         <ConditionBadge condition={r.condition} />
@@ -37,12 +40,14 @@ function Tile({ r }: { r: BoardRoom }) {
 }
 
 function RoomBoard() {
-  const { property } = useAccess();
+  const { property, can } = useAccess();
   const { data = [], isLoading, error } = useRoomBoard(property?.id);
+  const canAdd = can("setup.room.manage");
+  const [adding, setAdding] = useState<"one" | "several" | null>(null);
   const [condition, setCondition] = useState("all");
   const [type, setType] = useState("all");
 
-  const types = useMemo(() => [...new Map(data.map((r) => [r.room_type_id, r.room_type_code])).entries()], [data]);
+  const types = useMemo(() => [...new Map(data.map((r) => [r.room_type_id, r.room_type_name])).entries()], [data]);
   const floors = useMemo(() => {
     const shown = data.filter((r) => r.is_active
       && (condition === "all" || r.condition === condition)
@@ -66,7 +71,15 @@ function RoomBoard() {
 
   return (
     <div>
-      <PageHeader title="Rooms" description={`${active.length} rooms · ${counts.occupied} occupied · ${counts.sellable} sellable · ${counts.dirty} dirty`} />
+      <PageHeader title="Rooms" description={`${active.length} rooms · ${counts.occupied} occupied · ${counts.sellable} sellable · ${counts.dirty} dirty`}
+        actions={canAdd && <>
+          <Button variant="outline" onClick={() => setAdding("several")}>Add several rooms</Button>
+          <Button onClick={() => setAdding("one")}>Add room</Button>
+        </>} />
+      {canAdd && <>
+        <AddRoomDialog open={adding === "one"} onOpenChange={(o) => setAdding(o ? "one" : null)} />
+        <AddSeveralRoomsDialog open={adding === "several"} onOpenChange={(o) => setAdding(o ? "several" : null)} />
+      </>}
       {!isLoading && active.length > 0 && (
         <div className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
           <FilledStat icon={BedDouble} label="Ready to sell tonight" value={ready} sub="Vacant, clean and sellable" />
@@ -95,14 +108,14 @@ function RoomBoard() {
           <SelectTrigger className="w-48" aria-label="Room type"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All room types</SelectItem>
-            {types.map(([id, code]) => <SelectItem key={id} value={id}>{code}</SelectItem>)}
+            {types.map(([id, name]) => <SelectItem key={id} value={id}>{name}</SelectItem>)}
           </SelectContent>
         </Select>
       </FilterBar>
 
       {isLoading ? <LoadingState label="Loading rooms…" />
         : error ? <EmptyState title="Could not load rooms" />
-        : floors.length === 0 ? <EmptyState title={active.length ? "No rooms match these filters" : "No rooms yet"} description={active.length ? undefined : "Add rooms in Setup first."} />
+        : floors.length === 0 ? <EmptyState title={active.length ? "No rooms match these filters" : "No rooms yet"} description={active.length ? undefined : canAdd ? "Use Add room or Add several rooms above." : "Ask a manager to add rooms."} />
         : floors.map(([floor, rooms]) => (
           <section key={floor} className="mb-6">
             <h2 className="mb-2.5 text-base font-bold">{floor === "No floor" ? floor : `Floor ${floor}`}</h2>

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/maintenance/")({ component: TicketList });
 
@@ -75,7 +76,7 @@ function TicketList() {
                 <Link to="/maintenance/$id" params={{ id: t.id }} className="font-medium text-primary-strong hover:underline">{t.title}</Link>
                 {t.has_approved_block ? <Badge variant="danger" className="ml-2">Room blocked</Badge> : t.has_active_block ? <Badge variant="warning" className="ml-2">Block requested</Badge> : null}
               </TableCell>
-              <TableCell>{t.room_number ? <span className="font-semibold tabular">Room {t.room_number}</span> : null}{t.location && <span className="block text-sm text-muted-foreground">{t.location}</span>}</TableCell>
+              <TableCell>{t.room_number ? <RoomName label={t.room_number} /> : null}{t.location && <span className="block text-sm text-muted-foreground">{t.location}</span>}</TableCell>
               <TableCell><StatusBadge map={PRIORITY} value={t.priority} /></TableCell>
               <TableCell><StatusBadge map={TICKET_STATUS} value={t.status} /></TableCell>
               <TableCell>{t.assignee_name ?? <span className="text-muted-foreground">Nobody</span>}</TableCell>

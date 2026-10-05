@@ -152,7 +152,7 @@ function DesignPage() {
               <SelectContent><SelectItem value="std">Standard</SelectItem><SelectItem value="dlx">Deluxe</SelectItem></SelectContent></Select></div>
           <div className="space-y-1.5"><Label htmlFor="d-err">Email</Label><Input id="d-err" aria-invalid defaultValue="adaeze@" />
             <p className="text-sm text-destructive">Enter a valid email address.</p></div>
-          <div className="space-y-1.5"><Label htmlFor="d-dis">Room number</Label><Input id="d-dis" disabled defaultValue="101" /></div>
+          <div className="space-y-1.5"><Label htmlFor="d-dis">Room name or number</Label><Input id="d-dis" disabled defaultValue="101" /></div>
           <label className="flex items-center gap-3 text-[15px]"><Switch defaultChecked /> Active</label>
           <div className="space-y-1.5 sm:col-span-2"><Label htmlFor="d-notes">Notes</Label><Textarea id="d-notes" rows={3} placeholder="Prefers a quiet room." /></div>
         </div>

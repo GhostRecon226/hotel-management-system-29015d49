@@ -161,6 +161,6 @@ export function describeEvent(e: HistoryEvent): { title: string; changes: string
       }
     }
   }
-  if (e.action === "assign_room" && e.after?.["room_number"]) title = `Room ${String(e.after["room_number"])} assigned`;
+  if (e.action === "assign_room" && e.after?.["room_number"]) title = `${String(e.after["room_number"])} assigned`;
   return { title, changes };
 }

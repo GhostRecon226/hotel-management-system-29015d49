@@ -55,10 +55,10 @@ export function formatMoney(amount: number | string | null | undefined, currency
 }
 
 export function FormDialog({
-  open, onOpenChange, title, onSubmit, busy, children,
+  open, onOpenChange, title, onSubmit, busy, children, submitLabel = "Save", submitDisabled = false,
 }: {
   open: boolean; onOpenChange: (o: boolean) => void; title: string;
-  onSubmit: () => void; busy: boolean; children: ReactNode;
+  onSubmit: () => void; busy: boolean; children: ReactNode; submitLabel?: string; submitDisabled?: boolean;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,7 +73,7 @@ export function FormDialog({
           {children}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
+            <Button type="submit" disabled={busy || submitDisabled}>{busy ? "Saving…" : submitLabel}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

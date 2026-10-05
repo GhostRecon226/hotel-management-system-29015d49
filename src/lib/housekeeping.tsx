@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { sortByRoom } from "@/lib/room-label";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -110,9 +111,9 @@ export function useRoomsList() {
     queryKey: ["housekeeping", "rooms-list", property?.id],
     enabled: !!property,
     queryFn: async () => {
-      const { data, error } = await (supabase.from as any)("rooms").select("id, room_number").eq("property_id", property!.id).eq("is_active", true).order("room_number");
+      const { data, error } = await (supabase.from as any)("rooms").select("id, room_number").eq("property_id", property!.id).eq("is_active", true);
       if (error) throw error;
-      return data as { id: string; room_number: string }[];
+      return sortByRoom(data as { id: string; room_number: string }[]);
     },
   });
 }
@@ -134,7 +135,7 @@ export function NewTaskDialog({ open, onOpenChange }: { open: boolean; onOpenCha
         <Field label="Room" htmlFor="t-room">
           <Select value={f.room} onValueChange={(v) => setF({ ...f, room: v })}>
             <SelectTrigger id="t-room"><SelectValue placeholder="Pick a room" /></SelectTrigger>
-            <SelectContent>{(rooms.data ?? []).map((r) => <SelectItem key={r.id} value={r.id}>Room {r.room_number}</SelectItem>)}</SelectContent>
+            <SelectContent>{(rooms.data ?? []).map((r) => <SelectItem key={r.id} value={r.id}>{r.room_number}</SelectItem>)}</SelectContent>
           </Select>
         </Field>
         <Field label="Type" htmlFor="t-type">
@@ -171,7 +172,7 @@ export function AssignDialog({ task, onOpenChange }: { task: HkTask | null; onOp
   const [who, setWho] = useState("none");
   useEffect(() => { if (task) setWho(task.assignee_id ?? "none"); }, [task]);
   return (
-    <FormDialog open={!!task} onOpenChange={onOpenChange} title={`Assign · Room ${task?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!task} onOpenChange={onOpenChange} title={`Assign · ${task?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: task!.id, p_assignee_id: who === "none" ? null : who }, { onSuccess: () => onOpenChange(false) })}>
       <Field label="Attendant" htmlFor="a-who">
         <Select value={who} onValueChange={setWho}>
@@ -191,7 +192,7 @@ export function CancelTaskDialog({ task, onOpenChange }: { task: HkTask | null; 
   const [reason, setReason] = useState("");
   useEffect(() => { if (task) setReason(""); }, [task]);
   return (
-    <FormDialog open={!!task} onOpenChange={onOpenChange} title={`Cancel task · Room ${task?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!task} onOpenChange={onOpenChange} title={`Cancel task · ${task?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: task!.id, p_reason: reason }, { onSuccess: () => onOpenChange(false) })}>
       <Field label="Reason" htmlFor="c-reason"><Input id="c-reason" required value={reason} onChange={(e) => setReason(e.target.value)} /></Field>
     </FormDialog>

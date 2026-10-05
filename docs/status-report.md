@@ -15,6 +15,13 @@ This report covers the app Lovable built (`hotel-management-system-29015d49`). I
 - Screens no longer add up money. Every total, tax preview, fee preview and KPI comes from the database. A check (`npm run check:money`) fails if browser code starts doing money sums again.
 - It is still not ready for a real hotel: 21 failures, tax rules wait for the accountant, email is not connected, and 6c and DAY-006 are not built.
 
+## Update: 6 Oct 2026 (stage 1: room labels, on branch `claude/room-labels`)
+
+- **Rooms can be added from the Rooms page** ("Add room" and "Add several rooms"), only by roles that may set up rooms (System Administrator and General Manager).
+- **Room labels are free text** (ROOM-005): 101, A101, Zurich or a mix, up to 30 characters. Unique per hotel ignoring case and extra spaces. Natural order everywhere (2 before 10, names A to Z).
+- **Wording:** screens and messages show the label as typed, without "Room" in front ("Zurich is occupied."). Lists and boards show "Zurich (Deluxe)". New folio lines read "Zurich · 06 Oct 2026". Lines already posted and invoices already issued never change: they are stored as written at the time.
+- **Not live yet.** One new migration (`20261006100000_free_text_room_labels.sql`) waits for the practice project first, then your separate yes for the live database.
+
 ## Update: 5 Oct 2026 (first live deploy)
 
 - **The app is live on Vercel** at https://hotel-management-system-29015d49.vercel.app, deployed from `main` (the redesign, merged 2 Oct). Every push to GitHub now deploys by itself: `main` goes live, other branches get preview addresses.
@@ -335,6 +342,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | ROOM-002 | Out-of-order and out-of-service blocks; a request from maintenance needs approval, an approver's own request does not. | Must | Built and works | 5 test checks pass. |
 | ROOM-003 | A block cannot cover a night a guest is assigned, and cannot oversell the room type. | Must | Built and works | 2 test checks pass. |
 | ROOM-004 | A supervisor can override a room's condition with a reason; it is audited. | Should | Partly built | 2 pass, 1 fail: override needs a reason (expected [E_REQUIRED], but it succeeded) |
+| ROOM-005 | Rooms are added from the Rooms page by roles that set up rooms: one at a time, or several by number (optional prefix and range) or by name (one per line), with a preview. Labels are free text up to 30 characters (letters, accented letters, digits, spaces, hyphens, apostrophes), unique per hotel ignoring case and extra spaces, shown as typed and sorted in natural order. | Must | Built and works (branch `claude/room-labels`, not yet live) | 48 database checks and 4 browser tests pass. |
 
 ### Housekeeping
 

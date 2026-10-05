@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LoadingState } from "@/components/ui/states";
+import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/housekeeping/")({ component: Board });
 
@@ -47,7 +48,7 @@ function Board() {
                       <CardContent className="space-y-2 p-3">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <div className="text-base font-bold">Room {t.room_number}</div>
+                            <div className="text-base"><RoomName label={t.room_number} typeName={t.room_type_name} className="font-bold" /></div>
                             <div className="text-sm text-muted-foreground">{TASK_TYPES[t.type]}{t.floor ? ` · Floor ${t.floor}` : ""}</div>
                           </div>
                           <PriorityBadge priority={t.priority} />

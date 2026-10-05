@@ -6,6 +6,7 @@ import { useAccess } from "@/lib/access";
 import { errorMessage } from "@/lib/errors";
 import { callRpc, Field, FormDialog } from "@/lib/setup";
 import { addDays } from "@/lib/reservations";
+import { sortByRoom } from "@/lib/room-label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -51,7 +52,7 @@ export function useRoomBoard(propertyId?: string) {
     queryFn: async () => {
       const { data, error } = await (supabase.from as any)("v_room_board").select("*").eq("property_id", propertyId);
       if (error) throw error;
-      return (data as BoardRoom[]).sort((a, b) => a.room_number.length - b.room_number.length || a.room_number.localeCompare(b.room_number));
+      return sortByRoom(data as BoardRoom[]);
     },
   });
 }
@@ -96,7 +97,7 @@ export function SetConditionDialog({ room, onOpenChange }: { room: BoardRoom | n
   const [reason, setReason] = useState("");
   useEffect(() => { if (room) { setCondition(room.condition === "out_of_order" ? "dirty" : room.condition); setReason(""); } }, [room]);
   return (
-    <FormDialog open={!!room} onOpenChange={onOpenChange} title={`Set condition · Room ${room?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!room} onOpenChange={onOpenChange} title={`Set condition · ${room?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_room_id: room!.id, p_condition: condition, p_reason: reason || null }, { onSuccess: () => onOpenChange(false) })}>
       <Field label="Condition" htmlFor="c-cond" hint="To take a room out of use, block it instead.">
         <Select value={condition} onValueChange={setCondition}>
@@ -120,7 +121,7 @@ export function BlockRoomDialog({ room, onOpenChange }: { room: BoardRoom | null
   const [f, setF] = useState({ type: "out_of_order", from: today, to: today ? addDays(today, 1) : "", reason: "" });
   useEffect(() => { if (room) setF({ type: "out_of_order", from: today, to: today ? addDays(today, 1) : "", reason: "" }); }, [room, today]);
   return (
-    <FormDialog open={!!room} onOpenChange={onOpenChange} title={`Block room ${room?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!room} onOpenChange={onOpenChange} title={`Block ${room?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_room_id: room!.id, p_type: f.type, p_from: f.from, p_to: f.to, p_reason: f.reason }, { onSuccess: () => onOpenChange(false) })}>
       {!can("room.block.approve") && <p className="text-sm text-muted-foreground">A manager must approve this block before the room stops being sold.</p>}
       <Field label="Type" htmlFor="b-type">

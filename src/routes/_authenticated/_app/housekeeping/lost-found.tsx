@@ -53,7 +53,7 @@ function LostFound() {
           {list.map((i) => (
             <TableRow key={i.id}>
               <TableCell className="font-medium">{i.description}</TableCell>
-              <TableCell>{i.location}{i.room_id && roomNo(i.room_id) && <span className="block text-sm text-muted-foreground">Room {roomNo(i.room_id)}</span>}</TableCell>
+              <TableCell>{i.location}{i.room_id && roomNo(i.room_id) && <span className="block text-sm text-muted-foreground">{roomNo(i.room_id)}</span>}</TableCell>
               <TableCell className="tabular">{formatDateTime(i.found_at)}</TableCell>
               <TableCell>
                 <Badge variant={LF_STATUS[i.status]?.tone ?? "neutral"}>{LF_STATUS[i.status]?.label ?? i.status}</Badge>
@@ -88,7 +88,7 @@ function LogDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: bo
             <SelectTrigger id="l-room"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Not in a room</SelectItem>
-              {(rooms.data ?? []).map((r) => <SelectItem key={r.id} value={r.id}>Room {r.room_number}</SelectItem>)}
+              {(rooms.data ?? []).map((r) => <SelectItem key={r.id} value={r.id}>{r.room_number}</SelectItem>)}
             </SelectContent>
           </Select>
         </Field>

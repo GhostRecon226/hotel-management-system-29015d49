@@ -57,7 +57,7 @@ function FolioPage() {
       <PageHeader
         title={<span className="inline-flex flex-wrap items-center gap-3">{folio.number} · {folio.label}
           {open ? <Badge variant="info">Open</Badge> : <Badge variant="neutral">Closed</Badge>}</span>}
-        description={`${folio.guest_name ?? "Guest"}${folio.room_number ? ` · Room ${folio.room_number}` : ""} · ${formatDay(folio.arrival_date)} → ${formatDay(folio.departure_date)}`}
+        description={`${folio.guest_name ?? "Guest"}${folio.room_number ? ` · ${folio.room_number}` : ""} · ${formatDay(folio.arrival_date)} → ${formatDay(folio.departure_date)}`}
         actions={<>
           {open && perm.charge && <Button size="sm" onClick={() => setDialog("charge")}>Post charge</Button>}
           {open && perm.deposit && <Button size="sm" onClick={() => setDialog("payment")}>{perm.depositOnly ? "Record deposit" : "Record payment"}</Button>}
