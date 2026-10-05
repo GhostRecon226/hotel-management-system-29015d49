@@ -8,7 +8,7 @@ How to read it:
 - Every claim names its evidence (file, test, table, function or command). UNVERIFIED marks what I could not check.
 - "Code at" means branch `main`, commit `f94222b` (stage 1 and 2 merged and live).
 
-Status of each part: Part 1 done. Parts 1 to 3 done. Part 4 in progress.
+Status of each part: Part 1 done. Parts 1 to 4 done. Part 5 in progress.
 
 ---
 
@@ -436,3 +436,61 @@ Nothing has been load tested. All of this is UNVERIFIED and based on reading the
 - Usage dashboard: active hotels, bookings per day, failed rolls, queued emails, errors.
 - Error tracking with the hotel and user attached (none today).
 - A way to resend a stuck email or rerun a roll for one hotel from a screen (partly: Admin > Messages "Run now" and Admin > Business date are per hotel, used by the hotel itself).
+
+---
+
+## Part 4. What hotels expect that we lack
+
+**Compared with:** Cloudbeds, Mews, Oracle OPERA Cloud (global); eZee Absolute and Hotelogix (strong in Africa and India); DJUBO (West Africa, Paystack); StayNaija and MyHotelLine (Nigerian). Feature claims come from vendor pages and review sites listed under Sources; I did not use the products themselves, so details are UNVERIFIED beyond what those pages say.
+
+Importance: must, should, nice, for an independent Nigerian hotel of 20 to 150 rooms.
+
+| Capability | We have it | How competitors handle it | Importance | Size |
+|---|---|---|---|---|
+| Online booking engine and website widget | No | Cloudbeds: branded, mobile-first booking engine with promo codes; eZee, Hotelogix, DJUBO include one | Must | L |
+| Channel manager and OTA links (Booking.com, Expedia, Airbnb) | No | Cloudbeds connects to many OTAs and updates rates in real time; eZee, Hotelogix include it; usually through a certified connectivity partner | Must | L (or M using a partner such as SiteMinder or Rategain) |
+| Nigerian payment gateways (Paystack, Flutterwave), transfer matching, POS terminals | No (payments are recorded by hand) | DJUBO takes card, mobile money and transfer through Paystack inside the PMS; SabeeApp has a Paystack app; Cloudbeds and Mews have their own payment platforms | Must | M (Paystack links and webhooks), L (POS terminals and transfer matching) |
+| Other African payments (M-Pesa, MTN MoMo, Ghana) | No | Paystack covers Ghana, Kenya, South Africa; DJUBO cites mobile money | Should | M |
+| Restaurant and bar POS posting to the room folio | Partly (charge codes Restaurant, Minibar, Laundry; staff post by hand) | eZee and Hotelogix include their own POS that posts to the room | Must | L (own POS) or M (simple outlet screen posting to folios) |
+| Stores, stock and purchasing | No | eZee lists inventory management | Should | L |
+| Laundry, spa, events and banqueting, conference rooms | Partly (laundry charge code; service requests) | eZee and Hotelogix cover POS outlets; events usually a separate module | Should (events: nice) | M to L |
+| Group blocks, corporate accounts, city ledger, credit control | Partly (group table, no screen; no city ledger) | OPERA has accounts receivable and back office interfaces; Hotelogix handles group bookings | Must (city ledger for corporate clients) | L |
+| Rate management, packages, seasons, promotions | Partly (date-range prices only) | Cloudbeds promo codes and rate plans; Hotelogix "smart pricing across booking sites" | Must | M |
+| Guest messaging: WhatsApp, SMS, email, pre-arrival, post-stay | Partly (email queue, not sending) | Cloudbeds automated guest emails; Mews guest journey and online check-in | Must (WhatsApp first) | M |
+| Guest register and statutory returns | Partly (ID type, number, expiry, photo; nationality) | Not advertised by the global players | Must: Regulation 29 of the Nigeria Immigration Regulations 2017 requires hotels to record each foreign guest's full name, last address, occupation, nationality, passport number, arrival and departure dates, destination and signature; some states (Rivers, Sokoto) ask for ID capture at every check-in | S (add the missing fields and a printable register) |
+| Taxes: VAT, service charge, state consumption tax, tourism levy | Partly (VAT 7.5%, service charge 10%, levy 0%, unconfirmed) | Configurable tax tables in all products | Must: VAT stays 7.5% under the Nigeria Tax Act 2025 from 1 Jan 2026; Lagos charges a 5% hotel occupancy and restaurant consumption tax collected by LIRS; states levy a tourism development levy (reported as 5% of income in some states); one hotel may face several state levies | S (rules exist), plus your accountant (A11) |
+| Nigerian e-invoicing (FIRS MBS) | No | Hotelogix supports fiscal e-invoicing in Tanzania; no Nigerian connector found | Must for large and medium taxpayers: FIRS e-invoicing through the Merchant Buyer Solution became mandatory for large taxpayers (turnover N5 billion or more) from 1 Nov 2025; medium taxpayers (N1 to N5 billion) from 1 July 2026; smaller businesses from 2027, enforced by 2028. Most of our target hotels are below N1 billion today, so this is "should" now and "must" before 2027 | L |
+| Door locks and key cards, phone and TV systems | No | OPERA and Mews integrate with lock vendors through partners | Should (larger hotels) | M per vendor |
+| Accounting links (QuickBooks, Xero, Sage) and exports | Partly (CSV of reservations, guests, transactions) | OPERA night audit summaries feed accounting tools (AccountsIQ example) | Should | M |
+| Multi-property and chain view, franchise, management companies | No (one property per account in practice) | Hotelogix manages single or multiple properties from anywhere | Should | L |
+| Multi-currency and multi-language | Partly (foreign-currency payments at a daily rate; English only) | Mews payments in 40+ countries; OPERA multilingual | Should (currency), nice (language for now; French for West Africa later) | M |
+| Staff rota, attendance, payroll hand-off | No | eZee lists employee management | Nice | M |
+| Guest feedback, reviews, loyalty, repeat-guest tools | Partly (feedback log, untested) | eZee lists CRM and marketing automation | Should | M |
+| QR self check-in, mobile staff app, offline mode | No | Mews kiosk and online check-in; most are online only | Should (online check-in), must (some offline tolerance, given power and network cuts) | M (online check-in), L (offline) |
+| Owner dashboards and daily flash report on WhatsApp or email | Partly (dashboard on screen) | OPERA daily departmental summaries | Must (owners are often not on site) | S once messaging works |
+| API and webhooks for partners | No (internal API only) | Mews open API with 1,000+ marketplace apps | Should | M |
+
+### Do not build yet
+
+| Item | Why wait |
+|---|---|
+| Own door lock integration | Each lock brand needs its own work and hardware testing; few target hotels have electronic locks. |
+| Own restaurant POS with kitchen screens | A folio-posting outlet screen covers most needs; a full POS is a product of its own. |
+| Events and banqueting module | Valuable for large hotels only; our first customers are 20 to 60 rooms. |
+| Staff rota and payroll | Hotels already use other tools; low link to bookings and money. |
+| Loyalty points | Needs a guest base and messaging first. |
+| Multi-language interface | English covers Nigeria and Ghana; add French when we enter francophone markets. |
+| Our own channel manager connections to each OTA | Certification takes months; use a connectivity partner first. |
+| Full offline mode | Very hard to do safely with an immutable ledger; start with a "read-only when offline" view and a printed arrivals list. |
+
+### Sources for Part 4
+
+- Cloudbeds: [Cloudbeds platform](https://www.cloudbeds.com/hospitality-platform/), [Zeevou summary of Cloudbeds](https://zeevou.com/pms/cloudbeds/)
+- eZee Absolute: [GetApp](https://www.getapp.com/all-software/a/ezee-absolute/), [Krowdbase](https://www.krowdbase.com/software/ezee-absolute)
+- Hotelogix: [Hotelogix Africa](https://www.hotelogix.com/af), [Hotelogix blog on Africa](https://www.hotelogix.com/blog/hotel-management-software-africa)
+- Mews: [Mews kiosk](https://www.mews.com/en/blog/the-new-mews-operator-your-reception-kiosk-on-steroids-2), [Contrary research on Mews](https://research.contrary.com/report/mews)
+- OPERA Cloud: [Oracle OPERA Cloud](https://www.oracle.com/hospitality/hotel-property-management/hotel-pms-software/), [AccountsIQ OPERA integration](https://www.accountsiq.com/integrations/opera)
+- Nigerian and African options and Paystack: [DJUBO Ghana](https://djubo.com/ghana), [SabeeApp Paystack](https://www.sabeeapp.com/marketplace/paystack), [StayNaija on VC4A](https://vc4a.com/ventures/staynaija/), [MyHotelLine Lagos](https://www.myhotelline.com/hotel-management-software-in-lagos-cloud-pms-channel-manager-myhotelline)
+- Guest register: [The Nigeria Lawyer on Regulation 29](https://thenigerialawyer.com/what-hotel-owners-must-do-before-accommodating-immigrants/), [TheCable on Sokoto](https://thecable.ng/tambuwal-tasks-sokoto-hoteliers-security)
+- Taxes: [Forvis Mazars on VAT under the Nigeria Tax Act 2025](https://www.forvismazars.com/ng/en/services/tax/nigeria-s-tax-reform-in-focus/2025-nta-vat-key-business-changes), [Lagos consumption tax (Legalnaija)](https://legalnaija.com/compliance-challenges-of-lagos-state/), [ICIR on hotel taxes in Cross River](https://www.icirnigeria.org/how-21-taxes-are-stifling-hotel-business-in-cross-river-state/)
+- E-invoicing: [VATupdate, large taxpayers](https://www.vatupdate.com/2025/09/09/firs-extends-e-invoicing-compliance-deadline-for-large-nigerian-taxpayers-to-november-2025/), [vatcalc on the 2026 wave](https://www.vatcalc.com/nigeria/nigeria-automated-tax-administration-system-april-2021/), [Global VAT Compliance 2026 update](https://www.globalvatcompliance.com/globalvatnews/nigeria-e-invoicing-rollout-key-updates-2026/)
