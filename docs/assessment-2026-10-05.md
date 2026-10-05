@@ -8,7 +8,7 @@ How to read it:
 - Every claim names its evidence (file, test, table, function or command). UNVERIFIED marks what I could not check.
 - "Code at" means branch `main`, commit `f94222b` (stage 1 and 2 merged and live).
 
-Status of each part: Part 1 done. Part 2 done. Part 3 in progress.
+Status of each part: Part 1 done. Parts 1 to 3 done. Part 4 in progress.
 
 ---
 
@@ -382,3 +382,57 @@ Test counts come from tags in `supabase/tests/db` (for example 54 checks tagged 
 - **Next three actions:** (1) move Vercel to Pro and confirm Supabase Pro with daily backups before the first paying hotel (your steps), S; (2) automatic test run on GitHub and protection on `main` (deployment plan 5.1, 5.2), M; (3) error tracking and an uptime check with alerts to your phone, S.
 
 Price sources: [Supabase pricing summary (MakerKit)](https://makerkit.dev/blog/saas/supabase-pricing), [Vercel cost summary (MakerKit)](https://makerkit.dev/blog/saas/vercel-cost), [Resend pricing](https://www.resend.com/pricing.md).
+
+---
+
+## Part 3. Cross-cutting questions
+
+### Is it safe for two hotels to share the system?
+
+Yes, as far as I could test. I found no way for one hotel to see or change another's data.
+
+- **Every table has row-level security** (46 of 46) and no write right for the browser (Part 1.5). Reads go through rules that call `app.my_tenant()` or property access checks.
+- **Every one of our 139 browser-callable functions checks the hotel or a permission** before acting. A pattern search of all their bodies for a tenant or permission check found none without one (practice, today). Example: `calculate_tax` refuses a property of another hotel (`if ... not app.has_property_access(p_property_id) then ... E_FORBIDDEN`).
+- **Tests:** 18 checks in `11_isolation.sql`, 14 for PLT-003, cross-hotel checks in `23_room_labels.sql` ("another hotel cannot add rooms here") and `24_id_photos.sql` ("another hotel cannot open the photo ... nor upload to this hotel's guest").
+- **Storage:** the ID photo bucket is private with no storage rules; files open only through 60-second links signed after the database check.
+- **Server functions** (invites, exports, photos) run the permission check as the signed-in user before using the service key (`src/lib/invite.functions.ts`, `src/lib/id-photos.functions.ts`).
+- **Residual risks:** (1) the `btree_gist` helper functions in `public` (harmless, Part 1.5); (2) the service role key is in Vercel and on your Mac; anyone holding it can read everything, so it must stay Sensitive and be rotated if exposed; (3) one person can belong to only one hotel (`profiles.tenant_id`), so a management company running two hotels needs two logins. UNVERIFIED: no outside penetration test has been done.
+
+### Power cut, slow connection, or closed browser mid-way
+
+- **Check-in:** one database transaction; it either happens completely or not at all. Repeating it is safe: if the booking is already checked in, `check_in` returns the existing stay (`20260929102000_front_desk.sql` line 185). The ID photo is uploaded first; if the browser closes after the upload, the photo stays on the guest; an unfinished upload is cleaned up after a day (`id_photo_cleanup_due`). What is lost: the typed form (no draft).
+- **Payment:** one transaction. A retry in the same open form cannot post twice (retry key per form). If the connection drops after the server saved it and the cashier opens a new form and enters it again, the payment is recorded twice (Module 9). Staff see it on the folio and reverse it with approval.
+- **Night audit:** runs in the database on a schedule, not in anyone's browser, so a closed browser or a power cut at the hotel does not matter. Each property rolls in its own sub-transaction; a failure undoes that property's roll and alerts managers; the next run (5 minutes later) tries again and catches up to 7 days (`app.run_due_rollovers`).
+- **Slow connection:** buttons are disabled while a request runs; money is never computed in the browser. There is no offline mode: with no internet, the desk cannot check anyone in or take a payment. This is the biggest practical risk for Nigerian hotels with unstable internet.
+
+### Can money ever be wrong?
+
+- **Rounding:** amounts are stored with 4 decimals (`20260930110400_money_precision.sql`); tax lines use a remainder rule so lines add up to the total (`20260930160100_tax_rounding_remainder.sql`); tested in `18_server_figures.sql` and `22_accountant_brief.sql`.
+- **Double posting:** prevented at database level by unique retry keys on `folio_transactions`, `invoices`, `reservations`, `approvals` (Part 1.5); nightly room charges use `room:<booking>:<date>` so a night is never charged twice, even when the roll catches up. The one gap is the human retry after a dropped connection (above).
+- **Currency mix:** each folio line stores the amount, currency, exchange rate and the amount in the hotel's base currency (`FIN-003` test: "USD 10 at 1,500 is 15,000 in naira"). Balances use the base amount. Risk: if no exchange rate is entered for the day, UNVERIFIED which rate a foreign-currency payment uses; I found no test for a missing rate.
+- **Tax:** correct maths, unconfirmed rates (A11). If service charge should not be taxed by VAT, or the levy applies, every invoice is wrong until fixed, and issued invoices cannot be edited.
+- **Refunds:** need approval above the limit and cannot exceed the folio credit (`FIN-007`).
+- **Ledger tampering:** impossible through the app and blocked for the database owner too (triggers); only a superuser with direct database access could drop the triggers, and that would show in the migration history.
+
+### What breaks first at 50 rooms, 200 rooms, 1000 bookings a day?
+
+Nothing has been load tested. All of this is UNVERIFIED and based on reading the code.
+
+- **50 rooms:** fine. Plan limits: Starter allows 20 rooms, Standard 60, so a 50-room hotel needs Standard.
+- **200 rooms:** needs the Enterprise plan (Pro allows 150). Screens that list all rooms (Rooms board, Setup rooms) load everything at once with no paging; the guests list and folios list are capped (for example 200 folios, `docs/known-issues.md`), so older records are hidden rather than paged.
+- **1000 bookings a day (across all hotels):** the database work per booking is small. The likely first limits are (1) the Supabase Micro compute (1 GB memory, 60 connections) included in Pro, (2) row-level security rules that call functions for every row on large lists, and (3) the availability check, which locks per room type and walks each night. Upgrade compute and add paging before this level.
+- **Night roll:** one property at a time, every 5 minutes, up to 7 catch-up days per property per run; with hundreds of hotels rolling at midnight Lagos time, the run takes longer but stays correct.
+
+### What is the recovery plan if the live database is damaged?
+
+- **Today:** one manual dump of live (7 Oct) on your Mac. If live is on Supabase Pro, Supabase also keeps 7 daily backups (UNVERIFIED which plan live is on). No point-in-time recovery add-on. No restore has been practised.
+- **Gaps:** no written runbook, no restore drill, no off-site copy of backups, no alert when the database is down.
+- **Recommended:** confirm Pro and its daily backups; add point-in-time recovery once there are paying hotels (lose minutes, not a day); practise a restore into the practice project once per quarter; keep the app's Vercel rollback as the first step for app bugs.
+
+### What does support need that we do not have?
+
+- A platform admin console: find a hotel by name or email, see its plan, trial, users and last roll, activate or extend with a reason (PLT-008 is SQL-only today, PLT-009 missing).
+- Time-boxed, audited support access to a hotel with the hotel's consent (PLT-010, missing).
+- Usage dashboard: active hotels, bookings per day, failed rolls, queued emails, errors.
+- Error tracking with the hotel and user attached (none today).
+- A way to resend a stuck email or rerun a roll for one hotel from a screen (partly: Admin > Messages "Run now" and Admin > Business date are per hotel, used by the hotel itself).
