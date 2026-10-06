@@ -217,6 +217,8 @@ Other things the tests showed:
 
 ## 1. What exists, requirement by requirement
 
+> **Superseded on 6 Oct 2026.** The single requirement register is now [`docs/requirements.csv`](requirements.csv) (115 rows, status per row taken from this app's tests), checked by `scripts/check-requirements.mjs` (`npm run check:requirements`, and in every full `scripts/test-db.sh` run). The workbook [`docs/HMS_R1_Requirements.xlsx`](HMS_R1_Requirements.xlsx) is generated from it. The table below is kept as the record of 1 Oct 2026 and is no longer updated.
+
 Statuses after steps 1 and 2. A requirement counts as "Built and works" only when a test proves it. At the audit, the totals were 25 working, 52 untested, 17 partly built and 13 missing.
 
 ### Totals per module
