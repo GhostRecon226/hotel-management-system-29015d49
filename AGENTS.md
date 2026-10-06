@@ -86,6 +86,8 @@ One line per rule. Why: the reason.
 - Keep the existing permission names (decision 5f). Why: the code and database already use them.
 - Errors go to Sentry only through src/lib/error-report.ts (no Sentry package): never add user identity, IP, request bodies, form values or session replay, and keep expected [E_CODE] refusals out. GitHub checks (.github/workflows/ci.yml) always report "Checks and database tests" and "Browser tests"; docs-only changes pass early (scripts/ci-changes.sh). None of this is in the Vercel build. See docs/safety-net.md. Why: we hear about failures without sending personal data, and an urgent fix can always ship.
 
+- Platform console (/platform, src/lib/platform.tsx): operators are separate sign-ins listed in app.platform_operators (no grants; added only by the owner with app.add_platform_operator), never hotel members (trigger on profiles). Every platform_* function calls app.require_platform(): operator list AND JWT aal2, enforced in the database, not only on screen. Operators see hotel account data only. Subscription changes go through platform_change_subscription, which reuses app.platform_set_subscription / app.change_subscription so every change is in subscription_history. Why: no hand SQL on live, no platform access to guest data (PLT-008, PLT-009, PLT-013).
+
 ## Test gotchas
 
 - `set role` persists across DO blocks. Call `perform t.admin();` at the end of each block, and before reading tables a signed-in role cannot see.

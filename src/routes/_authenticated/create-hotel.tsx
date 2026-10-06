@@ -1,4 +1,5 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { whoamiQuery } from "@/lib/platform";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { z } from "zod";
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/create-hotel")({
   beforeLoad: async ({ context }) => {
     const ctx = await context.queryClient.ensureQueryData({ ...myContextQuery, revalidateIfStale: true });
     if (ctx.has_hotel) throw redirect({ to: "/dashboard" });
+    if ((await context.queryClient.fetchQuery(whoamiQuery)).operator) throw redirect({ to: "/platform" });
   },
   head: () => ({
     meta: [

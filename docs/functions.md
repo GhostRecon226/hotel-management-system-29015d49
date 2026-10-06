@@ -1474,3 +1474,40 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Returns: `boolean`
 - Permission: —
 - Errors: —
+
+### Platform console (wave 2, item 2)
+
+Every function below first calls `app.require_platform()`: the caller must be on `app.platform_operators` (`E_FORBIDDEN` otherwise) and the session must have passed two-step sign-in, JWT `aal = aal2` (`E_MFA_REQUIRED` otherwise).
+
+### `public.platform_whoami`
+- Args: none
+- Returns: `jsonb` (`operator`, `mfa`), about the caller only
+- Callable by signed-in users: yes · security definer
+- Permission: none (answers for the caller)
+
+### `public.platform_list_tenants`
+- Args: none
+- Returns: table of hotel account data: tenant_id, hotel_name, country, access_status, subscription_status, plan_code, plan_name, trial_ends_at, paid_until, created_at, properties, rooms, active_users, last_change_at. No guest, booking, money or contact data (PLT-009).
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
+
+### `public.platform_tenant_history`
+- Args: `p_tenant uuid`
+- Returns: table: created_at, from_status, to_status, plan_code, period_end, reason, source, operator_email (platform changes only)
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
+
+### `public.platform_change_subscription`
+- Args: `p_tenant uuid, p_action text, p_reason text, p_until timestamptz DEFAULT NULL, p_plan text DEFAULT NULL`
+- Actions: `extend_trial` (p_until, at most a year ahead), `activate` (p_until in the future, optional p_plan; also reactivates), `suspend`, `change_plan` (p_plan), `cancel`. Each needs a reason, refuses a change that changes nothing, and writes `subscription_history` (source platform, actor the operator). Nothing is deleted.
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_MFA_REQUIRED`, `E_NOT_FOUND`, `E_PLAN_LIMIT`, `E_REQUIRED`
+
+### `app.add_platform_operator`
+- Args: `p_email text`. Database owner only (Supabase SQL editor); no grant to any app role.
+- Adds an existing sign-in account that belongs to no hotel. Errors: `E_INVALID` (account belongs to a hotel), `E_NOT_FOUND` (no such account).
+
