@@ -4,11 +4,13 @@ import { test, expect } from "@playwright/test";
 import { createTestUser } from "./local-supabase";
 
 const PAGES: [string, RegExp][] = [
-  ["/", /Run your hotel's front desk/],
-  ["/pricing", /Simple pricing for your hotel/],
+  ["/", /Know every naira that comes through your front desk/],
+  ["/features", /Everything your hotel's front office runs on/],
+  ["/pricing", /Try it free\. Pay for the size of your hotel/],
+  ["/security", /Guest records and hotel money, protected on purpose/],
   ["/faq", /Questions hotel owners ask/],
   ["/about", /About Hotel Desk/],
-  ["/contact", /Talk to us/],
+  ["/contact", /Talk to a real person/],
   ["/privacy", /Privacy notice/],
   ["/terms", /Terms of use/],
 ];
@@ -40,14 +42,13 @@ test("the first Tab on a public page offers Skip to content", async ({ page }) =
   await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
 });
 
-test("FAQ answers open with the keyboard, and planned answers are labelled", async ({ page }) => {
+test("FAQ answers open with the keyboard", async ({ page }) => {
   await page.goto("/faq");
   await page.waitForLoadState("networkidle"); // the questions open once the page has started up
   const q = page.getByRole("button", { name: /Does it work without internet/ });
   await q.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByText("No, it needs an internet connection.")).toBeVisible();
-  await expect(page.getByRole("button", { name: /Can I manage more than one hotel\? Planned/ })).toBeVisible();
 });
 
 test("signed in: / goes to the app; other public pages stay readable with Open the app", async ({ page }) => {

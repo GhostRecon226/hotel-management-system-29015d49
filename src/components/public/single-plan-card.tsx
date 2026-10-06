@@ -16,7 +16,7 @@ export function SinglePlanCard({ title, lead, includes, notes }: { title: string
         <p className="mt-2 text-[15px] text-on-primary-muted">{lead}</p>
       </div>
       <div className="px-6 py-7 sm:px-10">
-        <h3 className="text-sm font-bold">The trial includes</h3>
+        <h3 className="text-sm font-bold">Included from day one</h3>
         <ul className="mt-3 space-y-2.5">
           {includes.map((i) => (
             <li key={i} className="flex items-start gap-2.5 text-sm">
@@ -26,8 +26,8 @@ export function SinglePlanCard({ title, lead, includes, notes }: { title: string
           ))}
         </ul>
         <div className="mt-7 grid gap-3 sm:grid-cols-2">
-          <Button asChild size="lg"><Link to="/auth">Start free trial</Link></Button>
-          <Button asChild size="lg" variant="outline"><Link to="/contact">Contact us</Link></Button>
+          <Button asChild size="lg"><Link to="/auth">Start your free trial</Link></Button>
+          <Button asChild size="lg" variant="outline"><Link to="/contact">Talk to us about pricing</Link></Button>
         </div>
         <ul className="mt-5 flex flex-wrap justify-center gap-2" aria-label="Good to know">
           {notes.map((n) => <li key={n} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">{n}</li>)}

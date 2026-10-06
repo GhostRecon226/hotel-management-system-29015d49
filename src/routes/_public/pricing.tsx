@@ -3,12 +3,13 @@ import { SinglePlanCard } from "@/components/public/single-plan-card";
 import { FaqList } from "@/components/public/faq-two-column";
 import { FAQS, PRICING_FAQ_IDS } from "@/components/public/faq-content";
 import { Eyebrow, Section } from "@/components/public/public-layout";
+import { pageHead } from "@/lib/seo";
 
-const TITLE = "Pricing: Hotel Desk";
-const DESCRIPTION = "Free trial, then pricing by hotel size. Contact us for a price for your hotel.";
+const TITLE = "Hotel Software Pricing: 30-Day Free Trial | Hotel Desk";
+const DESCRIPTION = "Start free for 30 days with no card. Then pay a simple monthly price based on the size of your hotel. Talk to us for your price.";
 
 export const Route = createFileRoute("/_public/pricing")({
-  head: () => ({ meta: [{ title: TITLE }, { name: "description", content: DESCRIPTION }, { property: "og:title", content: TITLE }, { property: "og:description", content: DESCRIPTION }] }),
+  head: () => pageHead({ title: TITLE, description: DESCRIPTION }),
   component: Pricing,
 });
 
@@ -18,23 +19,23 @@ function Pricing() {
     <>
       <Section className="pb-10 text-center sm:pb-12">
         <Eyebrow>Pricing</Eyebrow>
-        <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">Simple pricing for your hotel</h1>
-        <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground">Free trial, then pricing by hotel size. Contact us.</p>
+        <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">Try it free. Pay for the size of your hotel.</h1>
+        <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground">Start with 30 days free and no card. When you are ready, we agree a price that fits the number of rooms you run.</p>
       </Section>
       <Section className="pt-0 sm:pt-0">
         <SinglePlanCard
-          title="Free trial, then pricing by hotel size"
-          lead={<>Your 30-day free trial starts when you create your hotel. After that, <Link to="/contact" className="font-semibold text-primary-foreground underline underline-offset-4">contact us</Link> for a price for your hotel.</>}
+          title="Hotel Desk for your hotel"
+          lead={<>30 days free to start. Then a simple monthly price based on the size of your hotel. <Link to="/contact" className="font-semibold text-primary-foreground underline underline-offset-4">Talk to us</Link> for yours.</>}
           includes={[
             "Bookings, walk-ins, check-in and check-out",
             "Rooms, housekeeping and maintenance",
             "Guest bills with service charge and VAT, and printed invoices",
             "Staff roles and approvals for discounts, refunds and corrections",
-            "Daily figures: occupancy, ADR and RevPAR, with spreadsheet export",
+            "Daily figures with spreadsheet export",
           ]}
-          notes={["No card needed", "Nothing is deleted when the trial ends", "Contact us to cancel"]} />
+          notes={["No card needed", "Nothing is deleted when the trial ends", "Cancel any time by contacting us"]} />
         <p className="mx-auto mt-6 max-w-xl text-center text-sm text-muted-foreground">
-          When the trial ends, your hotel becomes read-only until we start your plan. You can still settle bills and check guests out. Nothing is deleted.
+          When the trial ends, your hotel becomes read-only until your plan starts. Your team can still record payments, settle bills and check guests out. Nothing is lost.
         </p>
       </Section>
       <Section className="pt-0 sm:pt-0">

@@ -22,8 +22,10 @@ import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as PublicContactRouteImport } from './routes/_public/contact'
 import { Route as PublicFaqRouteImport } from './routes/_public/faq'
+import { Route as PublicFeaturesRouteImport } from './routes/_public/features'
 import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PublicSecurityRouteImport } from './routes/_public/security'
 import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/_app/admin'
 import { Route as AuthenticatedAppApprovalsRouteImport } from './routes/_authenticated/_app/approvals'
@@ -130,6 +132,11 @@ const PublicFaqRoute = PublicFaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PublicFeaturesRoute = PublicFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 const PublicPricingRoute = PublicPricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -138,6 +145,11 @@ const PublicPricingRoute = PublicPricingRouteImport.update({
 const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicSecurityRoute = PublicSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicTermsRoute = PublicTermsRouteImport.update({
@@ -397,8 +409,10 @@ export interface FileRoutesByFullPath {
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
+  '/features': typeof PublicFeaturesRoute
   '/pricing': typeof PublicPricingRoute
   '/privacy': typeof PublicPrivacyRoute
+  '/security': typeof PublicSecurityRoute
   '/terms': typeof PublicTermsRoute
   '/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
   '/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
@@ -453,8 +467,10 @@ export interface FileRoutesByTo {
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
+  '/features': typeof PublicFeaturesRoute
   '/pricing': typeof PublicPricingRoute
   '/privacy': typeof PublicPrivacyRoute
+  '/security': typeof PublicSecurityRoute
   '/terms': typeof PublicTermsRoute
   '/admin': typeof AuthenticatedAppAdminRoute
   '/approvals': typeof AuthenticatedAppApprovalsRoute
@@ -505,8 +521,10 @@ export interface FileRoutesById {
   '/_public/about': typeof PublicAboutRoute
   '/_public/contact': typeof PublicContactRoute
   '/_public/faq': typeof PublicFaqRoute
+  '/_public/features': typeof PublicFeaturesRoute
   '/_public/pricing': typeof PublicPricingRoute
   '/_public/privacy': typeof PublicPrivacyRoute
+  '/_public/security': typeof PublicSecurityRoute
   '/_public/terms': typeof PublicTermsRoute
   '/_public/': typeof PublicIndexRoute
   '/_authenticated/_app/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
@@ -564,8 +582,10 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/faq'
+    | '/features'
     | '/pricing'
     | '/privacy'
+    | '/security'
     | '/terms'
     | '/folios'
     | '/guests'
@@ -620,8 +640,10 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/faq'
+    | '/features'
     | '/pricing'
     | '/privacy'
+    | '/security'
     | '/terms'
     | '/admin'
     | '/approvals'
@@ -671,8 +693,10 @@ export interface FileRouteTypes {
     | '/_public/about'
     | '/_public/contact'
     | '/_public/faq'
+    | '/_public/features'
     | '/_public/pricing'
     | '/_public/privacy'
+    | '/_public/security'
     | '/_public/terms'
     | '/_public/'
     | '/_authenticated/_app/folios'
@@ -822,6 +846,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicFaqRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_public/features': {
+      id: '/_public/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof PublicFeaturesRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
     '/_public/pricing': {
       id: '/_public/pricing'
       path: '/pricing'
@@ -834,6 +865,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PublicPrivacyRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/security': {
+      id: '/_public/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof PublicSecurityRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/_public/terms': {
@@ -1338,8 +1376,10 @@ interface PublicRouteRouteChildren {
   PublicAboutRoute: typeof PublicAboutRoute
   PublicContactRoute: typeof PublicContactRoute
   PublicFaqRoute: typeof PublicFaqRoute
+  PublicFeaturesRoute: typeof PublicFeaturesRoute
   PublicPricingRoute: typeof PublicPricingRoute
   PublicPrivacyRoute: typeof PublicPrivacyRoute
+  PublicSecurityRoute: typeof PublicSecurityRoute
   PublicTermsRoute: typeof PublicTermsRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
@@ -1348,8 +1388,10 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicAboutRoute: PublicAboutRoute,
   PublicContactRoute: PublicContactRoute,
   PublicFaqRoute: PublicFaqRoute,
+  PublicFeaturesRoute: PublicFeaturesRoute,
   PublicPricingRoute: PublicPricingRoute,
   PublicPrivacyRoute: PublicPrivacyRoute,
+  PublicSecurityRoute: PublicSecurityRoute,
   PublicTermsRoute: PublicTermsRoute,
   PublicIndexRoute: PublicIndexRoute,
 }

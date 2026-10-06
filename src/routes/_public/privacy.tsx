@@ -1,18 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { DraftNotice, Eyebrow, Section } from "@/components/public/public-layout";
 import { LegalPart } from "@/components/public/legal";
 import { ToConfirm } from "@/components/public/to-confirm";
+import { pageHead } from "@/lib/seo";
 
-const TITLE = "Privacy notice: Hotel Desk";
-const DESCRIPTION = "How Hotel Desk handles hotel and guest information. Draft, pending legal review.";
+const TITLE = "Privacy Notice | Hotel Desk";
+const DESCRIPTION = "How Hotel Desk stores and protects information for hotels, their staff and their guests.";
 
 export const Route = createFileRoute("/_public/privacy")({
-  head: () => ({ meta: [{ title: TITLE }, { name: "description", content: DESCRIPTION }, { property: "og:title", content: TITLE }, { property: "og:description", content: DESCRIPTION }] }),
+  head: () => pageHead({ title: TITLE, description: DESCRIPTION }),
   component: Privacy,
 });
 
-// Every statement here was checked against the system on 2 Oct 2026; section 4 (ID photos) on 7 Oct 2026, against
-// branch claude/id-photos. Legal wording waits for advice (A14).
+const link = "font-semibold text-primary underline-offset-4 hover:underline";
+
+// Every statement here was checked against the system on 2 Oct 2026; section 4 (ID photos) on 7 Oct 2026.
+// Items shown through <ToConfirm> wait for legal advice (A14). A production build refuses to run while any remain.
 function Privacy() {
   return (
     <Section className="max-w-3xl">
@@ -20,33 +23,38 @@ function Privacy() {
       <h1 className="mt-4 text-4xl font-extrabold tracking-tight">Privacy notice</h1>
       <p className="mt-3 text-sm text-muted-foreground">Last updated: <ToConfirm what="date of the final version" /></p>
       <div className="mt-6"><DraftNotice /></div>
+      <p className="mb-6 text-[15px] leading-relaxed text-muted-foreground"><strong className="text-foreground">In short.</strong> Hotels use Hotel Desk to run their business. The hotel decides what it records about its guests and is responsible for it. We store that information for the hotel, we keep each hotel's data separate, and we never sell it.</p>
       <LegalPart title="1. Who we are">
-        <p>Hotel Desk is provided by <ToConfirm what="company name" />.</p>
+        <p>Hotel Desk is provided by <ToConfirm what="company name" /> ("we", "us"). We run the software that hotels use. <ToConfirm what="company role and registration, after legal review" /></p>
       </LegalPart>
       <LegalPart title="2. Whose information this covers">
-        <p>Hotels use Hotel Desk to run their business. <strong>The hotel decides what guest information it records and is responsible for it.</strong> We store and process that information for the hotel. We also hold the account details of the hotel's staff who sign in.</p>
+        <ul>
+          <li><strong>Hotel staff</strong> who sign in to Hotel Desk.</li>
+          <li><strong>Hotel guests</strong> whose details a hotel records.</li>
+          <li><strong>Visitors</strong> to this website.</li>
+        </ul>
       </LegalPart>
       <LegalPart title="3. What we store">
         <ul>
-          <li>Staff accounts: name, email address and sign-in details.</li>
-          <li>What the hotel records about its business: bookings, rooms, bills, payments and invoices.</li>
-          <li>What the hotel records about guests: for example name, phone, email, nationality, address and, if the hotel enters them, ID document details and, if the hotel allows it, a photo or scan of the ID document (see section 4). Only staff whose role allows it can see ID document details.</li>
-          <li>A record of changes: who changed what and when. For guests it records which details changed, not the details themselves.</li>
+          <li><strong>Staff accounts:</strong> name, email address and sign-in details.</li>
+          <li><strong>Hotel records:</strong> bookings, rooms, bills, payments and invoices.</li>
+          <li><strong>Guest details the hotel records:</strong> for example name, phone, email, nationality and address. If the hotel enters them, ID document details. If the hotel allows it, a photo or scan of the ID document (see section 4). Only staff whose role allows it can see ID document details.</li>
+          <li><strong>A record of changes:</strong> who changed what and when. For guests it records which details changed, not the details themselves.</li>
         </ul>
       </LegalPart>
       <LegalPart title="4. Photos of ID documents">
         <ul>
-          <li>A hotel can choose to keep a photo or scan of a guest's ID document, front and back. This is off unless the hotel switches it on, and the hotel can also ask for it at check-in.</li>
-          <li>Why the hotel keeps it, and on what legal basis: <ToConfirm what="purpose and legal basis, for example a guest register rule, after legal review" />.</li>
-          <li>Who can see it: only hotel staff whose role allows it (managers and front desk). Reservation staff and accountants cannot.</li>
-          <li>How it is protected: it is stored privately, never at a public web address. A photo opens only through a link that works for 60 seconds, and every upload, view and deletion is recorded with who did it and when.</li>
-          <li>Before upload, the photo is made smaller on the hotel's device. This also removes hidden information in the photo, such as the place it was taken.</li>
-          <li>How long it is kept: it is deleted automatically 12 months after the guest's last check-out, unless the guest has a stay that is not over. <ToConfirm what="keep period, after legal review" />.</li>
-          <li>It is deleted straight away when the guest's personal details are removed (anonymised), or when a hotel manager deletes it.</li>
-          <li>Like the rest of the database, it is stored in the European Union (Ireland). <ToConfirm what="the safeguard for keeping guest ID photos outside Nigeria, after legal review" />.</li>
+          <li>A hotel can choose to keep a photo or scan of a guest's ID, front and back. This is off unless the hotel switches it on.</li>
+          <li><strong>Why the hotel keeps it:</strong> <ToConfirm what="purpose and legal basis, for example a guest register rule, after legal review" />.</li>
+          <li><strong>Who can see it:</strong> only hotel staff whose role allows it, such as managers and front desk. Reservation staff and accountants cannot.</li>
+          <li><strong>How it is protected:</strong> stored privately, never at a public web address. A photo opens only through a link that works for 60 seconds. Every upload, view and deletion is recorded with who did it and when.</li>
+          <li><strong>Before upload,</strong> the photo is made smaller on the hotel's device. This also removes hidden details, such as where it was taken.</li>
+          <li><strong>How long it is kept:</strong> deleted automatically 12 months after the guest's last check-out, unless the guest has a stay that is not over. <ToConfirm what="keep period, after legal review" />.</li>
+          <li>It is deleted straight away when the guest's personal details are removed, or when a hotel manager deletes it.</li>
+          <li><strong>Where it is stored:</strong> in the European Union (Ireland), like the rest of the database. <ToConfirm what="the safeguard for keeping guest ID photos outside Nigeria, after legal review" />.</li>
         </ul>
       </LegalPart>
-      <LegalPart title="5. Where it is kept and who helps us">
+      <LegalPart title="5. Where information is kept and who helps us">
         <ul>
           <li>The database is run by Supabase on servers in the European Union (Ireland).</li>
           <li>The website is served by Vercel.</li>
@@ -57,20 +65,20 @@ function Privacy() {
         <p>We use no advertising, no analytics and no tracking cookies. Your browser keeps your sign-in so you stay signed in. Our fonts are served from our own website, not from another company.</p>
       </LegalPart>
       <LegalPart title="7. Who can see the information">
-        <p>Each hotel's information is kept separate from every other hotel's. Inside a hotel, each member of staff sees only what their role allows. We do not sell the information.</p>
+        <p>Each hotel's information is kept separate from every other hotel's. Inside a hotel, each person sees only what their role allows. We do not sell information.</p>
       </LegalPart>
       <LegalPart title="8. Keeping and removing information">
         <ul>
           <li>Bills, payments, invoices and the record of changes cannot be deleted, because they are financial records. Mistakes are corrected with a new entry that stays on record.</li>
-          <li>A guest's personal details can be removed (anonymised) once the guest has no current or upcoming stay. Their past stays and bills are kept, without the personal details.</li>
-          <li>How long we keep information after a hotel's account closes: <ToConfirm what="retention period, after legal review" />.</li>
+          <li>A guest's personal details can be removed (anonymised) once the guest has no current or upcoming stay. Past stays and bills are kept without the personal details.</li>
+          <li>After a hotel's account closes, <ToConfirm what="retention period, after legal review" />.</li>
         </ul>
       </LegalPart>
-      <LegalPart title="9. Your requests">
-        <p>To ask what information we hold about you, or to have it corrected or removed, contact <ToConfirm what="who answers data requests" /> at <ToConfirm what="contact email" />. If you are a hotel guest, you can also ask the hotel directly.</p>
+      <LegalPart title="9. Your rights and requests">
+        <p><ToConfirm what="rights and response times, after legal review" /> Write to <ToConfirm what="who answers data requests" /> at <ToConfirm what="contact email" />. If you are a hotel guest, you can also ask the hotel directly.</p>
       </LegalPart>
-      <LegalPart title="10. Changes">
-        <p>This notice is a draft. We will publish the final version after legal review.</p>
+      <LegalPart title="10. Changes to this notice">
+        <p>We will update this page when we change how we handle information, and we will change the date at the top. See also the <Link to="/security" className={link}>security page</Link> and the <Link to="/terms" className={link}>terms of use</Link>.</p>
       </LegalPart>
     </Section>
   );

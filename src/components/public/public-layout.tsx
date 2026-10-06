@@ -5,7 +5,9 @@ import { hasStoredSession } from "@/lib/session-hint";
 import { cn } from "@/lib/utils";
 
 const NAV = [
+  { to: "/features", label: "Features" },
   { to: "/pricing", label: "Pricing" },
+  { to: "/security", label: "Security" },
   { to: "/faq", label: "FAQ" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
@@ -50,9 +52,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <span className="grid size-8 place-items-center rounded-lg bg-accent-fill text-xs font-extrabold text-primary-foreground" aria-hidden>HD</span>
               <span className="font-bold">Hotel Desk</span>
             </div>
-            <p className="mt-3 max-w-sm text-sm text-muted-foreground">Hotel management for independent hotels in Nigeria. Bookings, rooms and bills in one place.</p>
+            <p className="mt-3 max-w-sm text-sm text-muted-foreground">Hotel management software for independent hotels in Nigeria. Know every naira that comes through your front desk.</p>
           </div>
-          <FooterLinks title="Product" links={[{ to: "/", label: "Home" }, { to: "/pricing", label: "Pricing" }, { to: "/faq", label: "FAQ" }]} />
+          <FooterLinks title="Product" links={[{ to: "/", label: "Home" }, { to: "/features", label: "Features" }, { to: "/pricing", label: "Pricing" }, { to: "/security", label: "Security" }, { to: "/faq", label: "FAQ" }]} />
           <FooterLinks title="Company" links={[{ to: "/about", label: "About" }, { to: "/contact", label: "Contact" }, { to: "/privacy", label: "Privacy notice" }, { to: "/terms", label: "Terms of use" }]} />
         </div>
       </footer>
@@ -60,7 +62,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   );
 }
 
-type FooterLink = { to: "/" | "/pricing" | "/faq" | "/about" | "/contact" | "/privacy" | "/terms"; label: string };
+type FooterLink = { to: "/" | "/features" | "/security" | "/pricing" | "/faq" | "/about" | "/contact" | "/privacy" | "/terms"; label: string };
 function FooterLinks({ title, links }: { title: string; links: FooterLink[] }) {
   return (
     <div>

@@ -17,8 +17,8 @@ export function Hero({ label, title, text }: { label: string; title: string; tex
         <h1 className="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">{title}</h1>
         <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">{text}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Button asChild size="lg"><Link to="/auth">Start free trial <ArrowRight aria-hidden /></Link></Button>
-          <Button asChild size="lg" variant="outline"><Link to="/contact">Contact us</Link></Button>
+          <Button asChild size="lg"><Link to="/auth">Start your free trial <ArrowRight aria-hidden /></Link></Button>
+          <Button asChild size="lg" variant="outline"><Link to="/contact">Talk to us</Link></Button>
         </div>
         <p className="mt-4 text-sm text-muted-foreground">30 days free. No card needed.</p>
       </div>
