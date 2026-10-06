@@ -430,11 +430,12 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Errors: `E_INVALID`, `E_READ_ONLY`, `E_REQUIRED`
 
 ### `public.post_payment`
-- Args: `p_folio_id uuid, p_payment_method_id uuid, p_amount numeric, p_currency text, p_is_deposit boolean, p_description text, p_reference text, p_idempotency_key text`
+- Args: `p_folio_id uuid, p_payment_method_id uuid, p_amount numeric, p_currency text, p_is_deposit boolean, p_description text, p_reference text, p_idempotency_key text, p_confirm_duplicate_reason text DEFAULT NULL::text`
 - Returns: `uuid`
 - Callable by signed-in users: yes · security definer
-- Permission: —
-- Errors: `E_INVALID`, `E_READ_ONLY`, `E_REQUIRED`
+- Permission: `fin.payment.post` (deposits: `fin.deposit.take`)
+- Errors: `E_INVALID`, `E_POSSIBLE_DUPLICATE`, `E_READ_ONLY`, `E_REQUIRED`
+- FIN-017: a payment matching one on the same folio (amount, currency, method, reference) in the last `duplicate_payment_window_minutes` (10) is refused with `E_POSSIBLE_DUPLICATE`, naming the earlier payment, unless `p_confirm_duplicate_reason` is given. A confirmed repeat writes audit action `payment_duplicate_confirmed`.
 
 ### `public.post_room_charges`
 - Args: `p_property_id uuid, p_business_date date DEFAULT NULL::date`

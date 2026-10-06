@@ -4530,6 +4530,7 @@ export type Database = {
       post_payment: {
         Args: {
           p_amount: number
+          p_confirm_duplicate_reason?: string
           p_currency: string
           p_description: string
           p_folio_id: string

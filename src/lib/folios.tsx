@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/lib/access";
-import { errorMessage } from "@/lib/errors";
+import { errorCode, errorMessage } from "@/lib/errors";
 import { callRpc, Field, FormDialog, useSetupList } from "@/lib/setup";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -90,7 +90,7 @@ export function useFolioTransactions(folioId: string) {
   });
 }
 
-export function useFolioMutation<T = unknown>(name: string, success: string) {
+export function useFolioMutation<T = unknown>(name: string, success: string, quietCodes: string[] = []) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (args: Record<string, unknown>) => callRpc<T>(name, args),
@@ -99,7 +99,8 @@ export function useFolioMutation<T = unknown>(name: string, success: string) {
       qc.invalidateQueries({ queryKey: ["reservations"] });
       toast.success(success);
     },
-    onError: (e) => toast.error(errorMessage(e)),
+    // Codes in quietCodes are shown inside the form by the caller, not as a toast.
+    onError: (e) => { if (!quietCodes.includes(errorCode(e) ?? "")) toast.error(errorMessage(e)); },
   });
 }
 
@@ -173,38 +174,57 @@ export function RecordPaymentDialog({ folio, open, onOpenChange }: { folio: Foli
   const { data: methods = [] } = useSetupList<{ id: string; name: string; is_active: boolean }>("payment_methods", "code");
   const { data: rates = [] } = useSetupList<{ currency: string }>("exchange_rates", "currency");
   const currencies = [folio.currency, ...new Set(rates.map((r) => r.currency.trim()).filter((c) => c !== folio.currency))];
-  const m = useFolioMutation("post_payment", "Payment recorded.");
+  const m = useFolioMutation("post_payment", "Payment recorded.", ["E_POSSIBLE_DUPLICATE"]);
   const key = useDialogKey(open);
   const { depositOnly } = useFolioAccess();
   const due = String(folio.amount_due ?? "");
   const [f, setF] = useState({ method: "", amount: "", currency: folio.currency, deposit: false, reference: "" });
+  // FIN-017: the database refuses a likely repeat of a recent payment and names it; the cashier confirms with a reason.
+  const [duplicate, setDuplicate] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
+  const edit = (next: typeof f) => { setF(next); setDuplicate(null); setReason(""); };
   // Pre-fill with what is owed, as the database states it (no browser arithmetic).
-  useEffect(() => { if (open) setF({ method: "", amount: Number(due) > 0 ? Number(due).toFixed(currencyDecimals(folio.currency)) : "", currency: folio.currency, deposit: depositOnly, reference: "" }); }, [open, due, folio.currency, depositOnly]);
+  useEffect(() => {
+    if (!open) return;
+    setF({ method: "", amount: Number(due) > 0 ? Number(due).toFixed(currencyDecimals(folio.currency)) : "", currency: folio.currency, deposit: depositOnly, reference: "" });
+    setDuplicate(null); setReason("");
+  }, [open, due, folio.currency, depositOnly]);
 
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title={`Record payment · ${folio.number}`} busy={m.isPending}
+      submitLabel={duplicate ? "Record second payment" : "Save"} submitDisabled={!!duplicate && !reason.trim()}
       onSubmit={() => m.mutate({ p_folio_id: folio.folio_id, p_payment_method_id: f.method, p_amount: f.amount, p_currency: f.currency,
-        p_is_deposit: f.deposit || depositOnly, p_description: null, p_reference: f.reference, p_idempotency_key: key }, { onSuccess: () => onOpenChange(false) })}>
+        p_is_deposit: f.deposit || depositOnly, p_description: null, p_reference: f.reference, p_idempotency_key: key,
+        p_confirm_duplicate_reason: duplicate ? reason.trim() : null },
+        { onSuccess: () => onOpenChange(false), onError: (e) => { if (errorCode(e) === "E_POSSIBLE_DUPLICATE") setDuplicate(errorMessage(e)); } })}>
       <p className="text-sm text-muted-foreground">Take the payment outside the system first, then record it here.</p>
       <Field label="Method" htmlFor="pp-m">
-        <Select value={f.method} onValueChange={(v) => setF({ ...f, method: v })}>
+        <Select value={f.method} onValueChange={(v) => edit({ ...f, method: v })}>
           <SelectTrigger id="pp-m"><SelectValue placeholder="How did they pay?" /></SelectTrigger>
           <SelectContent>{methods.filter((x) => x.is_active).map((x) => <SelectItem key={x.id} value={x.id}>{x.name}</SelectItem>)}</SelectContent>
         </Select>
       </Field>
       <div className="grid grid-cols-[1fr_8rem] gap-3">
-        <Field label="Amount" htmlFor="pp-a"><Input id="pp-a" type="number" inputMode="decimal" min="0.01" step="0.01" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} required /></Field>
+        <Field label="Amount" htmlFor="pp-a"><Input id="pp-a" type="number" inputMode="decimal" min="0.01" step="0.01" value={f.amount} onChange={(e) => edit({ ...f, amount: e.target.value })} required /></Field>
         <Field label="Currency" htmlFor="pp-c">
-          <Select value={f.currency} onValueChange={(v) => setF({ ...f, currency: v })}>
+          <Select value={f.currency} onValueChange={(v) => edit({ ...f, currency: v })}>
             <SelectTrigger id="pp-c"><SelectValue /></SelectTrigger>
             <SelectContent>{currencies.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
           </Select>
         </Field>
       </div>
       {f.currency !== folio.currency && <p className="text-sm text-muted-foreground">The latest exchange rate on or before the business date is used and saved with the payment.</p>}
-      <Field label="Reference (optional)" htmlFor="pp-r" hint="POS slip, transfer reference or receipt number."><Input id="pp-r" value={f.reference} onChange={(e) => setF({ ...f, reference: e.target.value })} /></Field>
-      <label className="flex items-center gap-2 text-sm"><Switch checked={f.deposit || depositOnly} disabled={depositOnly} onCheckedChange={(v) => setF({ ...f, deposit: v })} /> This is a deposit</label>
+      <Field label="Reference (optional)" htmlFor="pp-r" hint="POS slip, transfer reference or receipt number."><Input id="pp-r" value={f.reference} onChange={(e) => edit({ ...f, reference: e.target.value })} /></Field>
+      <label className="flex items-center gap-2 text-sm"><Switch checked={f.deposit || depositOnly} disabled={depositOnly} onCheckedChange={(v) => edit({ ...f, deposit: v })} /> This is a deposit</label>
       {depositOnly && <p className="text-sm text-muted-foreground">Your role can record deposits only. Other payments are taken by the front desk or cashier.</p>}
+      {duplicate && (
+        <div role="alert" className="space-y-3 rounded-md border border-warning/40 bg-warning-soft p-3 text-sm">
+          <p>{duplicate}</p>
+          <Field label="Reason for second payment" htmlFor="pp-why" hint="Saved with the payment and in the audit log.">
+            <Input id="pp-why" value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
+          </Field>
+        </div>
+      )}
     </FormDialog>
   );
 }
