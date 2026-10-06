@@ -549,6 +549,14 @@ Sizes: small is about a day or less, medium a few days, large a week or more. Fi
 | Deployment | Vercel (decision 5c): change the build target from Cloudflare Workers | Small to medium |
 | Deployment | Automatic checks on every change (tests and build before anything reaches main) | Small |
 
+### Later (not wave 2)
+
+Added 6 Oct 2026. Agreed work that waits until after wave 2.
+
+| Requirement | Work | Size |
+|---|---|---|
+| SET-002 | Overbooking allowance per room type: how many rooms of a type may be sold beyond the rooms that exist. Today room types have occupancy limits (adults, children) but no overbooking allowance anywhere; the register row stays "Partly built". | Medium (availability, booking checks and the Room types screen) |
+
 ## 4. Decisions
 
 ### Answered on 30 Sep 2026
