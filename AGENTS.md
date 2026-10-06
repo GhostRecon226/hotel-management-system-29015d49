@@ -79,6 +79,7 @@ One line per rule. Why: the reason.
 - Migrations must replay from empty. Run scripts/test-db.sh (local Supabase in Docker) after every change; it must not add any "not ok". Why: supabase/migrations is the only source of truth, and the tests are the proof.
 - The browser has no table write rights (default-deny, 20260930100000). New tables need RLS and tenant_id; new public functions need an explicit grant to authenticated. Why: every change goes through a permission-checked function.
 - Keep the existing permission names (decision 5f). Why: the code and database already use them.
+- Errors go to Sentry only through src/lib/error-report.ts (no Sentry package): never add user identity, IP, request bodies, form values or session replay, and keep expected [E_CODE] refusals out. GitHub checks (.github/workflows/ci.yml) always report "Checks and database tests" and "Browser tests"; docs-only changes pass early (scripts/ci-changes.sh). None of this is in the Vercel build. See docs/safety-net.md. Why: we hear about failures without sending personal data, and an urgent fix can always ship.
 
 ## Test gotchas
 

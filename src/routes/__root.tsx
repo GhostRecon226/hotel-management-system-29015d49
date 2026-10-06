@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { installBrowserErrorReporting, reportBrowserError } from "@/lib/error-report";
 
 import appCss from "../styles.css?url";
 
@@ -37,6 +38,7 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   console.error(error);
+  useEffect(() => reportBrowserError(error, "page"), [error]);
   const router = useRouter();
 
   return (
@@ -109,6 +111,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+
+  useEffect(() => installBrowserErrorReporting(), []);
 
   useEffect(() => {
     // Do not reload the router on sign-in. The sign-in page and the email link already navigate, and
