@@ -119,7 +119,6 @@ Numbers refer to the table under steps 1 and 2. Fixed since then: 1 (test was wr
 | ADM-006 (3) | The database owner can change, delete or wipe audit rows |
 | FO-006, HK-001 | A room move creates no cleaning task for the old room |
 | FO-012 | After a voided check-in the room is dirty, so the guest cannot be checked in again at once |
-| PLT-007 / ADM-002 | Adding a property is System Administrator only (decision of 6 Oct 2026), so the General Manager does not hold every permission; ADM-002's check fails on that one permission until the conflict is decided |
 | GST-005 | A guest with an upcoming booking can be anonymised |
 
 Also not done: 6c (approval limits on built-in roles), DAY-006 (same-day stays), tax on the `tax_rates` table is not audited, invoice net and taxable figures can differ by 1 kobo from the folio on odd amounts, and one browser test failed once and then passed (not explained).
@@ -252,7 +251,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | PLT-004 | A new property is seeded from its country template (currency, timezone, tax lines, payment methods, charge codes). | Must | Built and works | 8 test checks pass, plus 2 in `26_small_fixes.sql`. Ghana GHS, Kenya KES, South Africa ZAR, each with its time zone; tax lines for Nigeria only. |
 | PLT-005 | A trial ends automatically and the hotel becomes read-only. | Must | Built and works | 8 test checks pass. |
 | PLT-006 | A read-only hotel can still settle and check out guests already in house. | Must | Built and works | 3 test checks pass. |
-| PLT-007 | Plan limits on rooms, properties and users stop new creation and never delete anything. | Should | Built and works | 4 test checks pass, plus 6 in `27_medium_fixes.sql`. System Administrator adds a property on Setup, Property; the limit is `plans.max_properties` (Starter and Standard 1, Pro 3). |
+| PLT-007 | Plan limits on rooms, properties and users stop new creation and never delete anything. | Should | Built and works | 4 test checks pass, plus 6 in `27_medium_fixes.sql`. System Administrator or General Manager (ADM-002, decision of 6 Oct 2026) adds a property on Setup, Property; the limit is `plans.max_properties` (Starter and Standard 1, Pro 3). |
 | PLT-008 | Platform staff activate, suspend, change plan or close a hotel by hand, with a reason, and every change is logged. | Must | Built and works | Manual activation, suspension and plan change through app.platform_set_subscription (decision 5e). No console screen. Tests pass. |
 | PLT-009 | Platform staff see tenants and subscriptions but no guest, reservation or financial data. | Must | Missing | No platform staff role at all. (no automated test yet) |
 | PLT-010 | Time-boxed break-glass support access, with reason, tenant notice and audit entry. | Should | Missing | No break-glass access. (no automated test yet) |

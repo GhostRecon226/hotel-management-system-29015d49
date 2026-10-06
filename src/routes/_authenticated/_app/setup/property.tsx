@@ -78,7 +78,7 @@ function PropertyDetails() {
 
 const COUNTRIES = ["Nigeria", "Ghana", "Kenya", "South Africa", "Other"];
 
-/** PLT-007: the System Administrator adds another property, within the plan's property limit. */
+/** PLT-007: the System Administrator or General Manager adds another property, within the plan's property limit. */
 function AddPropertySection() {
   const qc = useQueryClient();
   const { setPropertyId } = useAccess();

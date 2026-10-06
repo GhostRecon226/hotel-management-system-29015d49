@@ -399,7 +399,7 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Args: `p_name text, p_city text, p_country text`
 - Returns: `uuid`
 - Callable by signed-in users: yes · security definer
-- Permission: `setup.property.create` (System Administrator)
+- Permission: `setup.property.create` (System Administrator, General Manager)
 - Errors: `E_FORBIDDEN`, `E_PLAN_LIMIT`, `E_READ_ONLY`, `E_REQUIRED`
 - PLT-007: seeded like the first property; the creator gets System Administrator and General Manager there. Audited.
 

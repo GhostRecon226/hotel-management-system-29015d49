@@ -94,8 +94,10 @@ declare v_p uuid;
 begin
   perform t.admin();
   update public.tenant_subscriptions set plan_code = 'starter' where tenant_id = t.id('tenantA');
+  perform t.login('fom');
+  perform t.raises(format('select public.create_property(%L, %L, %L)', 'Sunrise Annex', 'Ibadan', 'Nigeria'), 'E_FORBIDDEN', '[PLT-007] a front office manager cannot add a property');
   perform t.login('gm');
-  perform t.raises(format('select public.create_property(%L, %L, %L)', 'Sunrise Annex', 'Ibadan', 'Nigeria'), 'E_FORBIDDEN', '[PLT-007] a general manager cannot add a property');
+  perform t.raises(format('select public.create_property(%L, %L, %L)', 'Sunrise Annex', 'Ibadan', 'Nigeria'), 'E_PLAN_LIMIT', '[PLT-007][ADM-002] a general manager can add a property too (decision of 6 Oct 2026), within the plan limit');
   perform t.login('adminA');
   perform t.raises(format('select public.create_property(%L, %L, %L)', 'Sunrise Annex', 'Ibadan', 'Nigeria'), 'E_PLAN_LIMIT', '[PLT-007] the plan''s property limit applies');
   perform t.admin();
@@ -107,6 +109,9 @@ begin
   perform t.eq((select count(*)::int from public.payment_methods where property_id = v_p), 4, '[PLT-007] the new property gets the same defaults');
   perform t.eq((select tenant_id from public.properties where id = v_p), t.id('tenantA'), '[PLT-007] it belongs to the same hotel');
   perform t.ok(exists (select 1 from public.audit_events where action = 'create_property' and record_id = v_p::text), '[PLT-007] adding a property is audited');
+  perform t.login('gm');
+  perform t.ok(public.create_property('Sunrise Lekki', 'Lagos', 'Nigeria') is not null, '[PLT-007][ADM-002] the general manager adds a property when the plan allows');
+  perform t.admin();
   perform t.login('fdo');
   perform t.ok(not app.can('fo.view', v_p), '[PLT-007] staff get no access to it until they are given a role there');
   perform t.admin();
