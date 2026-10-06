@@ -1,4 +1,53 @@
-# Architecture rules
+# Hotel Desk: rules
+
+The single rules file for this repository. Claude Code reads it through `CLAUDE.md`, which only imports this file.
+Merged on 6 Oct 2026 from the reference repository's `CLAUDE.md` (rules 1 to 10, adapted) and this file's architecture notes.
+
+## Product and people
+
+Multi-tenant hotel management system for Nigeria, then Africa. Peter owns the product. Peter is a project manager, not a database engineer: explain choices in business terms.
+
+## Stack
+
+- Supabase Postgres owns all data and rules. Every rule a hotel depends on lives in a migration and is proved by a test.
+- The app is TanStack Start (React, Vite) on Vercel. Work Postgres cannot do (staff invites, ID photo links, email sending, CSV exports, cron) runs in server functions under `src/lib/*.functions.ts` and `src/routes/api`. No Edge Functions, no Lovable.
+- Hosting: Vercel Hobby, so the 5-minute email cron is off until Pro; the daily ID photo clean-up runs at 02:00 UTC. Supabase in West EU (Ireland).
+
+## Commands
+
+- `scripts/test-db.sh` rebuilds a local Supabase database from the migrations, runs the upgrade test and every database test, and checks the requirement register. It must end with `ALL OK`. `SKIP_UPGRADE=1` skips the upgrade test for quick runs.
+- `npx playwright test` runs the browser tests against local Supabase.
+- `npm run typecheck`, `npm run check:money`, `npm run check:contrast`, `npm run check:requirements`, `npm run build`.
+- Run all of them before you finish any change.
+
+## Rules
+
+1. Never edit a migration that has been applied to the practice or live database. Add a new one. Name it `YYYYMMDDHHMMSS_topic.sql`. Before writing a new version of a function, find its latest definition: later migrations often use upper-case `CREATE OR REPLACE FUNCTION`, so search without regard to case.
+2. Every table has `tenant_id` and row-level security and, where it applies, `property_id`. The only tables without `tenant_id` are the shared lists `tenants`, `plans` and `permissions`.
+3. Helpers live in schema `app`. Callable functions live in `public`. Only `public` functions are granted to signed-in users (`authenticated`); never to `anon`.
+4. Every function is `security definer` with `set search_path = public, pg_temp`. Every public function checks a permission first, with `app.require` or `app.can`, or through a helper that does (`app.reservation_for_write`, `app.folio_for_write`, `app.hk_task_for_write`).
+5. Errors use `app.fail('E_CODE', 'plain message')`. It raises `[E_CODE] message`; the app shows the message only (`src/lib/errors.ts`). List every code a function raises in its entry in `docs/functions.md`.
+6. The ledger is immutable. Never update or delete `folio_transactions`, `folio_tax_lines`, `invoices` or `audit_events`. Correct with a linked reversal, adjustment or refund.
+7. Money and room inventory writes must be safe to repeat.
+   - Every write that moves money takes an idempotency key, unique per hotel. A retry returns the first result and never posts twice.
+   - Every write that changes room inventory must be safe to repeat: a key, or a state check that refuses the repeat.
+   - Known cases that use the state check: Change departure (`extend_stay`: the same departure again is refused, "Choose a departure date other than ...") and room moves (`move_room`: moving to the room the guest is already in is refused, "The guest is already in this room.").
+8. New tables get default-deny grants: no insert, update or delete for the browser, reads only through row-level security. New public functions need `revoke ... from public, anon` and an explicit grant to `authenticated`.
+9. Every new function needs a test, tagged with its requirement id, for example `[FIN-017]`. Every id a test uses needs a row in `docs/requirements.csv`, the single requirement register; `npm run check:requirements` (also run by `scripts/test-db.sh`) fails otherwise. Refresh the workbook with `python3 scripts/requirements-workbook.py` (needs `openpyxl`).
+10. Reference data (permissions, built-in roles and their grants, plans, settings) is seeded inside migrations. Change it with a new migration, never by hand on a database. New permissions go to built-in roles only; custom roles copied earlier do not get them, so say so in the report.
+11. Tests first. Write the failing test, then the change. Do not change an existing test without Peter's yes; show the before and after.
+12. Money arithmetic happens in Postgres only. The browser shows the figures the database returns (`npm run check:money`).
+
+## Releases
+
+- One branch per change. Never merge: Peter merges.
+- Practice database (`vxkresricneodgvqphrn`) first: dry run, then apply, then report. Keep the folder linked to practice.
+- Live database (`urbpxybyrfjczqbrpdsq`) only after Peter's separate yes for that release: back up first into `~/hotel-desk-backups`, dry run and apply only if it lists exactly the agreed migrations, confirm the count matches the code, check the new objects exist, then link back to practice.
+- Apply the database before the app is merged: the app calls the new functions.
+- Never put keys, passwords, database addresses or service keys in chat or in git. The app uses only the public (anon) key; the service role key stays in server code and Vercel settings.
+- Keep "Allow ID photos" off on every live hotel. Do not change the three privacy `[TO CONFIRM]` markers.
+
+## Architecture notes
 
 One line per rule. Why: the reason.
 
@@ -11,7 +60,7 @@ One line per rule. Why: the reason.
 - Guests are tenant-scoped (shared across properties); guest RPCs check permissions with app.require_any / app.can(key, null). Why: one guest profile per hotel group.
 - guest_documents has no client read policy; numbers come only via get_guest(), masked without guest.document.view. Why: ID numbers are sensitive.
 - merge_guests must move every table that references guests; add new referencing tables (reservations, folios) to it. Why: merges must leave no orphan references.
-- Every screen uses the shared design system only: tokens in src/styles.css, shadcn ui components, Badge status variants (success=clean/ready/paid, warning=pending/dirty, danger=out of order/overdue/error, info=in house/info), Money for amounts (right-aligned, ₦), PageHeader/FilterBar, EmptyState/LoadingState/TableStateRow. No raw colour classes. Reference: /design. Why: consistent, fast-to-scan front desk UI.
+- Every screen uses the shared design system only: tokens in src/theme.css, shadcn ui components, Badge status variants (success=clean/ready/paid, warning=pending/dirty, danger=out of order/overdue/error, info=in house/info), Money for amounts (right-aligned, ₦), PageHeader/FilterBar, EmptyState/LoadingState/TableStateRow. No raw colour classes. Reference: /design. Why: consistent, fast-to-scan front desk UI.
 - Availability comes from reservation_nights joined to live reservations (confirmed, checked_in, tentative with unexpired hold); bookings lock per property+room type via app.assert_available. Why: safe last-room booking.
 - Room assignments use an exclusion constraint on active rows; released rows stay (is_active=false). Why: no double-assigned rooms, keep history.
 - Front desk state lives in stays (one in_house row per reservation and per room); check-in/walk-in/move/extend/void are public RPCs, lists read security_invoker views v_arrivals/v_in_house. app.deposit_paid() sums is_deposit payment rows across the booking's folios. Check-in refuses a registration with registration_accepted sent and not true (FO-003; omitting it is not refused). move_room p_keep_rate: a dearer room type (app.move_rate_quote, unposted nights only) charges the new rate unless fo.upgrade.complimentary, audited complimentary_upgrade (FO-007). create_property needs setup.property.create (System Administrator and General Manager, PLT-007). Why: occupancy history per room, rules in Postgres.
@@ -30,3 +79,18 @@ One line per rule. Why: the reason.
 - Migrations must replay from empty. Run scripts/test-db.sh (local Supabase in Docker) after every change; it must not add any "not ok". Why: supabase/migrations is the only source of truth, and the tests are the proof.
 - The browser has no table write rights (default-deny, 20260930100000). New tables need RLS and tenant_id; new public functions need an explicit grant to authenticated. Why: every change goes through a permission-checked function.
 - Keep the existing permission names (decision 5f). Why: the code and database already use them.
+
+## Test gotchas
+
+- `set role` persists across DO blocks. Call `perform t.admin();` at the end of each block, and before reading tables a signed-in role cannot see.
+- Test helpers are in schema `t`: `login`, `admin`, `ok`, `eq`, `raises`, `lives`, `crash`, `bdate`, `set_bdate`, `pm`, `cc`, `room`, `reg`, `id`, `put`, `book`, `main_folio`, `balance`, `set_tenant_status`. A helper created inside a test needs `grant execute ... to authenticated`.
+- Fixture users: adminA, adminB, gm, fdo, fom, acc, hks, att, mnt, rsv, csh. fdo and fom hold custom copies of the built-in roles (FDOL, FOML). The test hotel has rooms 101 to 103 and 201; add your own rooms for new tests.
+- Staff can read only their own notifications.
+
+## Language
+
+Plain and short. No em dashes. Active voice. Explain choices in business terms.
+
+## Open decisions
+
+Plan tiers and prices (A16; pilots are free), tax seed sign-off (A11, accountant), fee and discount tax treatment (accountant). See `docs/decisions.md`. Decided: region West EU, Ireland (A14, 30 Sep 2026); same-day stays charged one night, a manager can waive it (DAY-006, 30 Sep and 1 Oct 2026).
