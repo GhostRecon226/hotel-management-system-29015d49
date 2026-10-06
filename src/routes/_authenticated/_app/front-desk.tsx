@@ -66,7 +66,7 @@ function FrontDesk() {
             can("fin.folio.view") && <DropdownMenuItem key="f" className="h-10" onClick={() => openFolio.mutate(s.reservation_id)}>Open folio</DropdownMenuItem>,
             can("svc.order.create") && <DropdownMenuItem key="s" className="h-10" onClick={() => setSvc(s)}>Service request</DropdownMenuItem>,
             can("fo.room.move") && !s.is_departing && <DropdownMenuItem key="m" className="h-10" onClick={() => setMove(s)}>Move room</DropdownMenuItem>,
-            can("fo.stay.extend") && <DropdownMenuItem key="e" className="h-10" onClick={() => setExtend(s)}>Extend stay</DropdownMenuItem>,
+            can("fo.stay.extend") && <DropdownMenuItem key="e" className="h-10" onClick={() => setExtend(s)}>Change departure</DropdownMenuItem>,
             can("fo.checkin.void") && s.can_void && <DropdownMenuItem key="v" className="h-10 text-destructive" onClick={() => setVoiding(s)}>Void check-in</DropdownMenuItem>,
           ].filter(Boolean);
           return (

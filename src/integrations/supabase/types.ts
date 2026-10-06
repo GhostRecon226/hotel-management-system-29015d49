@@ -1868,6 +1868,7 @@ export type Database = {
           country: string | null
           created_at: string
           id: string
+          inspection_required: boolean
           max_stay_nights: number
           name: string
           rollover_time: string
@@ -1886,6 +1887,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          inspection_required?: boolean
           max_stay_nights?: number
           name: string
           rollover_time?: string
@@ -1904,6 +1906,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          inspection_required?: boolean
           max_stay_nights?: number
           name?: string
           rollover_time?: string
@@ -2234,6 +2237,7 @@ export type Database = {
         Row: {
           adults: number
           arrival_date: string
+          arrival_ready: boolean
           cancellation_fee: number | null
           cancelled_at: string | null
           children: number
@@ -2269,6 +2273,7 @@ export type Database = {
         Insert: {
           adults?: number
           arrival_date: string
+          arrival_ready?: boolean
           cancellation_fee?: number | null
           cancelled_at?: string | null
           children?: number
@@ -2304,6 +2309,7 @@ export type Database = {
         Update: {
           adults?: number
           arrival_date?: string
+          arrival_ready?: boolean
           cancellation_fee?: number | null
           cancelled_at?: string | null
           children?: number
@@ -4884,6 +4890,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_arrival_ready: {
+        Args: { p_ready: boolean; p_reservation_id: string }
+        Returns: undefined
+      }
       set_exchange_rate: {
         Args: {
           p_currency: string
@@ -4895,6 +4905,10 @@ export type Database = {
       }
       set_guest_feedback_status: {
         Args: { p_id: string; p_status: string }
+        Returns: undefined
+      }
+      set_inspection_required: {
+        Args: { p_property_id: string; p_required: boolean }
         Returns: undefined
       }
       set_lost_found_status: {

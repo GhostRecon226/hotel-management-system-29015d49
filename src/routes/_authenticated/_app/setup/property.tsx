@@ -68,8 +68,30 @@ function PropertyDetails() {
       </div>
       {canEdit && <Button type="submit" disabled={save.isPending}>{save.isPending ? "Saving…" : "Save changes"}</Button>}
     </form>
+    <InspectionSection canEdit={canEdit} required={data.inspection_required} />
     <IdPhotoSettingsSection canEdit={canEdit} />
     </>
+  );
+}
+
+/** SET-008: housekeeping inspection on or off for this property. */
+function InspectionSection({ canEdit, required }: { canEdit: boolean; required: boolean }) {
+  const { property } = useAccess();
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (v: boolean) => callRpc("set_inspection_required", { p_property_id: property!.id, p_required: v }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["setup", "properties"] }); toast.success("Inspection setting saved."); },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  return (
+    <section className="mt-10 max-w-xl space-y-4" aria-labelledby="insp-title">
+      <h2 id="insp-title" className="text-xl font-semibold">Housekeeping</h2>
+      <div className="flex items-start gap-3">
+        <Switch id="insp-required" checked={required} disabled={!canEdit || m.isPending} onCheckedChange={(v) => m.mutate(v)} />
+        <div><Label htmlFor="insp-required">Rooms need inspection after cleaning</Label>
+          <p className="text-sm text-muted-foreground">Off: when an attendant completes a room, it is clean straight away, with no supervisor check.</p></div>
+      </div>
+    </section>
   );
 }
 

@@ -98,7 +98,7 @@ export function SetConditionDialog({ room, onOpenChange }: { room: BoardRoom | n
   useEffect(() => { if (room) { setCondition(room.condition === "out_of_order" ? "dirty" : room.condition); setReason(""); } }, [room]);
   return (
     <FormDialog open={!!room} onOpenChange={onOpenChange} title={`Set condition · ${room?.room_number ?? ""}`} busy={m.isPending}
-      onSubmit={() => m.mutate({ p_room_id: room!.id, p_condition: condition, p_reason: reason || null }, { onSuccess: () => onOpenChange(false) })}>
+      onSubmit={() => m.mutate({ p_room_id: room!.id, p_condition: condition, p_reason: reason }, { onSuccess: () => onOpenChange(false) })}>
       <Field label="Condition" htmlFor="c-cond" hint="To take a room out of use, block it instead.">
         <Select value={condition} onValueChange={setCondition}>
           <SelectTrigger id="c-cond"><SelectValue /></SelectTrigger>
@@ -107,8 +107,8 @@ export function SetConditionDialog({ room, onOpenChange }: { room: BoardRoom | n
           </SelectContent>
         </Select>
       </Field>
-      <Field label={room?.condition === "out_of_order" ? "Reason (required)" : "Reason (optional)"} htmlFor="c-reason">
-        <Input id="c-reason" value={reason} onChange={(e) => setReason(e.target.value)} required={room?.condition === "out_of_order"} />
+      <Field label="Reason" htmlFor="c-reason" hint="Saved in the audit log.">
+        <Input id="c-reason" value={reason} onChange={(e) => setReason(e.target.value)} required maxLength={300} />
       </Field>
     </FormDialog>
   );

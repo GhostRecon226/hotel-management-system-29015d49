@@ -111,7 +111,7 @@ Demo hotel started one day behind (29 Sept), rolled by hand from Admin, Business
 
 ### Remaining failures (21)
 
-Numbers refer to the table under steps 1 and 2. Fixed since then: 1 (test was wrong), 2, 3, 4, 5, 20, 21, 22, 27.
+Numbers refer to the table under steps 1 and 2. Fixed since then: 1 (test was wrong), 2, 3, 4, 5, 20, 21, 22, 27. Wave 1 (6 Oct 2026) fixed FO-008, RES-013, HK-002, HK-003 (the test read the notification as the supervisor; corrected to read it as the attendant), ROOM-004, PLT-004 and SET-008.
 
 | Requirement | What is still wrong |
 |---|---|
@@ -120,15 +120,8 @@ Numbers refer to the table under steps 1 and 2. Fixed since then: 1 (test was wr
 | FO-003 | No "registration card accepted" step at check-in |
 | FO-006, HK-001 | A room move creates no cleaning task for the old room |
 | FO-007 | No complimentary upgrade that keeps the booked rate |
-| FO-008 (2) | An in-house stay cannot be shortened in advance |
 | FO-012 | After a voided check-in the room is dirty, so the guest cannot be checked in again at once |
-| RES-013 | No arrival-ready flag |
-| HK-002 (2) | A task with no assignee can be started. Attendants see every task |
-| HK-003 | The attendant is not told when their room fails inspection |
-| ROOM-004 | A dirty override needs no reason |
 | PLT-007 | No way to add a second property (waits until after the first pilot) |
-| PLT-004 | A Ghana hotel gets naira (waits until after the first pilot) |
-| SET-008 | Inspection cannot be switched off per property |
 | GST-005 | A guest with an upcoming booking can be anonymised |
 
 Also not done: 6c (approval limits on built-in roles), DAY-006 (same-day stays), tax on the `tax_rates` table is not audited, invoice net and taxable figures can differ by 1 kobo from the folio on odd amounts, and one browser test failed once and then passed (not explained).
@@ -258,7 +251,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | PLT-001 | A person with a confirmed email creates a hotel account in one step. | Must | Built and works | 2 test checks pass. |
 | PLT-002 | Signup is refused for an unconfirmed email and for a user who already belongs to a hotel. | Must | Built and works | 2 test checks pass. |
 | PLT-003 | One hotel can never see or change another hotel's data. | Must | Built and works | 14 test checks pass. |
-| PLT-004 | A new property is seeded from its country template (currency, timezone, tax lines, payment methods, charge codes). | Must | Partly built | 7 pass, 1 fail: Ghana property uses cedi (got NGN, expected GHS) |
+| PLT-004 | A new property is seeded from its country template (currency, timezone, tax lines, payment methods, charge codes). | Must | Built and works | 8 test checks pass, plus 2 in `26_small_fixes.sql`. Ghana GHS, Kenya KES, South Africa ZAR, each with its time zone; tax lines for Nigeria only. |
 | PLT-005 | A trial ends automatically and the hotel becomes read-only. | Must | Built and works | 8 test checks pass. |
 | PLT-006 | A read-only hotel can still settle and check out guests already in house. | Must | Built and works | 3 test checks pass. |
 | PLT-007 | Plan limits on rooms, properties and users stop new creation and never delete anything. | Should | Partly built | 3 pass, 1 fail: a hotel can add another property (so the property limit can apply) |
@@ -293,7 +286,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | SET-005 | Tax lines with rate, base (net or net plus prior taxes), applicable revenue groups and a verified flag. | Must | Built and works | 1 test checks pass. |
 | SET-006 | Charge codes and payment methods per property. | Must | Built, untested | Charge codes and payment methods seeded per property. (no automated test yet) |
 | SET-007 | Exchange rates per property per day, entered by hand. | Should | Built and works | 1 test checks pass. |
-| SET-008 | Inspection can be switched off per property. | Should | Missing | Test fails: inspection can be switched off per property |
+| SET-008 | Inspection can be switched off per property. | Should | Built and works | 1 test check passes, plus 4 in `26_small_fixes.sql`. Switch on Setup, Property. Off: a completed room is clean at once. |
 | SET-009 | Per hotel: "Allow ID photos" (off by default) and "Require ID photo at check-in" (applies only when allowed). While Allow is off, uploading and opening ID photos are refused. | Must | Built and works (branch `claude/id-photos`, not yet live) | Database and browser tests pass. |
 
 ### Reservations
@@ -312,7 +305,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | RES-010 | A deposit rule on the rate plan sets the deposit required. | Must | Built and works | 2 test checks pass. |
 | RES-011 | Corporate business is a booking source plus a free-text company name plus a corporate rate plan; no company entity in R1. | Must | Built and works | 2 test checks pass. |
 | RES-012 | A group booking is several one-room reservations sharing a group record. | Should | Built, untested | Group bookings table and form. (no automated test yet) |
-| RES-013 | Additional guests and an arrival-ready flag on a booking. | Should | Partly built | 1 pass, 1 fail: the arrival-ready flag exists and is a flag, not a status |
+| RES-013 | Additional guests and an arrival-ready flag on a booking. | Should | Built and works (database only) | 2 test checks pass, plus 4 in `26_small_fixes.sql`. `set_arrival_ready` exists; no screen shows the flag yet. |
 
 ### Front Office
 
@@ -325,7 +318,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | FO-005 | Assign a room before arrival; two overlapping stays can never hold the same room. | Must | Built and works | 2 test checks pass. |
 | FO-006 | Move a guest to another room; the old room turns dirty with a turnover task; the stay and folio carry over. | Must | Partly built | 6 pass, 1 fail: a cleaning task was created for the old room |
 | FO-007 | A move to a different room type reprices from tonight; a complimentary upgrade keeps the rate and needs its own permission. | Should | Partly built | 0 pass, 1 fail: a complimentary upgrade that keeps the booked rate is supported |
-| FO-008 | Extend or shorten a stay in house; extension checks inventory, the room and blocks. | Must | Partly built | 4 pass, 2 fail: an in-house stay can be shortened (failed: [E_INVALID] The new departure must be after 03 Oct 2026.); shortening removes unused nights (got 3, expected 2) |
+| FO-008 | Extend or shorten a stay in house; extension checks inventory, the room and blocks. | Must | Built and works | 6 test checks pass, plus 4 in `26_small_fixes.sql` and browser test `e2e/change-departure.spec.ts`. |
 | FO-009 | Check-out needs a zero balance and no credit, or an approved exception; open folios stay open for collection. | Must | Built and works | 10 test checks pass. |
 | FO-010 | Check-out sets the room Dirty and Vacant and creates a turnover task; leaving early releases the unused nights. | Must | Built and works | 5 test checks pass. |
 | FO-011 | Undo a check-out on the same business date. | Should | Built and works | 5 test checks pass. |
@@ -354,7 +347,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | ROOM-001 | Room condition and occupancy are separate, are set only by the system or a controlled action, and cannot be written by hand. | Must | Built and works | 2 test checks pass. |
 | ROOM-002 | Out-of-order and out-of-service blocks; a request from maintenance needs approval, an approver's own request does not. | Must | Built and works | 5 test checks pass. |
 | ROOM-003 | A block cannot cover a night a guest is assigned, and cannot oversell the room type. | Must | Built and works | 2 test checks pass. |
-| ROOM-004 | A supervisor can override a room's condition with a reason; it is audited. | Should | Partly built | 2 pass, 1 fail: override needs a reason (expected [E_REQUIRED], but it succeeded) |
+| ROOM-004 | A supervisor can override a room's condition with a reason; it is audited. | Should | Built and works | 3 test checks pass, plus 1 in `26_small_fixes.sql`. |
 | ROOM-005 | Rooms are added from the Rooms page by roles that set up rooms: one at a time, or several by number (optional prefix and range) or by name (one per line), with a preview. Labels are free text up to 30 characters (letters, accented letters, digits, spaces, hyphens, apostrophes), unique per hotel ignoring case and extra spaces, shown as typed and sorted in natural order. | Must | Built and works (branch `claude/room-labels`, not yet live) | 48 database checks and 4 browser tests pass. |
 
 ### Housekeeping
@@ -362,8 +355,8 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
 | HK-001 | Check-out and room moves create a turnover task; the board lists open tasks. | Must | Partly built | 2 pass, 1 fail: a cleaning task was created for the old room |
-| HK-002 | Assign, start and complete cleaning tasks; an attendant sees only their own tasks. | Must | Partly built | 4 pass, 2 fail: a task assigned to nobody cannot be started (expected [E_INVALID/E_FORBIDDEN], but it succeeded); an attendant sees only their own tasks |
-| HK-003 | Inspection passes to Ready or fails with a reason and goes to rework. | Must | Partly built | 4 pass, 1 fail: the attendant is notified of the failed inspection |
+| HK-002 | Assign, start and complete cleaning tasks; an attendant sees only their own tasks. | Must | Built and works | 6 test checks pass, plus 2 in `26_small_fixes.sql`. |
+| HK-003 | Inspection passes to Ready or fails with a reason and goes to rework. | Must | Built and works | 5 test checks pass (the notification check now reads as the attendant, 6 Oct 2026). |
 | HK-004 | Nobody inspects their own cleaning. | Must | Built and works | 2 test checks pass. |
 | HK-005 | Stayover cleaning tasks are planned at the roll for guests staying on. | Should | Built and works | 1 test checks pass. |
 | HK-006 | Lost and found items are logged and tracked to return or disposal. | Should | Built and works | 1 test checks pass. |
