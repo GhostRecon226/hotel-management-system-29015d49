@@ -689,7 +689,8 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Returns: `uuid`
 - Callable by signed-in users: yes · security definer
 - Permission: `setup.room.manage`
-- Errors: `E_DUPLICATE`, `E_INVALID`, `E_NOT_FOUND`, `E_REQUIRED`
+- Errors: `E_DUPLICATE`, `E_INVALID`, `E_NOT_FOUND`, `E_REQUIRED`, `E_ROOM_BOOKED`, `E_ROOM_OCCUPIED`
+- SET-003: retiring an in-use room is refused while a guest is in it (`E_ROOM_OCCUPIED`, "This room has a guest in it. Retire it after check-out.", checked first) or while upcoming bookings are assigned to it (`E_ROOM_BOOKED`, "103 has 2 upcoming bookings (RES-000123, RES-000140). Move them to another room first.", up to 5 numbers then "and N more"). Upcoming: confirmed, or tentative with a hold not yet expired, assigned from the business date forward. Saving an already retired room as retired, renaming and floor changes work as before.
 
 ### `public.save_room_type`
 - Args: `p_property_id uuid, p_id uuid, p_code text, p_name text, p_max_adults integer, p_max_children integer, p_description text, p_is_active boolean`
