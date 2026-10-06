@@ -117,11 +117,9 @@ Numbers refer to the table under steps 1 and 2. Fixed since then: 1 (test was wr
 |---|---|
 | FIN-006, FIN-014 (3) | The database owner can wipe the ledger, or insert a backdated or negative row directly |
 | ADM-006 (3) | The database owner can change, delete or wipe audit rows |
-| FO-003 | No "registration card accepted" step at check-in |
 | FO-006, HK-001 | A room move creates no cleaning task for the old room |
-| FO-007 | No complimentary upgrade that keeps the booked rate |
 | FO-012 | After a voided check-in the room is dirty, so the guest cannot be checked in again at once |
-| PLT-007 | No way to add a second property (waits until after the first pilot) |
+| PLT-007 / ADM-002 | Adding a property is System Administrator only (decision of 6 Oct 2026), so the General Manager does not hold every permission; ADM-002's check fails on that one permission until the conflict is decided |
 | GST-005 | A guest with an upcoming booking can be anonymised |
 
 Also not done: 6c (approval limits on built-in roles), DAY-006 (same-day stays), tax on the `tax_rates` table is not audited, invoice net and taxable figures can differ by 1 kobo from the folio on odd amounts, and one browser test failed once and then passed (not explained).
@@ -254,7 +252,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | PLT-004 | A new property is seeded from its country template (currency, timezone, tax lines, payment methods, charge codes). | Must | Built and works | 8 test checks pass, plus 2 in `26_small_fixes.sql`. Ghana GHS, Kenya KES, South Africa ZAR, each with its time zone; tax lines for Nigeria only. |
 | PLT-005 | A trial ends automatically and the hotel becomes read-only. | Must | Built and works | 8 test checks pass. |
 | PLT-006 | A read-only hotel can still settle and check out guests already in house. | Must | Built and works | 3 test checks pass. |
-| PLT-007 | Plan limits on rooms, properties and users stop new creation and never delete anything. | Should | Partly built | 3 pass, 1 fail: a hotel can add another property (so the property limit can apply) |
+| PLT-007 | Plan limits on rooms, properties and users stop new creation and never delete anything. | Should | Built and works | 4 test checks pass, plus 6 in `27_medium_fixes.sql`. System Administrator adds a property on Setup, Property; the limit is `plans.max_properties` (Starter and Standard 1, Pro 3). |
 | PLT-008 | Platform staff activate, suspend, change plan or close a hotel by hand, with a reason, and every change is logged. | Must | Built and works | Manual activation, suspension and plan change through app.platform_set_subscription (decision 5e). No console screen. Tests pass. |
 | PLT-009 | Platform staff see tenants and subscriptions but no guest, reservation or financial data. | Must | Missing | No platform staff role at all. (no automated test yet) |
 | PLT-010 | Time-boxed break-glass support access, with reason, tenant notice and audit entry. | Should | Missing | No break-glass access. (no automated test yet) |
@@ -313,11 +311,11 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 |---|---|---|---|---|
 | FO-001 | Arrivals due today or overdue, with guest, room type, guarantee and assigned room. | Must | Built and works | 2 test checks pass. |
 | FO-002 | In-house guests with room, departure and balance; overdue departures flagged. | Must | Built and works | 1 test checks pass. |
-| FO-003 | Check-in guards: confirmed booking, arrival date reached, ID recorded, registration accepted, room ready and free, deposit paid. | Must | Partly built | 11 pass, 1 fail: check-in needs the registration card accepted (expected [E_REQUIRED/E_INVALID], but it succeeded) |
+| FO-003 | Check-in guards: confirmed booking, arrival date reached, ID recorded, registration accepted, room ready and free, deposit paid. | Must | Built and works, with a known limit | 12 test checks pass, plus 6 in `27_medium_fixes.sql`. The check-in and walk-in screens force the "registration card" tick; a direct database call that omits the tick is not refused (decision of 6 Oct 2026). Drawn signature: later. |
 | FO-004 | Walk-in check-in creates the booking and checks in in one step. | Must | Built and works | 2 test checks pass. |
 | FO-005 | Assign a room before arrival; two overlapping stays can never hold the same room. | Must | Built and works | 2 test checks pass. |
 | FO-006 | Move a guest to another room; the old room turns dirty with a turnover task; the stay and folio carry over. | Must | Partly built | 6 pass, 1 fail: a cleaning task was created for the old room |
-| FO-007 | A move to a different room type reprices from tonight; a complimentary upgrade keeps the rate and needs its own permission. | Should | Partly built | 0 pass, 1 fail: a complimentary upgrade that keeps the booked rate is supported |
+| FO-007 | A move to a different room type reprices from tonight; a complimentary upgrade keeps the rate and needs its own permission. | Should | Built and works | 1 test check passes, plus 13 in `27_medium_fixes.sql`. Dearer type: front desk charges the new rate; keeping the rate needs `fo.upgrade.complimentary` (GM, FOM, and System Administrator under ADM-002), the move reason, and is audited. Nights already charged keep their price. |
 | FO-008 | Extend or shorten a stay in house; extension checks inventory, the room and blocks. | Must | Built and works | 6 test checks pass, plus 4 in `26_small_fixes.sql` and browser test `e2e/change-departure.spec.ts`. |
 | FO-009 | Check-out needs a zero balance and no credit, or an approved exception; open folios stay open for collection. | Must | Built and works | 10 test checks pass. |
 | FO-010 | Check-out sets the room Dirty and Vacant and creates a turnover task; leaving early releases the unused nights. | Must | Built and works | 5 test checks pass. |

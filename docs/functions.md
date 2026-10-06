@@ -381,11 +381,27 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Errors: `E_INVALID`
 
 ### `public.move_room`
-- Args: `p_id uuid, p_room_id uuid, p_reason text, p_room_override_reason text DEFAULT NULL::text`
+- Args: `p_id uuid, p_room_id uuid, p_reason text, p_room_override_reason text DEFAULT NULL::text, p_keep_rate boolean DEFAULT NULL::boolean`
 - Returns: `uuid`
 - Callable by signed-in users: yes · security definer
-- Permission: —
-- Errors: `E_INVALID`, `E_REQUIRED`, `E_ROOM_TAKEN`
+- Permission: `fo.room.move`; keeping the rate on a dearer room type also needs `fo.upgrade.complimentary`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NO_RATE`, `E_READ_ONLY`, `E_REQUIRED`, `E_ROOM_NOT_READY`, `E_ROOM_TAKEN`
+- FO-007: p_keep_rate null means "charge" for a dearer type and "keep" otherwise. Charging reprices nights not yet posted.
+
+### `public.preview_move_rate`
+- Args: `p_id uuid, p_room_id uuid`
+- Returns: `jsonb` (same_type, is_upgrade, current_total, new_total, missing_date, currency, can_keep_rate)
+- Callable by signed-in users: yes · security definer
+- Permission: `fo.room.move`
+- Errors: `E_FORBIDDEN`, `E_NOT_FOUND`
+
+### `public.create_property`
+- Args: `p_name text, p_city text, p_country text`
+- Returns: `uuid`
+- Callable by signed-in users: yes · security definer
+- Permission: `setup.property.create` (System Administrator)
+- Errors: `E_FORBIDDEN`, `E_PLAN_LIMIT`, `E_READ_ONLY`, `E_REQUIRED`
+- PLT-007: seeded like the first property; the creator gets System Administrator and General Manager there. Audited.
 
 ### `public.my_context`
 - Args: `—`

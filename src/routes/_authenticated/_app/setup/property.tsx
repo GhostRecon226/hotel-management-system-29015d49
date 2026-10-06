@@ -7,6 +7,7 @@ import { Field, SectionHeader, useSetupMutation } from "@/lib/setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -69,8 +70,50 @@ function PropertyDetails() {
       {canEdit && <Button type="submit" disabled={save.isPending}>{save.isPending ? "Saving…" : "Save changes"}</Button>}
     </form>
     <InspectionSection canEdit={canEdit} required={data.inspection_required} />
+    {can("setup.property.create") && <AddPropertySection />}
     <IdPhotoSettingsSection canEdit={canEdit} />
     </>
+  );
+}
+
+const COUNTRIES = ["Nigeria", "Ghana", "Kenya", "South Africa", "Other"];
+
+/** PLT-007: the System Administrator adds another property, within the plan's property limit. */
+function AddPropertySection() {
+  const qc = useQueryClient();
+  const { setPropertyId } = useAccess();
+  const [f, setF] = useState({ name: "", city: "", country: "Nigeria" });
+  const m = useMutation({
+    mutationFn: () => callRpc<string>("create_property", { p_name: f.name, p_city: f.city, p_country: f.country }),
+    onSuccess: async (id) => {
+      await qc.invalidateQueries({ queryKey: myContextQuery.queryKey });
+      toast.success(`${f.name} added. You are now working in it.`);
+      setF({ name: "", city: "", country: "Nigeria" });
+      setPropertyId(id);
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  return (
+    <section className="mt-10 max-w-xl space-y-4" aria-labelledby="addp-title">
+      <div>
+        <h2 id="addp-title" className="text-xl font-semibold">Add another property</h2>
+        <p className="mt-0.5 text-[15px] text-muted-foreground">
+          It gets the same starting setup as this one: charge codes, payment methods and, for Nigeria, tax lines to confirm.
+          Rooms, rates and staff are set up separately. Your plan sets how many properties you can have.
+        </p>
+      </div>
+      <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); m.mutate(); }}>
+        <Field label="Property name" htmlFor="np-name"><Input id="np-name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required maxLength={120} /></Field>
+        <Field label="City" htmlFor="np-city"><Input id="np-city" value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} maxLength={120} /></Field>
+        <Field label="Country" htmlFor="np-country">
+          <Select value={f.country} onValueChange={(v) => setF({ ...f, country: v })}>
+            <SelectTrigger id="np-country"><SelectValue /></SelectTrigger>
+            <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+          </Select>
+        </Field>
+        <div className="flex items-end"><Button type="submit" disabled={m.isPending}>{m.isPending ? "Adding…" : "Add property"}</Button></div>
+      </form>
+    </section>
   );
 }
 

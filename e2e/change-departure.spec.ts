@@ -20,6 +20,7 @@ test("an in-house stay can be extended and then shortened from the Front Desk", 
   await pick(page, "wi-rp", /BAR/);
   await pick(page, "fd-room", /^1 ·/);
   await walkIn.getByLabel("ID number").fill("A1234567");
+  await walkIn.getByLabel("Guest has read and signed the registration card").check();
   await walkIn.getByRole("button", { name: "Save" }).click();
   await expect(toasts(page).filter({ hasText: "Walk-in checked in." })).toBeVisible();
 

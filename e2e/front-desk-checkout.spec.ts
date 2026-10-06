@@ -22,6 +22,7 @@ test("an in-house row has a Check out button that opens that guest's check-out, 
   await pick(page, "wi-rp", /BAR/);
   await pick(page, "fd-room", /^1 ·/);
   await walkIn.getByLabel("ID number").fill("A1234567");
+  await walkIn.getByLabel("Guest has read and signed the registration card").check();
   await walkIn.getByRole("button", { name: "Save" }).click();
   await expect(toasts(page).filter({ hasText: "Walk-in checked in." })).toBeVisible();
 
