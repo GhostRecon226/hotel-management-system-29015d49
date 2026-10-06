@@ -100,4 +100,19 @@ begin
   perform t.eq((select inspection_required from public.properties where id = t.id('propA')), true, '[SET-008] it can be switched back on');
 end $$;
 
+-- FO-008 / ROOM-005: messages show the room label as typed, with no "Room " in front (stage 1 wording).
+do $$
+declare v_a uuid; v_b uuid; v_msg text;
+begin
+  perform t.login('adminA');
+  perform public.save_room(t.id('propA'), null, 'Zurich', t.id('std'), '1', true);
+  perform t.login('fdo');
+  v_a := t.book(t.id('g1'), t.bdate(), t.bdate() + 1, t.id('std'), t.id('bar'));
+  perform public.check_in(v_a, t.reg(), t.room('Zurich'), null, null);
+  v_b := t.book(t.id('g3'), t.bdate() + 1, t.bdate() + 2, t.id('std'), t.id('bar'));
+  perform public.assign_room(v_b, t.room('Zurich'));
+  begin perform public.extend_stay(v_a, t.bdate() + 2, null); exception when others then v_msg := sqlerrm; end;
+  perform t.ok(v_msg like '[E_ROOM_TAKEN] Zurich is booked%', '[FO-008][ROOM-005] the extend message names the room as typed: ' || coalesce(v_msg, 'no error'));
+end $$;
+
 rollback;
