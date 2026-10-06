@@ -308,17 +308,20 @@ export function MoveRoomDialog({ stay, onOpenChange }: { stay: InHouseRow | null
 }
 
 export function ExtendStayDialog({ stay, onOpenChange }: { stay: InHouseRow | null; onOpenChange: (o: boolean) => void }) {
+  const { property } = useAccess();
   const [dep, setDep] = useState("");
   const [reason, setReason] = useState("");
-  const m = useResMutation("extend_stay", "Stay extended.");
+  const m = useResMutation("extend_stay", "Departure changed.");
   useEffect(() => { if (stay) { setDep(addDays(stay.departure_date, 1)); setReason(""); } }, [stay]);
-  const extra = stay ? nightsBetween(stay.departure_date, dep) : 0;
+  // FO-008: later adds nights, earlier (but after the business date) removes the unused ones.
+  const change = stay && dep ? nightsBetween(stay.departure_date, dep) : 0;
+  const hint = change > 0 ? `${change} extra night${change === 1 ? "" : "s"}` : change < 0 ? `${-change} night${change === -1 ? "" : "s"} fewer` : "";
   return (
-    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Extend stay · ${stay?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Change departure · ${stay?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_new_departure: dep, p_reason: reason || null }, { onSuccess: () => onOpenChange(false) })}>
-      <p className="text-sm text-muted-foreground">Current departure: {formatDay(stay?.departure_date)}</p>
-      <Field label="New departure" htmlFor="ex-dep" hint={extra > 0 ? `${extra} extra night${extra === 1 ? "" : "s"}` : ""}>
-        <Input id="ex-dep" type="date" min={stay ? addDays(stay.departure_date, 1) : undefined} value={dep} onChange={(e) => setDep(e.target.value)} required />
+      <p className="text-sm text-muted-foreground">Current departure: {formatDay(stay?.departure_date)}. Pick a later date to extend or an earlier one to shorten. To leave today, check the guest out.</p>
+      <Field label="New departure" htmlFor="ex-dep" hint={hint}>
+        <Input id="ex-dep" type="date" min={property?.business_date ? addDays(property.business_date, 1) : undefined} value={dep} onChange={(e) => setDep(e.target.value)} required />
       </Field>
       <Field label="Note" htmlFor="ex-reason" hint="Optional."><Input id="ex-reason" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} /></Field>
     </FormDialog>

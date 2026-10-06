@@ -752,6 +752,22 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Permission: `fin.nightaudit.run`
 - Errors: `E_REQUIRED`
 
+### `public.set_arrival_ready`
+- Args: `p_reservation_id uuid, p_ready boolean`
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: `fo.checkin`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`
+- RES-013: marks an upcoming arrival ready (a flag on reservations, not a status).
+
+### `public.set_inspection_required`
+- Args: `p_property_id uuid, p_required boolean`
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: `setup.property.edit`
+- Errors: `E_FORBIDDEN`, `E_READ_ONLY`
+- SET-008: off means a completed housekeeping task closes as passed and the room is clean. Audited.
+
 ### `public.set_room_condition`
 - Args: `p_room_id uuid, p_condition text, p_reason text DEFAULT NULL::text`
 - Returns: `void`
