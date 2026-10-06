@@ -6,7 +6,7 @@ export function SubscriptionBanner() {
   const status = ctx.tenant?.status;
   const days = ctx.subscription?.trial_days_left;
 
-  if (status === "expired" || status === "suspended") {
+  if (status === "expired" || status === "suspended" || status === "cancelled") {
     return (
       <div className="flex items-center gap-2 border-b border-destructive/30 bg-danger-soft px-5 py-2.5 text-[15px] font-medium text-danger-strong" role="alert">
         <Lock className="h-5 w-5 shrink-0" />
