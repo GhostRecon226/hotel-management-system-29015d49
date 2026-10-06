@@ -41,4 +41,16 @@ begin
   insert into upg.ids values ('admin', v_admin), ('rsv', v_rsv), ('tenant', r.tenant_id), ('prop', r.property_id),
     ('copy', v_copy), ('resA', v_a), ('resB', v_b), ('bar', v_bar);
 end $$;
+-- PLT-004 (wave 1): a Ghana hotel created before the country defaults existed got naira and Lagos time.
+do $$
+declare v_gh uuid := gen_random_uuid(); r record;
+begin
+  insert into auth.users (id, email, email_confirmed_at, aud, role) values (v_gh, 'upg-gh@test.local', now(), 'authenticated', 'authenticated');
+  perform set_config('request.jwt.claims', json_build_object('sub', v_gh, 'role', 'authenticated')::text, false);
+  execute 'set role authenticated';
+  select * into r from public.create_hotel('Old Accra Ltd', 'Ghana', 'Old Accra', 'Ama Old', 'Accra');
+  execute 'reset role';
+  perform set_config('request.jwt.claims', '', false);
+  insert into upg.ids values ('propGH', r.property_id);
+end $$;
 select 'hotel created before the new migrations' as status;

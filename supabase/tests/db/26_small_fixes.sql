@@ -8,13 +8,24 @@ end $$;
 
 -- FO-008: shortening keeps the room for the remaining nights and reprices the stay.
 do $$
-declare v_r uuid; v_tot numeric;
+declare v_r uuid; v_tot numeric; v_f uuid; v_ledger text;
 begin
   perform t.login('fdo');
   v_r := t.book(t.id('g1'), t.bdate(), t.bdate() + 4, t.id('std'), t.id('bar'));
   perform public.check_in(v_r, t.reg(), t.room('151'), null, null);
+  v_f := t.main_folio(v_r);
+  perform public.post_payment(v_f, t.pm('CASH'), 10000, 'NGN', true, 'Deposit', null, 'shorten-dep');
+  perform t.admin();
+  v_ledger := (select string_agg(id::text || amount::text, ',' order by id) from public.folio_transactions where folio_id = v_f);
+  perform t.login('fdo');
   v_tot := (select total_amount from public.reservations where id = v_r);
   perform public.extend_stay(v_r, t.bdate() + 2, 'Leaving early');
+  perform t.admin();
+  perform t.eq((select string_agg(id::text || amount::text, ',' order by id) from public.folio_transactions where folio_id = v_f), v_ledger,
+    '[FO-008] shortening adds, changes and removes no ledger row');
+  perform t.ok((select jsonb_array_length(before->'removed_nights') = 2 from public.audit_events where action = 'shorten_stay' and record_id = v_r::text),
+    '[FO-008] the removed nights are kept in the audit log');
+  perform t.login('fdo');
   perform t.eq((select departure_date from public.reservations where id = v_r), t.bdate() + 2, '[FO-008] the departure moves earlier');
   perform t.eq((select total_amount from public.reservations where id = v_r), v_tot / 2, '[FO-008] the stay is repriced for the remaining nights');
   perform t.eq((select max(to_date) from public.room_assignments where reservation_id = v_r and is_active), t.bdate() + 2, '[FO-008] the room is released from the new departure');
