@@ -44,6 +44,7 @@ Multi-tenant hotel management system for Nigeria, then Africa. Peter owns the pr
 - Practice database (`vxkresricneodgvqphrn`) first: dry run, then apply, then report. Keep the folder linked to practice.
 - Live database (`urbpxybyrfjczqbrpdsq`) only after Peter's separate yes for that release: back up first into `~/hotel-desk-backups`, dry run and apply only if it lists exactly the agreed migrations, confirm the count matches the code, check the new objects exist, then link back to practice.
 - Apply the database before the app is merged: the app calls the new functions.
+- Live Supabase "Deploy to production" (Settings, Integrations, GitHub) stays off, so a merge to main never changes live. Live database changes happen only in these release steps, after Peter says yes. Never switch it back on.
 - Never put keys, passwords, database addresses or service keys in chat or in git. The app uses only the public (anon) key; the service role key stays in server code and Vercel settings.
 - Keep "Allow ID photos" off on every live hotel. Do not change the three privacy `[TO CONFIRM]` markers.
 
