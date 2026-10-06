@@ -13,6 +13,8 @@ Wave 2, item 1 (6 Oct 2026). Three outside tools tell us when something is wrong
 
 ## Peter's click steps, in order
 
+**Status on 6 Oct 2026:** steps 1, 2 and 5 now (the GitHub checks). Steps 3, 4, 6, 7 and 8 (Sentry, UptimeRobot, GitHub Pro with branch protection) are **deferred until before the first paying hotel**. Until steps 3 and 4 are done the app sends nothing to Sentry: with no DSN set, the error reporter does nothing. The pilot readiness list in `docs/status-report.md` tracks them.
+
 No step needs a key in chat. Where a value is needed, it goes straight into Vercel or GitHub settings.
 
 ### 1. GitHub: make sure checks can never cost money
@@ -30,6 +32,7 @@ GitHub does not let the Mac's access token add files that run automatically, so 
 7. The checks start by themselves. Claude shows you the first run before you merge.
 
 ### 3. Sentry: create the account and project
+> **Deferred until before the first paying hotel** (Peter's decision, 6 Oct 2026). Keep these steps as they are; do them then.
 1. Sign up at sentry.io. When asked for the data region, choose **EU** (stored in Germany).
 2. Create a project. Platform: React. Name: hotel-desk. Skip the "install the SDK" steps: the app already has its own small reporter.
 3. Project Settings, Security & Privacy. Turn **on**: "Data Scrubber", "Use Default Scrubbers", "Prevent Storing of IP Addresses".
@@ -38,6 +41,7 @@ GitHub does not let the Mac's access token add files that run automatically, so 
 6. Project Settings, Client Keys (DSN): copy the DSN. Do not paste it into chat.
 
 ### 4. Vercel: add the DSN (Production only)
+> **Deferred until before the first paying hotel** (Peter's decision, 6 Oct 2026). Keep these steps as they are; do them then.
 1. Vercel, the hotel-management-system project, Settings, Environment Variables.
 2. Add `VITE_SENTRY_DSN` with the DSN, environment **Production** only.
 3. Add `SENTRY_DSN` with the same DSN, environment **Production** only.
@@ -47,6 +51,7 @@ GitHub does not let the Mac's access token add files that run automatically, so 
 Merge only after you have seen the first run. The next production deploy turns error alerts on.
 
 ### 6. Check that error alerts arrive
+> **Deferred until before the first paying hotel** (Peter's decision, 6 Oct 2026). Keep these steps as they are; do them then.
 1. Wait until Vercel shows the production deploy of the merge as Ready.
 2. Sign in to the live app as System Administrator (or General Manager): `https://hotel-management-system-29015d49.vercel.app`.
 3. Setup, Property, scroll to "Error alerts", click **Send a test error**. The app says two test errors were sent. Nothing in the hotel changes.
@@ -55,12 +60,14 @@ Merge only after you have seen the first run. The next production deploy turns e
 6. In Sentry, mark both issues **Resolved**. Pressing the button again later sends them again (Sentry emails only for a new or reopened issue).
 
 ### 7. UptimeRobot: the uptime check
+> **Deferred until before the first paying hotel** (Peter's decision, 6 Oct 2026). Keep these steps as they are; do them then.
 1. Sign up at uptimerobot.com.
 2. Add New Monitor. Type: **Keyword**. URL: `https://hotel-management-system-29015d49.vercel.app/auth`. Keyword: `Sign in or create an account`. Alert when the keyword is **not** found. Interval: 5 minutes.
 3. Alert contact: your email.
 4. Use this address, not the longer one with `peters-projects` in it. That one is behind Vercel's own sign-in and would always look "down" to UptimeRobot.
 
 ### 8. GitHub Pro and branch protection (after the first run, so the check names exist)
+> **Deferred until before the first paying hotel** (Peter's decision, 6 Oct 2026). Keep these steps as they are; do them then.
 1. Settings, Billing and plans, upgrade to **GitHub Pro** (about $4 a month).
 2. The repository, Settings, Branches, Add branch protection rule. Branch name pattern: `main`.
 3. Tick "Require status checks to pass before merging" and pick both checks: **Checks and database tests** and **Browser tests**.
