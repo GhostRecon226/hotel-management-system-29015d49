@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import { callRpc } from "@/lib/setup";
 import { errorMessage } from "@/lib/errors";
 import { useIdPhotoSettings, type IdPhotoSettings } from "@/lib/id-photos";
+import { reportBrowserError } from "@/lib/error-report";
+import { sendTestError, TEST_ERROR_BROWSER } from "@/lib/test-error.functions";
 
 export const Route = createFileRoute("/_authenticated/_app/setup/property")({
   component: PropertyDetails,
@@ -72,7 +74,32 @@ function PropertyDetails() {
     <InspectionSection canEdit={canEdit} required={data.inspection_required} />
     {can("setup.property.create") && <AddPropertySection />}
     <IdPhotoSettingsSection canEdit={canEdit} />
+    {canEdit && <TestErrorSection />}
     </>
+  );
+}
+
+/** Safety net check: sends one test error from the browser and one from the server to Sentry (docs/safety-net.md). */
+function TestErrorSection() {
+  const { property } = useAccess();
+  const [busy, setBusy] = useState(false);
+  async function send() {
+    setBusy(true);
+    reportBrowserError(new Error(TEST_ERROR_BROWSER), "test");
+    try {
+      await sendTestError({ data: { propertyId: property!.id } });
+    } catch (e) {
+      if (!errorMessage(e).includes("test error")) { toast.error(errorMessage(e)); setBusy(false); return; }
+    }
+    toast.success("Two test errors sent. If error alerts are set up, Sentry shows them within a minute and emails you.");
+    setBusy(false);
+  }
+  return (
+    <section className="mt-10 max-w-xl space-y-3" aria-labelledby="te-title">
+      <h2 id="te-title" className="text-xl font-semibold">Error alerts</h2>
+      <p className="text-[15px] text-muted-foreground">Check that error alerts reach you. This sends two test errors, one from this browser and one from the server. Nothing in the hotel changes.</p>
+      <Button type="button" variant="outline" onClick={send} disabled={busy}>{busy ? "Sending…" : "Send a test error"}</Button>
+    </section>
   );
 }
 

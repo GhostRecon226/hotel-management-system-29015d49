@@ -33,7 +33,7 @@ async function requireStaffManager(rpc: Rpc, propertyId: string | null) {
  */
 export const inviteStaffMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: InviteInput) => {
+  .validator((input: InviteInput) => {
     const email = String(input?.email ?? "").trim().toLowerCase();
     const fullName = String(input?.fullName ?? "").trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error("Enter a valid email address.");
@@ -100,7 +100,7 @@ export const inviteStaffMember = createServerFn({ method: "POST" })
 /** Sends the invitation email again to a staff member who has not accepted it yet. */
 export const resendStaffInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { userId: string; redirectTo: string }) => {
+  .validator((input: { userId: string; redirectTo: string }) => {
     if (!input?.userId) throw new Error("Choose a staff member.");
     return { userId: String(input.userId), redirectTo: String(input.redirectTo ?? "") };
   })

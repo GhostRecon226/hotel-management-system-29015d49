@@ -15,6 +15,19 @@ This report covers the app Lovable built (`hotel-management-system-29015d49`). I
 - Screens no longer add up money. Every total, tax preview, fee preview and KPI comes from the database. A check (`npm run check:money`) fails if browser code starts doing money sums again.
 - It is still not ready for a real hotel: 21 failures, tax rules wait for the accountant, email is not connected, and 6c and DAY-006 are not built.
 
+## Pilot readiness: open items before the first paying hotel
+
+Added 6 Oct 2026. The full 18-gate list is section F7 of `docs/assessment-2026-10-05.md` (branch `claude/assessment`, not merged); gate numbers below refer to it.
+
+| Item | Gate | State | What closes it |
+|---|---|---|---|
+| Sentry error alerts | 12 | Open, deferred by Peter until before the first paying hotel. The privacy-stripped reporter is built (pull request #4) and sends nothing until the DSN is set. | `docs/safety-net.md` steps 3, 4 and 6: account in the EU region, privacy settings on, DSN in Vercel Production, a test error reaches Peter's email. |
+| Uptime monitor (UptimeRobot) | 12 | Open, deferred by Peter until before the first paying hotel. | `docs/safety-net.md` step 7: keyword monitor on the public sign-in page; lawyer confirms the free plan's fair-use terms. |
+| GitHub Pro with branch protection on `main` | 13 | Open, deferred by Peter until before the first paying hotel. The GitHub checks themselves run on every pull request once #4 is merged. | `docs/safety-net.md` step 8: GitHub Pro (about $4 a month), both checks required, owner override kept. |
+| Vercel Pro (commercial use) | 1 | Open. Vercel's Hobby plan is for personal, non-commercial use. | Vercel, Settings, Billing shows Pro. Also turns the 5-minute email sender back on. |
+
+Live Supabase "Deploy to production" (Settings, Integrations, GitHub) is **off on purpose** (switched off by Peter on 6 Oct 2026; it was on, with production branch `main`), so a merge to `main` never changes live. Live database changes happen only in the release steps, after Peter says yes.
+
 ## Update: 7 Oct 2026 (stage 2: ID document photos, on branch `claude/id-photos`)
 
 - **A hotel can keep a photo or scan of a guest's ID** (front and back), if a manager switches on "Allow ID photos" in Setup > Property. Off by default. "Require ID photo at check-in" makes check-in and walk-in wait for a photo.

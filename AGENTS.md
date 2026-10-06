@@ -44,6 +44,11 @@ Multi-tenant hotel management system for Nigeria, then Africa. Peter owns the pr
 - Practice database (`vxkresricneodgvqphrn`) first: dry run, then apply, then report. Keep the folder linked to practice.
 - Live database (`urbpxybyrfjczqbrpdsq`) only after Peter's separate yes for that release: back up first into `~/hotel-desk-backups`, dry run and apply only if it lists exactly the agreed migrations, confirm the count matches the code, check the new objects exist, then link back to practice.
 - Apply the database before the app is merged: the app calls the new functions.
+- Every report to Peter starts with one line, "Project: practice" or "Project: live", and says which project the next step needs.
+- Claude does all Supabase CLI linking and relinking. Never ask Peter to switch, link or check which project is active.
+- When any task finishes, the CLI is linked back to practice; the report's last line says so.
+- Live is touched only in a release, after Peter says "yes, live", and always in this order: backup, dry run, apply, confirm the count, relink to practice.
+- Live Supabase "Deploy to production" (Settings, Integrations, GitHub) stays off, so a merge to main never changes live. Live database changes happen only in these release steps, after Peter says yes. Never switch it back on.
 - Never put keys, passwords, database addresses or service keys in chat or in git. The app uses only the public (anon) key; the service role key stays in server code and Vercel settings.
 - Keep "Allow ID photos" off on every live hotel. Do not change the three privacy `[TO CONFIRM]` markers.
 
@@ -79,6 +84,7 @@ One line per rule. Why: the reason.
 - Migrations must replay from empty. Run scripts/test-db.sh (local Supabase in Docker) after every change; it must not add any "not ok". Why: supabase/migrations is the only source of truth, and the tests are the proof.
 - The browser has no table write rights (default-deny, 20260930100000). New tables need RLS and tenant_id; new public functions need an explicit grant to authenticated. Why: every change goes through a permission-checked function.
 - Keep the existing permission names (decision 5f). Why: the code and database already use them.
+- Errors go to Sentry only through src/lib/error-report.ts (no Sentry package): never add user identity, IP, request bodies, form values or session replay, and keep expected [E_CODE] refusals out. GitHub checks (.github/workflows/ci.yml) always report "Checks and database tests" and "Browser tests"; docs-only changes pass early (scripts/ci-changes.sh). None of this is in the Vercel build. See docs/safety-net.md. Why: we hear about failures without sending personal data, and an urgent fix can always ship.
 
 ## Test gotchas
 
