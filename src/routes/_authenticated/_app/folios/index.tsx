@@ -9,6 +9,7 @@ import { Money } from "@/components/ui/money";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/folios/")({ component: FolioList });
 
@@ -40,7 +41,7 @@ function FolioList() {
               <TableCell><Link to="/folios/$id" params={{ id: f.folio_id }} className="font-medium text-primary-strong hover:underline">{f.number}</Link>
                 <span className="block text-sm text-muted-foreground">{f.label}</span></TableCell>
               <TableCell>{f.guest_name ?? "—"}<span className="block text-sm text-muted-foreground">{f.reservation_number}</span></TableCell>
-              <TableCell className="tabular">{f.room_number ?? "—"}</TableCell>
+              <TableCell>{f.room_number ? <RoomName label={f.room_number} className="font-normal" /> : "—"}</TableCell>
               <TableCell className="tabular">{formatDay(f.arrival_date)} – {formatDay(f.departure_date)}</TableCell>
               <TableCell>{f.status === "open" ? <Badge variant="info">Open</Badge> : <Badge variant="neutral">Closed</Badge>}</TableCell>
               <TableCell><Money amount={f.balance} currency={f.currency} /></TableCell>

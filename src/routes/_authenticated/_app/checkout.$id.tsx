@@ -52,7 +52,7 @@ function CheckoutPage() {
         <ArrowLeft className="h-4 w-4" /> Front Desk
       </Link>
       <PageHeader
-        title={<span className="inline-flex flex-wrap items-center gap-3">Check-out · Room {s.room_number}
+        title={<span className="inline-flex flex-wrap items-center gap-3">Check-out · {s.room_number}
           {inHouse ? <Badge variant="info">In house</Badge> : <Badge variant="neutral">Checked out</Badge>}</span>}
         description={`${s.guest_name ?? "Guest"} · ${s.number} · ${formatDay(s.arrival_date)} → ${formatDay(s.departure_date)}`}
         actions={<>

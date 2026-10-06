@@ -8,6 +8,17 @@ How to use this:
 - **Keys and passwords never go in chat, email or git.** You copy them from one dashboard and paste them straight into another. Keep a copy in a password manager that you and your second person share.
 - Nothing here deploys the app or changes the live database. When everything is ticked, send me the short "accounts are ready" message at the end.
 
+## Status on 5 Oct 2026: first live deploy done
+
+- **Live address:** https://hotel-management-system-29015d49.vercel.app, deployed from `main`. Every push to GitHub deploys by itself: `main` goes live, every other branch gets a preview address. No Ignored Build Step.
+- **Hand test passed on the live address on 5 Oct 2026** (in a test hotel, Euro Bar Hotel): sign-in, set-up, new guest, booking, check-in, room charge (₦10,000 + ₦1,000 service + ₦825 VAT = ₦11,825), cash payment, check-out, turnover task.
+- **Vercel plan: Hobby for now.** The 5-minute email sender is switched off until we move to Pro (see `docs/deployment-plan.md`, step 4.4). Emails wait in the queue and are not lost.
+- **Function region: Dublin (dub1).** Checked from the deploy of 5 Oct.
+- **Lovable sweep done (2 Oct).** No Lovable package, preset, file or setting is left in the code or in Vercel. You disconnected Lovable from GitHub on 5 Oct.
+- **Still open:** the practice Supabase project (C and the Preview keys in E8), so branch previews can load; your own domain (B, E9 to E11); Resend email (D); a check of the repo's GitHub Apps, Webhooks and Deploy keys page for anything left from Lovable.
+
+The steps below were written before going live, when the plan was to keep builds off. Where the live set-up differs, the step says so.
+
 Placeholders: wherever you see `yourdomain.com`, use the domain you buy in step B1. `PRACTICE-REF` is the practice project's ID from step C9.
 
 ---
@@ -75,7 +86,7 @@ Vercel builds and publishes a site every time code reaches GitHub: `main` goes t
 
 - [ ] **E1. YOU.** Sign up at vercel.com **with GitHub** (the account that owns `GhostRecon226/hotel-management-system-29015d49`). Create a **team** (for example `hotel-desk`) and choose the **Pro** plan. Write down the team's short name; it is used in C10.
 - [ ] **E2. YOU.** Avatar > **Account Settings** > **Authentication** > turn on two-step sign-in. Team **Settings** > **Members** > invite your second person as **Owner**, and ask them to turn on two-step sign-in.
-- [ ] **E3. YOU.** Create the project **without deploying**. In the Terminal on your Mac, in the project folder, run these one at a time and follow the prompts (log in, choose your team):
+- [x] **E3. YOU.** (Done: the project is `hotel-management-system-29015d49`.) Create the project **without deploying**. In the Terminal on your Mac, in the project folder, run these one at a time and follow the prompts (log in, choose your team):
   ```bash
   npx vercel login
   ```
@@ -83,18 +94,18 @@ Vercel builds and publishes a site every time code reaches GitHub: `main` goes t
   npx vercel project add hotel-desk
   ```
   This makes an empty project and publishes nothing.
-- [ ] **E4. YOU.** In the Vercel dashboard, open project **hotel-desk** > **Settings** > **Git**:
+- [x] **E4. YOU.** (Changed 2 Oct: builds are on for every branch, Production Branch `main`, no Ignored Build Step.) In the Vercel dashboard, open project **hotel-desk** > **Settings** > **Git**:
   - **Ignored Build Step**: choose **Don't build anything** (or the closest option that stops all builds). Save. This keeps everything switched off until I ask you to change it.
   - Then **Connect Git Repository** > GitHub > `hotel-management-system-29015d49`.
   - **Production Branch:** `main`.
   - If a deployment starts anyway, open **Deployments**, click it, and choose **Cancel**. Tell me if this happens.
-- [ ] **E5. YOU.** **Settings** > **Build and Deployment**: Framework Preset **Other**, Build Command `npm run build`, Install Command `npm ci`, Output Directory left empty, Node.js Version **22.x**. Save.
-- [ ] **E6. YOU.** **Settings** > **Functions** > **Function Region**: **Dublin, Ireland (dub1)**, next to the database. Save.
-- [ ] **E7. YOU.** Make the cron key. In Terminal run the command below and copy the long line it prints into the shared vault, labelled `CRON_SECRET (production)`. Run it a second time for `CRON_SECRET (preview)`.
+- [x] **E5. YOU.** (Done 2 Oct.) **Settings** > **Build and Deployment**: Framework Preset **Other**, Build Command `npm run build`, Install Command `npm ci`, Output Directory left empty, Node.js Version **22.x**. Save.
+- [x] **E6. YOU.** (Done 5 Oct, checked on the live deploy.) **Settings** > **Functions** > **Function Region**: **Dublin, Ireland (dub1)**, next to the database. Save.
+- [ ] **E7. YOU.** (Needed before ID photos go live: the daily ID photo clean-up uses it. The email sender also uses it once we move to Pro.) Make the cron key. In Terminal run the command below and copy the long line it prints into the shared vault, labelled `CRON_SECRET (production)`. Run it a second time for `CRON_SECRET (preview)`.
   ```bash
   openssl rand -hex 32
   ```
-- [ ] **E8. YOU.** **Settings** > **Environment Variables**. Add each key below. For each one, tick only the environment shown (**Production** = the live site, **Preview** = test addresses). Turn on **Sensitive** where it says so; Vercel then never shows the value again.
+- [ ] **E8. YOU.** (Production keys done 5 Oct. Preview keys wait for the practice project. `VITE_SUPABASE_PROJECT_ID` is not used by the app and can be skipped. `CRON_SECRET` waits for Pro.) **Settings** > **Environment Variables**. Add each key below. For each one, tick only the environment shown (**Production** = the live site, **Preview** = test addresses). Turn on **Sensitive** where it says so; Vercel then never shows the value again.
 
   | Key | Production value | Preview value | Sensitive |
   |---|---|---|---|
@@ -120,7 +131,7 @@ Vercel builds and publishes a site every time code reaches GitHub: `main` goes t
 
 - [ ] **F1. YOU.** github.com > avatar > **Settings** > **Password and authentication** > turn on two-factor authentication.
 - [ ] **F2. YOU.** Repository > **Settings** > **Collaborators** > add your second person (role Admin).
-- [ ] **F3. YOU.** Disconnect Lovable: github.com > avatar > **Settings** > **Applications** > **Installed GitHub Apps** > **Lovable** > **Configure** > remove this repository (or **Uninstall** if you no longer use Lovable). Also disconnect GitHub in the Lovable project's settings. After this, only you and I change the code.
+- [x] **F3. YOU.** (Done 5 Oct. Still to look at: repository > **Settings** > **GitHub Apps**, **Webhooks** and **Deploy keys** show nothing from Lovable.) Disconnect Lovable: github.com > avatar > **Settings** > **Applications** > **Installed GitHub Apps** > **Lovable** > **Configure** > remove this repository (or **Uninstall** if you no longer use Lovable). Also disconnect GitHub in the Lovable project's settings. After this, only you and I change the code.
 - [ ] **F4. YOU.** Turn on Dependabot for the app repository: repository > **Settings** > **Advanced Security** (or **Code security**) > turn on **Dependabot alerts** and **Dependabot security updates**. GitHub then emails you when a package the app uses has a known flaw, and opens a proposed fix on a branch. Nothing reaches `main` without your approval.
 
 ## G. Tell me the accounts are ready
@@ -135,4 +146,4 @@ Vercel builds and publishes a site every time code reaches GitHub: `main` goes t
 - [ ] **H2. CLAUDE.** Add the automatic checks (tests on every change) to GitHub, test first. Then you protect `main` (repository > **Settings** > **Branches** > **Add rule** for `main` > require a pull request and passing checks).
 - [ ] **H3. CLAUDE.** Ask you to switch builds back on (E4 > **Automatic**). Then I check a preview of the branch against the practice project, and test sign-up, invite, password reset and booking-confirmation emails.
 - [ ] **H4. YOU.** Approve the merge. I open a pull request to `main`; the checks must pass; you merge it. Vercel then publishes the site on `app.yourdomain.com`. As soon as the sign-in page loads there, do step **E11** (switch the live Supabase project's web address to your domain; the practice project stays on `localhost:8080`).
-- [ ] **H5. CLAUDE.** Repeat the hand test on `https://app.yourdomain.com`, then go through the "before the first real hotel" list in the deployment plan with you.
+- [ ] **H5. CLAUDE.** (Done on the `vercel.app` address on 5 Oct; repeat on your domain once it is set up.) Repeat the hand test on `https://app.yourdomain.com`, then go through the "before the first real hotel" list in the deployment plan with you.

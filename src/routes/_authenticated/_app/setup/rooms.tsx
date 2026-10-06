@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ROOM_LABEL_MAX, sortByRoom } from "@/lib/room-label";
 
 export const Route = createFileRoute("/_authenticated/_app/setup/rooms")({ component: Rooms });
 
@@ -35,7 +36,8 @@ function TypeSelect({ id, value, onChange, types }: { id: string; value: string;
 
 function Rooms() {
   const { property, can } = useAccess();
-  const { data: rooms = [] } = useSetupList<Room>("rooms", "room_number");
+  const { data: unsorted = [] } = useSetupList<Room>("rooms", "room_number");
+  const rooms = sortByRoom(unsorted);
   const { data: types = [] } = useSetupList<RoomType>("room_types", "code");
   const save = useSetupMutation("save_room", ["rooms"]);
   const bulk = useSetupMutation("bulk_add_rooms", ["rooms"], (n) => `${n} room${n === 1 ? "" : "s"} added.`);
@@ -45,7 +47,7 @@ function Rooms() {
   const [b, setB] = useState({ from: "", to: "", room_type_id: "", floor: "" });
   if (!can("setup.room.manage")) return <NoAccess />;
 
-  const typeName = (id: string) => types.find((t) => t.id === id)?.code ?? "";
+  const typeName = (id: string) => types.find((t) => t.id === id)?.name ?? "";
   const edit = (r?: Room) => {
     setF(r ? { id: r.id, room_number: r.room_number, room_type_id: r.room_type_id, floor: r.floor ?? "", is_active: r.is_active }
       : { id: null, room_number: "", room_type_id: "", floor: "", is_active: true });
@@ -82,7 +84,7 @@ function Rooms() {
         onSubmit={() => save.mutate({ p_property_id: property!.id, p_id: f.id, p_room_number: f.room_number,
           p_room_type_id: f.room_type_id || null, p_floor: f.floor, p_is_active: f.is_active }, { onSuccess: () => setOpen(false) })}>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Room number" htmlFor="r-no"><Input id="r-no" value={f.room_number} onChange={(e) => setF({ ...f, room_number: e.target.value })} required /></Field>
+          <Field label="Room name or number" htmlFor="r-no" hint={`Up to ${ROOM_LABEL_MAX} characters.`}><Input id="r-no" value={f.room_number} maxLength={ROOM_LABEL_MAX} onChange={(e) => setF({ ...f, room_number: e.target.value })} required /></Field>
           <Field label="Floor" htmlFor="r-fl"><Input id="r-fl" value={f.floor} onChange={(e) => setF({ ...f, floor: e.target.value })} /></Field>
         </div>
         <Field label="Room type" htmlFor="r-type"><TypeSelect id="r-type" value={f.room_type_id} onChange={(v) => setF({ ...f, room_type_id: v })} types={types} /></Field>
@@ -92,7 +94,7 @@ function Rooms() {
       <FormDialog open={bulkOpen} onOpenChange={setBulkOpen} title="Bulk add rooms" busy={bulk.isPending}
         onSubmit={() => bulk.mutate({ p_property_id: property!.id, p_from: Number(b.from), p_to: Number(b.to),
           p_room_type_id: b.room_type_id || null, p_floor: b.floor }, { onSuccess: () => setBulkOpen(false) })}>
-        <p className="text-sm text-muted-foreground">Adds every number in the range. Numbers that already exist are skipped.</p>
+        <p className="text-sm text-muted-foreground">Adds every number in the range. Numbers that already exist are skipped. For a prefix (A101) or names, use Add several rooms on the Rooms page.</p>
         <div className="grid grid-cols-2 gap-4">
           <Field label="From" htmlFor="b-from"><Input id="b-from" type="number" placeholder="101" value={b.from} onChange={(e) => setB({ ...b, from: e.target.value })} required /></Field>
           <Field label="To" htmlFor="b-to"><Input id="b-to" type="number" placeholder="120" value={b.to} onChange={(e) => setB({ ...b, to: e.target.value })} required /></Field>

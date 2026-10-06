@@ -8,10 +8,15 @@ import { addDays, formatDay, nightsBetween, nightsLabel, useResMutation } from "
 import { GuestPicker } from "@/components/reservation-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatAmount } from "@/components/ui/money";
+import { sortByRoom } from "@/lib/room-label";
+import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
+import { IdPhotoPicker, uploadIdPhoto, useGuestIdPhotos, useIdPhotoAccess, useIdPhotosChanged } from "@/lib/id-photos";
 
 export interface ArrivalRow {
   id: string; number: string; guest_id: string; guest_name: string | null; guest_phone: string | null;
@@ -45,9 +50,9 @@ export function useInHouse(propertyId?: string) {
   return useQuery({
     queryKey: ["reservations", "fd", "in-house", propertyId], enabled: !!propertyId,
     queryFn: async () => {
-      const { data, error } = await (supabase.from as any)("v_in_house").select("*").eq("property_id", propertyId).order("room_number");
+      const { data, error } = await (supabase.from as any)("v_in_house").select("*").eq("property_id", propertyId);
       if (error) throw error;
-      return data as InHouseRow[];
+      return sortByRoom(data as InHouseRow[]);
     },
   });
 }
@@ -93,10 +98,36 @@ function RoomSelect({ rooms, value, onChange, loading }: { rooms: FdRoom[]; valu
   );
 }
 
-export interface Registration { id_type: string; id_number: string; nationality: string; address: string; vehicle_plate: string }
-const EMPTY_REG: Registration = { id_type: "national_id", id_number: "", nationality: "", address: "", vehicle_plate: "" };
+export interface Registration { id_type: string; id_number: string; id_expiry: string; nationality: string; address: string; vehicle_plate: string; accepted: boolean }
+const EMPTY_REG: Registration = { id_type: "national_id", id_number: "", id_expiry: "", nationality: "", address: "", vehicle_plate: "", accepted: false };
 
-function RegistrationFields({ reg, setReg }: { reg: Registration; setReg: (r: Registration) => void }) {
+/** The ID photo step of check-in and walk-in (SET-009). Shown only when the hotel allows ID photos. */
+function usePhotoStep(guestId: string | null | undefined, open: boolean) {
+  const { property } = useAccess();
+  const access = useIdPhotoAccess();
+  const existing = useGuestIdPhotos(guestId ?? undefined, open && access.canView);
+  const changed = useIdPhotosChanged();
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const hasPhoto = (existing.data?.length ?? 0) > 0;
+  /** Uploads the chosen photo first. Returns false (and says why) if check-in should not go ahead. */
+  const run = async (reg: Registration) => {
+    if (!file) return true;
+    if (!guestId) { toast.error("Choose the guest first."); return false; }
+    setUploading(true);
+    try {
+      await uploadIdPhoto({ propertyId: property!.id, guestId, docType: reg.id_type, docNumber: reg.id_number,
+        expiry: reg.id_expiry || null, side: "front", file });
+      changed();
+      return true;
+    } catch (e) { toast.error(errorMessage(e)); return false; }
+    finally { setUploading(false); }
+  };
+  return { show: access.canUpload, required: access.required && !hasPhoto, hasPhoto, file, setFile, uploading, run, reset: () => setFile(null) };
+}
+type PhotoStep = ReturnType<typeof usePhotoStep>;
+
+function RegistrationFields({ reg, setReg, photo }: { reg: Registration; setReg: (r: Registration) => void; photo?: PhotoStep }) {
   const set = (k: keyof Registration) => (e: { target: { value: string } }) => setReg({ ...reg, [k]: e.target.value });
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -107,11 +138,24 @@ function RegistrationFields({ reg, setReg }: { reg: Registration; setReg: (r: Re
         </Select>
       </Field>
       <Field label="ID number" htmlFor="reg-num"><Input id="reg-num" value={reg.id_number} onChange={set("id_number")} required maxLength={50} autoComplete="off" /></Field>
+      <Field label="ID expiry" htmlFor="reg-exp" hint="Optional."><Input id="reg-exp" type="date" value={reg.id_expiry} onChange={set("id_expiry")} /></Field>
+      {photo?.show && (
+        <div className="sm:col-span-2">
+          {photo.hasPhoto && !photo.file
+            ? <p className="text-sm text-muted-foreground">An ID photo is already on file for this guest. Add a new one only if it has changed.</p> : null}
+          <IdPhotoPicker id="reg-photo" label={photo.required ? "ID photo (required by this hotel)" : "ID photo"} file={photo.file} onFile={photo.setFile} required={photo.required} />
+        </div>
+      )}
       <Field label="Nationality" htmlFor="reg-nat"><Input id="reg-nat" placeholder="Nigerian" value={reg.nationality} onChange={set("nationality")} maxLength={60} /></Field>
       <Field label="Vehicle plate" htmlFor="reg-plate" hint="Leave empty if none."><Input id="reg-plate" value={reg.vehicle_plate} onChange={set("vehicle_plate")} maxLength={20} /></Field>
       <div className="sm:col-span-2">
         <Field label="Address" htmlFor="reg-addr"><Textarea id="reg-addr" rows={2} value={reg.address} onChange={set("address")} maxLength={500} /></Field>
       </div>
+      {/* FO-003: required before check-in. A drawn signature comes later. */}
+      <label htmlFor="reg-accept" className="flex items-start gap-3 text-[15px] sm:col-span-2">
+        <Checkbox id="reg-accept" className="mt-0.5" checked={reg.accepted} onCheckedChange={(v) => setReg({ ...reg, accepted: v === true })} />
+        <span>Guest has read and signed the registration card</span>
+      </label>
     </div>
   );
 }
@@ -140,7 +184,7 @@ function DepositBlock({ due, currency, value, onChange }: { due: number; currenc
   );
 }
 
-const regArgs = (r: Registration) => ({ id_type: r.id_type, id_number: r.id_number, nationality: r.nationality, address: r.address, vehicle_plate: r.vehicle_plate });
+const regArgs = (r: Registration) => ({ id_type: r.id_type, id_number: r.id_number, id_expiry: r.id_expiry || null, nationality: r.nationality, address: r.address, vehicle_plate: r.vehicle_plate, registration_accepted: r.accepted });
 
 export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow | null; onOpenChange: (o: boolean) => void }) {
   const { property } = useAccess();
@@ -151,18 +195,22 @@ export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow |
   const open = !!arrival;
   const rooms = useFdRooms(arrival?.room_type_id ?? null, property?.business_date ?? "", arrival?.departure_date ?? "", arrival?.id ?? null, open);
   const m = useResMutation("check_in", "Guest checked in.");
-  useEffect(() => { if (arrival) { setReg(EMPTY_REG); setRoom(arrival.room_id ?? ""); setOvr(""); setWaive(""); } }, [arrival]);
+  const photo = usePhotoStep(arrival?.guest_id, open);
+  useEffect(() => { if (arrival) { setReg(EMPTY_REG); setRoom(arrival.room_id ?? ""); setOvr(""); setWaive(""); photo.reset(); } }, [arrival]); // eslint-disable-line react-hooks/exhaustive-deps
   const picked = rooms.data?.find((r) => r.id === room);
   const notReady = !!picked && !picked.is_ready;
   // Deposit still to take, from the database (v_arrivals.deposit_due).
   const due = arrival ? Number(arrival.deposit_due) : 0;
 
   return (
-    <FormDialog open={open} onOpenChange={onOpenChange} title={`Check in ${arrival?.guest_name ?? ""}`} busy={m.isPending}
-      onSubmit={() => m.mutate({
-        p_id: arrival!.id, p_registration: regArgs(reg), p_room_id: room || null,
-        p_room_override_reason: notReady ? ovr : null, p_deposit_waive_reason: due > 0 ? waive : null,
-      }, { onSuccess: () => onOpenChange(false) })}>
+    <FormDialog open={open} onOpenChange={onOpenChange} title={`Check in ${arrival?.guest_name ?? ""}`} busy={m.isPending || photo.uploading} submitDisabled={!reg.accepted}
+      onSubmit={async () => {
+        if (!(await photo.run(reg))) return;
+        m.mutate({
+          p_id: arrival!.id, p_registration: regArgs(reg), p_room_id: room || null,
+          p_room_override_reason: notReady ? ovr : null, p_deposit_waive_reason: due > 0 ? waive : null,
+        }, { onSuccess: () => onOpenChange(false) });
+      }}>
       {arrival && (
         <p className="text-sm text-muted-foreground">
           {arrival.number} · {arrival.room_type_code} · {formatDay(arrival.arrival_date)} to {formatDay(arrival.departure_date)} ({nightsLabel(arrival.nights)})
@@ -171,7 +219,7 @@ export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow |
       <Field label="Room" htmlFor="fd-room"><RoomSelect rooms={rooms.data ?? []} value={room} onChange={setRoom} loading={rooms.isLoading} /></Field>
       <OverrideReason show={notReady} value={ovr} onChange={setOvr} />
       <DepositBlock due={due} currency={arrival?.currency ?? "NGN"} value={waive} onChange={setWaive} />
-      <RegistrationFields reg={reg} setReg={setReg} />
+      <RegistrationFields reg={reg} setReg={setReg} photo={photo} />
     </FormDialog>
   );
 }
@@ -190,23 +238,24 @@ export function WalkInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const [reg, setReg] = useState(EMPTY_REG);
   const rooms = useFdRooms(f.room_type_id || null, bdate, f.departure, null, open && !!f.room_type_id);
   const m = useResMutation<string>("walk_in_check_in", "Walk-in checked in.");
+  const photo = usePhotoStep(guest.id || null, open);
   useEffect(() => {
     if (!open) return;
-    setKey(crypto.randomUUID()); setGuest({ id: "", label: "" }); setReg(EMPTY_REG);
+    setKey(crypto.randomUUID()); setGuest({ id: "", label: "" }); setReg(EMPTY_REG); photo.reset();
     setF({ departure: addDays(bdate, 1), room_type_id: "", rate_plan_id: "", adults: "1", children: "0", company_name: "", room: "", ovr: "" });
-  }, [open, bdate]);
+  }, [open, bdate]); // eslint-disable-line react-hooks/exhaustive-deps
   const picked = rooms.data?.find((r) => r.id === f.room);
   const notReady = !!picked && !picked.is_ready;
   const set = (k: keyof typeof f, v: string) => setF((x) => ({ ...x, [k]: v, ...(k === "room_type_id" || k === "departure" ? { room: "" } : {}) }));
 
   return (
-    <FormDialog open={open} onOpenChange={onOpenChange} title="Walk-in guest" busy={m.isPending}
-      onSubmit={() => m.mutate({
+    <FormDialog open={open} onOpenChange={onOpenChange} title="Walk-in guest" busy={m.isPending || photo.uploading} submitDisabled={!reg.accepted}
+      onSubmit={async () => { if (!(await photo.run(reg))) return; m.mutate({
         p_property_id: property!.id, p_idempotency_key: key, p_guest_id: guest.id || null, p_departure: f.departure,
         p_room_type_id: f.room_type_id || null, p_rate_plan_id: f.rate_plan_id || null, p_adults: Number(f.adults),
         p_children: Number(f.children || 0), p_room_id: f.room || null, p_registration: regArgs(reg),
         p_company_name: f.company_name || null, p_room_override_reason: notReady ? f.ovr : null,
-      }, { onSuccess: () => onOpenChange(false) })}>
+      }, { onSuccess: () => onOpenChange(false) }); }}>
       <p className="text-sm text-muted-foreground">Creates the booking and checks the guest in. Arrival is today, {formatDay(bdate)}.</p>
       <Field label="Guest" htmlFor="guest"><GuestPicker value={guest.id} label={guest.label} onPick={(id, label) => setGuest({ id, label })} /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -231,10 +280,12 @@ export function WalkInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
       </div>
       <OverrideReason show={notReady} value={f.ovr} onChange={(v) => set("ovr", v)} />
       <Field label="Company" htmlFor="wi-co" hint="Optional."><Input id="wi-co" value={f.company_name} onChange={(e) => set("company_name", e.target.value)} maxLength={200} /></Field>
-      <RegistrationFields reg={reg} setReg={setReg} />
+      <RegistrationFields reg={reg} setReg={setReg} photo={photo} />
     </FormDialog>
   );
 }
+
+interface MoveQuote { same_type: boolean; is_upgrade: boolean; can_keep_rate: boolean; current_total?: string; new_total?: string | null; currency?: string }
 
 export function MoveRoomDialog({ stay, onOpenChange }: { stay: InHouseRow | null; onOpenChange: (o: boolean) => void }) {
   const { property } = useAccess();
@@ -244,38 +295,69 @@ export function MoveRoomDialog({ stay, onOpenChange }: { stay: InHouseRow | null
   const from = property?.business_date ?? "";
   const rooms = useFdRooms(null, from, stay?.departure_date ?? "", stay?.reservation_id ?? null, !!stay);
   const m = useResMutation("move_room", "Guest moved.");
-  useEffect(() => { if (stay) { setRoom(""); setReason(""); setOvr(""); } }, [stay]);
+  const [rate, setRate] = useState<"" | "keep" | "new">("");
+  useEffect(() => { if (stay) { setRoom(""); setReason(""); setOvr(""); setRate(""); } }, [stay]);
   const picked = rooms.data?.find((r) => r.id === room);
   const notReady = !!picked && !picked.is_ready;
+  const otherType = !!picked && picked.room_type_id !== stay?.room_type_id;
+  // FO-007: the database says whether the new type costs more, both totals, and whether this user may keep the rate.
+  const quote = useQuery({
+    queryKey: ["reservations", "move-rate", stay?.reservation_id, room], enabled: !!stay && otherType,
+    queryFn: () => callRpc<MoveQuote>("preview_move_rate", { p_id: stay!.reservation_id, p_room_id: room }),
+  });
+  const q = otherType ? quote.data : undefined;
+  useEffect(() => { if (q) setRate(q.is_upgrade ? "new" : "keep"); }, [q]);
   return (
-    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Move ${stay?.guest_name ?? "guest"} from room ${stay?.room_number ?? ""}`} busy={m.isPending}
-      onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_room_id: room || null, p_reason: reason, p_room_override_reason: notReady ? ovr : null },
+    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Move ${stay?.guest_name ?? "guest"} from ${stay?.room_number ?? ""}`} busy={m.isPending}
+      submitDisabled={otherType && !q}
+      onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_room_id: room || null, p_reason: reason, p_room_override_reason: notReady ? ovr : null,
+        p_keep_rate: otherType ? rate === "keep" : null },
         { onSuccess: () => onOpenChange(false) })}>
       <Field label="New room" htmlFor="fd-room">
         <RoomSelect rooms={(rooms.data ?? []).filter((r) => r.id !== stay?.room_id)} value={room} onChange={setRoom} loading={rooms.isLoading} />
       </Field>
-      {picked && picked.room_type_id !== stay?.room_type_id && (
-        <p className="text-sm text-muted-foreground">This is a different room type. The nightly rate stays the same.</p>
+      {q && (
+        <Field label="Rate for the new room" htmlFor="mv-rate"
+          hint={q.is_upgrade ? "This room type costs more." : "This room type costs the same or less."}>
+          <Select value={rate} onValueChange={(v) => setRate(v as "keep" | "new")}>
+            <SelectTrigger id="mv-rate"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="new" disabled={q.new_total == null}>
+                Charge the new room type's rate{q.new_total != null ? ` (${formatAmount(q.new_total, q.currency ?? "NGN")} for the remaining nights)` : " (no price set)"}
+              </SelectItem>
+              {q.can_keep_rate && (
+                <SelectItem value="keep">
+                  {q.is_upgrade ? "Complimentary upgrade (keep rate)" : "Keep the booked rate"} ({formatAmount(q.current_total ?? "0", q.currency ?? "NGN")})
+                </SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        </Field>
       )}
+      {q?.is_upgrade && !q.can_keep_rate && <p className="text-sm text-muted-foreground">A complimentary upgrade needs the General Manager or Front Office Manager.</p>}
+      {q?.is_upgrade && rate === "keep" && <p className="text-sm text-muted-foreground">The reason for the move is saved with the complimentary upgrade in the audit log.</p>}
       <OverrideReason show={notReady} value={ovr} onChange={setOvr} />
       <Field label="Reason for the move" htmlFor="mv-reason"><Input id="mv-reason" value={reason} onChange={(e) => setReason(e.target.value)} required maxLength={300} /></Field>
-      <p className="text-sm text-muted-foreground">Room {stay?.room_number} will be marked vacant and dirty.</p>
+      <p className="text-sm text-muted-foreground">{stay?.room_number} will be marked vacant and dirty.</p>
     </FormDialog>
   );
 }
 
 export function ExtendStayDialog({ stay, onOpenChange }: { stay: InHouseRow | null; onOpenChange: (o: boolean) => void }) {
+  const { property } = useAccess();
   const [dep, setDep] = useState("");
   const [reason, setReason] = useState("");
-  const m = useResMutation("extend_stay", "Stay extended.");
+  const m = useResMutation("extend_stay", "Departure changed.");
   useEffect(() => { if (stay) { setDep(addDays(stay.departure_date, 1)); setReason(""); } }, [stay]);
-  const extra = stay ? nightsBetween(stay.departure_date, dep) : 0;
+  // FO-008: later adds nights, earlier (but after the business date) removes the unused ones.
+  const change = stay && dep ? nightsBetween(stay.departure_date, dep) : 0;
+  const hint = change > 0 ? `${change} extra night${change === 1 ? "" : "s"}` : change < 0 ? `${-change} night${change === -1 ? "" : "s"} fewer` : "";
   return (
-    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Extend stay · Room ${stay?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Change departure · ${stay?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_new_departure: dep, p_reason: reason || null }, { onSuccess: () => onOpenChange(false) })}>
-      <p className="text-sm text-muted-foreground">Current departure: {formatDay(stay?.departure_date)}</p>
-      <Field label="New departure" htmlFor="ex-dep" hint={extra > 0 ? `${extra} extra night${extra === 1 ? "" : "s"}` : ""}>
-        <Input id="ex-dep" type="date" min={stay ? addDays(stay.departure_date, 1) : undefined} value={dep} onChange={(e) => setDep(e.target.value)} required />
+      <p className="text-sm text-muted-foreground">Current departure: {formatDay(stay?.departure_date)}. Pick a later date to extend or an earlier one to shorten. To leave today, check the guest out.</p>
+      <Field label="New departure" htmlFor="ex-dep" hint={hint}>
+        <Input id="ex-dep" type="date" min={property?.business_date ? addDays(property.business_date, 1) : undefined} value={dep} onChange={(e) => setDep(e.target.value)} required />
       </Field>
       <Field label="Note" htmlFor="ex-reason" hint="Optional."><Input id="ex-reason" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} /></Field>
     </FormDialog>
@@ -291,7 +373,7 @@ export function VoidCheckInDialog({ stay, onOpenChange }: { stay: InHouseRow | n
       onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_reason: reason }, { onSuccess: () => onOpenChange(false) })}>
       <Alert variant="destructive">
         <AlertDescription>
-          {stay?.guest_name} goes back to arrivals, and room {stay?.room_number} is marked vacant and dirty. Use this only for a check-in made in error today.
+          {stay?.guest_name} goes back to arrivals, and {stay?.room_number} is marked vacant and dirty. Use this only for a check-in made in error today.
         </AlertDescription>
       </Alert>
       <Field label="Reason" htmlFor="void-reason"><Input id="void-reason" value={reason} onChange={(e) => setReason(e.target.value)} required maxLength={300} /></Field>

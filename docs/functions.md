@@ -381,11 +381,27 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Errors: `E_INVALID`
 
 ### `public.move_room`
-- Args: `p_id uuid, p_room_id uuid, p_reason text, p_room_override_reason text DEFAULT NULL::text`
+- Args: `p_id uuid, p_room_id uuid, p_reason text, p_room_override_reason text DEFAULT NULL::text, p_keep_rate boolean DEFAULT NULL::boolean`
 - Returns: `uuid`
 - Callable by signed-in users: yes · security definer
-- Permission: —
-- Errors: `E_INVALID`, `E_REQUIRED`, `E_ROOM_TAKEN`
+- Permission: `fo.room.move`; keeping the rate on a dearer room type also needs `fo.upgrade.complimentary`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NO_RATE`, `E_READ_ONLY`, `E_REQUIRED`, `E_ROOM_NOT_READY`, `E_ROOM_TAKEN`
+- FO-007: p_keep_rate null means "charge" for a dearer type and "keep" otherwise. Charging reprices nights not yet posted.
+
+### `public.preview_move_rate`
+- Args: `p_id uuid, p_room_id uuid`
+- Returns: `jsonb` (same_type, is_upgrade, current_total, new_total, missing_date, currency, can_keep_rate)
+- Callable by signed-in users: yes · security definer
+- Permission: `fo.room.move`
+- Errors: `E_FORBIDDEN`, `E_NOT_FOUND`
+
+### `public.create_property`
+- Args: `p_name text, p_city text, p_country text`
+- Returns: `uuid`
+- Callable by signed-in users: yes · security definer
+- Permission: `setup.property.create` (System Administrator, General Manager)
+- Errors: `E_FORBIDDEN`, `E_PLAN_LIMIT`, `E_READ_ONLY`, `E_REQUIRED`
+- PLT-007: seeded like the first property; the creator gets System Administrator and General Manager there. Audited.
 
 ### `public.my_context`
 - Args: `—`
@@ -430,11 +446,12 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Errors: `E_INVALID`, `E_READ_ONLY`, `E_REQUIRED`
 
 ### `public.post_payment`
-- Args: `p_folio_id uuid, p_payment_method_id uuid, p_amount numeric, p_currency text, p_is_deposit boolean, p_description text, p_reference text, p_idempotency_key text`
+- Args: `p_folio_id uuid, p_payment_method_id uuid, p_amount numeric, p_currency text, p_is_deposit boolean, p_description text, p_reference text, p_idempotency_key text, p_confirm_duplicate_reason text DEFAULT NULL::text`
 - Returns: `uuid`
 - Callable by signed-in users: yes · security definer
-- Permission: —
-- Errors: `E_INVALID`, `E_READ_ONLY`, `E_REQUIRED`
+- Permission: `fin.payment.post` (deposits: `fin.deposit.take`)
+- Errors: `E_INVALID`, `E_POSSIBLE_DUPLICATE`, `E_READ_ONLY`, `E_REQUIRED`
+- FIN-017: a payment matching one on the same folio (amount, currency, method, reference) in the last `duplicate_payment_window_minutes` (10) is refused with `E_POSSIBLE_DUPLICATE`, naming the earlier payment, unless `p_confirm_duplicate_reason` is given. A confirmed repeat writes audit action `payment_duplicate_confirmed`.
 
 ### `public.post_room_charges`
 - Args: `p_property_id uuid, p_business_date date DEFAULT NULL::date`
@@ -672,7 +689,8 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Returns: `uuid`
 - Callable by signed-in users: yes · security definer
 - Permission: `setup.room.manage`
-- Errors: `E_DUPLICATE`, `E_INVALID`, `E_NOT_FOUND`, `E_REQUIRED`
+- Errors: `E_DUPLICATE`, `E_INVALID`, `E_NOT_FOUND`, `E_REQUIRED`, `E_ROOM_BOOKED`, `E_ROOM_OCCUPIED`
+- SET-003: retiring an in-use room is refused while a guest is in it (`E_ROOM_OCCUPIED`, "This room has a guest in it. Retire it after check-out.", checked first) or while upcoming bookings are assigned to it (`E_ROOM_BOOKED`, "103 has 2 upcoming bookings (RES-000123, RES-000140). Move them to another room first.", up to 5 numbers then "and N more"). Upcoming: confirmed, or tentative with a hold not yet expired, assigned from the business date forward. Saving an already retired room as retired, renaming and floor changes work as before.
 
 ### `public.save_room_type`
 - Args: `p_property_id uuid, p_id uuid, p_code text, p_name text, p_max_adults integer, p_max_children integer, p_description text, p_is_active boolean`
@@ -750,6 +768,22 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: `fin.nightaudit.run`
 - Errors: `E_REQUIRED`
+
+### `public.set_arrival_ready`
+- Args: `p_reservation_id uuid, p_ready boolean`
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: `fo.checkin`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`
+- RES-013: marks an upcoming arrival ready (a flag on reservations, not a status).
+
+### `public.set_inspection_required`
+- Args: `p_property_id uuid, p_required boolean`
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: `setup.property.edit`
+- Errors: `E_FORBIDDEN`, `E_READ_ONLY`
+- SET-008: off means a completed housekeeping task closes as passed and the room is clean. Audited.
 
 ### `public.set_room_condition`
 - Args: `p_room_id uuid, p_condition text, p_reason text DEFAULT NULL::text`
@@ -1441,3 +1475,40 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Returns: `boolean`
 - Permission: —
 - Errors: —
+
+### Platform console (wave 2, item 2)
+
+Every function below first calls `app.require_platform()`: the caller must be on `app.platform_operators` (`E_FORBIDDEN` otherwise) and the session must have passed two-step sign-in, JWT `aal = aal2` (`E_MFA_REQUIRED` otherwise).
+
+### `public.platform_whoami`
+- Args: none
+- Returns: `jsonb` (`operator`, `mfa`), about the caller only
+- Callable by signed-in users: yes · security definer
+- Permission: none (answers for the caller)
+
+### `public.platform_list_tenants`
+- Args: none
+- Returns: table of hotel account data: tenant_id, hotel_name, country, access_status, subscription_status, plan_code, plan_name, trial_ends_at, paid_until, created_at, properties, rooms, active_users, last_change_at. No guest, booking, money or contact data (PLT-009).
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
+
+### `public.platform_tenant_history`
+- Args: `p_tenant uuid`
+- Returns: table: created_at, from_status, to_status, plan_code, period_end, reason, source, operator_email (platform changes only)
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
+
+### `public.platform_change_subscription`
+- Args: `p_tenant uuid, p_action text, p_reason text, p_until timestamptz DEFAULT NULL, p_plan text DEFAULT NULL`
+- Actions: `extend_trial` (p_until, at most a year ahead), `activate` (p_until in the future, optional p_plan; also reactivates), `suspend`, `change_plan` (p_plan), `cancel`. Each needs a reason, refuses a change that changes nothing, and writes `subscription_history` (source platform, actor the operator). Nothing is deleted.
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_MFA_REQUIRED`, `E_NOT_FOUND`, `E_PLAN_LIMIT`, `E_REQUIRED`
+
+### `app.add_platform_operator`
+- Args: `p_email text`. Database owner only (Supabase SQL editor); no grant to any app role.
+- Adds an existing sign-in account that belongs to no hotel. Errors: `E_INVALID` (account belongs to a hotel), `E_NOT_FOUND` (no such account).
+

@@ -1,0 +1,118 @@
+# Automatic checks for every pull request (wave 2, item 1, 6 Oct 2026). See docs/safety-net.md.
+# Two checks, always reported under the same names so branch protection can require them:
+#   "Checks and database tests" and "Browser tests".
+# Docs-only changes (scripts/ci-changes.sh) still run both jobs; they finish early and pass.
+# Everything runs against a scratch local Supabase inside GitHub's machine. No keys, never practice or live.
+# Not part of the Vercel build: a failure here never stops a deploy; Peter can still merge an urgent fix.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  SUPABASE_CLI_VERSION: 2.118.0
+  NODE_VERSION: 24
+  # Services the tests do not use; skipping them makes start-up faster.
+  SUPABASE_SKIP: studio,imgproxy,logflare,vector,supavisor,edge-runtime,postgres-meta
+
+jobs:
+  checks:
+    name: Checks and database tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Code or docs only?
+        id: changes
+        run: scripts/ci-changes.sh "${{ github.event.pull_request.base.sha || github.event.before }}" "${{ github.sha }}" >> "$GITHUB_OUTPUT"
+      - name: Docs only, nothing to test
+        if: steps.changes.outputs.code != 'true'
+        run: echo "Only documentation changed. Checks skipped on purpose; this check passes."
+      - uses: actions/setup-node@v7
+        if: steps.changes.outputs.code == 'true'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - name: Install
+        if: steps.changes.outputs.code == 'true'
+        run: npm ci
+      - name: Typecheck
+        if: steps.changes.outputs.code == 'true'
+        run: npm run typecheck
+      - name: Money check (no money arithmetic in browser code)
+        if: steps.changes.outputs.code == 'true'
+        run: npm run check:money
+      - name: Contrast check
+        if: steps.changes.outputs.code == 'true'
+        run: npm run check:contrast
+      - name: Requirement register check
+        if: steps.changes.outputs.code == 'true'
+        run: npm run check:requirements
+      - name: Build
+        if: steps.changes.outputs.code == 'true'
+        run: npm run build
+      - uses: supabase/setup-cli@v3
+        if: steps.changes.outputs.code == 'true'
+        with:
+          version: ${{ env.SUPABASE_CLI_VERSION }}
+      - name: Start a scratch local Supabase
+        if: steps.changes.outputs.code == 'true'
+        run: supabase start -x "$SUPABASE_SKIP"
+      - name: Database tests (upgrade test, every test file, register)
+        if: steps.changes.outputs.code == 'true'
+        run: scripts/test-db.sh
+
+  browser:
+    name: Browser tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Code or docs only?
+        id: changes
+        run: scripts/ci-changes.sh "${{ github.event.pull_request.base.sha || github.event.before }}" "${{ github.sha }}" >> "$GITHUB_OUTPUT"
+      - name: Docs only, nothing to test
+        if: steps.changes.outputs.code != 'true'
+        run: echo "Only documentation changed. Browser tests skipped on purpose; this check passes."
+      - uses: actions/setup-node@v7
+        if: steps.changes.outputs.code == 'true'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - name: Install
+        if: steps.changes.outputs.code == 'true'
+        run: npm ci
+      - name: Install the test browser
+        if: steps.changes.outputs.code == 'true'
+        run: npx playwright install --with-deps chromium
+      - uses: supabase/setup-cli@v3
+        if: steps.changes.outputs.code == 'true'
+        with:
+          version: ${{ env.SUPABASE_CLI_VERSION }}
+      - name: Start a scratch local Supabase
+        if: steps.changes.outputs.code == 'true'
+        run: supabase start -x "$SUPABASE_SKIP"
+      - name: Browser tests (one retry for a test that fails once)
+        if: steps.changes.outputs.code == 'true'
+        run: npx playwright test --retries=1
+      - name: Keep the failure trace
+        if: failure() && steps.changes.outputs.code == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7

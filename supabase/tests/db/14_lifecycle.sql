@@ -29,6 +29,7 @@ begin
   perform public.inspect_hk_task(v_task, false, 'failed', '["Bathroom not cleaned"]'::jsonb, 'Bathroom not cleaned');
   perform t.eq((select condition from public.rooms where id = t.room('101')), 'dirty', '[HK-003] a failed room goes back to dirty');
   perform t.eq((select status from public.hk_tasks where id = v_task), 'failed', '[HK-003] the task is in rework');
+  perform t.login('att');
   perform t.ok(exists (select 1 from public.notifications where user_id = t.id('att') and entity_id = v_task), '[HK-003] the attendant is notified of the failed inspection');
   perform t.login('att');
   perform public.start_hk_task(v_task);

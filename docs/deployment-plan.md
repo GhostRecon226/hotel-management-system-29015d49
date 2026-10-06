@@ -35,7 +35,7 @@ Keys are entered by you in the Vercel dashboard (Settings > Environment Variable
 | `SUPABASE_SERVICE_ROLE_KEY` | **Yes. Mark "Sensitive".** | Server only: staff invites, exports, email outbox | Supabase > API Keys > secret key. Never in a `VITE_` key. |
 | `RESEND_API_KEY` | **Yes. Mark "Sensitive".** | Server only: email outbox | Resend > API Keys, "sending access" only |
 | `OUTBOX_FROM_EMAIL` | No | Server only | for example `Hotel Desk <no-reply@mail.yourdomain>` |
-| `CRON_SECRET` | **Yes. Mark "Sensitive".** | Server only: protects the scheduled email sender (step 4.4) | a long random value Vercel can generate |
+| `CRON_SECRET` | **Yes. Mark "Sensitive".** | Server only: protects the scheduled jobs: the daily ID photo clean-up (needed as soon as ID photos go live) and the email sender (step 4.4) | a long random value Vercel can generate |
 
 Rules that stay in force:
 - `VITE_` keys reach the browser. Only the publishable key may ever start with `VITE_`.
@@ -62,6 +62,7 @@ Two kinds of email leave the system, and both should come from your domain.
 | 4.2 | You | **Sign-up and invite emails (Supabase Auth).** Supabase > Authentication > SMTP: host `smtp.resend.com`, port 465, user `resend`, password = a Resend API key. Sender `no-reply@mail.yourdomain`. Supabase's built-in email sender allows only a few emails per hour, so without this, sign-ups and staff invites will fail as soon as a few people use them. |
 | 4.3 | You | Put `RESEND_API_KEY` and `OUTBOX_FROM_EMAIL` in Vercel (section 2). |
 | 4.4 | Built 2 Oct 2026, schedule off for now | **Scheduled sender for app emails (booking confirmations, approval alerts).** `GET /api/cron/outbox`. The 5-minute schedule is switched off while we are on Vercel Hobby, which rejects it. Emails queue in the database and are never lost; they wait until the schedule is back. **To put it back when we move to Pro:** in `vite.config.ts`, restore the commented `vercel: { config: { ... crons ... } }` line inside `nitro({ ... })`, and check `CRON_SECRET`, `RESEND_API_KEY` and `OUTBOX_FROM_EMAIL` are set in Vercel. |
+| 4.6 | Built 7 Oct 2026 | **Daily ID photo clean-up.** `GET /api/cron/id-photo-cleanup`, called by Vercel Cron once a day at 02:00 UTC (allowed on Hobby). It removes from storage the ID photos past the keep period and those marked when a guest is anonymised. It refuses every call until `CRON_SECRET` is set in Vercel. |
 | 4.5 | Claude | Send a test confirmation and an invite to an address you choose, and check they arrive, are not marked as spam, and their links work. |
 
 ## 5. Automatic checks before anything reaches `main`

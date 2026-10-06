@@ -17,6 +17,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenticated/create-hotel'
+import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as PublicContactRouteImport } from './routes/_public/contact'
@@ -38,6 +39,7 @@ import { Route as AuthenticatedAppRoomsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppServiceRequestsRouteImport } from './routes/_authenticated/_app/service-requests'
 import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authenticated/_app/setup/route'
 import { Route as AuthenticatedInvoicesIdRouteImport } from './routes/_authenticated/invoices.$id'
+import { Route as ApiCronIdPhotoCleanupRouteImport } from './routes/api/cron/id-photo-cleanup'
 import { Route as ApiCronOutboxRouteImport } from './routes/api/cron/outbox'
 import { Route as AuthenticatedAppCheckoutIdRouteImport } from './routes/_authenticated/_app/checkout.$id'
 import { Route as AuthenticatedAppFoliosIndexRouteImport } from './routes/_authenticated/_app/folios/index'
@@ -103,6 +105,11 @@ const AuthenticatedCreateHotelRoute =
     path: '/create-hotel',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPlatformRoute = AuthenticatedPlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -218,6 +225,11 @@ const AuthenticatedInvoicesIdRoute = AuthenticatedInvoicesIdRouteImport.update({
   id: '/invoices/$id',
   path: '/invoices/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiCronIdPhotoCleanupRoute = ApiCronIdPhotoCleanupRouteImport.update({
+  id: '/api/cron/id-photo-cleanup',
+  path: '/api/cron/id-photo-cleanup',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCronOutboxRoute = ApiCronOutboxRouteImport.update({
   id: '/api/cron/outbox',
@@ -381,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/platform': typeof AuthenticatedPlatformRoute
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
@@ -401,6 +414,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
@@ -435,6 +449,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/platform': typeof AuthenticatedPlatformRoute
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
@@ -448,6 +463,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
@@ -485,6 +501,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/_authenticated/platform': typeof AuthenticatedPlatformRoute
   '/_public/about': typeof PublicAboutRoute
   '/_public/contact': typeof PublicContactRoute
   '/_public/faq': typeof PublicFaqRoute
@@ -506,6 +523,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/reports': typeof AuthenticatedAppReportsRoute
   '/_authenticated/_app/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/_authenticated/_app/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/_authenticated/_app/folios/$id': typeof AuthenticatedAppFoliosIdRoute
@@ -542,6 +560,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/create-hotel'
+    | '/platform'
     | '/about'
     | '/contact'
     | '/faq'
@@ -562,6 +581,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
+    | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
     | '/checkout/$id'
     | '/folios/$id'
@@ -596,6 +616,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/create-hotel'
+    | '/platform'
     | '/about'
     | '/contact'
     | '/faq'
@@ -609,6 +630,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
+    | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
     | '/checkout/$id'
     | '/folios/$id'
@@ -645,6 +667,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/_app'
     | '/_authenticated/create-hotel'
+    | '/_authenticated/platform'
     | '/_public/about'
     | '/_public/contact'
     | '/_public/faq'
@@ -666,6 +689,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/reports'
     | '/_authenticated/_app/service-requests'
     | '/_authenticated/invoices/$id'
+    | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
     | '/_authenticated/_app/checkout/$id'
     | '/_authenticated/_app/folios/$id'
@@ -701,6 +725,7 @@ export interface RootRouteChildren {
   CheckEmailRoute: typeof CheckEmailRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiCronIdPhotoCleanupRoute: typeof ApiCronIdPhotoCleanupRoute
   ApiCronOutboxRoute: typeof ApiCronOutboxRoute
 }
 
@@ -760,6 +785,13 @@ declare module '@tanstack/react-router' {
       path: '/create-hotel'
       fullPath: '/create-hotel'
       preLoaderRoute: typeof AuthenticatedCreateHotelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/platform': {
+      id: '/_authenticated/platform'
+      path: '/platform'
+      fullPath: '/platform'
+      preLoaderRoute: typeof AuthenticatedPlatformRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_public/': {
@@ -908,6 +940,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/invoices/$id'
       preLoaderRoute: typeof AuthenticatedInvoicesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/cron/id-photo-cleanup': {
+      id: '/api/cron/id-photo-cleanup'
+      path: '/api/cron/id-photo-cleanup'
+      fullPath: '/api/cron/id-photo-cleanup'
+      preLoaderRoute: typeof ApiCronIdPhotoCleanupRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/cron/outbox': {
       id: '/api/cron/outbox'
@@ -1281,12 +1320,14 @@ const AuthenticatedAppRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
   AuthenticatedCreateHotelRoute: typeof AuthenticatedCreateHotelRoute
+  AuthenticatedPlatformRoute: typeof AuthenticatedPlatformRoute
   AuthenticatedInvoicesIdRoute: typeof AuthenticatedInvoicesIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
   AuthenticatedCreateHotelRoute: AuthenticatedCreateHotelRoute,
+  AuthenticatedPlatformRoute: AuthenticatedPlatformRoute,
   AuthenticatedInvoicesIdRoute: AuthenticatedInvoicesIdRoute,
 }
 
@@ -1324,6 +1365,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckEmailRoute: CheckEmailRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiCronIdPhotoCleanupRoute: ApiCronIdPhotoCleanupRoute,
   ApiCronOutboxRoute: ApiCronOutboxRoute,
 }
 export const routeTree = rootRouteImport

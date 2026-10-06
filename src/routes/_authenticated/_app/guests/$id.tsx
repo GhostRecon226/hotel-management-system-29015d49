@@ -24,6 +24,12 @@ import {
 
 import { formatDay, ResStatusBadge } from "@/lib/reservations";
 import { Money } from "@/components/ui/money";
+import {
+  DeleteIdPhotoDialog, ID_PHOTO_ACCEPT, IdPhotoViewer, purgeIdPhotosNow, uploadIdPhoto, useGuestIdPhotos, useIdPhotoAccess,
+  useIdPhotosChanged, type IdPhoto,
+} from "@/lib/id-photos";
+import { errorMessage } from "@/lib/errors";
+import { toast } from "sonner";
 
 interface StayRow { id: string; number: string; property_name: string; arrival_date: string; departure_date: string; status: string; total_amount: number; currency: string }
 
@@ -42,7 +48,7 @@ function Row({ label, value }: { label: string; value: string | null | undefined
 
 function GuestProfile() {
   const { id } = Route.useParams();
-  const { can } = useAccess();
+  const { can, property } = useAccess();
   const navigate = useNavigate();
   const { data, isLoading, error } = useGuest(id);
   const [edit, setEdit] = useState(false);
@@ -58,6 +64,12 @@ function GuestProfile() {
   const addFb = useGuestMutation("add_guest_feedback", "Feedback added.");
   const setFbStatus = useGuestMutation("set_guest_feedback_status", "Status updated.");
   const anonymise = useGuestMutation("anonymise_guest", "Guest anonymised.");
+  const photoAccess = useIdPhotoAccess();
+  const photos = useGuestIdPhotos(id, photoAccess.canView);
+  const photosChanged = useIdPhotosChanged();
+  const [viewing, setViewing] = useState<IdPhoto | null>(null);
+  const [deleting, setDeleting] = useState<IdPhoto | null>(null);
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
 
   if (isLoading) return <LoadingState label="Loading guest…" />;
   if (error || !data) return <EmptyState title="Guest not found" description="This guest may have been removed." action={<Button variant="outline" asChild><Link to="/guests">All guests</Link></Button>} />;
@@ -71,6 +83,37 @@ function GuestProfile() {
     setDocOpen(true);
   };
   const confirmWord = "ANONYMISE";
+  const showPhotos = photoAccess.canView || photoAccess.canUpload;
+  const addPhoto = async (d: GuestDocument, side: "front" | "back", file: File | undefined) => {
+    if (!file || !property || !d.doc_number) return;
+    setUploadingKey(`${d.id}:${side}`);
+    try {
+      await uploadIdPhoto({ propertyId: property.id, guestId: g.id, docType: d.doc_type, docNumber: d.doc_number, expiry: d.expiry ?? null, side, file });
+      photosChanged(); toast.success("Photo added.");
+    } catch (e) { toast.error(errorMessage(e)); }
+    finally { setUploadingKey(null); }
+  };
+  const photoCell = (d: GuestDocument, side: "front" | "back") => {
+    const p = (photos.data ?? []).find((x) => x.document_id === d.id && x.side === side);
+    const label = side === "front" ? "front" : "back";
+    if (p) return (
+      <span className="inline-flex items-center gap-1">
+        {photoAccess.canView && <Button size="sm" variant="outline" onClick={() => setViewing(p)}>View {label}</Button>}
+        {photoAccess.canDelete && <Button size="sm" variant="ghost" onClick={() => setDeleting(p)} aria-label={`Delete ${label} photo`}>Delete</Button>}
+      </span>
+    );
+    if (!photoAccess.canUpload || locked || !d.doc_number) return null;
+    const key = `${d.id}:${side}`;
+    return (
+      <Button size="sm" variant="outline" asChild disabled={uploadingKey !== null}>
+        <label className="cursor-pointer">
+          {uploadingKey === key ? "Uploading…" : `Add ${label}`}
+          <input type="file" accept={ID_PHOTO_ACCEPT} capture="environment" className="sr-only" aria-label={`Add ${label} photo`}
+            onChange={(e) => { void addPhoto(d, side, e.target.files?.[0]); e.target.value = ""; }} />
+        </label>
+      </Button>
+    );
+  };
 
   return (
     <div>
@@ -128,9 +171,9 @@ function GuestProfile() {
                 <p className="mb-3 rounded-md bg-warning-soft px-3 py-2 text-sm text-warning-strong">Document numbers are hidden. You need permission to see ID numbers.</p>
               )}
               <Table>
-                <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Number</TableHead><TableHead>Expiry</TableHead><TableHead /></TableRow></TableHeader>
+                <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Number</TableHead><TableHead>Expiry</TableHead>{showPhotos && <TableHead>Photos</TableHead>}<TableHead /></TableRow></TableHeader>
                 <TableBody>
-                  {data.documents.length === 0 && <TableStateRow colSpan={4} title="No documents." />}
+                  {data.documents.length === 0 && <TableStateRow colSpan={showPhotos ? 5 : 4} title="No documents." />}
                   {data.documents.map((d) => {
                     const expired = d.expiry && d.expiry < new Date().toISOString().slice(0, 10);
                     return (
@@ -138,12 +181,13 @@ function GuestProfile() {
                         <TableCell>{DOC_TYPES[d.doc_type]}</TableCell>
                         <TableCell className="font-mono">{d.doc_number ?? d.doc_number_masked}</TableCell>
                         <TableCell>{formatDate(d.expiry)}{expired && <Badge variant="danger" className="ml-2">Expired</Badge>}</TableCell>
+                        {showPhotos && <TableCell><div className="flex flex-wrap gap-2">{photoCell(d, "front")}{photoCell(d, "back")}</div></TableCell>}
                         <TableCell className="text-right">
                           {canEdit && data.can_view_documents && (
                             <div className="flex justify-end gap-2">
                               <Button size="sm" variant="outline" onClick={() => openDoc(d)}>Edit</Button>
                               <Button size="sm" variant="outline" disabled={removeDoc.isPending}
-                                onClick={() => { if (window.confirm("Remove this document?")) removeDoc.mutate({ p_id: d.id }); }}>Remove</Button>
+                                onClick={() => { if (window.confirm("Remove this document?")) removeDoc.mutate({ p_id: d.id }, { onSuccess: () => { void purgeIdPhotosNow(g.id); photosChanged(); } }); }}>Remove</Button>
                             </div>
                           )}
                         </TableCell>
@@ -247,12 +291,14 @@ function GuestProfile() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <Button variant="destructive" disabled={anon.confirm !== confirmWord || !anon.reason.trim() || anonymise.isPending}
-              onClick={() => anonymise.mutate({ p_guest: g.id, p_reason: anon.reason }, { onSuccess: () => { setAnonOpen(false); navigate({ to: "/guests/$id", params: { id: g.id } }); } })}>
+              onClick={() => anonymise.mutate({ p_guest: g.id, p_reason: anon.reason }, { onSuccess: () => { void purgeIdPhotosNow(g.id); photosChanged(); setAnonOpen(false); navigate({ to: "/guests/$id", params: { id: g.id } }); } })}>
               {anonymise.isPending ? "Anonymising…" : "Anonymise guest"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <IdPhotoViewer photo={viewing} onOpenChange={(o) => { if (!o) setViewing(null); }} />
+      <DeleteIdPhotoDialog photo={deleting} guestId={g.id} onOpenChange={(o) => { if (!o) setDeleting(null); }} />
     </div>
   );
 }

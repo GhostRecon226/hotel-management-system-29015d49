@@ -15,6 +15,7 @@
     "test:e2e": "playwright test",
     "check:money": "scripts/check-no-browser-money.sh",
     "check:contrast": "node scripts/check-contrast.mjs",
+    "check:requirements": "node scripts/check-requirements.mjs",
     "check:confirm": "node scripts/check-to-confirm.mjs"
   },
   "overrides": {

@@ -1,5 +1,5 @@
 // Fails while any detail on the public pages still waits for Peter's confirmation ([TO CONFIRM] markers).
-// Runs before every production build (npm run build), so unconfirmed text can never go live.
+// Runs before every build (npm run build). Production (VERCEL_ENV=production) fails while any marker is left, so stand-in text can never go live; previews and local builds only warn.
 // Usage: npm run check:confirm
 import fs from "node:fs";
 import path from "node:path";
@@ -20,9 +20,17 @@ function walk(dir) {
 }
 roots.forEach((r) => fs.existsSync(r) && walk(r));
 if (hits.length) {
-  console.error(`${hits.length} detail(s) on the public pages are still [TO CONFIRM]:`);
-  for (const h of hits) console.error("  " + h);
-  console.error("Replace each one with the confirmed text, then build again.");
-  process.exit(1);
+  const isProduction = process.env.VERCEL_ENV === "production";
+  const msg = `${hits.length} detail(s) on the public pages are still stand-in text ([TO CONFIRM], filled from src/lib/site-info.ts):`;
+  if (isProduction) {
+    console.error(msg);
+    for (const h of hits) console.error("  " + h);
+    console.error("Replace each one with the confirmed text, then build again.");
+    process.exit(1);
+  }
+  console.warn(`PREVIEW ONLY: ${msg}`);
+  for (const h of hits) console.warn("  " + h);
+  console.warn("A production build (VERCEL_ENV=production) refuses to run until these are confirmed.");
+  process.exit(0);
 }
 console.log("OK: no [TO CONFIRM] left on the public pages.");

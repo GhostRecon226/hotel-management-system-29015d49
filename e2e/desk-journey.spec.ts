@@ -42,6 +42,7 @@ test("desk journey: new guest from the booking form, book, check in, charge, pay
   const checkIn = page.getByRole("dialog", { name: /Check in/ });
   await pick(page, "fd-room", /^1 ·/);
   await checkIn.getByLabel("ID number").fill("A1234567");
+  await checkIn.getByLabel("Guest has read and signed the registration card").check();
   await checkIn.getByRole("button", { name: "Save" }).click();
   await expect(toasts(page).filter({ hasText: "Guest checked in." })).toBeVisible();
 

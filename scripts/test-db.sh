@@ -49,6 +49,15 @@ for f in supabase/tests/db/[1-9]*.sql; do
   if [ "$ec" -gt 0 ]; then failures+=$(sed "s/^/  $(basename "$f" .sql): FILE ERROR /" <<<"$e")$'\n'; fi
 done
 
+# Requirement register (docs/requirements.csv): every test id has a row. Part of the full run, not of the build.
+reg=$(node scripts/check-requirements.mjs 2>&1)
+if [ $? -eq 0 ]; then
+  printf "%-40s %4d ok  %4d not ok\n" "requirement register" 1 0; pass=$((pass + 1))
+else
+  printf "%-40s %4d ok  %4d not ok\n" "requirement register" 0 1; fail=$((fail + 1))
+  failures+=$(sed "s/^/  requirement register: /" <<<"$reg")$'\n'
+fi
+
 echo
 if [ "$fail" -eq 0 ]; then
   echo "ALL OK ($pass checks)"

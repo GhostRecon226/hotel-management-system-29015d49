@@ -11,6 +11,7 @@ import { Money } from "@/components/ui/money";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/reservations/")({ component: ReservationList });
 
@@ -73,7 +74,7 @@ function ReservationList() {
               <TableCell className="tabular">{formatDay(r.arrival_date)}</TableCell>
               <TableCell className="tabular">{formatDay(r.departure_date)}</TableCell>
               <TableCell className="tabular">{nightsBetween(r.arrival_date, r.departure_date) || "Same day"}</TableCell>
-              <TableCell>{r.room_type_code}{r.room_number && <span className="text-muted-foreground"> · {r.room_number}</span>}</TableCell>
+              <TableCell>{r.room_number ? <RoomName label={r.room_number} className="font-normal" /> : <span className="text-muted-foreground">{r.room_type_code} · not assigned</span>}</TableCell>
               <TableCell><ResStatusBadge status={r.status} holdUntil={r.hold_until} /></TableCell>
               <TableCell><Money amount={r.total_amount} currency={r.currency} /></TableCell>
             </TableRow>

@@ -167,7 +167,7 @@ export function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boole
             <SelectTrigger id="t-room"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Not a room</SelectItem>
-              {(rooms.data ?? []).map((r) => <SelectItem key={r.id} value={r.id}>Room {r.room_number}</SelectItem>)}
+              {(rooms.data ?? []).map((r) => <SelectItem key={r.id} value={r.id}>{r.room_number}</SelectItem>)}
             </SelectContent>
           </Select>
         </Field>
@@ -212,7 +212,7 @@ export function BlockTicketRoomDialog({ ticket, onOpenChange }: { ticket: Ticket
   const [f, setF] = useState({ type: "out_of_order", from: today, to: today ? addDays(today, 1) : "", reason: "" });
   useEffect(() => { if (ticket) setF({ type: "out_of_order", from: today, to: today ? addDays(today, 1) : "", reason: `Maintenance: ${ticket.title}` }); }, [ticket, today]);
   return (
-    <FormDialog open={!!ticket} onOpenChange={onOpenChange} title={`Block room ${ticket?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!ticket} onOpenChange={onOpenChange} title={`Block ${ticket?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: ticket!.id, p_type: f.type, p_from: f.from, p_to: f.to, p_reason: f.reason }, { onSuccess: () => onOpenChange(false) })}>
       {!can("room.block.approve") && <p className="text-sm text-muted-foreground">A manager must approve this block before the room stops being sold.</p>}
       <Field label="Type" htmlFor="tb-type">
@@ -253,7 +253,7 @@ export function NewServiceRequestDialog({ guest, onOpenChange }: { guest: Servic
   const [f, setF] = useState(blank);
   useEffect(() => { if (guest) setF(blank); }, [guest]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <FormDialog open={!!guest} onOpenChange={onOpenChange} title={`Service request · Room ${guest?.room_number ?? ""}`} busy={m.isPending}
+    <FormDialog open={!!guest} onOpenChange={onOpenChange} title={`Service request · ${guest?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => {
         if (f.chargeable && (!f.code || !(Number(f.amount) > 0))) { toast.error("Enter the amount and pick a charge code."); return; }
         m.mutate({

@@ -6,6 +6,16 @@ import { useAccess, myContextQuery } from "@/lib/access";
 import { Field, SectionHeader, useSetupMutation } from "@/lib/setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { callRpc } from "@/lib/setup";
+import { errorMessage } from "@/lib/errors";
+import { useIdPhotoSettings, type IdPhotoSettings } from "@/lib/id-photos";
+import { reportBrowserError } from "@/lib/error-report";
+import { sendTestError, TEST_ERROR_BROWSER } from "@/lib/test-error.functions";
 
 export const Route = createFileRoute("/_authenticated/_app/setup/property")({
   component: PropertyDetails,
@@ -44,6 +54,7 @@ function PropertyDetails() {
 
   if (!data) return <p className="text-sm text-muted-foreground">Loading…</p>;
   return (
+    <>
     <form onSubmit={submit} className="max-w-xl space-y-4">
       <SectionHeader title="Property details" />
       <div className="grid gap-4 sm:grid-cols-2">
@@ -60,5 +71,133 @@ function PropertyDetails() {
       </div>
       {canEdit && <Button type="submit" disabled={save.isPending}>{save.isPending ? "Saving…" : "Save changes"}</Button>}
     </form>
+    <InspectionSection canEdit={canEdit} required={data.inspection_required} />
+    {can("setup.property.create") && <AddPropertySection />}
+    <IdPhotoSettingsSection canEdit={canEdit} />
+    {canEdit && <TestErrorSection />}
+    </>
+  );
+}
+
+/** Safety net check: sends one test error from the browser and one from the server to Sentry (docs/safety-net.md). */
+function TestErrorSection() {
+  const { property } = useAccess();
+  const [busy, setBusy] = useState(false);
+  async function send() {
+    setBusy(true);
+    reportBrowserError(new Error(TEST_ERROR_BROWSER), "test");
+    try {
+      await sendTestError({ data: { propertyId: property!.id } });
+    } catch (e) {
+      if (!errorMessage(e).includes("test error")) { toast.error(errorMessage(e)); setBusy(false); return; }
+    }
+    toast.success("Two test errors sent. If error alerts are set up, Sentry shows them within a minute and emails you.");
+    setBusy(false);
+  }
+  return (
+    <section className="mt-10 max-w-xl space-y-3" aria-labelledby="te-title">
+      <h2 id="te-title" className="text-xl font-semibold">Error alerts</h2>
+      <p className="text-[15px] text-muted-foreground">Check that error alerts reach you. This sends two test errors, one from this browser and one from the server. Nothing in the hotel changes.</p>
+      <Button type="button" variant="outline" onClick={send} disabled={busy}>{busy ? "Sending…" : "Send a test error"}</Button>
+    </section>
+  );
+}
+
+const COUNTRIES = ["Nigeria", "Ghana", "Kenya", "South Africa", "Other"];
+
+/** PLT-007: the System Administrator or General Manager adds another property, within the plan's property limit. */
+function AddPropertySection() {
+  const qc = useQueryClient();
+  const { setPropertyId } = useAccess();
+  const [f, setF] = useState({ name: "", city: "", country: "Nigeria" });
+  const m = useMutation({
+    mutationFn: () => callRpc<string>("create_property", { p_name: f.name, p_city: f.city, p_country: f.country }),
+    onSuccess: async (id) => {
+      await qc.invalidateQueries({ queryKey: myContextQuery.queryKey });
+      toast.success(`${f.name} added. You are now working in it.`);
+      setF({ name: "", city: "", country: "Nigeria" });
+      setPropertyId(id);
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  return (
+    <section className="mt-10 max-w-xl space-y-4" aria-labelledby="addp-title">
+      <div>
+        <h2 id="addp-title" className="text-xl font-semibold">Add another property</h2>
+        <p className="mt-0.5 text-[15px] text-muted-foreground">
+          It gets the same starting setup as this one: charge codes, payment methods and, for Nigeria, tax lines to confirm.
+          Rooms, rates and staff are set up separately. Your plan sets how many properties you can have.
+        </p>
+      </div>
+      <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); m.mutate(); }}>
+        <Field label="Property name" htmlFor="np-name"><Input id="np-name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required maxLength={120} /></Field>
+        <Field label="City" htmlFor="np-city"><Input id="np-city" value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} maxLength={120} /></Field>
+        <Field label="Country" htmlFor="np-country">
+          <Select value={f.country} onValueChange={(v) => setF({ ...f, country: v })}>
+            <SelectTrigger id="np-country"><SelectValue /></SelectTrigger>
+            <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+          </Select>
+        </Field>
+        <div className="flex items-end"><Button type="submit" disabled={m.isPending}>{m.isPending ? "Adding…" : "Add property"}</Button></div>
+      </form>
+    </section>
+  );
+}
+
+/** SET-008: housekeeping inspection on or off for this property. */
+function InspectionSection({ canEdit, required }: { canEdit: boolean; required: boolean }) {
+  const { property } = useAccess();
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (v: boolean) => callRpc("set_inspection_required", { p_property_id: property!.id, p_required: v }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["setup", "properties"] }); toast.success("Inspection setting saved."); },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  return (
+    <section className="mt-10 max-w-xl space-y-4" aria-labelledby="insp-title">
+      <h2 id="insp-title" className="text-xl font-semibold">Housekeeping</h2>
+      <div className="flex items-start gap-3">
+        <Switch id="insp-required" checked={required} disabled={!canEdit || m.isPending} onCheckedChange={(v) => m.mutate(v)} />
+        <div><Label htmlFor="insp-required">Rooms need inspection after cleaning</Label>
+          <p className="text-sm text-muted-foreground">Off: when an attendant completes a room, it is clean straight away, with no supervisor check.</p></div>
+      </div>
+    </section>
+  );
+}
+
+/** SET-009: "Allow ID photos" (off by default) and "Require ID photo at check-in" (only when allowed). */
+function IdPhotoSettingsSection({ canEdit }: { canEdit: boolean }) {
+  const { property } = useAccess();
+  const qc = useQueryClient();
+  const { data } = useIdPhotoSettings();
+  const m = useMutation({
+    mutationFn: (v: { allow: boolean; require: boolean }) =>
+      callRpc<IdPhotoSettings>("set_id_photo_settings", { p_property_id: property!.id, p_allow: v.allow, p_require: v.require }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["id-photos"] }); toast.success("ID photo settings saved."); },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  if (!data) return null;
+  return (
+    <section className="mt-10 max-w-xl space-y-4" aria-labelledby="idp-title">
+      <div>
+        <h2 id="idp-title" className="text-xl font-semibold">ID photos</h2>
+        <p className="mt-0.5 text-[15px] text-muted-foreground">
+          Let staff keep a photo or scan of each guest's ID document. Photos are stored privately, only managers and front
+          desk can see them, every view is recorded, and they are deleted {data.keep_months} months after the guest's last check-out.
+        </p>
+      </div>
+      <div className="flex items-start gap-3">
+        <Switch id="idp-allow" checked={data.allow} disabled={!canEdit || m.isPending}
+          onCheckedChange={(v) => m.mutate({ allow: v, require: v ? data.require : false })} />
+        <div><Label htmlFor="idp-allow">Allow ID photos</Label>
+          <p className="text-sm text-muted-foreground">Off: nobody can add or open ID photos at this property.</p></div>
+      </div>
+      <div className="flex items-start gap-3">
+        <Switch id="idp-require" checked={data.allow && data.require} disabled={!canEdit || !data.allow || m.isPending}
+          onCheckedChange={(v) => m.mutate({ allow: data.allow, require: v })} />
+        <div><Label htmlFor="idp-require">Require ID photo at check-in</Label>
+          <p className="text-sm text-muted-foreground">Check-in and walk-in wait until the guest has an ID photo. Works only when ID photos are allowed.</p></div>
+      </div>
+    </section>
   );
 }

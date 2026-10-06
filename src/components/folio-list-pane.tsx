@@ -38,7 +38,7 @@ export function FolioListPane({ activeId, className }: { activeId: string; class
               </div>
               <div className="mt-0.5 truncate text-[13px] text-foreground">{f.guest_name ?? "Guest"}</div>
               <div className="truncate text-xs text-muted-foreground">
-                {f.room_number ? `Room ${f.room_number} · ` : ""}{formatDay(f.arrival_date, { day: "numeric", month: "short" })} – {formatDay(f.departure_date, { day: "numeric", month: "short" })}
+                {f.room_number ? `${f.room_number} · ` : ""}{formatDay(f.arrival_date, { day: "numeric", month: "short" })} – {formatDay(f.departure_date, { day: "numeric", month: "short" })}
               </div>
             </Link>
           </li>

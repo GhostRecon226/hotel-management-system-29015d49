@@ -15,6 +15,43 @@ This report covers the app Lovable built (`hotel-management-system-29015d49`). I
 - Screens no longer add up money. Every total, tax preview, fee preview and KPI comes from the database. A check (`npm run check:money`) fails if browser code starts doing money sums again.
 - It is still not ready for a real hotel: 21 failures, tax rules wait for the accountant, email is not connected, and 6c and DAY-006 are not built.
 
+## Pilot readiness: open items before the first paying hotel
+
+Added 6 Oct 2026. The full 18-gate list is section F7 of `docs/assessment-2026-10-05.md` (branch `claude/assessment`, not merged); gate numbers below refer to it.
+
+| Item | Gate | State | What closes it |
+|---|---|---|---|
+| Sentry error alerts | 12 | Open, deferred by Peter until before the first paying hotel. The privacy-stripped reporter is built (pull request #4) and sends nothing until the DSN is set. | `docs/safety-net.md` steps 3, 4 and 6: account in the EU region, privacy settings on, DSN in Vercel Production, a test error reaches Peter's email. |
+| Uptime monitor (UptimeRobot) | 12 | Open, deferred by Peter until before the first paying hotel. | `docs/safety-net.md` step 7: keyword monitor on the public sign-in page; lawyer confirms the free plan's fair-use terms. |
+| GitHub Pro with branch protection on `main` | 13 | Open, deferred by Peter until before the first paying hotel. The GitHub checks themselves run on every pull request once #4 is merged. | `docs/safety-net.md` step 8: GitHub Pro (about $4 a month), both checks required, owner override kept. |
+| Vercel Pro (commercial use) | 1 | Open. Vercel's Hobby plan is for personal, non-commercial use. | Vercel, Settings, Billing shows Pro. Also turns the 5-minute email sender back on. |
+
+Live Supabase "Deploy to production" (Settings, Integrations, GitHub) is **off on purpose** (switched off by Peter on 6 Oct 2026; it was on, with production branch `main`), so a merge to `main` never changes live. Live database changes happen only in the release steps, after Peter says yes.
+
+## Update: 7 Oct 2026 (stage 2: ID document photos, on branch `claude/id-photos`)
+
+- **A hotel can keep a photo or scan of a guest's ID** (front and back), if a manager switches on "Allow ID photos" in Setup > Property. Off by default. "Require ID photo at check-in" makes check-in and walk-in wait for a photo.
+- **Private:** the files sit in private storage. Staff open a photo only through a link that works for 60 seconds, and every upload, view and deletion is recorded. Reservation officers and accountants cannot upload or see them.
+- **Smaller and cleaner:** photos are shrunk on the device before upload (longest side 1600 pixels), which also removes hidden data such as the GPS location.
+- **Deleted:** when the guest is anonymised, when a manager deletes one (with a reason), and automatically 12 months after the guest's last check-out. The 12 is one setting and can change without a new migration.
+- **Needs before going live:** `CRON_SECRET` in Vercel for the daily clean-up (02:00 UTC), the practice project first, then your separate yes for the live database. The privacy notice draft (branch `claude/public-pages`) now describes ID photos.
+
+## Update: 6 Oct 2026 (stage 1: room labels, on branch `claude/room-labels`)
+
+- **Rooms can be added from the Rooms page** ("Add room" and "Add several rooms"), only by roles that may set up rooms (System Administrator and General Manager).
+- **Room labels are free text** (ROOM-005): 101, A101, Zurich or a mix, up to 30 characters. Unique per hotel ignoring case and extra spaces. Natural order everywhere (2 before 10, names A to Z).
+- **Wording:** screens and messages show the label as typed, without "Room" in front ("Zurich is occupied."). Lists and boards show "Zurich (Deluxe)". New folio lines read "Zurich · 06 Oct 2026". Lines already posted and invoices already issued never change: they are stored as written at the time.
+- **Not live yet.** One new migration (`20261006100000_free_text_room_labels.sql`) waits for the practice project first, then your separate yes for the live database.
+
+## Update: 5 Oct 2026 (first live deploy)
+
+- **The app is live on Vercel** at https://hotel-management-system-29015d49.vercel.app, deployed from `main` (the redesign, merged 2 Oct). Every push to GitHub now deploys by itself: `main` goes live, other branches get preview addresses.
+- **Hand test passed on the live address on 5 Oct 2026**, in a test hotel (Euro Bar Hotel): sign-in with the Supabase links, set-up, a new guest made inside the booking form, booking RES-000001, check-in, room charge ₦11,825 (₦10,000 + ₦1,000 service + ₦825 VAT, the same as the Euro Hotel test), cash payment, check-out, and the turnover task in housekeeping.
+- **Function region: Dublin (dub1)**, next to the database in Ireland. Checked from the live deploy.
+- **Vercel Hobby for now, so the 5-minute email sender is off** until we move to Pro (`docs/deployment-plan.md`, step 4.4). Emails wait in the queue.
+- **Lovable sweep done on 2 Oct.** No Lovable package, preset, file or setting is left in the code or in Vercel, and Lovable is disconnected from GitHub.
+- **Still to do before a real hotel:** the practice Supabase project for previews, your own domain, email through Resend, and the "before the first real hotel" list in `docs/deployment-plan.md`.
+
 ## Update: 1 Oct 2026, afternoon (live project complete)
 
 **Live project `urbpxybyrfjczqbrpdsq`: all 43 migrations applied and recorded.** The last 7 went up in one batch after a dry run. Checked on the live project afterwards:
@@ -87,24 +124,14 @@ Demo hotel started one day behind (29 Sept), rolled by hand from Admin, Business
 
 ### Remaining failures (21)
 
-Numbers refer to the table under steps 1 and 2. Fixed since then: 1 (test was wrong), 2, 3, 4, 5, 20, 21, 22, 27.
+Numbers refer to the table under steps 1 and 2. Fixed since then: 1 (test was wrong), 2, 3, 4, 5, 20, 21, 22, 27. Wave 1 (6 Oct 2026) fixed FO-008, RES-013, HK-002, HK-003 (the test read the notification as the supervisor; corrected to read it as the attendant), ROOM-004, PLT-004 and SET-008.
 
 | Requirement | What is still wrong |
 |---|---|
 | FIN-006, FIN-014 (3) | The database owner can wipe the ledger, or insert a backdated or negative row directly |
 | ADM-006 (3) | The database owner can change, delete or wipe audit rows |
-| FO-003 | No "registration card accepted" step at check-in |
 | FO-006, HK-001 | A room move creates no cleaning task for the old room |
-| FO-007 | No complimentary upgrade that keeps the booked rate |
-| FO-008 (2) | An in-house stay cannot be shortened in advance |
 | FO-012 | After a voided check-in the room is dirty, so the guest cannot be checked in again at once |
-| RES-013 | No arrival-ready flag |
-| HK-002 (2) | A task with no assignee can be started. Attendants see every task |
-| HK-003 | The attendant is not told when their room fails inspection |
-| ROOM-004 | A dirty override needs no reason |
-| PLT-007 | No way to add a second property (waits until after the first pilot) |
-| PLT-004 | A Ghana hotel gets naira (waits until after the first pilot) |
-| SET-008 | Inspection cannot be switched off per property |
 | GST-005 | A guest with an upcoming booking can be anonymised |
 
 Also not done: 6c (approval limits on built-in roles), DAY-006 (same-day stays), tax on the `tax_rates` table is not audited, invoice net and taxable figures can differ by 1 kobo from the folio on odd amounts, and one browser test failed once and then passed (not explained).
@@ -203,6 +230,8 @@ Other things the tests showed:
 
 ## 1. What exists, requirement by requirement
 
+> **Superseded on 6 Oct 2026.** The single requirement register is now [`docs/requirements.csv`](requirements.csv) (115 rows, status per row taken from this app's tests), checked by `scripts/check-requirements.mjs` (`npm run check:requirements`, and in every full `scripts/test-db.sh` run). The workbook [`docs/HMS_R1_Requirements.xlsx`](HMS_R1_Requirements.xlsx) is generated from it. The table below is kept as the record of 1 Oct 2026 and is no longer updated.
+
 Statuses after steps 1 and 2. A requirement counts as "Built and works" only when a test proves it. At the audit, the totals were 25 working, 52 untested, 17 partly built and 13 missing.
 
 ### Totals per module
@@ -234,10 +263,10 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | PLT-001 | A person with a confirmed email creates a hotel account in one step. | Must | Built and works | 2 test checks pass. |
 | PLT-002 | Signup is refused for an unconfirmed email and for a user who already belongs to a hotel. | Must | Built and works | 2 test checks pass. |
 | PLT-003 | One hotel can never see or change another hotel's data. | Must | Built and works | 14 test checks pass. |
-| PLT-004 | A new property is seeded from its country template (currency, timezone, tax lines, payment methods, charge codes). | Must | Partly built | 7 pass, 1 fail: Ghana property uses cedi (got NGN, expected GHS) |
+| PLT-004 | A new property is seeded from its country template (currency, timezone, tax lines, payment methods, charge codes). | Must | Built and works | 8 test checks pass, plus 2 in `26_small_fixes.sql`. Ghana GHS, Kenya KES, South Africa ZAR, each with its time zone; tax lines for Nigeria only. |
 | PLT-005 | A trial ends automatically and the hotel becomes read-only. | Must | Built and works | 8 test checks pass. |
 | PLT-006 | A read-only hotel can still settle and check out guests already in house. | Must | Built and works | 3 test checks pass. |
-| PLT-007 | Plan limits on rooms, properties and users stop new creation and never delete anything. | Should | Partly built | 3 pass, 1 fail: a hotel can add another property (so the property limit can apply) |
+| PLT-007 | Plan limits on rooms, properties and users stop new creation and never delete anything. | Should | Built and works | 4 test checks pass, plus 6 in `27_medium_fixes.sql`. System Administrator or General Manager (ADM-002, decision of 6 Oct 2026) adds a property on Setup, Property; the limit is `plans.max_properties` (Starter and Standard 1, Pro 3). |
 | PLT-008 | Platform staff activate, suspend, change plan or close a hotel by hand, with a reason, and every change is logged. | Must | Built and works | Manual activation, suspension and plan change through app.platform_set_subscription (decision 5e). No console screen. Tests pass. |
 | PLT-009 | Platform staff see tenants and subscriptions but no guest, reservation or financial data. | Must | Missing | No platform staff role at all. (no automated test yet) |
 | PLT-010 | Time-boxed break-glass support access, with reason, tenant notice and audit entry. | Should | Missing | No break-glass access. (no automated test yet) |
@@ -269,7 +298,8 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | SET-005 | Tax lines with rate, base (net or net plus prior taxes), applicable revenue groups and a verified flag. | Must | Built and works | 1 test checks pass. |
 | SET-006 | Charge codes and payment methods per property. | Must | Built, untested | Charge codes and payment methods seeded per property. (no automated test yet) |
 | SET-007 | Exchange rates per property per day, entered by hand. | Should | Built and works | 1 test checks pass. |
-| SET-008 | Inspection can be switched off per property. | Should | Missing | Test fails: inspection can be switched off per property |
+| SET-008 | Inspection can be switched off per property. | Should | Built and works | 1 test check passes, plus 4 in `26_small_fixes.sql`. Switch on Setup, Property. Off: a completed room is clean at once. |
+| SET-009 | Per hotel: "Allow ID photos" (off by default) and "Require ID photo at check-in" (applies only when allowed). While Allow is off, uploading and opening ID photos are refused. | Must | Built and works (branch `claude/id-photos`, not yet live) | Database and browser tests pass. |
 
 ### Reservations
 
@@ -287,7 +317,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | RES-010 | A deposit rule on the rate plan sets the deposit required. | Must | Built and works | 2 test checks pass. |
 | RES-011 | Corporate business is a booking source plus a free-text company name plus a corporate rate plan; no company entity in R1. | Must | Built and works | 2 test checks pass. |
 | RES-012 | A group booking is several one-room reservations sharing a group record. | Should | Built, untested | Group bookings table and form. (no automated test yet) |
-| RES-013 | Additional guests and an arrival-ready flag on a booking. | Should | Partly built | 1 pass, 1 fail: the arrival-ready flag exists and is a flag, not a status |
+| RES-013 | Additional guests and an arrival-ready flag on a booking. | Should | Built and works (database only) | 2 test checks pass, plus 4 in `26_small_fixes.sql`. `set_arrival_ready` exists; no screen shows the flag yet. |
 
 ### Front Office
 
@@ -295,12 +325,12 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 |---|---|---|---|---|
 | FO-001 | Arrivals due today or overdue, with guest, room type, guarantee and assigned room. | Must | Built and works | 2 test checks pass. |
 | FO-002 | In-house guests with room, departure and balance; overdue departures flagged. | Must | Built and works | 1 test checks pass. |
-| FO-003 | Check-in guards: confirmed booking, arrival date reached, ID recorded, registration accepted, room ready and free, deposit paid. | Must | Partly built | 11 pass, 1 fail: check-in needs the registration card accepted (expected [E_REQUIRED/E_INVALID], but it succeeded) |
+| FO-003 | Check-in guards: confirmed booking, arrival date reached, ID recorded, registration accepted, room ready and free, deposit paid. | Must | Built and works, with a known limit | 12 test checks pass, plus 6 in `27_medium_fixes.sql`. The check-in and walk-in screens force the "registration card" tick; a direct database call that omits the tick is not refused (decision of 6 Oct 2026). Drawn signature: later. |
 | FO-004 | Walk-in check-in creates the booking and checks in in one step. | Must | Built and works | 2 test checks pass. |
 | FO-005 | Assign a room before arrival; two overlapping stays can never hold the same room. | Must | Built and works | 2 test checks pass. |
 | FO-006 | Move a guest to another room; the old room turns dirty with a turnover task; the stay and folio carry over. | Must | Partly built | 6 pass, 1 fail: a cleaning task was created for the old room |
-| FO-007 | A move to a different room type reprices from tonight; a complimentary upgrade keeps the rate and needs its own permission. | Should | Partly built | 0 pass, 1 fail: a complimentary upgrade that keeps the booked rate is supported |
-| FO-008 | Extend or shorten a stay in house; extension checks inventory, the room and blocks. | Must | Partly built | 4 pass, 2 fail: an in-house stay can be shortened (failed: [E_INVALID] The new departure must be after 03 Oct 2026.); shortening removes unused nights (got 3, expected 2) |
+| FO-007 | A move to a different room type reprices from tonight; a complimentary upgrade keeps the rate and needs its own permission. | Should | Built and works | 1 test check passes, plus 13 in `27_medium_fixes.sql`. Dearer type: front desk charges the new rate; keeping the rate needs `fo.upgrade.complimentary` (GM, FOM, and System Administrator under ADM-002), the move reason, and is audited. Nights already charged keep their price. |
+| FO-008 | Extend or shorten a stay in house; extension checks inventory, the room and blocks. | Must | Built and works | 6 test checks pass, plus 4 in `26_small_fixes.sql` and browser test `e2e/change-departure.spec.ts`. |
 | FO-009 | Check-out needs a zero balance and no credit, or an approved exception; open folios stay open for collection. | Must | Built and works | 10 test checks pass. |
 | FO-010 | Check-out sets the room Dirty and Vacant and creates a turnover task; leaving early releases the unused nights. | Must | Built and works | 5 test checks pass. |
 | FO-011 | Undo a check-out on the same business date. | Should | Built and works | 5 test checks pass. |
@@ -312,11 +342,15 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
 | GST-001 | One guest profile per person across stays; search by name, phone, email or ID number. | Must | Built and works | 2 test checks pass. |
-| GST-002 | ID documents are stored apart and shown only to roles that may see them. | Must | Partly built | 3 pass, 1 fail: reservation officers do not see ID documents |
+| GST-002 | ID documents are stored apart and shown only to roles that may see them. ID photos follow the same roles (6 Oct 2026). | Must | Partly built | 3 pass, 1 fail: reservation officers do not see ID documents |
 | GST-003 | Personal data never appears in audit records; only the names of changed fields do. | Must | Built and works | 2 test checks pass. |
 | GST-004 | Merge duplicate guest profiles; history moves to the kept profile. | Should | Built and works | 3 test checks pass. |
 | GST-005 | Anonymise a guest on request; the ledger and stay history stay intact. | Should | Partly built | 4 pass, 1 fail: a guest with upcoming stays cannot be anonymised (expected [E_INVALID/E_IN_USE], but it succeeded) |
 | GST-006 | Feedback and complaints logged against a guest. | Should | Built, untested | add_guest_feedback exists. (no automated test yet) |
+| GST-007 | A photo or scan of an ID document (front and back; JPEG, PNG, WebP or PDF, 2 MB) is kept in private storage, shrunk in the browser first (longest side 1600 px, hidden photo data such as GPS removed), and opened only through a 60-second link. Upload and view: System Administrator, General Manager, Front Office Manager, Front Desk. Delete by hand with a reason: the first three. | Must | Built and works (branch `claude/id-photos`, not yet live) | Database and browser tests pass. |
+| GST-008 | Every upload, view and deletion of an ID photo is audited with ids only, no personal data. | Must | Built and works (branch `claude/id-photos`) | Database tests pass. |
+| GST-009 | ID photos are removed from storage when the guest is anonymised or the document is removed, and move with the guest when two profiles are merged. | Must | Built and works (branch `claude/id-photos`) | Database and browser tests pass. |
+| GST-010 | ID photos are deleted automatically a set number of months (one setting, now 12) after the guest's last check-out, unless the guest has a booking that is not over. A daily clean-up removes the files. | Must | Built and works (branch `claude/id-photos`) | Database tests pass. |
 
 ### Rooms
 
@@ -325,15 +359,16 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | ROOM-001 | Room condition and occupancy are separate, are set only by the system or a controlled action, and cannot be written by hand. | Must | Built and works | 2 test checks pass. |
 | ROOM-002 | Out-of-order and out-of-service blocks; a request from maintenance needs approval, an approver's own request does not. | Must | Built and works | 5 test checks pass. |
 | ROOM-003 | A block cannot cover a night a guest is assigned, and cannot oversell the room type. | Must | Built and works | 2 test checks pass. |
-| ROOM-004 | A supervisor can override a room's condition with a reason; it is audited. | Should | Partly built | 2 pass, 1 fail: override needs a reason (expected [E_REQUIRED], but it succeeded) |
+| ROOM-004 | A supervisor can override a room's condition with a reason; it is audited. | Should | Built and works | 3 test checks pass, plus 1 in `26_small_fixes.sql`. |
+| ROOM-005 | Rooms are added from the Rooms page by roles that set up rooms: one at a time, or several by number (optional prefix and range) or by name (one per line), with a preview. Labels are free text up to 30 characters (letters, accented letters, digits, spaces, hyphens, apostrophes), unique per hotel ignoring case and extra spaces, shown as typed and sorted in natural order. | Must | Built and works (branch `claude/room-labels`, not yet live) | 48 database checks and 4 browser tests pass. |
 
 ### Housekeeping
 
 | Ref | Requirement | Priority | Status | Evidence |
 |---|---|---|---|---|
 | HK-001 | Check-out and room moves create a turnover task; the board lists open tasks. | Must | Partly built | 2 pass, 1 fail: a cleaning task was created for the old room |
-| HK-002 | Assign, start and complete cleaning tasks; an attendant sees only their own tasks. | Must | Partly built | 4 pass, 2 fail: a task assigned to nobody cannot be started (expected [E_INVALID/E_FORBIDDEN], but it succeeded); an attendant sees only their own tasks |
-| HK-003 | Inspection passes to Ready or fails with a reason and goes to rework. | Must | Partly built | 4 pass, 1 fail: the attendant is notified of the failed inspection |
+| HK-002 | Assign, start and complete cleaning tasks; an attendant sees only their own tasks. | Must | Built and works | 6 test checks pass, plus 2 in `26_small_fixes.sql`. |
+| HK-003 | Inspection passes to Ready or fails with a reason and goes to rework. | Must | Built and works | 5 test checks pass (the notification check now reads as the attendant, 6 Oct 2026). |
 | HK-004 | Nobody inspects their own cleaning. | Must | Built and works | 2 test checks pass. |
 | HK-005 | Stayover cleaning tasks are planned at the roll for guests staying on. | Should | Built and works | 1 test checks pass. |
 | HK-006 | Lost and found items are logged and tracked to return or disposal. | Should | Built and works | 1 test checks pass. |
@@ -373,6 +408,7 @@ Statuses after steps 1 and 2. A requirement counts as "Built and works" only whe
 | FIN-014 | Every posting takes the open business date, and a past date is refused. | Must | Partly built | 1 pass, 1 fail: posting to a past business date is refused (expected [E_DATE/E_INVALID], but it succeeded) |
 | FIN-015 | Folio visibility follows the role: managers see all folios, a reservation officer sees only those of their own bookings. | Must | Missing | Test fails: reservation officer sees only folios of own bookings (got 2, expected 1) |
 | FIN-016 | Cashier shifts and reconciliation by cashier, shift and method. | Should | Missing | R2. Not due yet. (no automated test yet) |
+| FIN-017 | A payment matching one on the same bill (amount, method, reference) within 10 minutes is refused unless the cashier confirms it with a reason; the refusal names the earlier payment and the confirmation is audited. Added 6 Oct 2026 (wave 1). | Must | Built and works | 20 test checks pass (`25_duplicate_payments.sql`), plus browser test `e2e/duplicate-payment.spec.ts`. |
 
 ### Business Date
 

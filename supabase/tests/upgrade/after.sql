@@ -210,4 +210,11 @@ begin
     '[upgrade][DAY-006b] paid the amount shown, checked out, folio at zero');
 exception when others then execute 'reset role'; raise notice 'not ok - [upgrade crashed: same-day check-out] %', sqlerrm;
 end $$;
+-- Country defaults apply to new hotels only; existing hotels keep their currency and time zone (20261009100000)
+do $$ begin
+  perform pg_temp.ok((select base_currency::text || ' ' || timezone from public.properties where id = pg_temp.id('prop')) = 'NGN Africa/Lagos',
+    '[upgrade][PLT-004] an existing Nigeria hotel keeps naira and Lagos time');
+  perform pg_temp.ok((select base_currency::text || ' ' || timezone from public.properties where id = pg_temp.id('propGH')) = 'NGN Africa/Lagos',
+    '[upgrade][PLT-004] an existing Ghana hotel is not changed: it keeps the currency and time zone it had');
+end $$;
 rollback;

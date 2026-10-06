@@ -41,7 +41,7 @@ function TaskCard({ task }: { task: HkTask }) {
       <CardContent className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <div className="text-2xl font-semibold">Room {task.room_number}</div>
+            <div className="text-2xl font-semibold">{task.room_number}</div>
             <div className="text-[15px] text-muted-foreground">{TASK_TYPES[task.type]} · {task.room_type_name}{task.floor ? ` · Floor ${task.floor}` : ""}</div>
           </div>
           <div className="flex flex-col items-end gap-1"><TaskStatusBadge status={task.status} /><PriorityBadge priority={task.priority} /></div>
