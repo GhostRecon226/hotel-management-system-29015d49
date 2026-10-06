@@ -29,7 +29,7 @@ function toCsv(rows: Record<string, unknown>[]) {
 /** CSV export. Permission check and audit entry happen in export_data(). */
 export const exportCsv = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { kind: ExportKind; propertyId: string; from: string; to: string }) => {
+  .validator((input: { kind: ExportKind; propertyId: string; from: string; to: string }) => {
     if (!["reservations", "transactions", "guests"].includes(input?.kind)) throw new Error("Choose what to export.");
     const d = /^\d{4}-\d{2}-\d{2}$/;
     if (!d.test(input.from) || !d.test(input.to)) throw new Error("Choose a valid date range.");

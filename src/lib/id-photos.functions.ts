@@ -17,7 +17,7 @@ export interface StartUploadInput {
 /** Step 1: reserve a file name in the database, then sign a one-time upload link for exactly that name. */
 export const startIdPhotoUpload = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: StartUploadInput) => ({
+  .validator((i: StartUploadInput) => ({
     propertyId: String(i?.propertyId ?? ""), guestId: String(i?.guestId ?? ""), docType: String(i?.docType ?? ""),
     docNumber: String(i?.docNumber ?? ""), expiry: i?.expiry ? String(i.expiry) : null,
     side: i?.side === "back" ? "back" as const : "front" as const, mime: String(i?.mime ?? ""), size: Number(i?.size ?? 0),
@@ -39,7 +39,7 @@ export const startIdPhotoUpload = createServerFn({ method: "POST" })
 /** A link to one photo that works for 60 seconds. The database checks permission and the switch, and audits the view. */
 export const idPhotoViewLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { fileId: string; propertyId: string }) => ({ fileId: String(i?.fileId ?? ""), propertyId: String(i?.propertyId ?? "") }))
+  .validator((i: { fileId: string; propertyId: string }) => ({ fileId: String(i?.fileId ?? ""), propertyId: String(i?.propertyId ?? "") }))
   .handler(async ({ data, context }) => {
     const rpc = context.supabase.rpc.bind(context.supabase) as unknown as Rpc;
     const opened = await rpc("open_id_photo", { p_file_id: data.fileId, p_property_id: data.propertyId });
@@ -56,7 +56,7 @@ export const idPhotoViewLink = createServerFn({ method: "POST" })
  */
 export const purgeGuestIdPhotos = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { guestId: string }) => ({ guestId: String(i?.guestId ?? "") }))
+  .validator((i: { guestId: string }) => ({ guestId: String(i?.guestId ?? "") }))
   .handler(async ({ data, context }) => {
     // The guest must belong to the caller's hotel (row-level security on guests).
     const { data: guest, error } = await context.supabase.from("guests").select("id").eq("id", data.guestId).maybeSingle();

@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Code or docs only?
@@ -40,7 +40,7 @@ jobs:
       - name: Docs only, nothing to test
         if: steps.changes.outputs.code != 'true'
         run: echo "Only documentation changed. Checks skipped on purpose; this check passes."
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.changes.outputs.code == 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -63,7 +63,7 @@ jobs:
       - name: Build
         if: steps.changes.outputs.code == 'true'
         run: npm run build
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         if: steps.changes.outputs.code == 'true'
         with:
           version: ${{ env.SUPABASE_CLI_VERSION }}
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Code or docs only?
@@ -88,7 +88,7 @@ jobs:
       - name: Docs only, nothing to test
         if: steps.changes.outputs.code != 'true'
         run: echo "Only documentation changed. Browser tests skipped on purpose; this check passes."
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.changes.outputs.code == 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -99,7 +99,7 @@ jobs:
       - name: Install the test browser
         if: steps.changes.outputs.code == 'true'
         run: npx playwright install --with-deps chromium
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         if: steps.changes.outputs.code == 'true'
         with:
           version: ${{ env.SUPABASE_CLI_VERSION }}
@@ -111,7 +111,7 @@ jobs:
         run: npx playwright test --retries=1
       - name: Keep the failure trace
         if: failure() && steps.changes.outputs.code == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-traces
           path: test-results/
