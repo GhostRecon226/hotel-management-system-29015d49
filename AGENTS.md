@@ -80,6 +80,8 @@ One line per rule. Why: the reason.
 - The browser has no table write rights (default-deny, 20260930100000). New tables need RLS and tenant_id; new public functions need an explicit grant to authenticated. Why: every change goes through a permission-checked function.
 - Keep the existing permission names (decision 5f). Why: the code and database already use them.
 
+- Platform console (/platform, src/lib/platform.tsx): operators are separate sign-ins listed in app.platform_operators (no grants; added only by the owner with app.add_platform_operator), never hotel members (trigger on profiles). Every platform_* function calls app.require_platform(): operator list AND JWT aal2, enforced in the database, not only on screen. Operators see hotel account data only. Subscription changes go through platform_change_subscription, which reuses app.platform_set_subscription / app.change_subscription so every change is in subscription_history. Why: no hand SQL on live, no platform access to guest data (PLT-008, PLT-009, PLT-013).
+
 ## Test gotchas
 
 - `set role` persists across DO blocks. Call `perform t.admin();` at the end of each block, and before reading tables a signed-in role cannot see.
