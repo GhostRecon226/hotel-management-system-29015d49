@@ -689,7 +689,8 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Returns: `uuid`
 - Callable by signed-in users: yes · security definer
 - Permission: `setup.room.manage`
-- Errors: `E_DUPLICATE`, `E_INVALID`, `E_NOT_FOUND`, `E_REQUIRED`
+- Errors: `E_DUPLICATE`, `E_INVALID`, `E_NOT_FOUND`, `E_REQUIRED`, `E_ROOM_OCCUPIED`
+- SET-003: retiring an in-use room that has an in-house guest is refused (`E_ROOM_OCCUPIED`, "This room has a guest in it. Retire it after check-out."). Saving an already retired room as retired works as before.
 
 ### `public.save_room_type`
 - Args: `p_property_id uuid, p_id uuid, p_code text, p_name text, p_max_adults integer, p_max_children integer, p_description text, p_is_active boolean`
