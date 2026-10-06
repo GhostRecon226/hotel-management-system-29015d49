@@ -198,6 +198,7 @@ test("with Require on, a walk-in waits for an ID photo, then checks in with it",
   await pick(page, "wi-rp", /BAR/);
   await pick(page, "fd-room", /^1 ·/);
   await walkIn.getByLabel("ID number").fill("NIN-778899");
+  await walkIn.getByLabel("Guest has read and signed the registration card").check();
   const calls: string[] = [];
   page.on("request", (r) => { if (/\/rpc\/walk_in_check_in/.test(r.url())) calls.push(r.url()); });
   await expect(walkIn.getByLabel(/ID photo \(required by this hotel\)/)).toBeVisible();

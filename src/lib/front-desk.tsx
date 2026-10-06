@@ -8,6 +8,7 @@ import { addDays, formatDay, nightsBetween, nightsLabel, useResMutation } from "
 import { GuestPicker } from "@/components/reservation-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -97,8 +98,8 @@ function RoomSelect({ rooms, value, onChange, loading }: { rooms: FdRoom[]; valu
   );
 }
 
-export interface Registration { id_type: string; id_number: string; id_expiry: string; nationality: string; address: string; vehicle_plate: string }
-const EMPTY_REG: Registration = { id_type: "national_id", id_number: "", id_expiry: "", nationality: "", address: "", vehicle_plate: "" };
+export interface Registration { id_type: string; id_number: string; id_expiry: string; nationality: string; address: string; vehicle_plate: string; accepted: boolean }
+const EMPTY_REG: Registration = { id_type: "national_id", id_number: "", id_expiry: "", nationality: "", address: "", vehicle_plate: "", accepted: false };
 
 /** The ID photo step of check-in and walk-in (SET-009). Shown only when the hotel allows ID photos. */
 function usePhotoStep(guestId: string | null | undefined, open: boolean) {
@@ -150,6 +151,11 @@ function RegistrationFields({ reg, setReg, photo }: { reg: Registration; setReg:
       <div className="sm:col-span-2">
         <Field label="Address" htmlFor="reg-addr"><Textarea id="reg-addr" rows={2} value={reg.address} onChange={set("address")} maxLength={500} /></Field>
       </div>
+      {/* FO-003: required before check-in. A drawn signature comes later. */}
+      <label htmlFor="reg-accept" className="flex items-start gap-3 text-[15px] sm:col-span-2">
+        <Checkbox id="reg-accept" className="mt-0.5" checked={reg.accepted} onCheckedChange={(v) => setReg({ ...reg, accepted: v === true })} />
+        <span>Guest has read and signed the registration card</span>
+      </label>
     </div>
   );
 }
@@ -178,7 +184,7 @@ function DepositBlock({ due, currency, value, onChange }: { due: number; currenc
   );
 }
 
-const regArgs = (r: Registration) => ({ id_type: r.id_type, id_number: r.id_number, id_expiry: r.id_expiry || null, nationality: r.nationality, address: r.address, vehicle_plate: r.vehicle_plate });
+const regArgs = (r: Registration) => ({ id_type: r.id_type, id_number: r.id_number, id_expiry: r.id_expiry || null, nationality: r.nationality, address: r.address, vehicle_plate: r.vehicle_plate, registration_accepted: r.accepted });
 
 export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow | null; onOpenChange: (o: boolean) => void }) {
   const { property } = useAccess();
@@ -197,7 +203,7 @@ export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow |
   const due = arrival ? Number(arrival.deposit_due) : 0;
 
   return (
-    <FormDialog open={open} onOpenChange={onOpenChange} title={`Check in ${arrival?.guest_name ?? ""}`} busy={m.isPending || photo.uploading}
+    <FormDialog open={open} onOpenChange={onOpenChange} title={`Check in ${arrival?.guest_name ?? ""}`} busy={m.isPending || photo.uploading} submitDisabled={!reg.accepted}
       onSubmit={async () => {
         if (!(await photo.run(reg))) return;
         m.mutate({
@@ -243,7 +249,7 @@ export function WalkInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const set = (k: keyof typeof f, v: string) => setF((x) => ({ ...x, [k]: v, ...(k === "room_type_id" || k === "departure" ? { room: "" } : {}) }));
 
   return (
-    <FormDialog open={open} onOpenChange={onOpenChange} title="Walk-in guest" busy={m.isPending || photo.uploading}
+    <FormDialog open={open} onOpenChange={onOpenChange} title="Walk-in guest" busy={m.isPending || photo.uploading} submitDisabled={!reg.accepted}
       onSubmit={async () => { if (!(await photo.run(reg))) return; m.mutate({
         p_property_id: property!.id, p_idempotency_key: key, p_guest_id: guest.id || null, p_departure: f.departure,
         p_room_type_id: f.room_type_id || null, p_rate_plan_id: f.rate_plan_id || null, p_adults: Number(f.adults),
@@ -279,6 +285,8 @@ export function WalkInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   );
 }
 
+interface MoveQuote { same_type: boolean; is_upgrade: boolean; can_keep_rate: boolean; current_total?: string; new_total?: string | null; currency?: string }
+
 export function MoveRoomDialog({ stay, onOpenChange }: { stay: InHouseRow | null; onOpenChange: (o: boolean) => void }) {
   const { property } = useAccess();
   const [room, setRoom] = useState("");
@@ -287,19 +295,47 @@ export function MoveRoomDialog({ stay, onOpenChange }: { stay: InHouseRow | null
   const from = property?.business_date ?? "";
   const rooms = useFdRooms(null, from, stay?.departure_date ?? "", stay?.reservation_id ?? null, !!stay);
   const m = useResMutation("move_room", "Guest moved.");
-  useEffect(() => { if (stay) { setRoom(""); setReason(""); setOvr(""); } }, [stay]);
+  const [rate, setRate] = useState<"" | "keep" | "new">("");
+  useEffect(() => { if (stay) { setRoom(""); setReason(""); setOvr(""); setRate(""); } }, [stay]);
   const picked = rooms.data?.find((r) => r.id === room);
   const notReady = !!picked && !picked.is_ready;
+  const otherType = !!picked && picked.room_type_id !== stay?.room_type_id;
+  // FO-007: the database says whether the new type costs more, both totals, and whether this user may keep the rate.
+  const quote = useQuery({
+    queryKey: ["reservations", "move-rate", stay?.reservation_id, room], enabled: !!stay && otherType,
+    queryFn: () => callRpc<MoveQuote>("preview_move_rate", { p_id: stay!.reservation_id, p_room_id: room }),
+  });
+  const q = otherType ? quote.data : undefined;
+  useEffect(() => { if (q) setRate(q.is_upgrade ? "new" : "keep"); }, [q]);
   return (
     <FormDialog open={!!stay} onOpenChange={onOpenChange} title={`Move ${stay?.guest_name ?? "guest"} from ${stay?.room_number ?? ""}`} busy={m.isPending}
-      onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_room_id: room || null, p_reason: reason, p_room_override_reason: notReady ? ovr : null },
+      submitDisabled={otherType && !q}
+      onSubmit={() => m.mutate({ p_id: stay!.reservation_id, p_room_id: room || null, p_reason: reason, p_room_override_reason: notReady ? ovr : null,
+        p_keep_rate: otherType ? rate === "keep" : null },
         { onSuccess: () => onOpenChange(false) })}>
       <Field label="New room" htmlFor="fd-room">
         <RoomSelect rooms={(rooms.data ?? []).filter((r) => r.id !== stay?.room_id)} value={room} onChange={setRoom} loading={rooms.isLoading} />
       </Field>
-      {picked && picked.room_type_id !== stay?.room_type_id && (
-        <p className="text-sm text-muted-foreground">This is a different room type. The nightly rate stays the same.</p>
+      {q && (
+        <Field label="Rate for the new room" htmlFor="mv-rate"
+          hint={q.is_upgrade ? "This room type costs more." : "This room type costs the same or less."}>
+          <Select value={rate} onValueChange={(v) => setRate(v as "keep" | "new")}>
+            <SelectTrigger id="mv-rate"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="new" disabled={q.new_total == null}>
+                Charge the new room type's rate{q.new_total != null ? ` (${formatAmount(q.new_total, q.currency ?? "NGN")} for the remaining nights)` : " (no price set)"}
+              </SelectItem>
+              {q.can_keep_rate && (
+                <SelectItem value="keep">
+                  {q.is_upgrade ? "Complimentary upgrade (keep rate)" : "Keep the booked rate"} ({formatAmount(q.current_total ?? "0", q.currency ?? "NGN")})
+                </SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        </Field>
       )}
+      {q?.is_upgrade && !q.can_keep_rate && <p className="text-sm text-muted-foreground">A complimentary upgrade needs the General Manager or Front Office Manager.</p>}
+      {q?.is_upgrade && rate === "keep" && <p className="text-sm text-muted-foreground">The reason for the move is saved with the complimentary upgrade in the audit log.</p>}
       <OverrideReason show={notReady} value={ovr} onChange={setOvr} />
       <Field label="Reason for the move" htmlFor="mv-reason"><Input id="mv-reason" value={reason} onChange={(e) => setReason(e.target.value)} required maxLength={300} /></Field>
       <p className="text-sm text-muted-foreground">{stay?.room_number} will be marked vacant and dirty.</p>

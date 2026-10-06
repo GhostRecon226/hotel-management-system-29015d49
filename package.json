@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "check:money": "scripts/check-no-browser-money.sh",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check:requirements": "node scripts/check-requirements.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

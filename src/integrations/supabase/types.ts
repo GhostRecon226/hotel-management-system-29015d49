@@ -4299,6 +4299,10 @@ export type Database = {
           tenant_id: string
         }[]
       }
+      create_property: {
+        Args: { p_city: string; p_country: string; p_name: string }
+        Returns: string
+      }
       create_reservation: {
         Args: {
           p_adults: number
@@ -4477,6 +4481,7 @@ export type Database = {
       move_room: {
         Args: {
           p_id: string
+          p_keep_rate?: boolean
           p_reason: string
           p_room_id: string
           p_room_override_reason?: string
@@ -4549,6 +4554,10 @@ export type Database = {
       }
       post_room_charges: {
         Args: { p_business_date?: string; p_property_id: string }
+        Returns: Json
+      }
+      preview_move_rate: {
+        Args: { p_id: string; p_room_id: string }
         Returns: Json
       }
       register_invited_user: {
