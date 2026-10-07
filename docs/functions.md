@@ -1532,6 +1532,20 @@ AI is off for every hotel until switched on. The provider only ever sees plain f
 - Args: `p_usage_id uuid, p_ok boolean`. Marks the call done or failed. Only the person who started it, once.
 - Errors: `E_NOT_FOUND`
 
+### Setup import assistant (SET-010, AI-006, AI-007)
+A hotel pastes its room list. The server screens it (no email, phone or card number), asks the AI for a draft list, drops anything not in the pasted text, and shows a preview from the database. Nothing is added until the person confirms; `apply_setup_import` then checks the whole list again.
+
+### `public.ai_import_start`
+- Args: `p_property_id uuid`. Logs a call in `ai_usage` and returns `{usage_id, context}`; the context is only the existing room type codes and a room count.
+- Permission: `setup.room.manage` on the property · Errors: `E_FORBIDDEN`, `E_AI_OFF`, `E_AI_LIMIT`
+
+### `public.apply_setup_import`
+- Args: `p_property_id uuid, p_payload jsonb, p_preview boolean DEFAULT true`. Payload: `{room_types:[{code,name,max_adults?,max_children?}], rooms:[{number,type_code,floor?}]}`, at most 50 types and 500 rooms.
+- Preview writes nothing and returns what would be created, skipped and refused. Apply adds room types, then rooms, all or nothing. Existing type codes and room names are skipped, so repeating the same import adds nothing. Audited as `apply_setup_import`.
+- Returns `jsonb`: `would_create_types, skipped_types, would_create_rooms, skipped_rooms, invalid, created_types, created_rooms, room_limit, rooms_now`
+- Permission: `setup.room.manage` on the property
+- Errors: `E_FORBIDDEN`, `E_INVALID` (bad shape, bad room name, unknown type, too many), `E_PLAN_LIMIT`
+
 ### Source and ageing reports (RPT-005, RPT-006)
 
 ### `public.report_revenue_by_source`
