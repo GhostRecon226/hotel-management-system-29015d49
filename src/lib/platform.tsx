@@ -36,6 +36,14 @@ export function usePlatformHistory(tenantId: string | null) {
     queryFn: () => callRpc<PlatformHistoryRow[]>("platform_tenant_history", { p_tenant: tenantId }),
   });
 }
+export interface FailedPayment {
+  payment_id: string; created_at: string; tenant_id: string; tenant_name: string; plan_code: string; period: "month" | "year";
+  amount: number; currency: string; status: "pending" | "failed"; reference: string; failure_reason: string | null;
+}
+/** Failed payments and payments left waiting more than a day. Amounts arrive in whole currency from the database. */
+export function usePlatformFailedPayments(enabled: boolean) {
+  return useQuery({ queryKey: ["platform", "failed-payments"], enabled, queryFn: () => callRpc<FailedPayment[]>("platform_failed_payments", {}) });
+}
 export function usePlans() {
   return useQuery({
     queryKey: ["platform", "plans"],

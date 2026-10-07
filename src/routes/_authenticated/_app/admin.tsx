@@ -8,6 +8,7 @@ import { errorMessage } from "@/lib/errors";
 import { callRpc, NoAccess } from "@/lib/setup";
 import { ADMIN_PERMS } from "@/lib/admin";
 import { formatDateTime, formatDay } from "@/lib/reservations";
+import { NightAuditFlags } from "@/lib/cashier";
 import { UsersPanel } from "@/components/admin/users-panel";
 import { RolesPanel } from "@/components/admin/roles-panel";
 import { LimitsPanel } from "@/components/admin/limits-panel";
@@ -43,6 +44,9 @@ export const Route = createFileRoute("/_authenticated/_app/admin")({
 
 function Admin() {
   const { can, canAny } = useAccess();
+  const [tab, setTab] = useState<string | null>(null);
+  // Coming back from the payment page lands on /admin#plan: open the Subscription tab.
+  useEffect(() => { if (window.location.hash === "#plan") setTab("plan"); }, []);
   if (!canAny(["fin.nightaudit.run", ...ADMIN_PERMS])) return <NoAccess />;
 
   const tabs = [
@@ -61,7 +65,7 @@ function Admin() {
   return (
     <div className="space-y-6">
       <PageHeader title="Admin" description="Staff, roles, limits, history and your subscription." />
-      <Tabs defaultValue={tabs[0]!.value}>
+      <Tabs value={tabs.some((t) => t.value === tab) ? tab! : tabs[0]!.value} onValueChange={setTab}>
         <TabsList className="flex-wrap">
           {tabs.map((t) => <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>)}
         </TabsList>
@@ -114,6 +118,7 @@ function BusinessDate() {
 
   return (
     <div className="space-y-6">
+      <NightAuditFlags />
       <Card>
         <CardHeader><CardTitle>Business date</CardTitle></CardHeader>
         <CardContent className="space-y-4">
