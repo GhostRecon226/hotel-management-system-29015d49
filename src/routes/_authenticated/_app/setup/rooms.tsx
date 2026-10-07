@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROOM_LABEL_MAX, sortByRoom } from "@/lib/room-label";
+import { ImportRoomsButton } from "@/components/rooms/import-rooms";
 
 export const Route = createFileRoute("/_authenticated/_app/setup/rooms")({ component: Rooms });
 
@@ -58,6 +59,7 @@ function Rooms() {
     <div>
       <SectionHeader title="Rooms" description={`${rooms.filter((r) => r.is_active).length} active rooms.`}
         action={<div className="flex gap-2">
+          <ImportRoomsButton />
           <Button variant="outline" onClick={() => setBulkOpen(true)} disabled={types.length === 0}>Bulk add</Button>
           <Button onClick={() => edit()} disabled={types.length === 0}>Add room</Button>
         </div>} />
