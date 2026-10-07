@@ -4149,6 +4149,7 @@ export type Database = {
       admin_roles: { Args: never; Returns: Json }
       admin_users: { Args: never; Returns: Json }
       ai_call_finish: { Args: { p_ok: boolean; p_usage_id: string }; Returns: undefined }
+      ai_import_start: { Args: { p_property_id: string }; Returns: Json }
       ai_morning_brief_start: { Args: { p_property_id: string }; Returns: Json }
       ai_status: { Args: never; Returns: Json }
       anonymise_guest: {
@@ -4162,6 +4163,10 @@ export type Database = {
           p_reason: string
           p_transaction_id: string
         }
+        Returns: Json
+      }
+      apply_setup_import: {
+        Args: { p_payload: Json; p_preview?: boolean; p_property_id: string }
         Returns: Json
       }
       approve_room_block: { Args: { p_id: string }; Returns: undefined }
