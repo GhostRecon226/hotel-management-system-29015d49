@@ -1513,6 +1513,11 @@ Every function below first calls `app.require_platform()`: the caller must be on
 - Adds an existing sign-in account that belongs to no hotel. Errors: `E_INVALID` (account belongs to a hotel), `E_NOT_FOUND` (no such account).
 
 
+### `public.setup_progress`
+- Args: `p_property_id uuid`. Needs any setup permission at the property. Read-only, so it works while a hotel is read-only.
+- Returns `{property_id, total, done, complete, steps[]}`. Each step has `key`, `label`, `detail`, `href` and `done`. Steps: property, room_types, rooms, rates, taxes, payments, staff.
+- Errors: `E_FORBIDDEN`, `E_NOT_FOUND`.
+
 ### `public.list_group_bookings`
 - Args: `p_property_id uuid`, `p_status text default null`. Needs `res.view`.
 - Lists groups with live room count, nights, first arrival, last departure and total. Cancelled and no-show bookings are not counted.
