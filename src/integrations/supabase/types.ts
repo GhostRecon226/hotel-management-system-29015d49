@@ -4148,6 +4148,9 @@ export type Database = {
       }
       admin_roles: { Args: never; Returns: Json }
       admin_users: { Args: never; Returns: Json }
+      ai_call_finish: { Args: { p_ok: boolean; p_usage_id: string }; Returns: undefined }
+      ai_morning_brief_start: { Args: { p_property_id: string }; Returns: Json }
+      ai_status: { Args: never; Returns: Json }
       anonymise_guest: {
         Args: { p_guest: string; p_reason: string }
         Returns: undefined
@@ -4891,6 +4894,7 @@ export type Database = {
           total_amount: number
         }[]
       }
+      set_ai_settings: { Args: { p_enabled: boolean; p_monthly_cap: number }; Returns: undefined }
       set_approval_limit: {
         Args: {
           p_max_amount: number

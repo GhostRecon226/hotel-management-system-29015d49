@@ -1525,6 +1525,25 @@ Every function below first calls `app.require_platform()`: the caller must be on
 - Args: `p_id uuid`, `p_status text` ('active' or 'cancelled'). Needs `res.group.manage`. Audited.
 - Errors: `E_GROUP_HAS_BOOKINGS` (cancel while live bookings exist), `E_NOT_FOUND`, `E_INVALID`.
 
+### AI helpers: owner's morning brief (AI-001 to AI-005)
+AI is off for every hotel until switched on. The provider only ever sees plain fact lines built by the database (counts and money, no guest, ID, room or card data). The server rejects any draft that contains a number not in those lines.
+
+### `public.ai_status`
+- Args: none. Returns `jsonb`: `enabled`, `monthly_cap`, `used` (this month, failed calls not counted), `remaining`.
+- Permission: `adm.ai.manage` or `rpt.finance.view` · Errors: `E_FORBIDDEN`
+
+### `public.set_ai_settings`
+- Args: `p_enabled boolean, p_monthly_cap integer` (0 to 1000). Audited as `set_ai_settings`.
+- Permission: `adm.ai.manage` (System Administrator and General Manager only) · Errors: `E_FORBIDDEN`, `E_INVALID`
+
+### `public.ai_morning_brief_start`
+- Args: `p_property_id uuid`. Checks permission, the switch and the monthly limit, logs a call in `ai_usage`, returns `{usage_id, facts}`. Facts: property, business date, currency, yesterday, today, attention (approvals, repairs, money unpaid more than 30 days after departure) and `lines`.
+- Permission: `rpt.finance.view` and `rpt.operations.view` on the property · Errors: `E_FORBIDDEN`, `E_AI_OFF`, `E_AI_LIMIT`
+
+### `public.ai_call_finish`
+- Args: `p_usage_id uuid, p_ok boolean`. Marks the call done or failed. Only the person who started it, once.
+- Errors: `E_NOT_FOUND`
+
 ### Source and ageing reports (RPT-005, RPT-006)
 
 ### `public.report_revenue_by_source`
