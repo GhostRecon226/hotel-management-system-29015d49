@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import {
   Bell, BedDouble, BarChart3, CalendarDays, ConciergeBell, LayoutDashboard, LogOut, Menu,
-  Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wrench, CalendarClock,
+  Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wallet, Wrench, CalendarClock, Building2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,13 +17,15 @@ import { SubscriptionBanner, TrialCard } from "@/components/subscription-banner"
 import { cn } from "@/lib/utils";
 import { SETUP_PERMS } from "@/lib/setup";
 import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
+import { SHIFT_PERMS } from "@/lib/cashier";
 import { NotificationBell } from "@/components/notification-bell";
 
-type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" };
+type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/cashier" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" };
 
 // perms: null = everyone; otherwise any one of the keys shows the item.
 const MENU: Item[] = [
   { label: "Dashboard", icon: LayoutDashboard, perms: null, to: "/dashboard" },
+  { label: "All branches", icon: Building2, perms: ["rpt.group.view"], to: "/group" },
   { label: "Reservations", icon: CalendarDays, perms: ["res.view"], to: "/reservations" },
   { label: "Front Desk", icon: ConciergeBell, perms: ["fo.view"], to: "/front-desk" },
   { label: "Rooms", icon: BedDouble, perms: ["room.view"], to: "/rooms" },
@@ -32,6 +34,7 @@ const MENU: Item[] = [
   { label: "Service requests", icon: ConciergeBell, perms: ["svc.view", "svc.order.complete"], to: "/service-requests" },
   { label: "Guests", icon: Users, perms: ["guest.view"], to: "/guests" },
   { label: "Folios", icon: Receipt, perms: ["fin.folio.view"], to: "/folios" },
+  { label: "Cashier shift", icon: Wallet, perms: SHIFT_PERMS, to: "/cashier" },
   { label: "Approvals", icon: CheckCircle2, perms: APPROVAL_MENU_PERMS, to: "/approvals" },
   { label: "Reports", icon: BarChart3, perms: ["rpt.operations.view", "rpt.finance.view"], to: "/reports" },
   { label: "Setup", icon: Settings, perms: SETUP_PERMS, to: "/setup" },
@@ -46,7 +49,7 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
       <div className="mb-5 flex items-center gap-3 px-2">
         <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-fill text-sm font-extrabold text-primary-foreground shadow-accent">HD</div>
         <div className="min-w-0">
-          <div className="text-[17px] font-bold leading-tight text-foreground">Hotel Desk</div>
+          <div className="font-display text-[18px] font-semibold leading-tight text-foreground">Hotel Desk</div>
           <div className="truncate text-xs text-muted-foreground">{ctx.tenant?.name}</div>
         </div>
       </div>

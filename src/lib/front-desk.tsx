@@ -23,6 +23,7 @@ export interface ArrivalRow {
   arrival_date: string; departure_date: string; nights: number; adults: number; children: number;
   /** Deposit still to take, from the database (v_arrivals.deposit_due). */
   deposit_due: number;
+  arrival_ready?: boolean;
   room_type_id: string; room_type_code: string; status: string; hold_until: string | null; company_name: string | null;
   special_requests: string | null; total_amount: number; currency: string; deposit_required: number; deposit_paid: number;
   room_id: string | null; room_number: string | null; room_condition: string | null; room_is_occupied: boolean | null;
