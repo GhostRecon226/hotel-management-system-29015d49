@@ -8,6 +8,7 @@ import { errorMessage } from "@/lib/errors";
 import { callRpc, NoAccess } from "@/lib/setup";
 import { ADMIN_PERMS } from "@/lib/admin";
 import { formatDateTime, formatDay } from "@/lib/reservations";
+import { NightAuditFlags } from "@/lib/cashier";
 import { UsersPanel } from "@/components/admin/users-panel";
 import { RolesPanel } from "@/components/admin/roles-panel";
 import { LimitsPanel } from "@/components/admin/limits-panel";
@@ -21,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
+import { AiPanel } from "@/components/admin/ai-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -42,6 +44,9 @@ export const Route = createFileRoute("/_authenticated/_app/admin")({
 
 function Admin() {
   const { can, canAny } = useAccess();
+  const [tab, setTab] = useState<string | null>(null);
+  // Coming back from the payment page lands on /admin#plan: open the Subscription tab.
+  useEffect(() => { if (window.location.hash === "#plan") setTab("plan"); }, []);
   if (!canAny(["fin.nightaudit.run", ...ADMIN_PERMS])) return <NoAccess />;
 
   const tabs = [
@@ -52,6 +57,7 @@ function Admin() {
     canAny(["adm.subscription.manage", "adm.user.manage"]) && { value: "plan", label: "Subscription", node: <SubscriptionPanel /> },
     canAny(["fin.nightaudit.run", "adm.audit.view"]) && { value: "date", label: "Business date", node: <BusinessDate /> },
     can("adm.user.manage") && { value: "outbox", label: "Messages", node: <OutboxPanel /> },
+    can("adm.ai.manage") && { value: "ai", label: "AI helpers", node: <AiPanel /> },
   ].filter(Boolean) as { value: string; label: string; node: React.ReactNode }[];
 
   if (tabs.length === 0) return <NoAccess />;
@@ -59,7 +65,7 @@ function Admin() {
   return (
     <div className="space-y-6">
       <PageHeader title="Admin" description="Staff, roles, limits, history and your subscription." />
-      <Tabs defaultValue={tabs[0]!.value}>
+      <Tabs value={tabs.some((t) => t.value === tab) ? tab! : tabs[0]!.value} onValueChange={setTab}>
         <TabsList className="flex-wrap">
           {tabs.map((t) => <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>)}
         </TabsList>
@@ -112,6 +118,7 @@ function BusinessDate() {
 
   return (
     <div className="space-y-6">
+      <NightAuditFlags />
       <Card>
         <CardHeader><CardTitle>Business date</CardTitle></CardHeader>
         <CardContent className="space-y-4">

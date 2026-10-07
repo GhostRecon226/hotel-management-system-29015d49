@@ -44,6 +44,9 @@ export const Route = createFileRoute("/_authenticated/_app/reports")({
 
 interface RevenueRow { charge_code: string; name: string; category: string; net: number; tax: number; gross: number }
 interface BalanceRow { folio_id: string; folio_number: string; label: string; reservation_id: string; reservation_number: string; guest_name: string | null; room_number: string | null; reservation_status: string; folio_status: string; departure_date: string; currency: string; balance: number }
+interface SourceRow { source: string; bookings: number; cancelled: number; no_shows: number; room_nights: number; room_revenue: number; adr: number | null }
+interface AgeingRow { source: string; currency: string; folios: number; current_amount: number; days_1_7: number; days_8_30: number; days_31_60: number; days_61_plus: number; total: number; credit_held: number }
+const SOURCE_LABEL: Record<string, string> = { direct: "Direct", walk_in: "Walk-in", phone: "Phone", corporate: "Company", other: "Other" };
 interface PaymentRow { business_date: string; method: string; kind: string; payments: number; refunds: number; net: number; count: number }
 
 function Reports() {
@@ -66,6 +69,8 @@ function Reports() {
   const payments = useReport<PaymentRow>("report_payments", { p_from: range.from, p_to: range.to }, fin && !!range.from);
   const cancel = useReport<CancelRow>("report_cancellation_rate", { p_from: range.from, p_to: range.to }, ops && !!range.from);
   const los = useReport<LosRow>("report_length_of_stay", { p_from: range.from, p_to: range.to }, ops && !!range.from);
+  const bySource = useReport<SourceRow>("report_revenue_by_source", { p_from: range.from, p_to: range.to }, fin && !!range.from);
+  const ageing = useReport<AgeingRow>("report_balance_ageing", {}, fin);
   const byGuest = useReport<GuestBalanceRow>("report_balances_by_guest", {}, fin);
   const canExport = can("rpt.export");
   const runExport = useServerFn(exportCsv);
@@ -108,7 +113,9 @@ function Reports() {
         <TabsList className="mb-3">
           <TabsTrigger value="kpi">Daily KPIs</TabsTrigger>
           {fin && <TabsTrigger value="revenue">Revenue by charge code</TabsTrigger>}
+          {fin && <TabsTrigger value="source">By booking source</TabsTrigger>}
           {fin && <TabsTrigger value="balances">Outstanding balances</TabsTrigger>}
+          {fin && <TabsTrigger value="ageing">Ageing</TabsTrigger>}
           {fin && <TabsTrigger value="payments">Payments</TabsTrigger>}
           <TabsTrigger value="stays">Cancellations and stay length</TabsTrigger>
           {fin && <TabsTrigger value="byguest">Balances by guest</TabsTrigger>}
@@ -168,6 +175,65 @@ function Reports() {
                 ))}
               </TableBody>
             </Table>
+          </TabsContent>
+        )}
+
+        {fin && (
+          <TabsContent value="source">
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Source</TableHead><TableHead className="text-right">Bookings</TableHead><TableHead className="text-right">Cancelled</TableHead>
+                <TableHead className="text-right">No-shows</TableHead><TableHead className="text-right">Room nights</TableHead>
+                <TableHead className="text-right">Room revenue</TableHead><TableHead className="text-right">Average rate</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {bySource.isLoading && <TableSkeletonRows cols={7} />}
+                {!bySource.isLoading && (bySource.data ?? []).length === 0 && <TableStateRow colSpan={7} title="No bookings or room revenue in this range" />}
+                {(bySource.data ?? []).map((r) => (
+                  <TableRow key={r.source}>
+                    <TableCell className="font-medium">{SOURCE_LABEL[r.source] ?? r.source}</TableCell>
+                    <TableCell className="text-right tabular">{r.bookings}</TableCell>
+                    <TableCell className="text-right tabular">{r.cancelled}</TableCell>
+                    <TableCell className="text-right tabular">{r.no_shows}</TableCell>
+                    <TableCell className="text-right tabular">{r.room_nights}</TableCell>
+                    <TableCell><Money amount={r.room_revenue} currency={cur} className="font-semibold" /></TableCell>
+                    <TableCell><Money amount={r.adr} currency={cur} /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <p className="mt-2 text-sm text-muted-foreground">Bookings and cancellations are counted by arrival date. Room revenue is room charges posted in the range, before tax.</p>
+          </TabsContent>
+        )}
+
+        {fin && (
+          <TabsContent value="ageing">
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Source</TableHead><TableHead className="text-right">Bills</TableHead><TableHead className="text-right">Current</TableHead>
+                <TableHead className="text-right">1 to 7 days</TableHead><TableHead className="text-right">8 to 30 days</TableHead>
+                <TableHead className="text-right">31 to 60 days</TableHead><TableHead className="text-right">Over 60 days</TableHead>
+                <TableHead className="text-right">Total owed</TableHead><TableHead className="text-right">Credit held</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {ageing.isLoading && <TableSkeletonRows cols={9} />}
+                {!ageing.isLoading && (ageing.data ?? []).length === 0 && <TableStateRow colSpan={9} title="Nothing owed" description="No bill has an unpaid balance." />}
+                {(ageing.data ?? []).map((r) => (
+                  <TableRow key={`${r.source}-${r.currency}`}>
+                    <TableCell className="font-medium">{SOURCE_LABEL[r.source] ?? r.source}</TableCell>
+                    <TableCell className="text-right tabular">{r.folios}</TableCell>
+                    <TableCell><Money amount={r.current_amount} currency={r.currency} /></TableCell>
+                    <TableCell><Money amount={r.days_1_7} currency={r.currency} /></TableCell>
+                    <TableCell><Money amount={r.days_8_30} currency={r.currency} /></TableCell>
+                    <TableCell><Money amount={r.days_31_60} currency={r.currency} /></TableCell>
+                    <TableCell><Money amount={r.days_61_plus} currency={r.currency} /></TableCell>
+                    <TableCell><Money amount={r.total} currency={r.currency} className="font-semibold" /></TableCell>
+                    <TableCell><Money amount={r.credit_held} currency={r.currency} /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <p className="mt-2 text-sm text-muted-foreground">Age counts the days since the guest was due to leave. Guests still staying are current. Overpayments show as credit held, never as a negative debt.</p>
           </TabsContent>
         )}
 

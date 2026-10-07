@@ -21,9 +21,11 @@ import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/_app/admin'
 import { Route as AuthenticatedAppApprovalsRouteImport } from './routes/_authenticated/_app/approvals'
+import { Route as AuthenticatedAppCashierRouteImport } from './routes/_authenticated/_app/cashier'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
 import { Route as AuthenticatedAppFoliosRouteRouteImport } from './routes/_authenticated/_app/folios/route'
 import { Route as AuthenticatedAppFrontDeskRouteImport } from './routes/_authenticated/_app/front-desk'
+import { Route as AuthenticatedAppGroupRouteImport } from './routes/_authenticated/_app/group'
 import { Route as AuthenticatedAppGuestsRouteRouteImport } from './routes/_authenticated/_app/guests/route'
 import { Route as AuthenticatedAppHousekeepingRouteRouteImport } from './routes/_authenticated/_app/housekeeping/route'
 import { Route as AuthenticatedAppMaintenanceRouteRouteImport } from './routes/_authenticated/_app/maintenance/route'
@@ -35,6 +37,7 @@ import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedInvoicesIdRouteImport } from './routes/_authenticated/invoices.$id'
 import { Route as ApiCronIdPhotoCleanupRouteImport } from './routes/api/cron/id-photo-cleanup'
 import { Route as ApiCronOutboxRouteImport } from './routes/api/cron/outbox'
+import { Route as ApiWebhooksPaystackRouteImport } from './routes/api/webhooks/paystack'
 import { Route as AuthenticatedAppCheckoutIdRouteImport } from './routes/_authenticated/_app/checkout.$id'
 import { Route as AuthenticatedAppFoliosIndexRouteImport } from './routes/_authenticated/_app/folios/index'
 import { Route as AuthenticatedAppFoliosIdRouteImport } from './routes/_authenticated/_app/folios/$id'
@@ -60,6 +63,8 @@ import { Route as AuthenticatedAppSetupPropertyRouteImport } from './routes/_aut
 import { Route as AuthenticatedAppSetupRatesRouteImport } from './routes/_authenticated/_app/setup/rates'
 import { Route as AuthenticatedAppSetupRoomTypesRouteImport } from './routes/_authenticated/_app/setup/room-types'
 import { Route as AuthenticatedAppSetupRoomsRouteImport } from './routes/_authenticated/_app/setup/rooms'
+import { Route as AuthenticatedAppReservationsGroupsIndexRouteImport } from './routes/_authenticated/_app/reservations/groups.index'
+import { Route as AuthenticatedAppReservationsGroupsIdRouteImport } from './routes/_authenticated/_app/reservations/groups.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -121,6 +126,11 @@ const AuthenticatedAppApprovalsRoute =
     path: '/approvals',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppCashierRoute = AuthenticatedAppCashierRouteImport.update({
+  id: '/cashier',
+  path: '/cashier',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppDashboardRoute =
   AuthenticatedAppDashboardRouteImport.update({
     id: '/dashboard',
@@ -139,6 +149,11 @@ const AuthenticatedAppFrontDeskRoute =
     path: '/front-desk',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppGroupRoute = AuthenticatedAppGroupRouteImport.update({
+  id: '/group',
+  path: '/group',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppGuestsRouteRoute =
   AuthenticatedAppGuestsRouteRouteImport.update({
     id: '/guests',
@@ -199,6 +214,11 @@ const ApiCronIdPhotoCleanupRoute = ApiCronIdPhotoCleanupRouteImport.update({
 const ApiCronOutboxRoute = ApiCronOutboxRouteImport.update({
   id: '/api/cron/outbox',
   path: '/api/cron/outbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWebhooksPaystackRoute = ApiWebhooksPaystackRouteImport.update({
+  id: '/api/webhooks/paystack',
+  path: '/api/webhooks/paystack',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppCheckoutIdRoute =
@@ -350,6 +370,18 @@ const AuthenticatedAppSetupRoomsRoute =
     path: '/rooms',
     getParentRoute: () => AuthenticatedAppSetupRouteRoute,
   } as any)
+const AuthenticatedAppReservationsGroupsIndexRoute =
+  AuthenticatedAppReservationsGroupsIndexRouteImport.update({
+    id: '/groups/',
+    path: '/groups/',
+    getParentRoute: () => AuthenticatedAppReservationsRouteRoute,
+  } as any)
+const AuthenticatedAppReservationsGroupsIdRoute =
+  AuthenticatedAppReservationsGroupsIdRouteImport.update({
+    id: '/groups/$id',
+    path: '/groups/$id',
+    getParentRoute: () => AuthenticatedAppReservationsRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -369,13 +401,16 @@ export interface FileRoutesByFullPath {
   '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/admin': typeof AuthenticatedAppAdminRoute
   '/approvals': typeof AuthenticatedAppApprovalsRoute
+  '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/group': typeof AuthenticatedAppGroupRoute
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/webhooks/paystack': typeof ApiWebhooksPaystackRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -401,6 +436,8 @@ export interface FileRoutesByFullPath {
   '/reservations/': typeof AuthenticatedAppReservationsIndexRoute
   '/rooms/': typeof AuthenticatedAppRoomsIndexRoute
   '/setup/': typeof AuthenticatedAppSetupIndexRoute
+  '/reservations/groups/$id': typeof AuthenticatedAppReservationsGroupsIdRoute
+  '/reservations/groups/': typeof AuthenticatedAppReservationsGroupsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -413,13 +450,16 @@ export interface FileRoutesByTo {
   '/platform': typeof AuthenticatedPlatformRoute
   '/admin': typeof AuthenticatedAppAdminRoute
   '/approvals': typeof AuthenticatedAppApprovalsRoute
+  '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/group': typeof AuthenticatedAppGroupRoute
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/webhooks/paystack': typeof ApiWebhooksPaystackRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -445,6 +485,8 @@ export interface FileRoutesByTo {
   '/reservations': typeof AuthenticatedAppReservationsIndexRoute
   '/rooms': typeof AuthenticatedAppRoomsIndexRoute
   '/setup': typeof AuthenticatedAppSetupIndexRoute
+  '/reservations/groups/$id': typeof AuthenticatedAppReservationsGroupsIdRoute
+  '/reservations/groups': typeof AuthenticatedAppReservationsGroupsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -467,13 +509,16 @@ export interface FileRoutesById {
   '/_authenticated/_app/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/_authenticated/_app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/_app/approvals': typeof AuthenticatedAppApprovalsRoute
+  '/_authenticated/_app/cashier': typeof AuthenticatedAppCashierRoute
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/_app/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/_authenticated/_app/group': typeof AuthenticatedAppGroupRoute
   '/_authenticated/_app/reports': typeof AuthenticatedAppReportsRoute
   '/_authenticated/_app/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/webhooks/paystack': typeof ApiWebhooksPaystackRoute
   '/_authenticated/_app/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/_authenticated/_app/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/_authenticated/_app/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -499,6 +544,8 @@ export interface FileRoutesById {
   '/_authenticated/_app/reservations/': typeof AuthenticatedAppReservationsIndexRoute
   '/_authenticated/_app/rooms/': typeof AuthenticatedAppRoomsIndexRoute
   '/_authenticated/_app/setup/': typeof AuthenticatedAppSetupIndexRoute
+  '/_authenticated/_app/reservations/groups/$id': typeof AuthenticatedAppReservationsGroupsIdRoute
+  '/_authenticated/_app/reservations/groups/': typeof AuthenticatedAppReservationsGroupsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -520,13 +567,16 @@ export interface FileRouteTypes {
     | '/setup'
     | '/admin'
     | '/approvals'
+    | '/cashier'
     | '/dashboard'
     | '/front-desk'
+    | '/group'
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
     | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
+    | '/api/webhooks/paystack'
     | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
@@ -552,6 +602,8 @@ export interface FileRouteTypes {
     | '/reservations/'
     | '/rooms/'
     | '/setup/'
+    | '/reservations/groups/$id'
+    | '/reservations/groups/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -564,13 +616,16 @@ export interface FileRouteTypes {
     | '/platform'
     | '/admin'
     | '/approvals'
+    | '/cashier'
     | '/dashboard'
     | '/front-desk'
+    | '/group'
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
     | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
+    | '/api/webhooks/paystack'
     | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
@@ -596,6 +651,8 @@ export interface FileRouteTypes {
     | '/reservations'
     | '/rooms'
     | '/setup'
+    | '/reservations/groups/$id'
+    | '/reservations/groups'
   id:
     | '__root__'
     | '/'
@@ -617,13 +674,16 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/setup'
     | '/_authenticated/_app/admin'
     | '/_authenticated/_app/approvals'
+    | '/_authenticated/_app/cashier'
     | '/_authenticated/_app/dashboard'
     | '/_authenticated/_app/front-desk'
+    | '/_authenticated/_app/group'
     | '/_authenticated/_app/reports'
     | '/_authenticated/_app/service-requests'
     | '/_authenticated/invoices/$id'
     | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
+    | '/api/webhooks/paystack'
     | '/_authenticated/_app/checkout/$id'
     | '/_authenticated/_app/folios/$id'
     | '/_authenticated/_app/guests/$id'
@@ -649,6 +709,8 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/reservations/'
     | '/_authenticated/_app/rooms/'
     | '/_authenticated/_app/setup/'
+    | '/_authenticated/_app/reservations/groups/$id'
+    | '/_authenticated/_app/reservations/groups/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -661,6 +723,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiCronIdPhotoCleanupRoute: typeof ApiCronIdPhotoCleanupRoute
   ApiCronOutboxRoute: typeof ApiCronOutboxRoute
+  ApiWebhooksPaystackRoute: typeof ApiWebhooksPaystackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -749,6 +812,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppApprovalsRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/cashier': {
+      id: '/_authenticated/_app/cashier'
+      path: '/cashier'
+      fullPath: '/cashier'
+      preLoaderRoute: typeof AuthenticatedAppCashierRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/_app/dashboard': {
       id: '/_authenticated/_app/dashboard'
       path: '/dashboard'
@@ -768,6 +838,13 @@ declare module '@tanstack/react-router' {
       path: '/front-desk'
       fullPath: '/front-desk'
       preLoaderRoute: typeof AuthenticatedAppFrontDeskRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/group': {
+      id: '/_authenticated/_app/group'
+      path: '/group'
+      fullPath: '/group'
+      preLoaderRoute: typeof AuthenticatedAppGroupRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/_app/guests': {
@@ -845,6 +922,13 @@ declare module '@tanstack/react-router' {
       path: '/api/cron/outbox'
       fullPath: '/api/cron/outbox'
       preLoaderRoute: typeof ApiCronOutboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/paystack': {
+      id: '/api/webhooks/paystack'
+      path: '/api/webhooks/paystack'
+      fullPath: '/api/webhooks/paystack'
+      preLoaderRoute: typeof ApiWebhooksPaystackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/_app/checkout/$id': {
@@ -1022,6 +1106,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSetupRoomsRouteImport
       parentRoute: typeof AuthenticatedAppSetupRouteRoute
     }
+    '/_authenticated/_app/reservations/groups/': {
+      id: '/_authenticated/_app/reservations/groups/'
+      path: '/groups'
+      fullPath: '/reservations/groups/'
+      preLoaderRoute: typeof AuthenticatedAppReservationsGroupsIndexRouteImport
+      parentRoute: typeof AuthenticatedAppReservationsRouteRoute
+    }
+    '/_authenticated/_app/reservations/groups/$id': {
+      id: '/_authenticated/_app/reservations/groups/$id'
+      path: '/groups/$id'
+      fullPath: '/reservations/groups/$id'
+      preLoaderRoute: typeof AuthenticatedAppReservationsGroupsIdRouteImport
+      parentRoute: typeof AuthenticatedAppReservationsRouteRoute
+    }
   }
 }
 
@@ -1105,6 +1203,8 @@ interface AuthenticatedAppReservationsRouteRouteChildren {
   AuthenticatedAppReservationsAvailabilityRoute: typeof AuthenticatedAppReservationsAvailabilityRoute
   AuthenticatedAppReservationsNewRoute: typeof AuthenticatedAppReservationsNewRoute
   AuthenticatedAppReservationsIndexRoute: typeof AuthenticatedAppReservationsIndexRoute
+  AuthenticatedAppReservationsGroupsIdRoute: typeof AuthenticatedAppReservationsGroupsIdRoute
+  AuthenticatedAppReservationsGroupsIndexRoute: typeof AuthenticatedAppReservationsGroupsIndexRoute
 }
 
 const AuthenticatedAppReservationsRouteRouteChildren: AuthenticatedAppReservationsRouteRouteChildren =
@@ -1115,6 +1215,10 @@ const AuthenticatedAppReservationsRouteRouteChildren: AuthenticatedAppReservatio
     AuthenticatedAppReservationsNewRoute: AuthenticatedAppReservationsNewRoute,
     AuthenticatedAppReservationsIndexRoute:
       AuthenticatedAppReservationsIndexRoute,
+    AuthenticatedAppReservationsGroupsIdRoute:
+      AuthenticatedAppReservationsGroupsIdRoute,
+    AuthenticatedAppReservationsGroupsIndexRoute:
+      AuthenticatedAppReservationsGroupsIndexRoute,
   }
 
 const AuthenticatedAppReservationsRouteRouteWithChildren =
@@ -1175,8 +1279,10 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppSetupRouteRoute: typeof AuthenticatedAppSetupRouteRouteWithChildren
   AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppApprovalsRoute: typeof AuthenticatedAppApprovalsRoute
+  AuthenticatedAppCashierRoute: typeof AuthenticatedAppCashierRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
   AuthenticatedAppFrontDeskRoute: typeof AuthenticatedAppFrontDeskRoute
+  AuthenticatedAppGroupRoute: typeof AuthenticatedAppGroupRoute
   AuthenticatedAppReportsRoute: typeof AuthenticatedAppReportsRoute
   AuthenticatedAppServiceRequestsRoute: typeof AuthenticatedAppServiceRequestsRoute
   AuthenticatedAppCheckoutIdRoute: typeof AuthenticatedAppCheckoutIdRoute
@@ -1197,8 +1303,10 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppSetupRouteRoute: AuthenticatedAppSetupRouteRouteWithChildren,
   AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
   AuthenticatedAppApprovalsRoute: AuthenticatedAppApprovalsRoute,
+  AuthenticatedAppCashierRoute: AuthenticatedAppCashierRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
   AuthenticatedAppFrontDeskRoute: AuthenticatedAppFrontDeskRoute,
+  AuthenticatedAppGroupRoute: AuthenticatedAppGroupRoute,
   AuthenticatedAppReportsRoute: AuthenticatedAppReportsRoute,
   AuthenticatedAppServiceRequestsRoute: AuthenticatedAppServiceRequestsRoute,
   AuthenticatedAppCheckoutIdRoute: AuthenticatedAppCheckoutIdRoute,
@@ -1236,6 +1344,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ApiCronIdPhotoCleanupRoute: ApiCronIdPhotoCleanupRoute,
   ApiCronOutboxRoute: ApiCronOutboxRoute,
+  ApiWebhooksPaystackRoute: ApiWebhooksPaystackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

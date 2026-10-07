@@ -42,7 +42,7 @@ export interface Reservation {
   company_name: string | null; special_requests: string | null; notes: string | null; guarantee: string;
   hold_until: string | null; group_id: string | null; currency: string; total_amount: number; deposit_required: number;
   rate_override: number | null; override_reason: string | null; cancellation_fee: number | null; no_show_fee: number | null;
-  fee_waived: boolean; status_reason: string | null; created_at: string;
+  fee_waived: boolean; status_reason: string | null; created_at: string; arrival_ready?: boolean;
 }
 export interface HistoryEvent {
   id: string; action: string; before: Record<string, unknown> | null; after: Record<string, unknown> | null;

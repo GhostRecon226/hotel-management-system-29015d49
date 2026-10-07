@@ -45,6 +45,7 @@ function ReservationDetailPage() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const confirm = useResMutation("confirm_reservation", "Booking confirmed.");
   const unassign = useResMutation("unassign_room", "Room removed.");
+  const ready = useResMutation("set_arrival_ready");
   const openFolio = useOpenMainFolio();
 
   if (isLoading) return <LoadingState label="Loading booking…" />;
@@ -71,13 +72,15 @@ function ReservationDetailPage() {
         <ArrowLeft className="h-4 w-4" /> All bookings
       </Link>
       <PageHeader
-        title={<span className="inline-flex flex-wrap items-center gap-3">{r.number} <ResStatusBadge status={r.status} holdUntil={r.hold_until} /></span>}
+        title={<span className="inline-flex flex-wrap items-center gap-3">{r.number} <ResStatusBadge status={r.status} holdUntil={r.hold_until} />{open && r.arrival_ready && <Badge variant="success">Ready for arrival</Badge>}</span>}
         description={`${primary ? fullName(primary) : ""} · ${formatDay(r.arrival_date)} → ${formatDay(r.departure_date)} · ${nightsLabel(nights)}`}
         actions={<>
           {can("fin.folio.view") && r.status !== "cancelled" && r.status !== "no_show" &&
             <Button variant="outline" disabled={openFolio.isPending} onClick={() => openFolio.mutate(r.id)}>Folio</Button>}
           {(r.status === "checked_in" || r.status === "checked_out") && can("fo.view") &&
             <Button variant={r.status === "checked_in" ? "default" : "outline"} asChild><Link to="/checkout/$id" params={{ id: r.id }}>{r.status === "checked_in" ? "Check out" : "Check-out details"}</Link></Button>}
+          {open && can("fo.checkin") &&
+            <Button variant="outline" disabled={ready.isPending} onClick={() => ready.mutate({ p_reservation_id: r.id, p_ready: !r.arrival_ready })}>{r.arrival_ready ? "Not ready" : "Mark ready"}</Button>}
           {open && can("res.edit") && <Button variant="outline" onClick={() => setEditing(true)}>Change</Button>}
           {r.status === "tentative" && can("res.edit") && <Button disabled={confirm.isPending} onClick={() => confirm.mutate({ p_id: r.id })}>Confirm</Button>}
           {open && can("res.noshow") && <Button variant="outline" onClick={() => setDialog("noshow")}>No-show</Button>}
@@ -126,7 +129,7 @@ function ReservationDetailPage() {
             <Row label="Rate override">{r.rate_override !== null ? `${formatAmount(r.rate_override, r.currency)} a night — ${r.override_reason ?? ""}` : "No"}</Row>
             <Row label="Source">{SOURCES[r.source]}</Row>
             <Row label="Company">{r.company_name}</Row>
-            <Row label="Group">{data.group?.name}</Row>
+            <Row label="Group">{data.group && <Link className="text-primary-strong hover:underline" to="/reservations/groups/$id" params={{ id: data.group.id }}>{data.group.name}</Link>}</Row>
             <Row label="Guarantee">{GUARANTEES[r.guarantee]}</Row>
             {r.status === "tentative" && <Row label="Held until">{formatDateTime(r.hold_until)}</Row>}
             <Row label="Special requests">{r.special_requests}</Row>

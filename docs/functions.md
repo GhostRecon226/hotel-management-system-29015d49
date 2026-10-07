@@ -1512,3 +1512,188 @@ Every function below first calls `app.require_platform()`: the caller must be on
 - Args: `p_email text`. Database owner only (Supabase SQL editor); no grant to any app role.
 - Adds an existing sign-in account that belongs to no hotel. Errors: `E_INVALID` (account belongs to a hotel), `E_NOT_FOUND` (no such account).
 
+
+### `public.list_group_bookings`
+- Args: `p_property_id uuid`, `p_status text default null`. Needs `res.view`.
+- Lists groups with live room count, nights, first arrival, last departure and total. Cancelled and no-show bookings are not counted.
+
+### `public.get_group_booking`
+- Args: `p_id uuid`. Needs `res.view`.
+- Returns the group, its bookings and totals. `balance_due` is null without `fin.folio.view`. Errors: `E_NOT_FOUND`.
+
+### `public.set_group_booking_status`
+- Args: `p_id uuid`, `p_status text` ('active' or 'cancelled'). Needs `res.group.manage`. Audited.
+- Errors: `E_GROUP_HAS_BOOKINGS` (cancel while live bookings exist), `E_NOT_FOUND`, `E_INVALID`.
+
+### AI helpers: owner's morning brief (AI-001 to AI-005)
+AI is off for every hotel until switched on. The provider only ever sees plain fact lines built by the database (counts and money, no guest, ID, room or card data). The server rejects any draft that contains a number not in those lines.
+
+### `public.ai_status`
+- Args: none. Returns `jsonb`: `enabled`, `monthly_cap`, `used` (this month, failed calls not counted), `remaining`.
+- Permission: `adm.ai.manage` or `rpt.finance.view` · Errors: `E_FORBIDDEN`
+
+### `public.set_ai_settings`
+- Args: `p_enabled boolean, p_monthly_cap integer` (0 to 1000). Audited as `set_ai_settings`.
+- Permission: `adm.ai.manage` (System Administrator and General Manager only) · Errors: `E_FORBIDDEN`, `E_INVALID`
+
+### `public.ai_morning_brief_start`
+- Args: `p_property_id uuid`. Checks permission, the switch and the monthly limit, logs a call in `ai_usage`, returns `{usage_id, facts}`. Facts: property, business date, currency, yesterday, today, attention (approvals, repairs, money unpaid more than 30 days after departure) and `lines`.
+- Permission: `rpt.finance.view` and `rpt.operations.view` on the property · Errors: `E_FORBIDDEN`, `E_AI_OFF`, `E_AI_LIMIT`
+
+### `public.ai_call_finish`
+- Args: `p_usage_id uuid, p_ok boolean`. Marks the call done or failed. Only the person who started it, once.
+- Errors: `E_NOT_FOUND`
+
+### Setup import assistant (SET-010, AI-006, AI-007)
+A hotel pastes its room list. The server screens it (no email, phone or card number), asks the AI for a draft list, drops anything not in the pasted text, and shows a preview from the database. Nothing is added until the person confirms; `apply_setup_import` then checks the whole list again.
+
+### `public.ai_import_start`
+- Args: `p_property_id uuid`. Logs a call in `ai_usage` and returns `{usage_id, context}`; the context is only the existing room type codes and a room count.
+- Permission: `setup.room.manage` on the property · Errors: `E_FORBIDDEN`, `E_AI_OFF`, `E_AI_LIMIT`
+
+### `public.apply_setup_import`
+- Args: `p_property_id uuid, p_payload jsonb, p_preview boolean DEFAULT true`. Payload: `{room_types:[{code,name,max_adults?,max_children?}], rooms:[{number,type_code,floor?}]}`, at most 50 types and 500 rooms.
+- Preview writes nothing and returns what would be created, skipped and refused. Apply adds room types, then rooms, all or nothing. Existing type codes and room names are skipped, so repeating the same import adds nothing. Audited as `apply_setup_import`.
+- Returns `jsonb`: `would_create_types, skipped_types, would_create_rooms, skipped_rooms, invalid, created_types, created_rooms, room_limit, rooms_now`
+- Permission: `setup.room.manage` on the property
+- Errors: `E_FORBIDDEN`, `E_INVALID` (bad shape, bad room name, unknown type, too many), `E_PLAN_LIMIT`
+
+### Source and ageing reports (RPT-005, RPT-006)
+
+### `public.report_revenue_by_source`
+- Args: `p_property_id uuid, p_from date, p_to date`
+- Returns one row per booking source with any activity: `source, bookings, cancelled, no_shows, room_nights, room_revenue, adr`. Bookings, cancellations and no-shows count by arrival date. Room nights count booked nights in the range for live bookings. Room revenue is room-category charges (reversals and adjustments included, payments and refunds left out) posted in the range, before tax. `adr` is room revenue divided by room nights.
+- Callable by signed-in users: yes · security definer, stable
+- Permission: `rpt.finance.view`
+- Errors: `E_FORBIDDEN`, `E_INVALID` (end before start)
+
+### `public.report_balance_ageing`
+- Args: `p_property_id uuid`
+- Returns one row per source and currency: `source, currency, folios, current_amount, days_1_7, days_8_30, days_31_60, days_61_plus, total, credit_held`. Age is the property's business date minus the booking's departure date; guests still staying or due to arrive are current. Only positive balances are aged; overpayments add up in `credit_held`.
+- Callable by signed-in users: yes · security definer, stable
+- Permission: `rpt.finance.view`
+
+### Hotel group view (GRP-001 to GRP-004)
+
+### `public.group_overview`
+- Args: none
+- Returns `jsonb`: `properties` (one object per branch the caller holds `rpt.group.view` on: name, code, city, base currency, business date, rooms total and occupied, occupancy, in house, arrivals and departures still to come, pending approvals, open and urgent repairs, last night's revenue and occupancy) and `totals` (the same counts added up, plus `revenue_by_currency`, never mixed).
+- Callable by signed-in users: yes · security definer, stable
+- Permission: `rpt.group.view`, checked per branch; other hotel groups are never listed
+- Errors: `E_FORBIDDEN`
+
+### `public.copy_property_setup`
+- Args: `p_source_property_id uuid, p_target_property_id uuid`
+- Copies room types, rate plans and rate prices from the source into an empty target branch. Prices point at the target's own room types. Rooms are not copied. Writes an audit row `copy_property_setup`.
+- Returns `jsonb`: `room_types`, `rate_plans`, `rate_prices` (counts)
+- Callable by signed-in users: yes · security definer
+- Permission: `setup.room.manage` and `setup.rate.manage` on the target, `setup.property.view` on the source
+- Errors: `E_FORBIDDEN`, `E_INVALID` (same branch), `E_NOT_FOUND`, `E_NOT_EMPTY` (target already has room types or rates)
+
+### Cashier shifts and night audit flags (FIN-016, DAY-005)
+Tables: `cashier_shifts`, `cashier_shift_lines` (read through row-level security: a cashier sees their own shifts, a user with `fin.shift.reconcile` sees the hotel's). `folio_transactions.cashier_shift_id` is set by a trigger when a payment, refund or reversal is posted by someone with an open shift. `properties.require_cashier_shift` (off by default) makes `post_payment` refuse a payment from a cashier with no open shift (`E_NO_SHIFT`). New permission `fin.shift.reconcile` goes to the built-in System Administrator, General Manager, Front Office Manager and Accountant roles only. Custom roles copied earlier do not get it. Amounts are whole currency in the hotel's base currency.
+
+### `public.open_cashier_shift`
+- Args: `p_property_id uuid, p_opening_float numeric, p_idempotency_key text`
+- Opens the caller's shift. A retry with the same key returns the same shift. One open shift per cashier and hotel.
+- Returns: `uuid`
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.shift.close`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_READ_ONLY`, `E_REQUIRED`, `E_SHIFT_OPEN`
+
+### `public.cashier_shift_summary`
+- Args: `p_shift uuid`
+- One shift with, per payment method, what it should hold (`expected`), what was counted and the difference. An open shift shows live expected figures. Cash expected includes the float.
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: the cashier who opened it, or `fin.shift.reconcile`
+- Errors: `E_FORBIDDEN`, `E_NOT_FOUND`
+
+### `public.close_cashier_shift`
+- Args: `p_shift uuid, p_counts jsonb ([{payment_method_id, counted}]), p_note text`
+- Every method that took money must be counted. The database works out the difference (counted minus expected). A difference needs a note. A manager can close someone else's shift, with a note. Works while the hotel is read-only.
+- Returns: `jsonb` (the shift summary)
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.shift.close` for your own shift; `fin.shift.reconcile` for another's
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`, `E_REQUIRED`
+
+### `public.reconcile_cashier_shift`
+- Args: `p_shift uuid, p_note text`
+- A manager checks a closed shift. Not the person who closed it (`E_SOD`, and CHECK `cashier_shifts_sod`). A shift with a difference needs a note. Audited.
+- Returns: `jsonb` (the shift summary)
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.shift.reconcile`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`, `E_REQUIRED`, `E_SOD`
+
+### `public.list_cashier_shifts`
+- Args: `p_property_id uuid, p_from date, p_to date, p_status text (open, closed, unreconciled or null)`
+- Up to 200 shifts, newest first: the caller's own, or all when the caller can reconcile.
+- Returns: `jsonb` (list)
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.shift.close` or `fin.shift.reconcile`
+- Errors: `E_FORBIDDEN`, `E_INVALID`
+
+### `public.set_cashier_shift_required`
+- Args: `p_property_id uuid, p_required boolean`
+- Turns the "open a shift before taking payments" rule on or off for a hotel. Audited.
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: `setup.property.edit`
+- Errors: `E_FORBIDDEN`, `E_READ_ONLY`
+
+### `public.night_audit_flags`
+- Args: `p_property_id uuid`
+- What is still open before the day closes. `blocking`: cashier shifts still open. `warnings`: closed shifts with an unreconciled difference, guests in house on or past departure, bookings due that have not checked in. It does not stop the date rolling.
+- Returns: `jsonb` (`business_date`, `blocking`, `warnings`; each item has `code`, `title`, `count`, `detail`)
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.nightaudit.run`
+- Errors: `E_FORBIDDEN`
+
+### `app.stamp_cashier_shift`
+- Trigger on `folio_transactions` (before insert). Ties a payment, refund or reversal to the poster's open shift. Raises `E_NO_SHIFT` for a payment when the hotel requires a shift and the poster has none.
+
+### Subscription billing (PLT-012)
+Prices: column `plans.prices` (for example `{"NGN": {"month": 6000000, "year": 60000000}}`; hotels read it, only `platform_set_plan_price` writes it). Tables: `subscription_payments` (a hotel reads its own with `adm.subscription.manage`), `billing_events` (no client access). Amounts are in the smallest unit (kobo). Nothing here is settled in a browser: the price always comes from `plans.prices`.
+
+### `public.platform_set_plan_price`
+- Args: `p_plan text, p_currency text, p_interval text, p_amount_minor bigint`
+- Sets or replaces one price. `p_interval` is `month` or `year`.
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_MFA_REQUIRED`, `E_NOT_FOUND`
+
+### `public.start_subscription_payment`
+- Args: `p_plan text, p_interval text, p_idempotency_key text`
+- Makes a pending payment for the hotel's own currency (its first property). A retry with the same key returns the first payment. Refuses a plan the hotel has outgrown.
+- Returns: `jsonb` (`payment_id`, `reference`, `amount_minor`, `currency`, `plan_code`, `interval`, `status`)
+- Callable by signed-in users: yes · security definer
+- Permission: `adm.subscription.manage`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NO_PRICE`, `E_NOT_FOUND`, `E_PLAN_LIMIT`, `E_REQUIRED`
+
+### `public.billing_apply_event`
+- Args: `p_provider text, p_event_id text, p_reference text, p_outcome text ('success' or 'failed'), p_amount_minor bigint, p_currency text`
+- Called only by the server after it verifies the provider's signature. Stores the event once, then: `applied` (plan activated, or failure recorded), `duplicate` (event seen before), `ignored` (payment already paid), `mismatch` (amount or currency differ; payment marked failed, nothing activated), `unknown_reference`.
+- Success adds one month or one year to the end of the current paid period, or from today when the hotel is not active. Writes `subscription_history` with source `billing`.
+- Returns: `text`
+- Callable by signed-in users: no (service role only) · security definer
+- Errors: `E_INVALID`, `E_REQUIRED`
+
+### `public.platform_failed_payments`
+- Args: none
+- Failed payments from the last 60 days and payments still pending after a day.
+- Returns: table (`payment_id`, `created_at`, `tenant_id`, `tenant_name`, `plan_code`, `period`, `amount` (whole currency, worked out by the database), `currency`, `status`, `reference`, `failure_reason`)
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
+
+### `app.assert_plan_fits`
+- Args: `p_tenant uuid, p_plan text`. Helper. Errors: `E_NOT_FOUND`, `E_PLAN_LIMIT`.
+
+### `public.billing_options`
+- Args: none
+- For the Subscription screen: the hotel's currency, every plan with its monthly and yearly price in whole currency (the database divides, the browser does not), `fits` (the hotel is within the plan's limits) and `can_buy` (fits and has a price), and the hotel's last 20 payments.
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: `adm.subscription.manage`
+- Errors: `E_FORBIDDEN`
