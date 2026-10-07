@@ -52,7 +52,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <span className="grid size-8 place-items-center rounded-lg bg-accent-fill text-xs font-extrabold text-primary-foreground" aria-hidden>HD</span>
               <span className="font-bold">Hotel Desk</span>
             </div>
-            <p className="mt-3 max-w-sm text-sm text-muted-foreground">Hotel management software for independent hotels in Nigeria. Know every naira that comes through your front desk.</p>
+            <p className="mt-3 max-w-sm text-sm text-muted-foreground">Hotel management software built in Africa, for independent hotels. Know every payment that comes through your front desk.</p>
           </div>
           <FooterLinks title="Product" links={[{ to: "/", label: "Home" }, { to: "/features", label: "Features" }, { to: "/pricing", label: "Pricing" }, { to: "/security", label: "Security" }, { to: "/faq", label: "FAQ" }]} />
           <FooterLinks title="Company" links={[{ to: "/about", label: "About" }, { to: "/contact", label: "Contact" }, { to: "/privacy", label: "Privacy notice" }, { to: "/terms", label: "Terms of use" }]} />

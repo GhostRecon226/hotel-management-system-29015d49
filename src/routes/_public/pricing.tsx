@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SinglePlanCard } from "@/components/public/single-plan-card";
 import { FaqList } from "@/components/public/faq-two-column";
 import { FAQS, PRICING_FAQ_IDS } from "@/components/public/faq-content";
+import { SizeBands } from "@/components/public/home-sections";
 import { Eyebrow, Section } from "@/components/public/public-layout";
 import { pageHead } from "@/lib/seo";
 
@@ -38,6 +39,7 @@ function Pricing() {
           When the trial ends, your hotel becomes read-only until your plan starts. Your team can still record payments, settle bills and check guests out. Nothing is lost.
         </p>
       </Section>
+      <SizeBands />
       <Section className="pt-0 sm:pt-0">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-2xl font-extrabold tracking-tight">Common questions</h2>

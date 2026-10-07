@@ -17,4 +17,4 @@ export function pageHead({ title, description, jsonLd }: { title: string; descri
   };
 }
 
-export const ORGANIZATION_LD = { "@context": "https://schema.org", "@type": "Organization", name: "Hotel Desk Ltd", description: "Hotel management software for independent hotels in Nigeria." };
+export const ORGANIZATION_LD = { "@context": "https://schema.org", "@type": "Organization", name: "Hotel Desk Ltd", description: "Hotel management software for independent hotels in Africa." };

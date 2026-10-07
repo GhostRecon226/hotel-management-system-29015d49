@@ -16,9 +16,12 @@ export type Faq = {
 
 export const FAQS: Faq[] = [
   { id: "what", group: "Getting started", q: "What is Hotel Desk?",
-    a: "Hotel Desk is hotel management software that runs in your web browser. It handles bookings, check-in and check-out, rooms and housekeeping, maintenance, guest bills, invoices and reports. It is built for hotels in Nigeria and works in naira." },
+    a: "Hotel Desk is hotel management software that runs in your web browser. It handles bookings, check-in and check-out, rooms and housekeeping, maintenance, guest bills, invoices and reports. It is built in Africa, for African hotels, and each hotel works in its own currency." },
   { id: "fit", group: "Getting started", q: "Is Hotel Desk made for hotels like mine?",
-    a: "It is built for independent hotels in Nigeria, where the front desk takes cash, transfers and POS payments and one small team does many jobs. If you run guest rooms and a front desk, it fits." },
+    a: "It is built for independent hotels in Africa, where the front desk takes cash, transfers and POS payments and one small team does many jobs. If you run guest rooms and a front desk, it fits." },
+  { id: "countries", group: "Getting started", q: "Which countries does Hotel Desk work in?",
+    a: "We are launching in Nigeria. A hotel in Ghana, Kenya or South Africa is set up with its own currency and time zone, and the system works for it. Tax rules are ready for Nigeria today. We add other countries' tax rules country by country, so tell us where you are and we will say what is ready.",
+    more: { to: "/contact", label: "Tell us where you are" } },
   { id: "cost", group: "Getting started", q: "How much does it cost?",
     a: "You start with a free trial. After that, the price depends on the size of your hotel. Talk to us and we will give you a price for your hotel.",
     more: { to: "/contact", label: "Talk to us" } },
@@ -39,8 +42,10 @@ export const FAQS: Faq[] = [
   { id: "invoices", group: "Money and tax", q: "Can I print invoices?",
     a: "Yes. Print interim bills during a stay and final invoices at check-out, with each tax shown. Issued invoices never change." },
   { id: "currency", group: "Money and tax", q: "Can I record payments in dollars or another currency?",
-    a: "Yes. Record a payment in another currency at the exchange rate you set. Bills themselves are in naira." },
+    a: "Yes. Record a payment in another currency at the exchange rate you set. Bills are in your hotel's own currency." },
 
+  { id: "grow", group: "Staff and control", q: "Can I run more than one hotel?",
+    a: "Yes. A manager can add another hotel, within what your plan allows. Each hotel has its own rooms, rates and staff, and you switch between hotels in the app. Figures show one hotel at a time." },
   { id: "devices", group: "Daily use", q: "Can I use it on a phone or tablet?",
     a: "Yes. It works in the browser on a computer, tablet or phone. There is nothing to install." },
   { id: "offline", group: "Daily use", q: "Does it work without internet?",

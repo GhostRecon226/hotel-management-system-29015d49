@@ -4,17 +4,18 @@ import { BadgeCheck, BedDouble, ConciergeBell, FileText, ShieldCheck, Users, Wif
 import { Hero } from "@/components/public/hero";
 import { FeatureGrid } from "@/components/public/feature-grid";
 import { Section } from "@/components/public/public-layout";
+import { GrowthStrip, NightShift, RoleScreens } from "@/components/public/home-sections";
 import { Button } from "@/components/ui/button";
 import { hasStoredSession } from "@/lib/session-hint";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
 
-const TITLE = "Hotel Management Software for Nigeria | Hotel Desk";
-const DESCRIPTION = "Take bookings, check guests in and out and keep every bill correct in naira. Hotel software for Nigerian hotels. Try it free for 30 days.";
+const TITLE = "Hotel Management Software for Africa | Hotel Desk";
+const DESCRIPTION = "Take bookings, check guests in and out and keep every bill correct. Hotel software built in Africa, launching in Nigeria. Try it free for 30 days.";
 
 const softwareLd = {
   "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Hotel Desk",
   applicationCategory: "BusinessApplication", operatingSystem: "Web browser", description: DESCRIPTION,
-  offers: { "@type": "Offer", price: "0", priceCurrency: "NGN", description: "30-day free trial" },
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "30-day free trial" },
 };
 
 export const Route = createFileRoute("/_public/")({
@@ -43,9 +44,9 @@ function Home() {
 
   return (
     <>
-      <Hero label="Hotel management software for Nigeria"
-        title="Know every naira that comes through your front desk."
-        text="Hotel Desk is hotel management software built for independent hotels in Nigeria. Take bookings, check guests in and out, keep rooms ready and keep every bill correct, all in naira." />
+      <Hero label="Hotel management software for Africa"
+        title="Know every payment that comes through your front desk."
+        text="Hotel Desk is hotel management software built in Africa, for independent hotels. Take bookings, check guests in and out, keep rooms ready and keep every bill correct, in your own currency. We are launching in Nigeria." />
 
       <Section className="pt-0 sm:pt-0">
         <div className="mx-auto max-w-3xl rounded-2xl border border-border/70 bg-card p-6 shadow-card sm:p-8">
@@ -57,13 +58,15 @@ function Home() {
         </div>
       </Section>
 
+      <NightShift />
+
       <Section className="pt-4 sm:pt-6">
         <h2 className="text-center text-2xl font-extrabold tracking-tight sm:text-3xl">What your team gets</h2>
         <p className="mx-auto mt-2 max-w-2xl text-center text-[15px] text-muted-foreground">One system for the desk, housekeeping, maintenance and the accounts.</p>
         <div className="mt-10">
           <FeatureGrid items={[
             { icon: ConciergeBell, title: "A front desk that keeps up", text: "Take bookings and walk-ins. Check guests in and out. See today's arrivals, guests in house and departures on one screen." },
-            { icon: FileText, title: "Bills that add up", text: "Service charge and VAT are worked out on every charge, in naira. Print an interim bill during the stay and a final invoice at check-out." },
+            { icon: FileText, title: "Bills that add up", text: "Service charge and VAT are worked out on every charge, in your hotel's currency. Print an interim bill during the stay and a final invoice at check-out." },
             { icon: ShieldCheck, title: "Nothing changes quietly", text: "Discounts above a limit, adjustments, reversals and refunds need a second person to approve. Every change is on record, and a bill line can never be deleted, only corrected." },
             { icon: BedDouble, title: "Rooms ready on time", text: "See which rooms are clean, dirty or out of order. Cleaning tasks appear when a guest leaves or moves rooms, and inspections are recorded." },
             { icon: Users, title: "The right access for each person", text: "Give front desk, reservations, housekeeping, maintenance, cashier and accounts staff only what they need. Or build your own roles." },
@@ -72,6 +75,10 @@ function Home() {
         </div>
         <p className="mt-6 text-center text-sm"><Link to="/features" className="font-semibold text-primary underline-offset-4 hover:underline">See everything Hotel Desk does</Link></p>
       </Section>
+
+      <RoleScreens />
+
+      <GrowthStrip />
 
       <Section className="pt-0 sm:pt-0">
         <h2 className="text-center text-2xl font-extrabold tracking-tight sm:text-3xl">Start in three steps</h2>
