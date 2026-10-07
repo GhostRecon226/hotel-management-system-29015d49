@@ -8,6 +8,7 @@ import { errorMessage } from "@/lib/errors";
 import { callRpc, NoAccess } from "@/lib/setup";
 import { ADMIN_PERMS } from "@/lib/admin";
 import { formatDateTime, formatDay } from "@/lib/reservations";
+import { NightAuditFlags } from "@/lib/cashier";
 import { UsersPanel } from "@/components/admin/users-panel";
 import { RolesPanel } from "@/components/admin/roles-panel";
 import { LimitsPanel } from "@/components/admin/limits-panel";
@@ -115,6 +116,7 @@ function BusinessDate() {
 
   return (
     <div className="space-y-6">
+      <NightAuditFlags />
       <Card>
         <CardHeader><CardTitle>Business date</CardTitle></CardHeader>
         <CardContent className="space-y-4">
