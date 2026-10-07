@@ -1574,3 +1574,49 @@ Tables: `cashier_shifts`, `cashier_shift_lines` (read through row-level security
 
 ### `app.stamp_cashier_shift`
 - Trigger on `folio_transactions` (before insert). Ties a payment, refund or reversal to the poster's open shift. Raises `E_NO_SHIFT` for a payment when the hotel requires a shift and the poster has none.
+
+### Subscription billing (PLT-012)
+Prices: column `plans.prices` (for example `{"NGN": {"month": 6000000, "year": 60000000}}`; hotels read it, only `platform_set_plan_price` writes it). Tables: `subscription_payments` (a hotel reads its own with `adm.subscription.manage`), `billing_events` (no client access). Amounts are in the smallest unit (kobo). Nothing here is settled in a browser: the price always comes from `plans.prices`.
+
+### `public.platform_set_plan_price`
+- Args: `p_plan text, p_currency text, p_interval text, p_amount_minor bigint`
+- Sets or replaces one price. `p_interval` is `month` or `year`.
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_MFA_REQUIRED`, `E_NOT_FOUND`
+
+### `public.start_subscription_payment`
+- Args: `p_plan text, p_interval text, p_idempotency_key text`
+- Makes a pending payment for the hotel's own currency (its first property). A retry with the same key returns the first payment. Refuses a plan the hotel has outgrown.
+- Returns: `jsonb` (`payment_id`, `reference`, `amount_minor`, `currency`, `plan_code`, `interval`, `status`)
+- Callable by signed-in users: yes · security definer
+- Permission: `adm.subscription.manage`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NO_PRICE`, `E_NOT_FOUND`, `E_PLAN_LIMIT`, `E_REQUIRED`
+
+### `public.billing_apply_event`
+- Args: `p_provider text, p_event_id text, p_reference text, p_outcome text ('success' or 'failed'), p_amount_minor bigint, p_currency text`
+- Called only by the server after it verifies the provider's signature. Stores the event once, then: `applied` (plan activated, or failure recorded), `duplicate` (event seen before), `ignored` (payment already paid), `mismatch` (amount or currency differ; payment marked failed, nothing activated), `unknown_reference`.
+- Success adds one month or one year to the end of the current paid period, or from today when the hotel is not active. Writes `subscription_history` with source `billing`.
+- Returns: `text`
+- Callable by signed-in users: no (service role only) · security definer
+- Errors: `E_INVALID`, `E_REQUIRED`
+
+### `public.platform_failed_payments`
+- Args: none
+- Failed payments from the last 60 days and payments still pending after a day.
+- Returns: table (`payment_id`, `created_at`, `tenant_id`, `tenant_name`, `plan_code`, `period`, `amount` (whole currency, worked out by the database), `currency`, `status`, `reference`, `failure_reason`)
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
+
+### `app.assert_plan_fits`
+- Args: `p_tenant uuid, p_plan text`. Helper. Errors: `E_NOT_FOUND`, `E_PLAN_LIMIT`.
+
+### `public.billing_options`
+- Args: none
+- For the Subscription screen: the hotel's currency, every plan with its monthly and yearly price in whole currency (the database divides, the browser does not), `fits` (the hotel is within the plan's limits) and `can_buy` (fits and has a price), and the hotel's last 20 payments.
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: `adm.subscription.manage`
+- Errors: `E_FORBIDDEN`

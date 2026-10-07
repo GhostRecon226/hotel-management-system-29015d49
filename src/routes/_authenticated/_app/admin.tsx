@@ -43,6 +43,9 @@ export const Route = createFileRoute("/_authenticated/_app/admin")({
 
 function Admin() {
   const { can, canAny } = useAccess();
+  const [tab, setTab] = useState<string | null>(null);
+  // Coming back from the payment page lands on /admin#plan: open the Subscription tab.
+  useEffect(() => { if (window.location.hash === "#plan") setTab("plan"); }, []);
   if (!canAny(["fin.nightaudit.run", ...ADMIN_PERMS])) return <NoAccess />;
 
   const tabs = [
@@ -60,7 +63,7 @@ function Admin() {
   return (
     <div className="space-y-6">
       <PageHeader title="Admin" description="Staff, roles, limits, history and your subscription." />
-      <Tabs defaultValue={tabs[0]!.value}>
+      <Tabs value={tabs.some((t) => t.value === tab) ? tab! : tabs[0]!.value} onValueChange={setTab}>
         <TabsList className="flex-wrap">
           {tabs.map((t) => <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>)}
         </TabsList>

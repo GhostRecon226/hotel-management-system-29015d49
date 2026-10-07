@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
+import { Money } from "@/components/ui/money";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,7 +16,7 @@ import { Field, FormDialog } from "@/lib/setup";
 import { formatDateTime, formatDay } from "@/lib/reservations";
 import {
   daysUntil, endOfDay, type PlatformAction, type PlatformTenant, TwoStepGate, usePlans, usePlatformChange, usePlatformHistory,
-  usePlatformTenants, whoamiQuery,
+  usePlatformFailedPayments, usePlatformTenants, whoamiQuery,
 } from "@/lib/platform";
 
 // Platform console (PLT-008, PLT-009, PLT-013): hotels' accounts only, never their guests, bookings or money.
@@ -93,10 +94,45 @@ function PlatformConsole() {
               })}
             </TableBody>
           </Table>
+          <FailedPayments enabled={mfa} />
           <HotelPanel tenant={current} onOpenChange={(o) => !o && setOpen(null)} />
         </>
       )}
     </div>
+  );
+}
+
+// Subscription payments that failed, or that a hotel started and never finished. Contact the hotel, or activate by hand.
+function FailedPayments({ enabled }: { enabled: boolean }) {
+  const q = usePlatformFailedPayments(enabled);
+  const rows = q.data ?? [];
+  if (q.isLoading || rows.length === 0) return null;
+  return (
+    <section className="mt-10" aria-labelledby="failed-payments">
+      <h2 id="failed-payments" className="mb-1 text-lg font-semibold">Payments to follow up</h2>
+      <p className="mb-3 text-sm text-muted-foreground">Failed payments from the last 60 days, and payments left waiting for more than a day.</p>
+      <Table>
+        <TableHeader><TableRow>
+          <TableHead>Started</TableHead><TableHead>Hotel</TableHead><TableHead>Plan</TableHead>
+          <TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead><TableHead>Reference</TableHead>
+        </TableRow></TableHeader>
+        <TableBody>
+          {rows.map((r) => (
+            <TableRow key={r.payment_id}>
+              <TableCell>{formatDateTime(r.created_at)}</TableCell>
+              <TableCell className="font-medium">{r.tenant_name}</TableCell>
+              <TableCell><span className="capitalize">{r.plan_code}</span><span className="block text-sm text-muted-foreground">{r.period === "year" ? "Yearly" : "Monthly"}</span></TableCell>
+              <TableCell className="text-right"><Money amount={r.amount} currency={r.currency} /></TableCell>
+              <TableCell>
+                <Badge variant={r.status === "failed" ? "danger" : "warning"} dot>{r.status === "failed" ? "Failed" : "Not finished"}</Badge>
+                {r.failure_reason && <span className="block text-sm text-muted-foreground">{r.failure_reason}</span>}
+              </TableCell>
+              <TableCell className="font-mono text-xs">{r.reference}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </section>
   );
 }
 
