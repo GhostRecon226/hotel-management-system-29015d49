@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import {
   Bell, BedDouble, BarChart3, CalendarDays, ConciergeBell, LayoutDashboard, LogOut, Menu,
-  Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wrench, CalendarClock, Building2,
+  Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wallet, Wrench, CalendarClock, Building2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,10 @@ import { SubscriptionBanner, TrialCard } from "@/components/subscription-banner"
 import { cn } from "@/lib/utils";
 import { SETUP_PERMS } from "@/lib/setup";
 import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
+import { SHIFT_PERMS } from "@/lib/cashier";
 import { NotificationBell } from "@/components/notification-bell";
 
-type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" };
+type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/cashier" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" };
 
 // perms: null = everyone; otherwise any one of the keys shows the item.
 const MENU: Item[] = [
@@ -33,6 +34,7 @@ const MENU: Item[] = [
   { label: "Service requests", icon: ConciergeBell, perms: ["svc.view", "svc.order.complete"], to: "/service-requests" },
   { label: "Guests", icon: Users, perms: ["guest.view"], to: "/guests" },
   { label: "Folios", icon: Receipt, perms: ["fin.folio.view"], to: "/folios" },
+  { label: "Cashier shift", icon: Wallet, perms: SHIFT_PERMS, to: "/cashier" },
   { label: "Approvals", icon: CheckCircle2, perms: APPROVAL_MENU_PERMS, to: "/approvals" },
   { label: "Reports", icon: BarChart3, perms: ["rpt.operations.view", "rpt.finance.view"], to: "/reports" },
   { label: "Setup", icon: Settings, perms: SETUP_PERMS, to: "/setup" },

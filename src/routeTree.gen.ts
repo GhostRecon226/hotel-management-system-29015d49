@@ -21,6 +21,7 @@ import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/_app/admin'
 import { Route as AuthenticatedAppApprovalsRouteImport } from './routes/_authenticated/_app/approvals'
+import { Route as AuthenticatedAppCashierRouteImport } from './routes/_authenticated/_app/cashier'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
 import { Route as AuthenticatedAppFoliosRouteRouteImport } from './routes/_authenticated/_app/folios/route'
 import { Route as AuthenticatedAppFrontDeskRouteImport } from './routes/_authenticated/_app/front-desk'
@@ -123,6 +124,11 @@ const AuthenticatedAppApprovalsRoute =
     path: '/approvals',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppCashierRoute = AuthenticatedAppCashierRouteImport.update({
+  id: '/cashier',
+  path: '/cashier',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppDashboardRoute =
   AuthenticatedAppDashboardRouteImport.update({
     id: '/dashboard',
@@ -381,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/admin': typeof AuthenticatedAppAdminRoute
   '/approvals': typeof AuthenticatedAppApprovalsRoute
+  '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/group': typeof AuthenticatedAppGroupRoute
@@ -427,6 +434,7 @@ export interface FileRoutesByTo {
   '/platform': typeof AuthenticatedPlatformRoute
   '/admin': typeof AuthenticatedAppAdminRoute
   '/approvals': typeof AuthenticatedAppApprovalsRoute
+  '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/group': typeof AuthenticatedAppGroupRoute
@@ -483,6 +491,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/_authenticated/_app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/_app/approvals': typeof AuthenticatedAppApprovalsRoute
+  '/_authenticated/_app/cashier': typeof AuthenticatedAppCashierRoute
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/_app/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/_authenticated/_app/group': typeof AuthenticatedAppGroupRoute
@@ -538,6 +547,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/admin'
     | '/approvals'
+    | '/cashier'
     | '/dashboard'
     | '/front-desk'
     | '/group'
@@ -584,6 +594,7 @@ export interface FileRouteTypes {
     | '/platform'
     | '/admin'
     | '/approvals'
+    | '/cashier'
     | '/dashboard'
     | '/front-desk'
     | '/group'
@@ -639,6 +650,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/setup'
     | '/_authenticated/_app/admin'
     | '/_authenticated/_app/approvals'
+    | '/_authenticated/_app/cashier'
     | '/_authenticated/_app/dashboard'
     | '/_authenticated/_app/front-desk'
     | '/_authenticated/_app/group'
@@ -772,6 +784,13 @@ declare module '@tanstack/react-router' {
       path: '/approvals'
       fullPath: '/approvals'
       preLoaderRoute: typeof AuthenticatedAppApprovalsRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/cashier': {
+      id: '/_authenticated/_app/cashier'
+      path: '/cashier'
+      fullPath: '/cashier'
+      preLoaderRoute: typeof AuthenticatedAppCashierRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/_app/dashboard': {
@@ -1214,6 +1233,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppSetupRouteRoute: typeof AuthenticatedAppSetupRouteRouteWithChildren
   AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppApprovalsRoute: typeof AuthenticatedAppApprovalsRoute
+  AuthenticatedAppCashierRoute: typeof AuthenticatedAppCashierRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
   AuthenticatedAppFrontDeskRoute: typeof AuthenticatedAppFrontDeskRoute
   AuthenticatedAppGroupRoute: typeof AuthenticatedAppGroupRoute
@@ -1237,6 +1257,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppSetupRouteRoute: AuthenticatedAppSetupRouteRouteWithChildren,
   AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
   AuthenticatedAppApprovalsRoute: AuthenticatedAppApprovalsRoute,
+  AuthenticatedAppCashierRoute: AuthenticatedAppCashierRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
   AuthenticatedAppFrontDeskRoute: AuthenticatedAppFrontDeskRoute,
   AuthenticatedAppGroupRoute: AuthenticatedAppGroupRoute,
