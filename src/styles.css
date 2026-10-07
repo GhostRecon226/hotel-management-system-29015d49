@@ -1,8 +1,9 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-/* The font is bundled with the app (no calls to Google Fonts): normal style, all weights, one variable file per script. */
-@import "@fontsource-variable/plus-jakarta-sans/wght.css";
+/* The fonts are bundled with the app (no calls to Google Fonts): variable files, normal style. */
+@import "@fontsource-variable/figtree/wght.css";
+@import "@fontsource-variable/fraunces/wght.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -19,6 +20,7 @@
   --radius-4xl: calc(var(--radius) + 16px);
   --font-sans: var(--font-sans-app);
   --font-mono: var(--font-mono-app);
+  --font-display: var(--font-display-app);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -93,6 +95,7 @@
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3 {
+    font-family: var(--font-display-app);
     letter-spacing: -0.01em;
   }
 }
