@@ -30,8 +30,9 @@ test("an in-house stay can be extended and then shortened from the Front Desk", 
     await page.getByRole("row", { name: /Kemi Early/ }).getByRole("button", { name: "Actions for room 1" }).click();
     await page.getByRole("menuitem", { name: "Change departure" }).click();
     const dlg = page.getByRole("dialog", { name: /Change departure/ });
-    const d = new Date(); d.setDate(d.getDate() + offsetDays);
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    // The hotel's business date is the Lagos date, not the runner's date (they differ from 23:00 to 24:00 UTC).
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(new Date());
+    const iso = new Date(Date.parse(today) + offsetDays * 86_400_000).toISOString().slice(0, 10);
     await dlg.getByLabel("New departure").fill(iso);
     await expect(dlg.getByText(hint)).toBeVisible();
     await dlg.getByRole("button", { name: "Save" }).click();

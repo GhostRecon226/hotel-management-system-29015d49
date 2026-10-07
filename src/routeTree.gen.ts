@@ -36,6 +36,7 @@ import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedInvoicesIdRouteImport } from './routes/_authenticated/invoices.$id'
 import { Route as ApiCronIdPhotoCleanupRouteImport } from './routes/api/cron/id-photo-cleanup'
 import { Route as ApiCronOutboxRouteImport } from './routes/api/cron/outbox'
+import { Route as ApiWebhooksPaystackRouteImport } from './routes/api/webhooks/paystack'
 import { Route as AuthenticatedAppCheckoutIdRouteImport } from './routes/_authenticated/_app/checkout.$id'
 import { Route as AuthenticatedAppFoliosIndexRouteImport } from './routes/_authenticated/_app/folios/index'
 import { Route as AuthenticatedAppFoliosIdRouteImport } from './routes/_authenticated/_app/folios/$id'
@@ -205,6 +206,11 @@ const ApiCronIdPhotoCleanupRoute = ApiCronIdPhotoCleanupRouteImport.update({
 const ApiCronOutboxRoute = ApiCronOutboxRouteImport.update({
   id: '/api/cron/outbox',
   path: '/api/cron/outbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWebhooksPaystackRoute = ApiWebhooksPaystackRouteImport.update({
+  id: '/api/webhooks/paystack',
+  path: '/api/webhooks/paystack',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppCheckoutIdRoute =
@@ -383,6 +389,7 @@ export interface FileRoutesByFullPath {
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/webhooks/paystack': typeof ApiWebhooksPaystackRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -428,6 +435,7 @@ export interface FileRoutesByTo {
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/webhooks/paystack': typeof ApiWebhooksPaystackRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -483,6 +491,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/webhooks/paystack': typeof ApiWebhooksPaystackRoute
   '/_authenticated/_app/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/_authenticated/_app/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/_authenticated/_app/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -537,6 +546,7 @@ export interface FileRouteTypes {
     | '/invoices/$id'
     | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
+    | '/api/webhooks/paystack'
     | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
@@ -582,6 +592,7 @@ export interface FileRouteTypes {
     | '/invoices/$id'
     | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
+    | '/api/webhooks/paystack'
     | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
@@ -636,6 +647,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices/$id'
     | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
+    | '/api/webhooks/paystack'
     | '/_authenticated/_app/checkout/$id'
     | '/_authenticated/_app/folios/$id'
     | '/_authenticated/_app/guests/$id'
@@ -673,6 +685,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiCronIdPhotoCleanupRoute: typeof ApiCronIdPhotoCleanupRoute
   ApiCronOutboxRoute: typeof ApiCronOutboxRoute
+  ApiWebhooksPaystackRoute: typeof ApiWebhooksPaystackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -864,6 +877,13 @@ declare module '@tanstack/react-router' {
       path: '/api/cron/outbox'
       fullPath: '/api/cron/outbox'
       preLoaderRoute: typeof ApiCronOutboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/paystack': {
+      id: '/api/webhooks/paystack'
+      path: '/api/webhooks/paystack'
+      fullPath: '/api/webhooks/paystack'
+      preLoaderRoute: typeof ApiWebhooksPaystackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/_app/checkout/$id': {
@@ -1257,6 +1277,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ApiCronIdPhotoCleanupRoute: ApiCronIdPhotoCleanupRoute,
   ApiCronOutboxRoute: ApiCronOutboxRoute,
+  ApiWebhooksPaystackRoute: ApiWebhooksPaystackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
