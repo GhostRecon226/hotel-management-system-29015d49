@@ -76,6 +76,24 @@ export function useSubscriptionInfo(enabled: boolean) {
   });
 }
 
+export interface BillingPlan {
+  code: string; name: string; max_rooms: number | null; max_properties: number | null; max_users: number | null;
+  month: number | null; year: number | null; fits: boolean; can_buy: boolean;
+}
+export interface BillingPayment {
+  created_at: string; plan_code: string; period: "month" | "year"; amount: number; currency: string;
+  status: "pending" | "paid" | "failed"; failure_reason: string | null; paid_at: string | null;
+}
+export interface BillingOptions { currency: string; plans: BillingPlan[]; payments: BillingPayment[] }
+
+/** Prices (already in whole currency, worked out by the database) and the hotel's own payments. */
+export function useBillingOptions(enabled: boolean) {
+  return useQuery({
+    queryKey: ["admin", "billing"], enabled,
+    queryFn: () => callRpc<BillingOptions>("billing_options", {}),
+  });
+}
+
 /** Runs an admin database function and refreshes the admin screens. */
 export function useAdminAction(name: string, success: string) {
   const qc = useQueryClient();

@@ -1543,10 +1543,18 @@ Prices: column `plans.prices` (for example `{"NGN": {"month": 6000000, "year": 6
 ### `public.platform_failed_payments`
 - Args: none
 - Failed payments from the last 60 days and payments still pending after a day.
-- Returns: table (`payment_id`, `created_at`, `tenant_id`, `tenant_name`, `plan_code`, `period`, `amount_minor`, `currency`, `status`, `reference`, `failure_reason`)
+- Returns: table (`payment_id`, `created_at`, `tenant_id`, `tenant_name`, `plan_code`, `period`, `amount` (whole currency, worked out by the database), `currency`, `status`, `reference`, `failure_reason`)
 - Callable by signed-in users: yes · security definer
 - Permission: platform operator with two-step sign-in
 - Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
 
 ### `app.assert_plan_fits`
 - Args: `p_tenant uuid, p_plan text`. Helper. Errors: `E_NOT_FOUND`, `E_PLAN_LIMIT`.
+
+### `public.billing_options`
+- Args: none
+- For the Subscription screen: the hotel's currency, every plan with its monthly and yearly price in whole currency (the database divides, the browser does not), `fits` (the hotel is within the plan's limits) and `can_buy` (fits and has a price), and the hotel's last 20 payments.
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: `adm.subscription.manage`
+- Errors: `E_FORBIDDEN`
