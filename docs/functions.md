@@ -1532,6 +1532,21 @@ AI is off for every hotel until switched on. The provider only ever sees plain f
 - Args: `p_usage_id uuid, p_ok boolean`. Marks the call done or failed. Only the person who started it, once.
 - Errors: `E_NOT_FOUND`
 
+### Source and ageing reports (RPT-005, RPT-006)
+
+### `public.report_revenue_by_source`
+- Args: `p_property_id uuid, p_from date, p_to date`
+- Returns one row per booking source with any activity: `source, bookings, cancelled, no_shows, room_nights, room_revenue, adr`. Bookings, cancellations and no-shows count by arrival date. Room nights count booked nights in the range for live bookings. Room revenue is room-category charges (reversals and adjustments included, payments and refunds left out) posted in the range, before tax. `adr` is room revenue divided by room nights.
+- Callable by signed-in users: yes · security definer, stable
+- Permission: `rpt.finance.view`
+- Errors: `E_FORBIDDEN`, `E_INVALID` (end before start)
+
+### `public.report_balance_ageing`
+- Args: `p_property_id uuid`
+- Returns one row per source and currency: `source, currency, folios, current_amount, days_1_7, days_8_30, days_31_60, days_61_plus, total, credit_held`. Age is the property's business date minus the booking's departure date; guests still staying or due to arrive are current. Only positive balances are aged; overpayments add up in `credit_held`.
+- Callable by signed-in users: yes · security definer, stable
+- Permission: `rpt.finance.view`
+
 ### Hotel group view (GRP-001 to GRP-004)
 
 ### `public.group_overview`
