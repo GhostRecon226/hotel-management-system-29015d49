@@ -1512,3 +1512,8 @@ Every function below first calls `app.require_platform()`: the caller must be on
 - Args: `p_email text`. Database owner only (Supabase SQL editor); no grant to any app role.
 - Adds an existing sign-in account that belongs to no hotel. Errors: `E_INVALID` (account belongs to a hotel), `E_NOT_FOUND` (no such account).
 
+
+### `public.setup_progress`
+- Args: `p_property_id uuid`. Needs any setup permission at the property. Read-only, so it works while a hotel is read-only.
+- Returns `{property_id, total, done, complete, steps[]}`. Each step has `key`, `label`, `detail`, `href` and `done`. Steps: property, room_types, rooms, rates, taxes, payments, staff.
+- Errors: `E_FORBIDDEN`, `E_NOT_FOUND`.
