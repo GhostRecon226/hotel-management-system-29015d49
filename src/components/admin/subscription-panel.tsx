@@ -1,9 +1,16 @@
 import { useAccess } from "@/lib/access";
 import { NoAccess, SectionHeader } from "@/lib/setup";
 import { formatDateTime } from "@/lib/reservations";
-import { useSubscriptionInfo } from "@/lib/admin";
+import { useBillingOptions, useSubscriptionInfo } from "@/lib/admin";
+import { startPlanCheckout } from "@/lib/billing.functions";
+import { errorMessage } from "@/lib/errors";
+import { useServerFn } from "@tanstack/react-start";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Money } from "@/components/ui/money";
 import { LoadingState } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -18,6 +25,101 @@ const STATUS: Record<string, { label: string; variant: BadgeTone }> = {
   suspended: { label: "Suspended", variant: "danger" },
   cancelled: { label: "Cancelled", variant: "neutral" },
 };
+
+const PAYMENT: Record<string, { label: string; variant: BadgeTone }> = {
+  pending: { label: "Waiting", variant: "warning" },
+  paid: { label: "Paid", variant: "success" },
+  failed: { label: "Failed", variant: "danger" },
+};
+
+/** Pay for a plan online. Prices and "can buy" come from the database; the amount is never sent from here. */
+function PayForPlan() {
+  const options = useBillingOptions(true);
+  const qc = useQueryClient();
+  const checkoutFn = useServerFn(startPlanCheckout);
+  const pay = useMutation({
+    mutationFn: (v: { plan: string; interval: "month" | "year" }) => checkoutFn({
+      data: { ...v, key: crypto.randomUUID(), returnUrl: `${window.location.origin}/admin#plan` },
+    }),
+    onSuccess: (r) => { window.location.href = r.url; },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  const b = options.data;
+  if (options.isLoading) return <LoadingState />;
+  if (!b) return null;
+  const priced = b.plans.some((p) => p.month != null || p.year != null);
+
+  return (
+    <>
+      <Card>
+        <CardContent className="pt-6">
+          <SectionHeader title="Choose a plan" description={priced
+            ? "Pay online by card or bank transfer. Your plan starts as soon as the payment is confirmed. Paying again adds time to what you have already paid for."
+            : "Online payment is not open yet. To start or change your plan, contact us."} />
+          {priced && (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Plan</TableHead><TableHead className="text-right">Per month</TableHead>
+                <TableHead className="text-right">Per year</TableHead><TableHead className="text-right">Pay</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {b.plans.map((p) => (
+                  <TableRow key={p.code}>
+                    <TableCell className="font-medium">{p.name}
+                      {!p.fits && <div className="text-xs font-normal text-muted-foreground">Your hotel is larger than this plan allows.</div>}
+                    </TableCell>
+                    <TableCell className="text-right">{p.month != null ? <Money amount={p.month} currency={b.currency} /> : "—"}</TableCell>
+                    <TableCell className="text-right">{p.year != null ? <Money amount={p.year} currency={b.currency} /> : "—"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" disabled={!p.can_buy || p.month == null || pay.isPending}
+                          onClick={() => pay.mutate({ plan: p.code, interval: "month" })}>Pay monthly</Button>
+                        <Button size="sm" disabled={!p.can_buy || p.year == null || pay.isPending}
+                          onClick={() => pay.mutate({ plan: p.code, interval: "year" })}>Pay yearly</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {b.payments.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <SectionHeader title="Your payments" description="If you paid and the plan has not changed, wait a minute and refresh." />
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Started</TableHead><TableHead>Plan</TableHead><TableHead>Period</TableHead>
+                <TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {b.payments.map((x, i) => {
+                  const st = PAYMENT[x.status] ?? { label: x.status, variant: "neutral" as const };
+                  return (
+                    <TableRow key={`${x.created_at}-${i}`}>
+                      <TableCell>{formatDateTime(x.created_at)}</TableCell>
+                      <TableCell className="capitalize">{x.plan_code}</TableCell>
+                      <TableCell>{x.period === "year" ? "Yearly" : "Monthly"}</TableCell>
+                      <TableCell className="text-right"><Money amount={x.amount} currency={x.currency} /></TableCell>
+                      <TableCell>
+                        <Badge variant={st.variant} dot>{st.label}</Badge>
+                        {x.failure_reason && <div className="mt-1 text-xs text-muted-foreground">{x.failure_reason}</div>}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <div className="mt-3"><Button size="sm" variant="outline" onClick={() => { qc.invalidateQueries({ queryKey: ["admin"] }); qc.invalidateQueries({ queryKey: ["my-context"] }); }}>Refresh</Button></div>
+          </CardContent>
+        </Card>
+      )}
+    </>
+  );
+}
 
 export function SubscriptionPanel() {
   const { can } = useAccess();
@@ -76,9 +178,11 @@ export function SubscriptionPanel() {
         </CardContent>
       </Card>
 
+      {can("adm.subscription.manage") && <PayForPlan />}
+
       <Card>
         <CardContent className="pt-6">
-          <SectionHeader title="Other plans" description="To change plan, contact us. Plans are not changed from inside the app yet." />
+          <SectionHeader title="Plan sizes" description="What each plan includes." />
           <Table>
             <TableHeader><TableRow>
               <TableHead>Plan</TableHead><TableHead className="text-right">Rooms</TableHead>

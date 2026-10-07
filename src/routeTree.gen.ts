@@ -21,6 +21,7 @@ import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/_app/admin'
 import { Route as AuthenticatedAppApprovalsRouteImport } from './routes/_authenticated/_app/approvals'
+import { Route as AuthenticatedAppCashierRouteImport } from './routes/_authenticated/_app/cashier'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
 import { Route as AuthenticatedAppFoliosRouteRouteImport } from './routes/_authenticated/_app/folios/route'
 import { Route as AuthenticatedAppFrontDeskRouteImport } from './routes/_authenticated/_app/front-desk'
@@ -35,6 +36,7 @@ import { Route as AuthenticatedAppSetupRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedInvoicesIdRouteImport } from './routes/_authenticated/invoices.$id'
 import { Route as ApiCronIdPhotoCleanupRouteImport } from './routes/api/cron/id-photo-cleanup'
 import { Route as ApiCronOutboxRouteImport } from './routes/api/cron/outbox'
+import { Route as ApiWebhooksPaystackRouteImport } from './routes/api/webhooks/paystack'
 import { Route as AuthenticatedAppCheckoutIdRouteImport } from './routes/_authenticated/_app/checkout.$id'
 import { Route as AuthenticatedAppFoliosIndexRouteImport } from './routes/_authenticated/_app/folios/index'
 import { Route as AuthenticatedAppFoliosIdRouteImport } from './routes/_authenticated/_app/folios/$id'
@@ -123,6 +125,11 @@ const AuthenticatedAppApprovalsRoute =
     path: '/approvals',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppCashierRoute = AuthenticatedAppCashierRouteImport.update({
+  id: '/cashier',
+  path: '/cashier',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppDashboardRoute =
   AuthenticatedAppDashboardRouteImport.update({
     id: '/dashboard',
@@ -201,6 +208,11 @@ const ApiCronIdPhotoCleanupRoute = ApiCronIdPhotoCleanupRouteImport.update({
 const ApiCronOutboxRoute = ApiCronOutboxRouteImport.update({
   id: '/api/cron/outbox',
   path: '/api/cron/outbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWebhooksPaystackRoute = ApiWebhooksPaystackRouteImport.update({
+  id: '/api/webhooks/paystack',
+  path: '/api/webhooks/paystack',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppCheckoutIdRoute =
@@ -383,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/admin': typeof AuthenticatedAppAdminRoute
   '/approvals': typeof AuthenticatedAppApprovalsRoute
+  '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/reports': typeof AuthenticatedAppReportsRoute
@@ -390,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/webhooks/paystack': typeof ApiWebhooksPaystackRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -429,6 +443,7 @@ export interface FileRoutesByTo {
   '/platform': typeof AuthenticatedPlatformRoute
   '/admin': typeof AuthenticatedAppAdminRoute
   '/approvals': typeof AuthenticatedAppApprovalsRoute
+  '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/reports': typeof AuthenticatedAppReportsRoute
@@ -436,6 +451,7 @@ export interface FileRoutesByTo {
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/webhooks/paystack': typeof ApiWebhooksPaystackRoute
   '/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -485,6 +501,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/setup': typeof AuthenticatedAppSetupRouteRouteWithChildren
   '/_authenticated/_app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/_app/approvals': typeof AuthenticatedAppApprovalsRoute
+  '/_authenticated/_app/cashier': typeof AuthenticatedAppCashierRoute
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/_app/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/_authenticated/_app/reports': typeof AuthenticatedAppReportsRoute
@@ -492,6 +509,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
   '/api/cron/id-photo-cleanup': typeof ApiCronIdPhotoCleanupRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/webhooks/paystack': typeof ApiWebhooksPaystackRoute
   '/_authenticated/_app/checkout/$id': typeof AuthenticatedAppCheckoutIdRoute
   '/_authenticated/_app/folios/$id': typeof AuthenticatedAppFoliosIdRoute
   '/_authenticated/_app/guests/$id': typeof AuthenticatedAppGuestsIdRoute
@@ -540,6 +558,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/admin'
     | '/approvals'
+    | '/cashier'
     | '/dashboard'
     | '/front-desk'
     | '/reports'
@@ -547,6 +566,7 @@ export interface FileRouteTypes {
     | '/invoices/$id'
     | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
+    | '/api/webhooks/paystack'
     | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
@@ -586,6 +606,7 @@ export interface FileRouteTypes {
     | '/platform'
     | '/admin'
     | '/approvals'
+    | '/cashier'
     | '/dashboard'
     | '/front-desk'
     | '/reports'
@@ -593,6 +614,7 @@ export interface FileRouteTypes {
     | '/invoices/$id'
     | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
+    | '/api/webhooks/paystack'
     | '/checkout/$id'
     | '/folios/$id'
     | '/guests/$id'
@@ -641,6 +663,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/setup'
     | '/_authenticated/_app/admin'
     | '/_authenticated/_app/approvals'
+    | '/_authenticated/_app/cashier'
     | '/_authenticated/_app/dashboard'
     | '/_authenticated/_app/front-desk'
     | '/_authenticated/_app/reports'
@@ -648,6 +671,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices/$id'
     | '/api/cron/id-photo-cleanup'
     | '/api/cron/outbox'
+    | '/api/webhooks/paystack'
     | '/_authenticated/_app/checkout/$id'
     | '/_authenticated/_app/folios/$id'
     | '/_authenticated/_app/guests/$id'
@@ -687,6 +711,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiCronIdPhotoCleanupRoute: typeof ApiCronIdPhotoCleanupRoute
   ApiCronOutboxRoute: typeof ApiCronOutboxRoute
+  ApiWebhooksPaystackRoute: typeof ApiWebhooksPaystackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -773,6 +798,13 @@ declare module '@tanstack/react-router' {
       path: '/approvals'
       fullPath: '/approvals'
       preLoaderRoute: typeof AuthenticatedAppApprovalsRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/cashier': {
+      id: '/_authenticated/_app/cashier'
+      path: '/cashier'
+      fullPath: '/cashier'
+      preLoaderRoute: typeof AuthenticatedAppCashierRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/_app/dashboard': {
@@ -871,6 +903,13 @@ declare module '@tanstack/react-router' {
       path: '/api/cron/outbox'
       fullPath: '/api/cron/outbox'
       preLoaderRoute: typeof ApiCronOutboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/paystack': {
+      id: '/api/webhooks/paystack'
+      path: '/api/webhooks/paystack'
+      fullPath: '/api/webhooks/paystack'
+      preLoaderRoute: typeof ApiWebhooksPaystackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/_app/checkout/$id': {
@@ -1221,6 +1260,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppSetupRouteRoute: typeof AuthenticatedAppSetupRouteRouteWithChildren
   AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppApprovalsRoute: typeof AuthenticatedAppApprovalsRoute
+  AuthenticatedAppCashierRoute: typeof AuthenticatedAppCashierRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
   AuthenticatedAppFrontDeskRoute: typeof AuthenticatedAppFrontDeskRoute
   AuthenticatedAppReportsRoute: typeof AuthenticatedAppReportsRoute
@@ -1243,6 +1283,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppSetupRouteRoute: AuthenticatedAppSetupRouteRouteWithChildren,
   AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
   AuthenticatedAppApprovalsRoute: AuthenticatedAppApprovalsRoute,
+  AuthenticatedAppCashierRoute: AuthenticatedAppCashierRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
   AuthenticatedAppFrontDeskRoute: AuthenticatedAppFrontDeskRoute,
   AuthenticatedAppReportsRoute: AuthenticatedAppReportsRoute,
@@ -1282,6 +1323,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ApiCronIdPhotoCleanupRoute: ApiCronIdPhotoCleanupRoute,
   ApiCronOutboxRoute: ApiCronOutboxRoute,
+  ApiWebhooksPaystackRoute: ApiWebhooksPaystackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
