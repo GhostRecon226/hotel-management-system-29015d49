@@ -106,10 +106,10 @@ function DesignPage() {
 
       <Section title="Typography">
         <div className="space-y-3">
-          <p className="text-[28px] font-semibold">Page title — 28px semibold</p>
+          <p className="text-[28px] font-semibold">Page title (Fraunces) — 28px semibold</p>
           <p className="text-xl font-semibold">Section title — 20px semibold</p>
           <p className="text-base font-medium">Card title — 16px medium</p>
-          <p className="text-[15px]">Body and table text — 15px regular. IBM Plex Sans, readable at arm's length.</p>
+          <p className="text-[15px]">Body and table text — 15px regular. Figtree, readable at arm's length.</p>
           <p className="text-sm text-muted-foreground">Help text — 14px muted</p>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Table header — 12px caps</p>
         </div>

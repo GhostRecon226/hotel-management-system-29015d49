@@ -46,7 +46,7 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
       <div className="mb-5 flex items-center gap-3 px-2">
         <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-fill text-sm font-extrabold text-primary-foreground shadow-accent">HD</div>
         <div className="min-w-0">
-          <div className="text-[17px] font-bold leading-tight text-foreground">Hotel Desk</div>
+          <div className="font-display text-[18px] font-semibold leading-tight text-foreground">Hotel Desk</div>
           <div className="truncate text-xs text-muted-foreground">{ctx.tenant?.name}</div>
         </div>
       </div>
