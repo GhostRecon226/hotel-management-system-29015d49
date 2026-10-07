@@ -1512,3 +1512,65 @@ Every function below first calls `app.require_platform()`: the caller must be on
 - Args: `p_email text`. Database owner only (Supabase SQL editor); no grant to any app role.
 - Adds an existing sign-in account that belongs to no hotel. Errors: `E_INVALID` (account belongs to a hotel), `E_NOT_FOUND` (no such account).
 
+
+### Cashier shifts and night audit flags (FIN-016, DAY-005)
+Tables: `cashier_shifts`, `cashier_shift_lines` (read through row-level security: a cashier sees their own shifts, a user with `fin.shift.reconcile` sees the hotel's). `folio_transactions.cashier_shift_id` is set by a trigger when a payment, refund or reversal is posted by someone with an open shift. `properties.require_cashier_shift` (off by default) makes `post_payment` refuse a payment from a cashier with no open shift (`E_NO_SHIFT`). New permission `fin.shift.reconcile` goes to the built-in System Administrator, General Manager, Front Office Manager and Accountant roles only. Custom roles copied earlier do not get it. Amounts are whole currency in the hotel's base currency.
+
+### `public.open_cashier_shift`
+- Args: `p_property_id uuid, p_opening_float numeric, p_idempotency_key text`
+- Opens the caller's shift. A retry with the same key returns the same shift. One open shift per cashier and hotel.
+- Returns: `uuid`
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.shift.close`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_READ_ONLY`, `E_REQUIRED`, `E_SHIFT_OPEN`
+
+### `public.cashier_shift_summary`
+- Args: `p_shift uuid`
+- One shift with, per payment method, what it should hold (`expected`), what was counted and the difference. An open shift shows live expected figures. Cash expected includes the float.
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: the cashier who opened it, or `fin.shift.reconcile`
+- Errors: `E_FORBIDDEN`, `E_NOT_FOUND`
+
+### `public.close_cashier_shift`
+- Args: `p_shift uuid, p_counts jsonb ([{payment_method_id, counted}]), p_note text`
+- Every method that took money must be counted. The database works out the difference (counted minus expected). A difference needs a note. A manager can close someone else's shift, with a note. Works while the hotel is read-only.
+- Returns: `jsonb` (the shift summary)
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.shift.close` for your own shift; `fin.shift.reconcile` for another's
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`, `E_REQUIRED`
+
+### `public.reconcile_cashier_shift`
+- Args: `p_shift uuid, p_note text`
+- A manager checks a closed shift. Not the person who closed it (`E_SOD`, and CHECK `cashier_shifts_sod`). A shift with a difference needs a note. Audited.
+- Returns: `jsonb` (the shift summary)
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.shift.reconcile`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`, `E_REQUIRED`, `E_SOD`
+
+### `public.list_cashier_shifts`
+- Args: `p_property_id uuid, p_from date, p_to date, p_status text (open, closed, unreconciled or null)`
+- Up to 200 shifts, newest first: the caller's own, or all when the caller can reconcile.
+- Returns: `jsonb` (list)
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.shift.close` or `fin.shift.reconcile`
+- Errors: `E_FORBIDDEN`, `E_INVALID`
+
+### `public.set_cashier_shift_required`
+- Args: `p_property_id uuid, p_required boolean`
+- Turns the "open a shift before taking payments" rule on or off for a hotel. Audited.
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: `setup.property.edit`
+- Errors: `E_FORBIDDEN`, `E_READ_ONLY`
+
+### `public.night_audit_flags`
+- Args: `p_property_id uuid`
+- What is still open before the day closes. `blocking`: cashier shifts still open. `warnings`: closed shifts with an unreconciled difference, guests in house on or past departure, bookings due that have not checked in. It does not stop the date rolling.
+- Returns: `jsonb` (`business_date`, `blocking`, `warnings`; each item has `code`, `title`, `count`, `detail`)
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.nightaudit.run`
+- Errors: `E_FORBIDDEN`
+
+### `app.stamp_cashier_shift`
+- Trigger on `folio_transactions` (before insert). Ties a payment, refund or reversal to the poster's open shift. Raises `E_NO_SHIFT` for a payment when the hotel requires a shift and the poster has none.
