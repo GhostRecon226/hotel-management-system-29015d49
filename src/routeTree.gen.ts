@@ -25,6 +25,7 @@ import { Route as AuthenticatedAppCashierRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
 import { Route as AuthenticatedAppFoliosRouteRouteImport } from './routes/_authenticated/_app/folios/route'
 import { Route as AuthenticatedAppFrontDeskRouteImport } from './routes/_authenticated/_app/front-desk'
+import { Route as AuthenticatedAppGroupRouteImport } from './routes/_authenticated/_app/group'
 import { Route as AuthenticatedAppGuestsRouteRouteImport } from './routes/_authenticated/_app/guests/route'
 import { Route as AuthenticatedAppHousekeepingRouteRouteImport } from './routes/_authenticated/_app/housekeeping/route'
 import { Route as AuthenticatedAppMaintenanceRouteRouteImport } from './routes/_authenticated/_app/maintenance/route'
@@ -148,6 +149,11 @@ const AuthenticatedAppFrontDeskRoute =
     path: '/front-desk',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppGroupRoute = AuthenticatedAppGroupRouteImport.update({
+  id: '/group',
+  path: '/group',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppGuestsRouteRoute =
   AuthenticatedAppGuestsRouteRouteImport.update({
     id: '/guests',
@@ -398,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/group': typeof AuthenticatedAppGroupRoute
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
@@ -446,6 +453,7 @@ export interface FileRoutesByTo {
   '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/group': typeof AuthenticatedAppGroupRoute
   '/reports': typeof AuthenticatedAppReportsRoute
   '/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/cashier': typeof AuthenticatedAppCashierRoute
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/_app/front-desk': typeof AuthenticatedAppFrontDeskRoute
+  '/_authenticated/_app/group': typeof AuthenticatedAppGroupRoute
   '/_authenticated/_app/reports': typeof AuthenticatedAppReportsRoute
   '/_authenticated/_app/service-requests': typeof AuthenticatedAppServiceRequestsRoute
   '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
@@ -561,6 +570,7 @@ export interface FileRouteTypes {
     | '/cashier'
     | '/dashboard'
     | '/front-desk'
+    | '/group'
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
@@ -609,6 +619,7 @@ export interface FileRouteTypes {
     | '/cashier'
     | '/dashboard'
     | '/front-desk'
+    | '/group'
     | '/reports'
     | '/service-requests'
     | '/invoices/$id'
@@ -666,6 +677,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/cashier'
     | '/_authenticated/_app/dashboard'
     | '/_authenticated/_app/front-desk'
+    | '/_authenticated/_app/group'
     | '/_authenticated/_app/reports'
     | '/_authenticated/_app/service-requests'
     | '/_authenticated/invoices/$id'
@@ -826,6 +838,13 @@ declare module '@tanstack/react-router' {
       path: '/front-desk'
       fullPath: '/front-desk'
       preLoaderRoute: typeof AuthenticatedAppFrontDeskRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/group': {
+      id: '/_authenticated/_app/group'
+      path: '/group'
+      fullPath: '/group'
+      preLoaderRoute: typeof AuthenticatedAppGroupRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/_app/guests': {
@@ -1263,6 +1282,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppCashierRoute: typeof AuthenticatedAppCashierRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
   AuthenticatedAppFrontDeskRoute: typeof AuthenticatedAppFrontDeskRoute
+  AuthenticatedAppGroupRoute: typeof AuthenticatedAppGroupRoute
   AuthenticatedAppReportsRoute: typeof AuthenticatedAppReportsRoute
   AuthenticatedAppServiceRequestsRoute: typeof AuthenticatedAppServiceRequestsRoute
   AuthenticatedAppCheckoutIdRoute: typeof AuthenticatedAppCheckoutIdRoute
@@ -1286,6 +1306,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppCashierRoute: AuthenticatedAppCashierRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
   AuthenticatedAppFrontDeskRoute: AuthenticatedAppFrontDeskRoute,
+  AuthenticatedAppGroupRoute: AuthenticatedAppGroupRoute,
   AuthenticatedAppReportsRoute: AuthenticatedAppReportsRoute,
   AuthenticatedAppServiceRequestsRoute: AuthenticatedAppServiceRequestsRoute,
   AuthenticatedAppCheckoutIdRoute: AuthenticatedAppCheckoutIdRoute,

@@ -1525,6 +1525,23 @@ Every function below first calls `app.require_platform()`: the caller must be on
 - Args: `p_id uuid`, `p_status text` ('active' or 'cancelled'). Needs `res.group.manage`. Audited.
 - Errors: `E_GROUP_HAS_BOOKINGS` (cancel while live bookings exist), `E_NOT_FOUND`, `E_INVALID`.
 
+### Hotel group view (GRP-001 to GRP-004)
+
+### `public.group_overview`
+- Args: none
+- Returns `jsonb`: `properties` (one object per branch the caller holds `rpt.group.view` on: name, code, city, base currency, business date, rooms total and occupied, occupancy, in house, arrivals and departures still to come, pending approvals, open and urgent repairs, last night's revenue and occupancy) and `totals` (the same counts added up, plus `revenue_by_currency`, never mixed).
+- Callable by signed-in users: yes · security definer, stable
+- Permission: `rpt.group.view`, checked per branch; other hotel groups are never listed
+- Errors: `E_FORBIDDEN`
+
+### `public.copy_property_setup`
+- Args: `p_source_property_id uuid, p_target_property_id uuid`
+- Copies room types, rate plans and rate prices from the source into an empty target branch. Prices point at the target's own room types. Rooms are not copied. Writes an audit row `copy_property_setup`.
+- Returns `jsonb`: `room_types`, `rate_plans`, `rate_prices` (counts)
+- Callable by signed-in users: yes · security definer
+- Permission: `setup.room.manage` and `setup.rate.manage` on the target, `setup.property.view` on the source
+- Errors: `E_FORBIDDEN`, `E_INVALID` (same branch), `E_NOT_FOUND`, `E_NOT_EMPTY` (target already has room types or rates)
+
 ### Cashier shifts and night audit flags (FIN-016, DAY-005)
 Tables: `cashier_shifts`, `cashier_shift_lines` (read through row-level security: a cashier sees their own shifts, a user with `fin.shift.reconcile` sees the hotel's). `folio_transactions.cashier_shift_id` is set by a trigger when a payment, refund or reversal is posted by someone with an open shift. `properties.require_cashier_shift` (off by default) makes `post_payment` refuse a payment from a cashier with no open shift (`E_NO_SHIFT`). New permission `fin.shift.reconcile` goes to the built-in System Administrator, General Manager, Front Office Manager and Accountant roles only. Custom roles copied earlier do not get it. Amounts are whole currency in the hotel's base currency.
 
