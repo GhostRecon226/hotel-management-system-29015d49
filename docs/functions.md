@@ -1512,3 +1512,15 @@ Every function below first calls `app.require_platform()`: the caller must be on
 - Args: `p_email text`. Database owner only (Supabase SQL editor); no grant to any app role.
 - Adds an existing sign-in account that belongs to no hotel. Errors: `E_INVALID` (account belongs to a hotel), `E_NOT_FOUND` (no such account).
 
+
+### `public.list_group_bookings`
+- Args: `p_property_id uuid`, `p_status text default null`. Needs `res.view`.
+- Lists groups with live room count, nights, first arrival, last departure and total. Cancelled and no-show bookings are not counted.
+
+### `public.get_group_booking`
+- Args: `p_id uuid`. Needs `res.view`.
+- Returns the group, its bookings and totals. `balance_due` is null without `fin.folio.view`. Errors: `E_NOT_FOUND`.
+
+### `public.set_group_booking_status`
+- Args: `p_id uuid`, `p_status text` ('active' or 'cancelled'). Needs `res.group.manage`. Audited.
+- Errors: `E_GROUP_HAS_BOOKINGS` (cancel while live bookings exist), `E_NOT_FOUND`, `E_INVALID`.
