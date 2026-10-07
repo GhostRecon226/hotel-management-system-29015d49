@@ -49,6 +49,14 @@ for f in supabase/tests/db/[1-9]*.sql; do
   if [ "$ec" -gt 0 ]; then failures+=$(sed "s/^/  $(basename "$f" .sql): FILE ERROR /" <<<"$e")$'\n'; fi
 done
 
+# Last-room load test: many database sessions book at the same moment (needs the committed fixtures above).
+out=$(DB_URL="$DB_URL" bash supabase/tests/concurrency/last_room.sh 2>&1)
+p=$(grep -c "^ok - " <<<"$out"); n=$(grep -c "^not ok - " <<<"$out")
+pass=$((pass + p)); fail=$((fail + n))
+printf "%-40s %4d ok  %4d not ok\n" "concurrency/last_room" "$p" "$n"
+if [ "$n" -gt 0 ]; then failures+=$(grep -v "^ok - " <<<"$out" | sed "s/^/  last_room: /")$'\n'; fi
+if [ "$p" -eq 0 ] && [ "$n" -eq 0 ]; then fail=$((fail + 1)); failures+="  last_room: produced no results"$'\n'; fi
+
 # Requirement register (docs/requirements.csv): every test id has a row. Part of the full run, not of the build.
 reg=$(node scripts/check-requirements.mjs 2>&1)
 if [ $? -eq 0 ]; then
