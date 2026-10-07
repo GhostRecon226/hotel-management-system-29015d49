@@ -1512,3 +1512,41 @@ Every function below first calls `app.require_platform()`: the caller must be on
 - Args: `p_email text`. Database owner only (Supabase SQL editor); no grant to any app role.
 - Adds an existing sign-in account that belongs to no hotel. Errors: `E_INVALID` (account belongs to a hotel), `E_NOT_FOUND` (no such account).
 
+
+### Subscription billing (PLT-012)
+Prices: column `plans.prices` (for example `{"NGN": {"month": 6000000, "year": 60000000}}`; hotels read it, only `platform_set_plan_price` writes it). Tables: `subscription_payments` (a hotel reads its own with `adm.subscription.manage`), `billing_events` (no client access). Amounts are in the smallest unit (kobo). Nothing here is settled in a browser: the price always comes from `plans.prices`.
+
+### `public.platform_set_plan_price`
+- Args: `p_plan text, p_currency text, p_interval text, p_amount_minor bigint`
+- Sets or replaces one price. `p_interval` is `month` or `year`.
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_MFA_REQUIRED`, `E_NOT_FOUND`
+
+### `public.start_subscription_payment`
+- Args: `p_plan text, p_interval text, p_idempotency_key text`
+- Makes a pending payment for the hotel's own currency (its first property). A retry with the same key returns the first payment. Refuses a plan the hotel has outgrown.
+- Returns: `jsonb` (`payment_id`, `reference`, `amount_minor`, `currency`, `plan_code`, `interval`, `status`)
+- Callable by signed-in users: yes · security definer
+- Permission: `adm.subscription.manage`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NO_PRICE`, `E_NOT_FOUND`, `E_PLAN_LIMIT`, `E_REQUIRED`
+
+### `public.billing_apply_event`
+- Args: `p_provider text, p_event_id text, p_reference text, p_outcome text ('success' or 'failed'), p_amount_minor bigint, p_currency text`
+- Called only by the server after it verifies the provider's signature. Stores the event once, then: `applied` (plan activated, or failure recorded), `duplicate` (event seen before), `ignored` (payment already paid), `mismatch` (amount or currency differ; payment marked failed, nothing activated), `unknown_reference`.
+- Success adds one month or one year to the end of the current paid period, or from today when the hotel is not active. Writes `subscription_history` with source `billing`.
+- Returns: `text`
+- Callable by signed-in users: no (service role only) · security definer
+- Errors: `E_INVALID`, `E_REQUIRED`
+
+### `public.platform_failed_payments`
+- Args: none
+- Failed payments from the last 60 days and payments still pending after a day.
+- Returns: table (`payment_id`, `created_at`, `tenant_id`, `tenant_name`, `plan_code`, `period`, `amount_minor`, `currency`, `status`, `reference`, `failure_reason`)
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
+
+### `app.assert_plan_fits`
+- Args: `p_tenant uuid, p_plan text`. Helper. Errors: `E_NOT_FOUND`, `E_PLAN_LIMIT`.
