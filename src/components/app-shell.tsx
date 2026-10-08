@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import {
   Bell, BedDouble, BarChart3, CalendarDays, ConciergeBell, LayoutDashboard, LogOut, Menu,
-  Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wallet, Wrench, CalendarClock, Building2,
+  Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wallet, Wrench, CalendarClock, Building2, Printer,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
 import { SHIFT_PERMS } from "@/lib/cashier";
 import { NotificationBell } from "@/components/notification-bell";
 
-type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/cashier" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" };
+type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/cashier" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" | "/downtime" };
 
 // perms: null = everyone; otherwise any one of the keys shows the item.
 const MENU: Item[] = [
@@ -28,6 +28,7 @@ const MENU: Item[] = [
   { label: "All branches", icon: Building2, perms: ["rpt.group.view"], to: "/group" },
   { label: "Reservations", icon: CalendarDays, perms: ["res.view"], to: "/reservations" },
   { label: "Front Desk", icon: ConciergeBell, perms: ["fo.view"], to: "/front-desk" },
+  { label: "Downtime pack", icon: Printer, perms: ["fo.view"], to: "/downtime" },
   { label: "Rooms", icon: BedDouble, perms: ["room.view"], to: "/rooms" },
   { label: "Housekeeping", icon: Sparkles, perms: ["hk.view"], to: "/housekeeping" },
   { label: "Maintenance", icon: Wrench, perms: ["mnt.view", "mnt.ticket.create"], to: "/maintenance" },
@@ -92,11 +93,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-sidebar-border bg-sidebar lg:block">
+      <aside className="sticky top-0 hidden print:!hidden h-screen w-60 shrink-0 border-r border-sidebar-border bg-sidebar lg:block">
         <Nav />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 bg-background/85 px-3 backdrop-blur-md sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 print:hidden items-center gap-3 bg-background/85 px-3 backdrop-blur-md sm:px-6">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu"><Menu className="h-5 w-5" /></Button>
