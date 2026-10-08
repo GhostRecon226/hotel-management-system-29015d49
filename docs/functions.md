@@ -1418,6 +1418,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Permission: —
 - Errors: —
 
+### `app.warn_before_rollover`
+- Args: `p_now timestamptz DEFAULT now()`
+- Returns: `integer` (notifications written)
+- Permission: none; run by the `rollover-warning` cron job every 5 minutes. Not granted to signed-in users.
+- Errors: —
+- DAY-007: in the last 60 minutes before a property's roll time, if a cashier shift is still open, every active user with `fin.nightaudit.run` gets one `rollover_warning` notification for that business date. The roll itself never waits.
+
 ### `app.save_registration`
 - Args: `p_guest uuid, p_reg jsonb`
 - Returns: `jsonb`
