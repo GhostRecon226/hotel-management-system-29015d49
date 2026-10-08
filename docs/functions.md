@@ -337,6 +337,7 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: `fin.folio.view`, `fin.invoice.issue`
 - Errors: `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`, `E_REQUIRED`
+- The snapshot header also holds adults, children, nights, check-in time and a total for each day; each line holds its receipt reference (FIN-019).
 
 ### `public.mark_all_notifications_read`
 - Args: `—`
