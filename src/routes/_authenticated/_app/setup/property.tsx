@@ -71,6 +71,7 @@ function PropertyDetails() {
       </div>
       {canEdit && <Button type="submit" disabled={save.isPending}>{save.isPending ? "Saving…" : "Save changes"}</Button>}
     </form>
+    <BookingRulesSection canEdit={canEdit} maxStay={data.max_stay_nights} holdHours={data.tentative_hold_hours} />
     <InspectionSection canEdit={canEdit} required={data.inspection_required} />
     {can("setup.property.create") && <AddPropertySection />}
     <IdPhotoSettingsSection canEdit={canEdit} />
@@ -139,6 +140,40 @@ function AddPropertySection() {
           </Select>
         </Field>
         <div className="flex items-end"><Button type="submit" disabled={m.isPending}>{m.isPending ? "Adding…" : "Add property"}</Button></div>
+      </form>
+    </section>
+  );
+}
+
+/** SET-012: the longest stay a booking can have, and how long a tentative booking holds its room. */
+function BookingRulesSection({ canEdit, maxStay, holdHours }: { canEdit: boolean; maxStay: number; holdHours: number }) {
+  const { property } = useAccess();
+  const qc = useQueryClient();
+  const [stay, setStay] = useState(String(maxStay));
+  const [hold, setHold] = useState(String(holdHours));
+  useEffect(() => { setStay(String(maxStay)); setHold(String(holdHours)); }, [maxStay, holdHours]);
+  const m = useMutation({
+    mutationFn: () => callRpc("set_booking_rules", { p_property_id: property!.id, p_max_stay_nights: Number(stay), p_tentative_hold_hours: Number(hold) }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["setup", "properties"] }); toast.success("Booking rules saved."); },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  return (
+    <section className="mt-10 max-w-xl space-y-4" aria-labelledby="br-title">
+      <div>
+        <h2 id="br-title" className="text-xl font-semibold">Booking rules</h2>
+        <p className="mt-0.5 text-[15px] text-muted-foreground">
+          The longest stay one booking can have, and how long a tentative booking keeps its room before it is released.
+          Changes apply to new bookings and changes. Existing bookings stay as they are.
+        </p>
+      </div>
+      <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); m.mutate(); }}>
+        <Field label="Longest stay (nights)" htmlFor="br-stay" hint="1 to 365">
+          <Input id="br-stay" type="number" min={1} max={365} value={stay} onChange={(e) => setStay(e.target.value)} disabled={!canEdit} />
+        </Field>
+        <Field label="Tentative hold (hours)" htmlFor="br-hold" hint="1 to 720">
+          <Input id="br-hold" type="number" min={1} max={720} value={hold} onChange={(e) => setHold(e.target.value)} disabled={!canEdit} />
+        </Field>
+        {canEdit && <div><Button type="submit" disabled={m.isPending}>{m.isPending ? "Saving…" : "Save booking rules"}</Button></div>}
       </form>
     </section>
   );

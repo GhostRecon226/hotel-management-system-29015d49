@@ -33,7 +33,7 @@ Every screen inside the shell also relies on `my_context` (loaded once by the sh
 | `/setup/charges` | Taxes, charge codes, payment methods (accountant note). | save_charge_code, save_payment_method, save_tax_rate | charge_codes, payment_methods, tax_rates |
 | `/setup/exchange-rates` | Exchange rates. | set_exchange_rate | exchange_rates |
 | `/setup/` | Setup landing. | — | — |
-| `/setup/property` | Property details. | update_property | properties |
+| `/setup/property` | Property details, booking rules (longest stay, tentative hold), housekeeping inspection, ID photos. | update_property, set_booking_rules, set_inspection_required | properties |
 | `/setup/rates` | Rate plans and prices. | delete_rate_plan_price, save_rate_plan, save_rate_plan_price | rate_plan_prices, rate_plans, room_types |
 | `/setup/room-types` | Room types. | save_room_type | room_types |
 | `/setup/rooms` | Rooms with bulk add (e.g. 101–120). | bulk_add_rooms, save_room | room_types, rooms |
