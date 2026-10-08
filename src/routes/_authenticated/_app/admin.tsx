@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
+import { SupportPanel } from "@/components/admin/support-panel";
 import { AiPanel } from "@/components/admin/ai-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -47,7 +48,7 @@ function Admin() {
   const [tab, setTab] = useState<string | null>(null);
   // Coming back from the payment page lands on /admin#plan: open the Subscription tab.
   useEffect(() => { if (window.location.hash === "#plan") setTab("plan"); }, []);
-  if (!canAny(["fin.nightaudit.run", ...ADMIN_PERMS])) return <NoAccess />;
+  if (!canAny(["fin.nightaudit.run", "adm.support.manage", ...ADMIN_PERMS])) return <NoAccess />;
 
   const tabs = [
     can("adm.user.manage") && { value: "users", label: "Staff", node: <UsersPanel /> },
@@ -57,6 +58,7 @@ function Admin() {
     canAny(["adm.subscription.manage", "adm.user.manage"]) && { value: "plan", label: "Subscription", node: <SubscriptionPanel /> },
     canAny(["fin.nightaudit.run", "adm.audit.view"]) && { value: "date", label: "Business date", node: <BusinessDate /> },
     can("adm.user.manage") && { value: "outbox", label: "Messages", node: <OutboxPanel /> },
+    can("adm.support.manage") && { value: "support", label: "Support access", node: <SupportPanel /> },
     can("adm.ai.manage") && { value: "ai", label: "AI helpers", node: <AiPanel /> },
   ].filter(Boolean) as { value: string; label: string; node: React.ReactNode }[];
 
