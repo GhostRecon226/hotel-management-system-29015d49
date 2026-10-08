@@ -27,7 +27,7 @@ begin
   perform t.admin();
   perform t.eq((select charge_amount from public.service_requests where id = v_req), 2200.50, '[HK-007] the database prices the use (2 x 500 + 1,200.50)');
   perform t.eq((select status from public.service_requests where id = v_req), 'open', '[HK-007] the request waits for front desk, nothing is on the folio yet');
-  perform t.ok((select description from public.service_requests where id = v_req) like 'Minibar: 2 x Water, 1 x Cola%', '[HK-007] the request lists what was used');
+  perform t.ok((select description from public.service_requests where id = v_req) like 'Minibar: 1 x Cola, 2 x Water%', '[HK-007] the request lists what was used');
   perform t.eq((select count(*)::int from public.folio_transactions where folio_id = t.main_folio(v_r) and description like 'Minibar%'), 0, '[HK-007] nothing posts before confirmation');
 
   perform t.login('att');
