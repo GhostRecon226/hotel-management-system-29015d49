@@ -8,6 +8,7 @@ import { addDays, formatPercent, useDashboardSummary, useKpis } from "@/lib/repo
 import { PageHeader } from "@/components/page-header";
 import { SetupCard } from "@/components/setup-checklist";
 import { MorningBrief } from "@/components/morning-brief";
+import { OwnerSummaryCard } from "@/components/owner-summary";
 import { ArrowDownRight, ArrowUpRight, BedDouble, CheckCircle2, Gauge, Wrench } from "lucide-react";
 import { AvailabilityBar, FilledStat, StatTile } from "@/components/stats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +51,7 @@ function Dashboard() {
     <div className="space-y-5">
       <PageHeader title="Dashboard" description={`Welcome back${firstName ? `, ${firstName}` : ""}. ${property.name} · business date ${formatDay(property.business_date)}.`} />
       <SetupCard />
+      <OwnerSummaryCard />
       <MorningBrief />
       {s.isLoading ? <LoadingState label="Loading today…" /> : (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
