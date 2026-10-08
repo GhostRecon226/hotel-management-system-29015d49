@@ -5,7 +5,7 @@ Blunt list. Nothing here is hidden elsewhere.
 ## Testing
 - Every screen was clicked through on the local copy with a demo hotel (`scripts/seed-demo.sh`) on 30 Sep 2026. Not yet on the real project.
 - Database tests now live in `supabase/tests/db` and run on local Supabase with `scripts/test-db.sh` (448 checks on 30 Sep 2026, 21 open failures). Open failures are listed in `docs/status-report.md`.
-- Concurrency (two clerks booking the last room) relies on an advisory lock and was never load-tested.
+- Concurrency (two clerks booking the last room) is load-tested by `supabase/tests/concurrency/last_room.sh` (NFR-006, 7 Oct 2026): 8 sessions at once. It is not yet proved at hotel-group scale or on the live project.
 - Authenticated screens after the design restyle (Setup, Guests and everything built later) were not visually checked.
 
 ## Money and tax
