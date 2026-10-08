@@ -20,6 +20,7 @@ Every screen inside the shell also relies on `my_context` (loaded once by the sh
 | `/housekeeping/inspections` | Inspection list with pass / fail and defects. | inspect_hk_task | v_hk_board |
 | `/housekeeping/lost-found` | Lost and found list and form. | save_lost_found_item, set_lost_found_status | lost_found_items, rooms |
 | `/housekeeping/my-tasks` | Attendant view (mobile first): start, checklist, complete. | complete_hk_task, start_hk_task | v_hk_board |
+| `/housekeeping/minibar` | Minibar (mobile first): attendant picks a room and taps items used; managers keep the price list. Front desk confirms on Service requests. | list_minibar_items, list_minibar_rooms, record_minibar_use, save_minibar_item | minibar_items |
 | `/maintenance/$id` | Ticket detail with all lifecycle actions and Block room. | assign_ticket, block_room_for_ticket, cancel_ticket, close_ticket, mnt_staff, reopen_ticket, resolve_ticket, start_ticket, svc_staff, wait_ticket | room_blocks, v_maintenance_tickets |
 | `/maintenance/` | Ticket list and create. | create_ticket, mnt_staff | rooms, v_maintenance_tickets |
 | `/reports` | KPI table + CSV, revenue by charge code, outstanding balances, payments, cancellation rate, length of stay, balances by guest, CSV exports, definitions. | export_data, report_balances_by_guest, report_cancellation_rate, report_length_of_stay, report_outstanding_balances, report_payments, report_revenue_by_charge_code | v_kpi_daily |

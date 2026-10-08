@@ -24,6 +24,7 @@ function HousekeepingLayout() {
     { to: "/housekeeping" as const, label: "Board", show: canAny(["hk.task.assign", "hk.view"]), exact: true },
     { to: "/housekeeping/my-tasks" as const, label: "My tasks", show: can("hk.task.complete"), exact: false },
     { to: "/housekeeping/inspections" as const, label: "Inspections", show: can("hk.inspect"), exact: false },
+    { to: "/housekeeping/minibar" as const, label: "Minibar", show: canAny(["hk.minibar.record", "setup.minibar.manage"]), exact: false },
     { to: "/housekeeping/lost-found" as const, label: "Lost and found", show: true, exact: false },
   ].filter((t) => t.show);
   return (
