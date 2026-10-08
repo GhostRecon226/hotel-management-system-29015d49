@@ -23,6 +23,7 @@ import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppApprovalsRouteImport } from './routes/_authenticated/_app/approvals'
 import { Route as AuthenticatedAppCashierRouteImport } from './routes/_authenticated/_app/cashier'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
+import { Route as AuthenticatedAppDowntimeRouteImport } from './routes/_authenticated/_app/downtime'
 import { Route as AuthenticatedAppFoliosRouteRouteImport } from './routes/_authenticated/_app/folios/route'
 import { Route as AuthenticatedAppFrontDeskRouteImport } from './routes/_authenticated/_app/front-desk'
 import { Route as AuthenticatedAppGroupRouteImport } from './routes/_authenticated/_app/group'
@@ -135,6 +136,12 @@ const AuthenticatedAppDashboardRoute =
   AuthenticatedAppDashboardRouteImport.update({
     id: '/dashboard',
     path: '/dashboard',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppDowntimeRoute =
+  AuthenticatedAppDowntimeRouteImport.update({
+    id: '/downtime',
+    path: '/downtime',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
 const AuthenticatedAppFoliosRouteRoute =
@@ -403,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/approvals': typeof AuthenticatedAppApprovalsRoute
   '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/downtime': typeof AuthenticatedAppDowntimeRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/group': typeof AuthenticatedAppGroupRoute
   '/reports': typeof AuthenticatedAppReportsRoute
@@ -452,6 +460,7 @@ export interface FileRoutesByTo {
   '/approvals': typeof AuthenticatedAppApprovalsRoute
   '/cashier': typeof AuthenticatedAppCashierRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/downtime': typeof AuthenticatedAppDowntimeRoute
   '/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/group': typeof AuthenticatedAppGroupRoute
   '/reports': typeof AuthenticatedAppReportsRoute
@@ -511,6 +520,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/approvals': typeof AuthenticatedAppApprovalsRoute
   '/_authenticated/_app/cashier': typeof AuthenticatedAppCashierRoute
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/_authenticated/_app/downtime': typeof AuthenticatedAppDowntimeRoute
   '/_authenticated/_app/front-desk': typeof AuthenticatedAppFrontDeskRoute
   '/_authenticated/_app/group': typeof AuthenticatedAppGroupRoute
   '/_authenticated/_app/reports': typeof AuthenticatedAppReportsRoute
@@ -569,6 +579,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/cashier'
     | '/dashboard'
+    | '/downtime'
     | '/front-desk'
     | '/group'
     | '/reports'
@@ -618,6 +629,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/cashier'
     | '/dashboard'
+    | '/downtime'
     | '/front-desk'
     | '/group'
     | '/reports'
@@ -676,6 +688,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/approvals'
     | '/_authenticated/_app/cashier'
     | '/_authenticated/_app/dashboard'
+    | '/_authenticated/_app/downtime'
     | '/_authenticated/_app/front-desk'
     | '/_authenticated/_app/group'
     | '/_authenticated/_app/reports'
@@ -824,6 +837,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedAppDashboardRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/downtime': {
+      id: '/_authenticated/_app/downtime'
+      path: '/downtime'
+      fullPath: '/downtime'
+      preLoaderRoute: typeof AuthenticatedAppDowntimeRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/_app/folios': {
@@ -1281,6 +1301,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppApprovalsRoute: typeof AuthenticatedAppApprovalsRoute
   AuthenticatedAppCashierRoute: typeof AuthenticatedAppCashierRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
+  AuthenticatedAppDowntimeRoute: typeof AuthenticatedAppDowntimeRoute
   AuthenticatedAppFrontDeskRoute: typeof AuthenticatedAppFrontDeskRoute
   AuthenticatedAppGroupRoute: typeof AuthenticatedAppGroupRoute
   AuthenticatedAppReportsRoute: typeof AuthenticatedAppReportsRoute
@@ -1305,6 +1326,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppApprovalsRoute: AuthenticatedAppApprovalsRoute,
   AuthenticatedAppCashierRoute: AuthenticatedAppCashierRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
+  AuthenticatedAppDowntimeRoute: AuthenticatedAppDowntimeRoute,
   AuthenticatedAppFrontDeskRoute: AuthenticatedAppFrontDeskRoute,
   AuthenticatedAppGroupRoute: AuthenticatedAppGroupRoute,
   AuthenticatedAppReportsRoute: AuthenticatedAppReportsRoute,
