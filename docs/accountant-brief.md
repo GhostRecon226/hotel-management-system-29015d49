@@ -21,6 +21,7 @@ From Peter, 2 Oct 2026. Hotel Desk is the system our hotels will use to bill gue
 2. **The same dinner with a 10% discount (₦1,182.50).** Today a discount comes off the price and off each tax in the same proportion: the price goes down by ₦1,000, the service charge by ₦100 and VAT by ₦82.50. **The guest pays ₦10,642.50**, and the tax collected falls with the discount.
 3. **A price that already includes tax.** ₦11,825 entered "including tax" is recorded as ₦10,000 plus the same ₦1,000 and ₦825.
 4. **Rounding.** Each tax is rounded to the kobo. When the parts do not add up to the total tax exactly, the difference (at most a kobo or two) goes on the last tax that has a rate, which is VAT today. Example: ₦7,777.77 gives service charge ₦777.78 and VAT ₦641.66.
+5. **A method seen on a real hotel bill.** One Nigerian hotel charges service charge 10%, VAT 7.5% and a state tax of 5%, each on the room price alone, with no tax on another tax. Food and drink carry no tax. A room at ₦45,000 gives service charge ₦4,500, VAT ₦3,375 and state tax ₦2,250, so the room comes to ₦55,125. With ₦12,001 of bar charges the bill is **₦67,126**. Hotel Desk can do this with setup alone (each rate set to apply on the price alone, bar set as not taxable). The default method in examples 1 to 4 differs: it charges VAT on the price plus service charge. Question 1 asks which is right.
 
 ## Other things you should know
 
