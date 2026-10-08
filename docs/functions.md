@@ -1760,3 +1760,10 @@ Prices: column `plans.prices` (for example `{"NGN": {"month": 6000000, "year": 6
 - Callable by signed-in users: yes · security definer
 - Permission: `adm.subscription.manage`
 - Errors: `E_FORBIDDEN`
+
+### `public.owner_summary`
+- Args: `p_property_id uuid`
+- Returns: `jsonb` (facts, collected money for the last closed day, `lines` and `text`)
+- Callable by signed-in users: yes · security definer
+- Permission: `rpt.finance.view` and `rpt.operations.view`
+- Errors: `E_FORBIDDEN`
