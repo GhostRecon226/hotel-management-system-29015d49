@@ -1232,6 +1232,7 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Returns: `text`
 - Permission: —
 - Errors: `E_NOT_FOUND`
+- Invoice and interim numbers include the year and month of the property's business date and restart at 1 each month (FIN-020).
 
 ### `app.notify_approvers`
 - Args: `a approvals`

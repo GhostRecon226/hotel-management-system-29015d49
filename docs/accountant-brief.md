@@ -28,7 +28,7 @@ From Peter, 2 Oct 2026. Hotel Desk is the system our hotels will use to bill gue
 - **Same-day stays.** A guest who arrives and leaves on the same day is charged one night at the room rate, with tax as for any room night. A manager can waive it with a reason.
 - **Corrections.** Posted charges are never edited or deleted. A mistake is corrected by a reversal or an adjustment, approved by a second person, and both rows stay on the record.
 - **Currency.** Charges are in naira. Guests may pay in another currency at the rate the hotel sets for that day.
-- **Invoices.** Final invoices and interim invoices have separate number series (INV and INT). Each invoice lists the price, each tax and the total.
+- **Invoices.** Final invoices and interim invoices have separate number series (INV and INT). A number looks like INV-202610-000001: the year and month of the hotel's business date, then a count that restarts each month with no gaps. Each invoice lists the price, each tax and the total.
 
 ## Questions we need you to answer
 
