@@ -39,7 +39,7 @@ Every screen inside the shell also relies on `my_context` (loaded once by the sh
 | `/setup/room-types` | Room types. | save_room_type | room_types |
 | `/setup/rooms` | Rooms with bulk add (e.g. 101–120). | bulk_add_rooms, save_room | room_types, rooms |
 | `/create-hotel` | First sign-in: Create your hotel. | create_hotel | — |
-| `/invoices/$id` | Printable invoice with tax split and Print button (no app shell). | — | invoices |
+| `/invoices/$id` | Printable invoice with nights, guests, check-in time, receipt references, a total for each day, tax split and Print button (no app shell). | — | invoices |
 | `/` | Auth gate: redirects signed-out users to /auth. | — | — |
 | `/auth` | Sign in / sign up (email + password, email confirmation required). | — | — |
 | `/check-email` | Check-your-email page after sign-up. | — | — |

@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Printer } from "lucide-react";
 import { useInvoice } from "@/lib/checkout";
@@ -20,6 +21,8 @@ function InvoicePage() {
   if (!inv) return <EmptyState title="Invoice not found" />;
   const h = inv.header;
   const cur = inv.currency;
+  // Day totals come from the database; older invoices have none and show no day rows.
+  const dayTotals = new Map((h.day_totals ?? []).map((d) => [d.date, d]));
 
   return (
     <div className="mx-auto max-w-4xl bg-background p-6 text-foreground print:max-w-none print:p-0">
@@ -50,6 +53,9 @@ function InvoicePage() {
         <dt className="text-muted-foreground">Folio</dt><dd className="tabular">{h.folio_number} · {h.folio_label}</dd>
         <dt className="text-muted-foreground">Room</dt><dd>{h.room_number ?? "—"}</dd>
         <dt className="text-muted-foreground">Stay</dt><dd className="tabular">{h.arrival_date && formatDay(h.arrival_date)} – {h.departure_date && formatDay(h.departure_date)}</dd>
+        {h.nights != null && <><dt className="text-muted-foreground">Nights</dt><dd className="tabular">{h.nights}</dd></>}
+        {h.adults != null && <><dt className="text-muted-foreground">Guests</dt><dd className="tabular">{guestsText(h.adults, h.children ?? 0)}</dd></>}
+        {h.checked_in_at && <><dt className="text-muted-foreground">Checked in</dt><dd className="tabular">{formatDateTime(h.checked_in_at)}</dd></>}
       </dl>
 
       <Table>
@@ -58,11 +64,13 @@ function InvoicePage() {
           <TableHead className="text-right">Net</TableHead><TableHead className="text-right">Tax</TableHead><TableHead className="text-right">Amount</TableHead>
         </TableRow></TableHeader>
         <TableBody>
-          {inv.lines.map((l) => (
-            <TableRow key={l.id} className={cn((l.is_reversed || l.is_transferred) && "text-muted-foreground")}>
+          {inv.lines.map((l, i) => (
+            <Fragment key={l.id}>
+            <TableRow className={cn((l.is_reversed || l.is_transferred) && "text-muted-foreground")}>
               <TableCell className="tabular">{formatDay(l.date)}</TableCell>
               <TableCell>
                 {l.description}
+                {l.reference && <span className="block text-xs text-muted-foreground">Receipt {l.reference}</span>}
                 {l.tax_lines.length > 0 && <span className="block text-xs text-muted-foreground">{l.tax_lines.map((t) => `${t.name} ${Number(t.percent)}%`).join(" · ")}</span>}
               </TableCell>
               {/* Payments and refunds are money received or returned, not charges: no net or tax column. */}
@@ -71,6 +79,15 @@ function InvoicePage() {
                 : <><TableCell><Money amount={l.net} currency={cur} /></TableCell><TableCell><Money amount={l.tax} currency={cur} /></TableCell></>}
               <TableCell><Money amount={l.total} currency={cur} /></TableCell>
             </TableRow>
+            {dayTotals.has(l.date) && inv.lines[i + 1]?.date !== l.date && (
+              <TableRow className="bg-muted/40 font-medium">
+                <TableCell colSpan={2} className="text-right">Day total {formatDay(l.date)}</TableCell>
+                <TableCell><Money amount={dayTotals.get(l.date)!.net} currency={cur} /></TableCell>
+                <TableCell><Money amount={dayTotals.get(l.date)!.tax} currency={cur} /></TableCell>
+                <TableCell><Money amount={dayTotals.get(l.date)!.total} currency={cur} /></TableCell>
+              </TableRow>
+            )}
+            </Fragment>
           ))}
         </TableBody>
       </Table>
@@ -107,6 +124,11 @@ function InvoicePage() {
       <p className="mt-8 text-xs text-muted-foreground">Business date {formatDay(inv.business_date)}. Payments are received outside this system and recorded on the folio.</p>
     </div>
   );
+}
+
+function guestsText(adults: number, children: number) {
+  const a = `${adults} adult${adults === 1 ? "" : "s"}`;
+  return children > 0 ? `${a}, ${children} child${children === 1 ? "" : "ren"}` : a;
 }
 
 function Total({ label, amount, cur, strong }: { label: string; amount: number; cur: string; strong?: boolean }) {

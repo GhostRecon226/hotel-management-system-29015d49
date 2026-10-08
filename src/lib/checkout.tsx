@@ -20,14 +20,18 @@ export interface TaxSplitLine { line_no: number; tax_code: string; tax_name: str
 export interface InvoiceLine {
   id: string; date: string; kind: string; description: string; net: number; tax: number; total: number;
   tax_lines: { name: string; percent: number; amount: number }[]; is_reversed: boolean; is_transferred: boolean;
+  reference?: string | null;
 }
+export interface InvoiceDayTotal { date: string; net: number; tax: number; total: number }
 export interface Invoice {
   id: string; folio_id: string; number: string; kind: "interim" | "final"; currency: string; issued_at: string; business_date: string;
   net_total: number; tax_total: number; gross_total: number; payments_total: number; balance: number;
   tax_split: TaxSplitLine[]; lines: InvoiceLine[];
   header: { hotel?: string; property?: string; address?: string | null; city?: string | null; country?: string | null; folio_number?: string;
     folio_label?: string; reservation_number?: string; guest_name?: string | null; company_name?: string | null;
-    arrival_date?: string; departure_date?: string; room_number?: string | null };
+    arrival_date?: string; departure_date?: string; room_number?: string | null;
+    // Added in FIN-019; invoices issued earlier do not have them.
+    adults?: number; children?: number; nights?: number; checked_in_at?: string | null; day_totals?: InvoiceDayTotal[] };
 }
 
 export function useCheckoutStay(reservationId: string) {
