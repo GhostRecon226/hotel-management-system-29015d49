@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
+import { SupportSection } from "@/components/platform-support";
 import { Field, FormDialog } from "@/lib/setup";
 import { formatDateTime, formatDay } from "@/lib/reservations";
 import {
@@ -164,6 +165,7 @@ function HotelPanel({ tenant, onOpenChange }: { tenant: PlatformTenant | null; o
                 <Button key={a.action} size="sm" variant={a.action === "suspend" || a.action === "cancel" ? "outline" : "default"} onClick={() => setAction(a.action)}>{a.label}</Button>
               ))}
             </div>
+            <SupportSection tenantId={tenant.tenant_id} />
             <section aria-labelledby="hist-title">
               <h3 id="hist-title" className="mb-2 font-semibold">History</h3>
               {history.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}

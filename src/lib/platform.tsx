@@ -140,3 +140,40 @@ export function TwoStepGate({ onDone }: { onDone: () => void }) {
     </div>
   );
 }
+
+// Support access (PLT-010): ask a hotel for permission, then read its account snapshot while the hotel allows it.
+export interface SupportRequest {
+  id: string; status: string; reason: string; hours_requested: number; requested_at: string;
+  decided_at: string | null; expires_at: string | null; views: number;
+}
+export interface SupportSnapshot {
+  hotel: { name: string; country: string; access_status: string; subscription_status: string; plan_code: string; trial_ends_at: string | null; paid_until: string | null };
+  properties: Array<{ name: string; timezone: string; business_date: string; rooms: number; active_staff: number }>;
+  business_date_runs: Array<{ property: string; from_date: string; to_date: string; status: string; trigger: string; finished_at: string; error: string | null }>;
+  messages: { pending: number; failed: number; sent_last_24h: number };
+  access: { expires_at: string; views: number };
+}
+export function useSupportRequests(tenantId: string | null) {
+  return useQuery({
+    queryKey: ["platform", "support", tenantId], enabled: !!tenantId,
+    queryFn: () => callRpc<SupportRequest[]>("platform_support_requests", { p_tenant: tenantId }),
+  });
+}
+export function useSupportRequest(tenantId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { reason: string; hours: number }) =>
+      callRpc("platform_request_support_access", { p_tenant: tenantId, p_reason: v.reason, p_hours: v.hours }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["platform", "support"] }); toast.success("Request sent. The hotel's administrators were told."); },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+}
+/** Opening the snapshot counts as one view in the hotel's audit log, so it runs only when the operator asks. */
+export function useSupportSnapshot(tenantId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => callRpc<SupportSnapshot>("platform_support_snapshot", { p_tenant: tenantId }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["platform", "support"] }),
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+}
