@@ -127,7 +127,7 @@ begin
   perform t.ok((select balance > 0 from public.invoices where id = v_i), '[FIN-012] an interim document shows what is still due');
   perform t.ok((select number ~ '^INT-' from public.invoices where id = v_i), '[FIN-012] interim documents have their own number series (INT-)');
   v_i := public.issue_invoice(v_f, 'interim', 'int-2');
-  perform t.eq((select number from public.invoices where id = v_i), 'INT-000002', '[FIN-012] interim numbers run on without gaps');
+  perform t.eq((select number from public.invoices where id = v_i), 'INT-' || to_char(t.bdate(), 'YYYYMM') || '-000002', '[FIN-012] interim numbers run on without gaps');
   perform t.eq((select count(*)::int from public.invoices where number like 'INV-%' and property_id = t.id('propA')), 0, '[FIN-012] interim documents use no final invoice numbers');
   perform t.admin();
 exception when others then perform t.admin(); perform t.crash('receipts', sqlerrm);
