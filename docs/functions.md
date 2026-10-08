@@ -1508,6 +1508,47 @@ Every function below first calls `app.require_platform()`: the caller must be on
 - Permission: platform operator with two-step sign-in
 - Errors: `E_FORBIDDEN`, `E_INVALID`, `E_MFA_REQUIRED`, `E_NOT_FOUND`, `E_PLAN_LIMIT`, `E_REQUIRED`
 
+### `public.platform_request_support_access`
+- Args: `p_tenant uuid, p_reason text, p_hours integer DEFAULT 24`
+- A platform operator asks to look at one hotel. Needs a reason and 1 to 72 hours. One open request per operator and hotel. Writes the hotel's audit log and tells everyone at the hotel who holds `adm.support.manage`.
+- Returns: `uuid` (the request)
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_MFA_REQUIRED`, `E_NOT_FOUND`, `E_REQUIRED`
+
+### `public.platform_support_requests`
+- Args: `p_tenant uuid`. The operator's own requests for that hotel, with status (requested, granted, denied, revoked, expired).
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
+
+### `public.list_support_access`
+- Args: none. The hotel's support requests, newest first. A granted request past its time shows as `expired`.
+- Callable by signed-in users: yes · security definer
+- Permission: `adm.support.manage` (System Administrator and General Manager only; custom roles copied earlier do not get it)
+- Errors: `E_FORBIDDEN`
+
+### `public.decide_support_access`
+- Args: `p_id uuid, p_approve boolean, p_hours integer DEFAULT NULL`. Yes grants access for 1 to 72 hours (default: the hours asked for). No refuses. A decision is final. Audited. Allowed on a read-only hotel on purpose: those hotels most need help, so it does not call `app.assert_writable`.
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: `adm.support.manage`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`
+
+### `public.revoke_support_access`
+- Args: `p_id uuid`. Closes open access at once. Audited. Also allowed on a read-only hotel.
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: `adm.support.manage`
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`
+
+### `public.platform_support_snapshot`
+- Args: `p_tenant uuid`. The read-only support view: hotel account data, properties (name, time zone, business date, room and staff counts), the last 10 business date runs, and message counts (pending, failed, sent in 24 hours). No guests, bookings, money, contact details or ID photos. Needs an open grant for this operator and this hotel. Each view is counted and written to the hotel's audit log.
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in and an open grant
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`, `E_NO_CONSENT`
+
 ### `app.add_platform_operator`
 - Args: `p_email text`. Database owner only (Supabase SQL editor); no grant to any app role.
 - Adds an existing sign-in account that belongs to no hotel. Errors: `E_INVALID` (account belongs to a hotel), `E_NOT_FOUND` (no such account).
