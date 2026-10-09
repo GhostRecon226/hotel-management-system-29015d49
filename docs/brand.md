@@ -5,20 +5,22 @@ The full guide with colors, type and rules is the "Zikora Brand Guide" document 
 
 ## Logo files (public/brand)
 
+The approved artwork is Peter's own picture (teal and gold Z, serif name). The PNG files are cut from it with a transparent background. The SVG files are redrawn copies, used where a picture does not work (dark screens, one color, print).
+
 | File | Use |
 |---|---|
-| zikora-logo-notagline.svg | Sidebar, mobile sign-in header (via `BrandLogo`) |
-| zikora-logo.svg | Invoices, emails, anywhere 200 px wide or more |
-| zikora-logo-dark-screen.svg | Dark panels and dark mode (`BrandLogo onDark`) |
+| zikora-logo-notagline.png | Sidebar, sign-in screens (via `BrandLogo`) |
+| zikora-logo.png | Invoices, emails, anywhere 200 px wide or more |
+| zikora-icon.png, zikora-icon-tab.png | The Z alone; the Z on sand for the tab, phone home screen |
+| zikora-logo-dark-screen.svg, zikora-icon-dark-screen.svg | Dark mode (`BrandLogo` picks it). The picture is too dark to read on dark screens |
 | zikora-logo-one-color.svg | Print in black |
 | zikora-logo-white.svg | On Main teal or photos |
-| zikora-icon.svg, zikora-icon-dark-screen.svg | The Z alone |
-| zikora-icon-tab.svg | Browser tab (`public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`) |
 
-## Colors in the logo
+The tab icons are `public/favicon.ico`, `favicon-32.png` and `apple-touch-icon.png`.
 
-- Deep teal #004F51 (mark), Main teal #007475 stays the app color.
-- Logo ink #032126 (name). Gold #9A7343 (mark). Tagline gold #7A5A30.
-- Dark screens: #49B8B8 (mark), #C9A56B (gold), #F8F6F1 (name).
+## Colors
+
+- App color stays Main teal #007475. Logo teal is a dark gradient, close to Deep teal #004F51.
 - Gold is for the logo, print and marketing only. Never use it in app screens. Amber means warning there.
 - Below 200 px wide use the version without the tagline.
+- To replace the artwork, ask for vector files. The PNGs are as sharp as the original picture, about 1400 px wide.
