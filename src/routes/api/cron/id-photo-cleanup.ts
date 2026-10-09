@@ -15,7 +15,14 @@ export const Route = createFileRoute("/api/cron/id-photo-cleanup")({
             removed += r.removed;
             if (r.removed < 200) break;
           }
-          return { removed };
+          const { removeMarkedTicketPhotos } = await import("@/lib/ticket-photos.server");
+          let ticketRemoved = 0;
+          for (let i = 0; i < 20; i++) {
+            const r = await removeMarkedTicketPhotos({ limit: 200 });
+            ticketRemoved += r.removed;
+            if (r.removed < 200) break;
+          }
+          return { removed, ticketRemoved };
         }, "The ID photo clean-up is switched off: CRON_SECRET is not set."),
     },
   },

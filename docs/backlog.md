@@ -6,4 +6,4 @@ Things we know about and chose to do later. Newest at the top. Move an item to a
 | --- | --- | --- |
 | One rule for "money collected" across all reports | The owner summary leaves out a payment reversed the same day. The older payments report still counts it, so two screens can show different totals. | 9 Oct 2026 |
 | Daily owner summary by email | Needs the email account and sending domain first. | 9 Oct 2026 |
-| Photos on maintenance requests and damage reports | Attendants need to show the problem. Reuse the private storage pattern from ID photos. In progress. | 9 Oct 2026 |
+| Photos on maintenance requests and damage reports | Attendants need to show the problem. Reuse the private storage pattern from ID photos. Maintenance tickets done (MNT-004). Damage reports on lost and found items and service requests are not covered yet. | 9 Oct 2026 |
