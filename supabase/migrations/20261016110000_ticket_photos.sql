@@ -38,12 +38,13 @@ returns void language sql security definer set search_path = public, pg_temp as 
     jsonb_build_object('ticket_id', f.ticket_id, 'mime_type', f.mime_type, 'size_bytes', f.size_bytes), p_reason)
 $$;
 
-create or replace function app.ticket_photo_can(t public.maintenance_tickets, p_action text)
+create or replace function app.ticket_photo_can(tk public.maintenance_tickets, p_action text)
 returns boolean language sql stable security definer set search_path = public, pg_temp as $$
-  select t.created_by = auth.uid() or t.assignee_id = auth.uid()
-      or app.can('mnt.ticket.work', t.property_id)
-      or (p_action = 'add' and app.can('mnt.ticket.create', t.property_id))
-      or (p_action = 'view' and app.can('mnt.view', t.property_id))
+  -- coalesce on every term: an unassigned ticket has a NULL assignee, and NULL must read as "no".
+  select coalesce(tk.created_by = auth.uid(), false) or coalesce(tk.assignee_id = auth.uid(), false)
+      or app.can('mnt.ticket.work', tk.property_id)
+      or (p_action = 'add' and app.can('mnt.ticket.create', tk.property_id))
+      or (p_action = 'view' and app.can('mnt.view', tk.property_id))
 $$;
 
 create or replace function public.begin_ticket_photo_upload(p_ticket_id uuid, p_mime text, p_size integer)
