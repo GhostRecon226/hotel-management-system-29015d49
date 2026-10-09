@@ -3,8 +3,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 type Rpc = (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
 
-export const TEST_ERROR_SERVER = "Hotel Desk test error, sent on purpose from the server (Setup, Property)";
-export const TEST_ERROR_BROWSER = "Hotel Desk test error, sent on purpose from the browser (Setup, Property)";
+export const TEST_ERROR_SERVER = "Zikora test error, sent on purpose from the server (Setup, Property)";
+export const TEST_ERROR_BROWSER = "Zikora test error, sent on purpose from the browser (Setup, Property)";
 
 /**
  * Safety net check (docs/safety-net.md): fails on purpose so the error reaches Sentry and the alert email arrives.

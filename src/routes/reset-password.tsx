@@ -9,7 +9,7 @@ import { errorMessage } from "@/lib/errors";
 import { AuthLayout } from "@/components/auth-layout";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Set a new password — Hotel Desk" }, { name: "description", content: "Choose a new password for your account." }] }),
+  head: () => ({ meta: [{ title: "Set a new password — Zikora" }, { name: "description", content: "Choose a new password for your account." }] }),
   component: ResetPassword,
 });
 

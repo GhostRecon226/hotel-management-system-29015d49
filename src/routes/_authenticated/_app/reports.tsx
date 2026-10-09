@@ -31,9 +31,9 @@ import { RoomName } from "@/components/room-name";
 export const Route = createFileRoute("/_authenticated/_app/reports")({
   head: () => ({
     meta: [
-      { title: "Reports — Hotel Desk" },
+      { title: "Reports — Zikora" },
       { name: "description", content: "Occupancy, ADR, RevPAR, revenue by charge code, outstanding balances and payments." },
-      { property: "og:title", content: "Reports — Hotel Desk" },
+      { property: "og:title", content: "Reports — Zikora" },
       { property: "og:description", content: "Occupancy, ADR, RevPAR, revenue by charge code, outstanding balances and payments." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -24,7 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/front-desk")({
-  head: () => ({ meta: [{ title: "Front Desk · Hotel Desk" }] }),
+  head: () => ({ meta: [{ title: "Front Desk · Zikora" }] }),
   component: FrontDesk,
 });
 

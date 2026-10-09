@@ -1,4 +1,4 @@
-# Hotel Desk: rules
+# Zikora: rules
 
 The single rules file for this repository. Claude Code reads it through `CLAUDE.md`, which only imports this file.
 Merged on 6 Oct 2026 from the reference repository's `CLAUDE.md` (rules 1 to 10, adapted) and this file's architecture notes.

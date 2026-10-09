@@ -21,9 +21,9 @@ export const Route = createFileRoute("/_authenticated/create-hotel")({
   },
   head: () => ({
     meta: [
-      { title: "Create your hotel — Hotel Desk" },
+      { title: "Create your hotel — Zikora" },
       { name: "description", content: "Set up your hotel and first property." },
-      { property: "og:title", content: "Create your hotel — Hotel Desk" },
+      { property: "og:title", content: "Create your hotel — Zikora" },
       { property: "og:description", content: "Set up your hotel and first property." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

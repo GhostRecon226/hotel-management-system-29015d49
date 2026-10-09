@@ -18,9 +18,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export const Route = createFileRoute("/_authenticated/_app/cashier")({
   head: () => ({
     meta: [
-      { title: "Cashier shift — Hotel Desk" },
+      { title: "Cashier shift — Zikora" },
       { name: "description", content: "Open your shift, count your drawer and close it. Managers review the shifts." },
-      { property: "og:title", content: "Cashier shift — Hotel Desk" },
+      { property: "og:title", content: "Cashier shift — Zikora" },
       { property: "og:description", content: "Open your shift, count your drawer and close it. Managers review the shifts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/invoices/$id")({
-  head: () => ({ meta: [{ title: "Invoice · Hotel Desk" }] }),
+  head: () => ({ meta: [{ title: "Invoice · Zikora" }] }),
   component: InvoicePage,
 });
 

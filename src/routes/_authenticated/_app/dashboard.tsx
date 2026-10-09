@@ -18,9 +18,9 @@ import { EmptyState, LoadingState } from "@/components/ui/states";
 export const Route = createFileRoute("/_authenticated/_app/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Hotel Desk" },
+      { title: "Dashboard — Zikora" },
       { name: "description", content: "Today's arrivals, rooms, approvals and 30-day performance for your hotel." },
-      { property: "og:title", content: "Dashboard — Hotel Desk" },
+      { property: "og:title", content: "Dashboard — Zikora" },
       { property: "og:description", content: "Today's arrivals, rooms, approvals and 30-day performance for your hotel." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

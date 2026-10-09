@@ -32,7 +32,7 @@ rd = wb["README"]
 status = collections.Counter(r[head.index("Status")] for r in body)
 for row in rd.iter_rows():
     if row[0].value and str(row[0].value).startswith("Version"):
-        row[0].value = f"Generated from docs/requirements.csv on {datetime.date.today():%d %b %Y}. Status describes the Hotel Desk app."
+        row[0].value = f"Generated from docs/requirements.csv on {datetime.date.today():%d %b %Y}. Status describes the Zikora app."
 start = next(i for i, row in enumerate(rd.iter_rows(), 1) if row[0].value == "Counts")
 rd.delete_rows(start + 1, rd.max_row)
 rd.cell(start + 1, 1, "Total requirements"); rd.cell(start + 1, 2, len(body))

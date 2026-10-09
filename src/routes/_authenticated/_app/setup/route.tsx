@@ -6,9 +6,9 @@ import { PageHeader } from "@/components/page-header";
 export const Route = createFileRoute("/_authenticated/_app/setup")({
   head: () => ({
     meta: [
-      { title: "Setup — Hotel Desk" },
+      { title: "Setup — Zikora" },
       { name: "description", content: "Property, rooms, rates, taxes and payment settings." },
-      { property: "og:title", content: "Setup — Hotel Desk" },
+      { property: "og:title", content: "Setup — Zikora" },
       { property: "og:description", content: "Property, rooms, rates, taxes and payment settings." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

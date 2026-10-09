@@ -19,10 +19,10 @@ import { PageHeader, FilterBar } from "@/components/page-header";
 export const Route = createFileRoute("/design")({
   head: () => ({
     meta: [
-      { title: "Design system — Hotel Desk" },
-      { name: "description", content: "Colours, type, buttons, fields, tables and status labels used across Hotel Desk." },
-      { property: "og:title", content: "Design system — Hotel Desk" },
-      { property: "og:description", content: "Colours, type, buttons, fields, tables and status labels used across Hotel Desk." },
+      { title: "Design system — Zikora" },
+      { name: "description", content: "Colours, type, buttons, fields, tables and status labels used across Zikora." },
+      { property: "og:title", content: "Design system — Zikora" },
+      { property: "og:description", content: "Colours, type, buttons, fields, tables and status labels used across Zikora." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
