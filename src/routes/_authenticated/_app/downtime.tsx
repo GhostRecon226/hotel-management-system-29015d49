@@ -12,7 +12,7 @@ import { Money } from "@/components/ui/money";
 import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/downtime")({
-  head: () => ({ meta: [{ title: "Downtime pack · Hotel Desk" }] }),
+  head: () => ({ meta: [{ title: "Downtime pack · Zikora" }] }),
   component: Downtime,
 });
 

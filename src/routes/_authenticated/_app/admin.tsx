@@ -32,9 +32,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export const Route = createFileRoute("/_authenticated/_app/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — Hotel Desk" },
+      { title: "Admin — Zikora" },
       { name: "description", content: "Staff, roles, approval limits, audit log, subscription and the business date." },
-      { property: "og:title", content: "Admin — Hotel Desk" },
+      { property: "og:title", content: "Admin — Zikora" },
       { property: "og:description", content: "Staff, roles, approval limits, audit log, subscription and the business date." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

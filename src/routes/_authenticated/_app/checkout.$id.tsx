@@ -16,7 +16,7 @@ import { EmptyState, LoadingState, TableSkeletonRows, TableStateRow } from "@/co
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/_app/checkout/$id")({
-  head: () => ({ meta: [{ title: "Check-out · Hotel Desk" }] }),
+  head: () => ({ meta: [{ title: "Check-out · Zikora" }] }),
   component: CheckoutPage,
 });
 

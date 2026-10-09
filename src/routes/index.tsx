@@ -5,9 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Hotel Desk — Hotel management for Africa" },
+      { title: "Zikora — Hotel management for Africa" },
       { name: "description", content: "Run reservations, front desk, rooms and folios for your hotel." },
-      { property: "og:title", content: "Hotel Desk — Hotel management for Africa" },
+      { property: "og:title", content: "Zikora — Hotel management for Africa" },
       { property: "og:description", content: "Run reservations, front desk, rooms and folios for your hotel." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

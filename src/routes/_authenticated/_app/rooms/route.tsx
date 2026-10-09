@@ -5,9 +5,9 @@ import { NoAccess } from "@/lib/setup";
 export const Route = createFileRoute("/_authenticated/_app/rooms")({
   head: () => ({
     meta: [
-      { title: "Rooms — Hotel Desk" },
+      { title: "Rooms — Zikora" },
       { name: "description", content: "See every room's condition, occupancy and blocks at a glance." },
-      { property: "og:title", content: "Rooms — Hotel Desk" },
+      { property: "og:title", content: "Rooms — Zikora" },
       { property: "og:description", content: "See every room's condition, occupancy and blocks at a glance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

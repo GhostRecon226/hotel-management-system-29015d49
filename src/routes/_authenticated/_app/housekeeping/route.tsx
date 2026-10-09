@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/_app/housekeeping")({
   head: () => ({
     meta: [
-      { title: "Housekeeping — Hotel Desk" },
+      { title: "Housekeeping — Zikora" },
       { name: "description", content: "Cleaning tasks, inspections and lost and found for your property." },
-      { property: "og:title", content: "Housekeeping — Hotel Desk" },
+      { property: "og:title", content: "Housekeeping — Zikora" },
       { property: "og:description", content: "Cleaning tasks, inspections and lost and found for your property." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

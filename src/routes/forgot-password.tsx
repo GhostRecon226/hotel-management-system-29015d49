@@ -10,7 +10,7 @@ import { AuthLayout } from "@/components/auth-layout";
 import { useHydrated } from "@/lib/use-hydrated";
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset your password — Hotel Desk" }, { name: "description", content: "Get a link to set a new password." }] }),
+  head: () => ({ meta: [{ title: "Reset your password — Zikora" }, { name: "description", content: "Get a link to set a new password." }] }),
   component: ForgotPassword,
 });
 

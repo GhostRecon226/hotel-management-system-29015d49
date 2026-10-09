@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/platform")({
     const me = await context.queryClient.fetchQuery(whoamiQuery);
     if (!me.operator) throw redirect({ to: "/dashboard" });
   },
-  head: () => ({ meta: [{ title: "Platform console · Hotel Desk" }] }),
+  head: () => ({ meta: [{ title: "Platform console · Zikora" }] }),
   component: PlatformConsole,
 });
 

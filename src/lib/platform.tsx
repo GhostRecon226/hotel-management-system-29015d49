@@ -94,7 +94,7 @@ export function TwoStepGate({ onDone }: { onDone: () => void }) {
     try {
       // Remove a half-finished set-up from an earlier visit, then start again.
       for (const f of factors.data?.all ?? []) if (f.status === "unverified") await supabase.auth.mfa.unenroll({ factorId: f.id });
-      const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: `Hotel Desk platform ${new Date().toISOString().slice(0, 10)}` });
+      const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: `Zikora platform ${new Date().toISOString().slice(0, 10)}` });
       if (error) throw error;
       setEnrol({ id: data.id, qr: data.totp.qr_code, secret: data.totp.secret });
     } catch (e) { toast.error(errorMessage(e)); } finally { setBusy(false); }

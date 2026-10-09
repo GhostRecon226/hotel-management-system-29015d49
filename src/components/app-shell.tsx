@@ -19,6 +19,7 @@ import { SETUP_PERMS } from "@/lib/setup";
 import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
 import { SHIFT_PERMS } from "@/lib/cashier";
 import { NotificationBell } from "@/components/notification-bell";
+import { BrandLogo } from "@/components/brand-logo";
 
 type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/cashier" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" | "/downtime" };
 
@@ -47,12 +48,9 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
   const items = MENU.filter((m) => !m.perms || canAny(m.perms));
   return (
     <nav className="flex h-full flex-col px-4 pb-4 pt-5">
-      <div className="mb-5 flex items-center gap-3 px-2">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-fill text-sm font-extrabold text-primary-foreground shadow-accent">HD</div>
-        <div className="min-w-0">
-          <div className="font-display text-[18px] font-semibold leading-tight text-foreground">Hotel Desk</div>
-          <div className="truncate text-xs text-muted-foreground">{ctx.tenant?.name}</div>
-        </div>
+      <div className="mb-5 px-2">
+        <BrandLogo className="h-9 w-auto" />
+        <div className="mt-1.5 truncate text-xs text-muted-foreground">{ctx.tenant?.name}</div>
       </div>
       <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-1">
         {items.map((m) => {

@@ -4,9 +4,9 @@ import { useAccess } from "@/lib/access";
 export const Route = createFileRoute("/_authenticated/_app/guests")({
   head: () => ({
     meta: [
-      { title: "Guests — Hotel Desk" },
+      { title: "Guests — Zikora" },
       { name: "description", content: "Search, create and manage guest profiles." },
-      { property: "og:title", content: "Guests — Hotel Desk" },
+      { property: "og:title", content: "Guests — Zikora" },
       { property: "og:description", content: "Search, create and manage guest profiles." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

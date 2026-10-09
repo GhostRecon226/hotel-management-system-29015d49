@@ -18,7 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export const Route = createFileRoute("/_authenticated/_app/group")({
   head: () => ({
     meta: [
-      { title: "All branches — Hotel Desk" },
+      { title: "All branches — Zikora" },
       { name: "description", content: "Occupancy, arrivals, approvals and last night's revenue for every branch in one view." },
     ],
   }),

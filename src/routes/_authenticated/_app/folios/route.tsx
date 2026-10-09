@@ -6,9 +6,9 @@ import { NoAccess } from "@/lib/setup";
 export const Route = createFileRoute("/_authenticated/_app/folios")({
   head: () => ({
     meta: [
-      { title: "Folios — Hotel Desk" },
+      { title: "Folios — Zikora" },
       { name: "description", content: "Guest bills: charges, payments and balances for every stay." },
-      { property: "og:title", content: "Folios — Hotel Desk" },
+      { property: "og:title", content: "Folios — Zikora" },
       { property: "og:description", content: "Guest bills: charges, payments and balances for every stay." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
