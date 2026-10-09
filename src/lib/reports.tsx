@@ -14,6 +14,8 @@ export interface DashboardSummary {
   vacant_clean: number; vacant_dirty: number; out_of_order: number; pending_approvals: number; open_tickets: number; urgent_tickets: number;
 }
 
+export interface ActivityRow { kind: string; title: string; detail: string; at: string; amount: number | null; currency: string | null }
+
 export function addDays(iso: string, n: number) {
   const d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10);
 }
@@ -28,6 +30,18 @@ export function useDashboardSummary() {
     enabled: !!property,
     refetchInterval: 60_000,
     queryFn: () => callRpc<DashboardSummary>("dashboard_summary", { p_property_id: property!.id }),
+  });
+}
+
+/** The newest things that happened at the hotel, limited by the database to what this person may see. */
+export function useRecentActivity(enabled: boolean, limit = 6) {
+  const { property } = useAccess();
+  return useQuery({
+    queryKey: ["reports", "activity", property?.id, limit],
+    enabled: !!property && enabled,
+    refetchInterval: 60_000,
+    retry: false,
+    queryFn: () => callRpc<ActivityRow[]>("recent_activity", { p_property_id: property!.id, p_limit: limit }),
   });
 }
 
