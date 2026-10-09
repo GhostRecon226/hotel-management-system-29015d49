@@ -11,7 +11,7 @@ const FEATURES = [
 
 /**
  * Two-column layout for sign-in, sign-up and first-time setup. The brand panel hides on small screens.
- * The panel is a dark teal gradient. To use a photo later, add a licensed image to public/brand and set it in `.auth-hero` (src/theme.css).
+ * The panel shows the lobby photo public/brand/login-hero.jpg under a dark teal wash (`.auth-hero` in src/theme.css).
  */
 export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boolean }) {
   return (

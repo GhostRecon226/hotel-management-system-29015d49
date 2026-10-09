@@ -143,10 +143,11 @@
   --sidebar-ring: oklch(0.72 0.1 195);
 }
 
-/* Brand panel on the sign-in screens: dark teal, soft light from the top left. Add a licensed photo as the first background layer to use one. */
+/* Brand panel on the sign-in screens: the hotel lobby photo (public/brand/login-hero.jpg) under a dark teal wash so the white text stays readable. */
 .auth-hero {
   background:
-    radial-gradient(ellipse at 15% 10%, oklch(0.42 0.08 195 / 0.55), transparent 55%),
-    radial-gradient(ellipse at 90% 100%, oklch(0.36 0.07 195 / 0.5), transparent 50%),
-    linear-gradient(160deg, oklch(0.27 0.05 200), oklch(0.19 0.04 205));
+    linear-gradient(100deg, oklch(0.2 0.045 205 / 0.92) 0%, oklch(0.2 0.045 205 / 0.78) 55%, oklch(0.2 0.045 205 / 0.38) 100%),
+    linear-gradient(0deg, oklch(0.18 0.04 205 / 0.75), transparent 35%),
+    url("/brand/login-hero.jpg") 70% center / cover no-repeat,
+    oklch(0.22 0.045 205);
 }
