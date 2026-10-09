@@ -339,6 +339,20 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Errors: `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`, `E_REQUIRED`
 - The snapshot header also holds adults, children, nights, check-in time and a total for each day; each line holds its receipt reference (FIN-019).
 
+### `public.list_minibar_items`
+- Args: `p_property_id uuid`
+- Returns: `TABLE(id uuid, name text, price numeric, is_active boolean)`
+- Callable by signed-in users: yes · security definer
+- Permission: `hk.minibar.record, setup.minibar.manage`
+- Errors: `E_FORBIDDEN`
+
+### `public.list_minibar_rooms`
+- Args: `p_property_id uuid`
+- Returns: `TABLE(room_id uuid, room_number text)`
+- Callable by signed-in users: yes · security definer
+- Permission: `hk.minibar.record`
+- Errors: `E_FORBIDDEN`
+
 ### `public.mark_all_notifications_read`
 - Args: `—`
 - Returns: `void`
@@ -460,6 +474,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: `fin.nightaudit.run`
 - Errors: `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`
+
+### `public.record_minibar_use`
+- Args: `p_room_id uuid, p_items jsonb, p_idempotency_key text`
+- Returns: `uuid`
+- Callable by signed-in users: yes · security definer
+- Permission: `hk.minibar.record`
+- Errors: `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`, `E_REQUIRED`
 
 ### `public.register_invited_user`
 - Args: `p_user_id uuid, p_full_name text, p_phone text DEFAULT NULL::text`
@@ -663,6 +684,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: `fo.view`, `hk.view`
 - Errors: `E_FORBIDDEN`, `E_READ_ONLY`, `E_REQUIRED`
+
+### `public.save_minibar_item`
+- Args: `p_property_id uuid, p_id uuid, p_name text, p_price numeric, p_is_active boolean`
+- Returns: `uuid`
+- Callable by signed-in users: yes · security definer
+- Permission: `setup.minibar.manage`
+- Errors: `E_DUPLICATE`, `E_INVALID`, `E_NOT_FOUND`, `E_REQUIRED`
 
 ### `public.save_payment_method`
 - Args: `p_property_id uuid, p_id uuid, p_code text, p_name text, p_kind text, p_is_active boolean`

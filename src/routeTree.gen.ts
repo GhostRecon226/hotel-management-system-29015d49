@@ -48,6 +48,7 @@ import { Route as AuthenticatedAppGuestsMergeRouteImport } from './routes/_authe
 import { Route as AuthenticatedAppHousekeepingIndexRouteImport } from './routes/_authenticated/_app/housekeeping/index'
 import { Route as AuthenticatedAppHousekeepingInspectionsRouteImport } from './routes/_authenticated/_app/housekeeping/inspections'
 import { Route as AuthenticatedAppHousekeepingLostFoundRouteImport } from './routes/_authenticated/_app/housekeeping/lost-found'
+import { Route as AuthenticatedAppHousekeepingMinibarRouteImport } from './routes/_authenticated/_app/housekeeping/minibar'
 import { Route as AuthenticatedAppHousekeepingMyTasksRouteImport } from './routes/_authenticated/_app/housekeeping/my-tasks'
 import { Route as AuthenticatedAppMaintenanceIndexRouteImport } from './routes/_authenticated/_app/maintenance/index'
 import { Route as AuthenticatedAppMaintenanceIdRouteImport } from './routes/_authenticated/_app/maintenance/$id'
@@ -282,6 +283,12 @@ const AuthenticatedAppHousekeepingLostFoundRoute =
     path: '/lost-found',
     getParentRoute: () => AuthenticatedAppHousekeepingRouteRoute,
   } as any)
+const AuthenticatedAppHousekeepingMinibarRoute =
+  AuthenticatedAppHousekeepingMinibarRouteImport.update({
+    id: '/minibar',
+    path: '/minibar',
+    getParentRoute: () => AuthenticatedAppHousekeepingRouteRoute,
+  } as any)
 const AuthenticatedAppHousekeepingMyTasksRoute =
   AuthenticatedAppHousekeepingMyTasksRouteImport.update({
     id: '/my-tasks',
@@ -425,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/housekeeping/inspections': typeof AuthenticatedAppHousekeepingInspectionsRoute
   '/housekeeping/lost-found': typeof AuthenticatedAppHousekeepingLostFoundRoute
+  '/housekeeping/minibar': typeof AuthenticatedAppHousekeepingMinibarRoute
   '/housekeeping/my-tasks': typeof AuthenticatedAppHousekeepingMyTasksRoute
   '/maintenance/$id': typeof AuthenticatedAppMaintenanceIdRoute
   '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
@@ -475,6 +483,7 @@ export interface FileRoutesByTo {
   '/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/housekeeping/inspections': typeof AuthenticatedAppHousekeepingInspectionsRoute
   '/housekeeping/lost-found': typeof AuthenticatedAppHousekeepingLostFoundRoute
+  '/housekeeping/minibar': typeof AuthenticatedAppHousekeepingMinibarRoute
   '/housekeeping/my-tasks': typeof AuthenticatedAppHousekeepingMyTasksRoute
   '/maintenance/$id': typeof AuthenticatedAppMaintenanceIdRoute
   '/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
@@ -535,6 +544,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/guests/merge': typeof AuthenticatedAppGuestsMergeRoute
   '/_authenticated/_app/housekeeping/inspections': typeof AuthenticatedAppHousekeepingInspectionsRoute
   '/_authenticated/_app/housekeeping/lost-found': typeof AuthenticatedAppHousekeepingLostFoundRoute
+  '/_authenticated/_app/housekeeping/minibar': typeof AuthenticatedAppHousekeepingMinibarRoute
   '/_authenticated/_app/housekeeping/my-tasks': typeof AuthenticatedAppHousekeepingMyTasksRoute
   '/_authenticated/_app/maintenance/$id': typeof AuthenticatedAppMaintenanceIdRoute
   '/_authenticated/_app/reservations/$id': typeof AuthenticatedAppReservationsIdRoute
@@ -594,6 +604,7 @@ export interface FileRouteTypes {
     | '/guests/merge'
     | '/housekeeping/inspections'
     | '/housekeeping/lost-found'
+    | '/housekeeping/minibar'
     | '/housekeeping/my-tasks'
     | '/maintenance/$id'
     | '/reservations/$id'
@@ -644,6 +655,7 @@ export interface FileRouteTypes {
     | '/guests/merge'
     | '/housekeeping/inspections'
     | '/housekeeping/lost-found'
+    | '/housekeeping/minibar'
     | '/housekeeping/my-tasks'
     | '/maintenance/$id'
     | '/reservations/$id'
@@ -703,6 +715,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/guests/merge'
     | '/_authenticated/_app/housekeeping/inspections'
     | '/_authenticated/_app/housekeeping/lost-found'
+    | '/_authenticated/_app/housekeeping/minibar'
     | '/_authenticated/_app/housekeeping/my-tasks'
     | '/_authenticated/_app/maintenance/$id'
     | '/_authenticated/_app/reservations/$id'
@@ -1014,6 +1027,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppHousekeepingLostFoundRouteImport
       parentRoute: typeof AuthenticatedAppHousekeepingRouteRoute
     }
+    '/_authenticated/_app/housekeeping/minibar': {
+      id: '/_authenticated/_app/housekeeping/minibar'
+      path: '/minibar'
+      fullPath: '/housekeeping/minibar'
+      preLoaderRoute: typeof AuthenticatedAppHousekeepingMinibarRouteImport
+      parentRoute: typeof AuthenticatedAppHousekeepingRouteRoute
+    }
     '/_authenticated/_app/housekeeping/my-tasks': {
       id: '/_authenticated/_app/housekeeping/my-tasks'
       path: '/my-tasks'
@@ -1180,6 +1200,7 @@ const AuthenticatedAppGuestsRouteRouteWithChildren =
 interface AuthenticatedAppHousekeepingRouteRouteChildren {
   AuthenticatedAppHousekeepingInspectionsRoute: typeof AuthenticatedAppHousekeepingInspectionsRoute
   AuthenticatedAppHousekeepingLostFoundRoute: typeof AuthenticatedAppHousekeepingLostFoundRoute
+  AuthenticatedAppHousekeepingMinibarRoute: typeof AuthenticatedAppHousekeepingMinibarRoute
   AuthenticatedAppHousekeepingMyTasksRoute: typeof AuthenticatedAppHousekeepingMyTasksRoute
   AuthenticatedAppHousekeepingIndexRoute: typeof AuthenticatedAppHousekeepingIndexRoute
 }
@@ -1190,6 +1211,8 @@ const AuthenticatedAppHousekeepingRouteRouteChildren: AuthenticatedAppHousekeepi
       AuthenticatedAppHousekeepingInspectionsRoute,
     AuthenticatedAppHousekeepingLostFoundRoute:
       AuthenticatedAppHousekeepingLostFoundRoute,
+    AuthenticatedAppHousekeepingMinibarRoute:
+      AuthenticatedAppHousekeepingMinibarRoute,
     AuthenticatedAppHousekeepingMyTasksRoute:
       AuthenticatedAppHousekeepingMyTasksRoute,
     AuthenticatedAppHousekeepingIndexRoute:
