@@ -1,26 +1,51 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BarChart3, ConciergeBell, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/public/public-layout";
 
 /*
- * Hero: label, headline, one paragraph and two buttons, centred.
- * Layout based on "Hero with text and two button" by Tommy Jepsen on 21st.dev (MIT licence).
- * Rebuilt for Zikora with the tokens in src/theme.css; no code copied. See THIRD_PARTY_NOTICES.md.
+ * Landing hero: dark photo, two-tone headline, product screenshot in a laptop frame.
+ * The screenshot is the real dashboard with sample data (public/brand/product-dashboard.jpg).
+ * Layout inspired by the reference mock-up Peter shared; code and wording are ours.
  */
-export function Hero({ label, title, text }: { label: string; title: string; text: string }) {
+const PILLARS = [
+  { icon: ConciergeBell, text: "Streamline operations" },
+  { icon: Smile, text: "Delight your guests" },
+  { icon: BarChart3, text: "Grow revenue" },
+];
+
+export function Hero({ label, lead, rest, text }: { label: string; lead: string; rest: string; text: string }) {
   return (
-    <section className="relative overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-40 mx-auto h-96 max-w-4xl rounded-full bg-primary-soft opacity-70 blur-3xl" />
-      <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 py-20 text-center sm:px-6 sm:py-28">
-        <Eyebrow>{label}</Eyebrow>
-        <h1 className="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">{title}</h1>
-        <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">{text}</p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Button asChild size="lg"><Link to="/auth">Start your free trial <ArrowRight aria-hidden /></Link></Button>
-          <Button asChild size="lg" variant="outline"><Link to="/contact">Talk to us</Link></Button>
+    <section className="landing-hero relative overflow-hidden text-white">
+      <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:py-24">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{label}</p>
+          <h1 className="mt-4 font-display text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+            {lead} <span className="text-gold">{rest}</span>
+          </h1>
+          <p className="mt-5 max-w-xl text-base text-white/85 sm:text-lg">{text}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button asChild size="lg" variant="secondary"><Link to="/auth">Start your free trial <ArrowRight aria-hidden /></Link></Button>
+            <Button asChild size="lg" variant="outline" className="border-white/50 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link to="/contact">Talk to us</Link></Button>
+          </div>
+          <p className="mt-3 text-sm text-white/70">30 days free. No card needed.</p>
+          <ul className="mt-8 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
+            {PILLARS.map(({ icon: Icon, text: t }) => (
+              <li key={t} className="flex items-center gap-3">
+                <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-lg border border-white/25 bg-white/10"><Icon className="size-5" /></span>
+                <span className="text-sm font-semibold leading-tight">{t}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">30 days free. No card needed.</p>
+        <figure className="mx-auto w-full max-w-xl lg:max-w-none">
+          <div className="rounded-t-2xl border border-white/20 bg-black/60 p-2 pb-0 shadow-raised">
+            <img src="/brand/product-dashboard.jpg" width={1440} height={900} loading="eager"
+              alt="The Zikora dashboard: today's arrivals and departures, rooms occupied, and room status."
+              className="block h-auto w-full rounded-t-lg" />
+          </div>
+          <div aria-hidden className="mx-auto h-2.5 w-[106%] -translate-x-[2.8%] rounded-b-xl bg-white/25" />
+          <figcaption className="mt-3 text-center text-xs text-white/60">Sample data</figcaption>
+        </figure>
       </div>
     </section>
   );

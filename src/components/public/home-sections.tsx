@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowRight, BarChart3, BedDouble, CalendarDays, ConciergeBell, Download, Globe2, Lock, Receipt, Sparkles, Wifi, type LucideIcon } from "lucide-react";
 import { Section } from "@/components/public/public-layout";
+import { Button } from "@/components/ui/button";
 
 /*
  * Extra home and pricing sections. Ideas only (a night-shift story, role screens, size bands, growth steps);
@@ -76,6 +78,69 @@ export function SizeBands() {
           {BANDS.map((b) => <li key={b} className="rounded-full border border-border/70 bg-card px-3.5 py-1.5 text-sm font-semibold">{b}</li>)}
         </ul>
         <p className="mt-4 text-sm text-muted-foreground"><Link to="/contact" className="font-semibold text-primary underline-offset-4 hover:underline">Ask for your price</Link></p>
+      </div>
+    </Section>
+  );
+}
+
+const FACTS: { icon: LucideIcon; text: string }[] = [
+  { icon: Globe2, text: "Data stored in the European Union (Ireland)" },
+  { icon: Lock, text: "Each hotel's data kept apart from every other hotel's" },
+  { icon: Wifi, text: "Runs in your browser. Nothing to install" },
+  { icon: Download, text: "Export to a spreadsheet at any time" },
+];
+
+/** Facts strip under the hero. Real facts only: there are no customer names or logos to show yet. */
+export function FactsStrip() {
+  return (
+    <section aria-label="Built for independent hotels" className="border-b border-border/70 bg-card">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Built in Africa, for independent hotels</p>
+        <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {FACTS.map(({ icon: Icon, text }) => (
+            <li key={text} className="flex items-center gap-3 text-sm font-semibold">
+              <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary-strong"><Icon className="size-4" /></span>
+              {text}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+const TILES: { icon: LucideIcon; title: string; text: string; tone: string }[] = [
+  { icon: CalendarDays, title: "Reservations", text: "Take bookings and walk-ins. A room is never booked twice.", tone: "bg-primary-soft text-primary-strong" },
+  { icon: ConciergeBell, title: "Front desk", text: "Check guests in and out. Arrivals, in house and departures on one screen.", tone: "bg-warning-soft text-warning-strong" },
+  { icon: BedDouble, title: "Rooms", text: "See which rooms are clean, dirty or out of order.", tone: "bg-info-soft text-info-strong" },
+  { icon: Sparkles, title: "Housekeeping", text: "A cleaning task appears when a guest leaves or moves rooms.", tone: "bg-info-soft text-info-strong" },
+  { icon: Receipt, title: "Billing and folio", text: "Service charge and VAT on every charge, in your currency.", tone: "bg-danger-soft text-danger-strong" },
+  { icon: BarChart3, title: "Reports", text: "Occupancy, ADR and RevPAR every morning. Export to a spreadsheet.", tone: "bg-success-soft text-success-strong" },
+];
+
+/** "Everything you need" block: heading, six tiles and a photo card. */
+export function AllInOne() {
+  return (
+    <Section>
+      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,4fr)_minmax(0,6fr)_minmax(0,3.4fr)]">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-strong">All in one place</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Everything you need to run a modern hotel</h2>
+          <p className="mt-4 text-[15px] text-muted-foreground">From the booking to the housekeeping round to the final bill, your whole operation lives in one system.</p>
+          <Button asChild size="lg" className="mt-6"><Link to="/features">Explore features <ArrowRight aria-hidden /></Link></Button>
+        </div>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {TILES.map(({ icon: Icon, title, text, tone }) => (
+            <li key={title} className="rounded-xl border border-border/70 bg-card p-4 shadow-card">
+              <span aria-hidden className={`grid size-10 place-items-center rounded-lg ${tone}`}><Icon className="size-5" /></span>
+              <h3 className="mt-3 text-[15px] font-bold">{title}</h3>
+              <p className="mt-1 text-sm leading-snug text-muted-foreground">{text}</p>
+            </li>
+          ))}
+        </ul>
+        <div className="landing-hero relative hidden min-h-72 overflow-hidden rounded-2xl text-white xl:block xl:h-full">
+          <p className="absolute inset-x-4 bottom-4 rounded-xl bg-black/45 px-4 py-3 text-sm font-semibold backdrop-blur-sm">A smooth check-in. A correct bill. A room that is ready.</p>
+        </div>
       </div>
     </Section>
   );

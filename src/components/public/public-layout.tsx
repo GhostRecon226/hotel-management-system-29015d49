@@ -37,10 +37,13 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
             {signedIn
               ? <Button asChild size="sm"><Link to="/dashboard">Open the app</Link></Button>
-              : <Button asChild size="sm" variant="outline"><Link to="/auth">Sign in</Link></Button>}
+              : <>
+                  <Button asChild size="sm" variant="outline"><Link to="/auth">Sign in</Link></Button>
+                  <Button asChild size="sm" className="hidden sm:inline-flex"><Link to="/auth">Start free trial</Link></Button>
+                </>}
           </div>
         </div>
       </header>

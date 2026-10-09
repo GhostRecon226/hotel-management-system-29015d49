@@ -1,10 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { BadgeCheck, BedDouble, ConciergeBell, FileText, ShieldCheck, Users, Wifi, Check } from "lucide-react";
+import { Wifi, Check } from "lucide-react";
 import { Hero } from "@/components/public/hero";
-import { FeatureGrid } from "@/components/public/feature-grid";
 import { Section } from "@/components/public/public-layout";
-import { GrowthStrip, NightShift, RoleScreens } from "@/components/public/home-sections";
+import { AllInOne, FactsStrip, NightShift, RoleScreens } from "@/components/public/home-sections";
 import { Button } from "@/components/ui/button";
 import { hasStoredSession } from "@/lib/session-hint";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
@@ -45,8 +44,12 @@ function Home() {
   return (
     <>
       <Hero label="Hotel management software for Africa"
-        title="Know every payment that comes through your front desk."
+        lead="Know every payment" rest="that comes through your front desk."
         text="Zikora is hotel management software built in Africa, for independent hotels. Take bookings, check guests in and out, keep rooms ready and keep every bill correct, in your own currency. We are launching in Nigeria." />
+
+      <FactsStrip />
+
+      <AllInOne />
 
       <Section className="pt-0 sm:pt-0">
         <div className="mx-auto max-w-3xl rounded-2xl border border-border/70 bg-card p-6 shadow-card sm:p-8">
@@ -60,25 +63,7 @@ function Home() {
 
       <NightShift />
 
-      <Section className="pt-4 sm:pt-6">
-        <h2 className="text-center text-2xl font-extrabold tracking-tight sm:text-3xl">What your team gets</h2>
-        <p className="mx-auto mt-2 max-w-2xl text-center text-[15px] text-muted-foreground">One system for the desk, housekeeping, maintenance and the accounts.</p>
-        <div className="mt-10">
-          <FeatureGrid items={[
-            { icon: ConciergeBell, title: "A front desk that keeps up", text: "Take bookings and walk-ins. Check guests in and out. See today's arrivals, guests in house and departures on one screen." },
-            { icon: FileText, title: "Bills that add up", text: "Service charge and VAT are worked out on every charge, in your hotel's currency. Print an interim bill during the stay and a final invoice at check-out." },
-            { icon: ShieldCheck, title: "Nothing changes quietly", text: "Discounts above a limit, adjustments, reversals and refunds need a second person to approve. Every change is on record, and a bill line can never be deleted, only corrected." },
-            { icon: BedDouble, title: "Rooms ready on time", text: "See which rooms are clean, dirty or out of order. Cleaning tasks appear when a guest leaves or moves rooms, and inspections are recorded." },
-            { icon: Users, title: "The right access for each person", text: "Give front desk, reservations, housekeeping, maintenance, cashier and accounts staff only what they need. Or build your own roles." },
-            { icon: BadgeCheck, title: "Figures every morning", text: "The day closes by itself each night. Open the app to see occupancy, average daily rate and revenue per available room, and export to a spreadsheet." },
-          ]} />
-        </div>
-        <p className="mt-6 text-center text-sm"><Link to="/features" className="font-semibold text-primary underline-offset-4 hover:underline">See everything Zikora does</Link></p>
-      </Section>
-
       <RoleScreens />
-
-      <GrowthStrip />
 
       <Section className="pt-0 sm:pt-0">
         <h2 className="text-center text-2xl font-extrabold tracking-tight sm:text-3xl">Start in three steps</h2>
