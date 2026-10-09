@@ -1,26 +1,47 @@
 import type { ReactNode } from "react";
-import { BedDouble, ConciergeBell, FileText } from "lucide-react";
+import { BarChart3, BedDouble, CalendarDays, ConciergeBell } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 
-/** Two-column layout for sign-in, sign-up and first-time setup. Brand panel hides on small screens. */
+const FEATURES = [
+  { icon: CalendarDays, title: "Reservations", text: "Manage bookings in one place" },
+  { icon: ConciergeBell, title: "Front desk", text: "Faster check-in and check-out" },
+  { icon: BedDouble, title: "Rooms", text: "Track availability, housekeeping and maintenance" },
+  { icon: BarChart3, title: "Reports", text: "Make decisions with figures from the day" },
+];
+
+/**
+ * Two-column layout for sign-in, sign-up and first-time setup. The brand panel hides on small screens.
+ * The panel is a dark teal gradient. To use a photo later, add a licensed image to public/brand and set it in `.auth-hero` (src/theme.css).
+ */
 export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boolean }) {
   return (
-    <div className="grid min-h-screen bg-background lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      <aside className="hidden flex-col justify-between bg-sidebar p-10 text-sidebar-foreground lg:flex">
-        <BrandLogo variant="login" className="h-14 w-auto self-start" />
-        <div className="max-w-sm">
-          <h2 className="text-3xl font-semibold leading-tight text-sidebar-primary">Run your front desk with less effort.</h2>
-          <ul className="mt-8 space-y-4 text-[15px]">
-            <li className="flex items-center gap-3"><ConciergeBell className="size-5 shrink-0" /> Check guests in and out quickly</li>
-            <li className="flex items-center gap-3"><BedDouble className="size-5 shrink-0" /> See which rooms are clean and ready</li>
-            <li className="flex items-center gap-3"><FileText className="size-5 shrink-0" /> Keep every bill correct, in naira (₦)</li>
+    <div className="grid min-h-screen bg-background lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
+      <aside className="auth-hero relative hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex">
+        <BrandLogo variant="login" onDark className="relative h-14 w-auto self-start" />
+        <div className="relative max-w-md">
+          <h2 className="text-5xl font-semibold leading-[1.1]">Simpler operations. Happier guests.</h2>
+          <p className="mt-5 text-base leading-relaxed text-white/80">
+            One system for the front desk, housekeeping and the bills, in naira. Built for hotels in Nigeria and across Africa.
+          </p>
+          <ul className="mt-9 space-y-5">
+            {FEATURES.map(({ icon: Icon, title, text }) => (
+              <li key={title} className="flex items-center gap-4">
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/10 ring-1 ring-white/15" aria-hidden>
+                  <Icon className="size-5 text-white" />
+                </span>
+                <span>
+                  <span className="block text-[15px] font-semibold">{title}</span>
+                  <span className="block text-sm text-white/75">{text}</span>
+                </span>
+              </li>
+            ))}
           </ul>
         </div>
-        <p className="text-sm text-sidebar-foreground/60">Built for hotels in Nigeria and across Africa.</p>
+        <p className="relative text-xs uppercase tracking-[0.3em] text-white/70">Built for modern hospitality</p>
       </aside>
       <main className="flex items-center justify-center px-4 py-10 sm:px-8">
         <div className={wide ? "w-full max-w-lg" : "w-full max-w-md"}>
-          <BrandLogo variant="login" className="mb-8 h-11 w-auto lg:hidden" />
+          <BrandLogo variant="login" className="mb-8 h-12 w-auto self-start lg:h-14" />
           {children}
         </div>
       </main>

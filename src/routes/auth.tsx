@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,8 +34,8 @@ function AuthPage() {
   return (
     <AuthLayout>
       <div>
-        <h1 className="text-[28px] font-semibold">Welcome</h1>
-        <p className="mb-6 mt-1 text-[15px] text-muted-foreground">Sign in to your hotel, or create an account.</p>
+        <h1 className="text-[32px] font-semibold">Welcome back</h1>
+        <p className="mb-6 mt-1 text-[15px] text-muted-foreground">Sign in to your hotel management account, or create one.</p>
         <Tabs defaultValue="signin">
           <TabsList className="mb-6 grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign in</TabsTrigger>
@@ -54,6 +55,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const hydrated = useHydrated();
 
   async function submit(e: FormEvent) {
@@ -93,23 +95,33 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       {/* Locked until the page is ready, so nothing typed or clicked during a slow first load is lost. */}
       <fieldset disabled={!hydrated} className="space-y-5">
       <div className="space-y-1.5">
-        <Label htmlFor={`${mode}-email`}>Email</Label>
-        <Input id={`${mode}-email`} type="email" autoComplete="email" value={email}
-          onChange={(e) => setEmail(e.target.value)} required />
+        <Label htmlFor={`${mode}-email`}>Email address</Label>
+        <div className="relative">
+          <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input id={`${mode}-email`} type="email" autoComplete="email" placeholder="you@hotelname.com" className="h-11 pl-10" value={email}
+            onChange={(e) => setEmail(e.target.value)} required />
+        </div>
       </div>
       <div className="space-y-1.5">
         <Label htmlFor={`${mode}-password`}>Password</Label>
-        <Input id={`${mode}-password`} type="password"
-          autoComplete={mode === "signup" ? "new-password" : "current-password"}
-          value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <div className="relative">
+          <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input id={`${mode}-password`} type={showPassword ? "text" : "password"} placeholder="Enter your password" className="h-11 px-10"
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <button type="button" onClick={() => setShowPassword((v) => !v)} aria-pressed={showPassword} aria-label="Reveal characters"
+            className="absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
+            {showPassword ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+          </button>
+        </div>
         {mode === "signup" && <p className="text-sm text-muted-foreground">At least 8 characters.</p>}
         {mode === "signin" && (
-          <p className="text-sm"><Link to="/forgot-password" className="text-primary hover:underline">Forgot password?</Link></p>
+          <p className="text-right text-sm"><Link to="/forgot-password" className="text-primary hover:underline">Forgot password?</Link></p>
         )}
       </div>
       {error && <p className="rounded-md bg-danger-soft px-3 py-2.5 text-sm text-danger-strong" role="alert">{error}</p>}
-      <Button type="submit" size="lg" className="w-full" disabled={busy}>
-        {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
+      <Button type="submit" size="lg" className="h-11 w-full gap-2" disabled={busy}>
+        {busy ? "Please wait…" : mode === "signup" ? "Create account" : <>Sign in <ArrowRight className="size-4" aria-hidden /></>}
       </Button>
       </fieldset>
     </form>
