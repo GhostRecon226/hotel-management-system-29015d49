@@ -7,7 +7,7 @@ export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boo
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <aside className="hidden flex-col justify-between bg-sidebar p-10 text-sidebar-foreground lg:flex">
-        <BrandLogo className="h-12 w-auto self-start" />
+        <BrandLogo variant="login" className="h-14 w-auto self-start" />
         <div className="max-w-sm">
           <h2 className="text-3xl font-semibold leading-tight text-sidebar-primary">Run your front desk with less effort.</h2>
           <ul className="mt-8 space-y-4 text-[15px]">
@@ -20,7 +20,7 @@ export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boo
       </aside>
       <main className="flex items-center justify-center px-4 py-10 sm:px-8">
         <div className={wide ? "w-full max-w-lg" : "w-full max-w-md"}>
-          <BrandLogo className="mb-8 h-10 w-auto lg:hidden" />
+          <BrandLogo variant="login" className="mb-8 h-11 w-auto lg:hidden" />
           {children}
         </div>
       </main>
