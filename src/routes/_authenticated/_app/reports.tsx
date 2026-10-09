@@ -265,7 +265,7 @@ function Reports() {
 
         {fin && (
           <TabsContent value="payments">
-            <p className="mb-3 text-sm text-muted-foreground">Payments recorded in the system. Payments are taken outside the system.</p>
+            <p className="mb-3 text-sm text-muted-foreground">Payments recorded in the system. Payments are taken outside the system. A payment that was reversed shows as taken back, the same way the owner summary and invoices count it.</p>
             <Table>
               <TableHeader><TableRow>
                 <TableHead>Date</TableHead><TableHead>Method</TableHead><TableHead className="text-right">Count</TableHead>
