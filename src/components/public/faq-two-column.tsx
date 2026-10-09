@@ -10,7 +10,7 @@ const link = "font-semibold text-primary underline-offset-4 hover:underline";
 /*
  * Two-column FAQ: a sticky intro and contact card on the left, the questions on the right, grouped by topic.
  * Layout based on "Two-Column FAQ" (faqs-02) by LN (lndev-ui) on 21st.dev (MIT licence).
- * Rebuilt for Hotel Desk with the tokens in src/theme.css and our Radix accordion; no code copied.
+ * Rebuilt for Zikora with the tokens in src/theme.css and our Radix accordion; no code copied.
  * The intro comes first in the page, so keyboard order follows reading order: heading, contact button, questions.
  */
 export function FaqTwoColumn({ faqs, title, intro }: { faqs: Faq[]; title: string; intro: string }) {

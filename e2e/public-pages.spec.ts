@@ -9,7 +9,7 @@ const PAGES: [string, RegExp][] = [
   ["/pricing", /Try it free\. Pay for the size of your hotel/],
   ["/security", /Guest records and hotel money, protected on purpose/],
   ["/faq", /Questions hotel owners ask/],
-  ["/about", /About Hotel Desk/],
+  ["/about", /About Zikora/],
   ["/contact", /Talk to a real person/],
   ["/privacy", /Privacy notice/],
   ["/terms", /Terms of use/],

@@ -6,7 +6,7 @@ import { SizeBands } from "@/components/public/home-sections";
 import { Eyebrow, Section } from "@/components/public/public-layout";
 import { pageHead } from "@/lib/seo";
 
-const TITLE = "Hotel Software Pricing: 30-Day Free Trial | Hotel Desk";
+const TITLE = "Hotel Software Pricing: 30-Day Free Trial | Zikora";
 const DESCRIPTION = "Start free for 30 days with no card. Then pay a simple monthly price based on the size of your hotel. Talk to us for your price.";
 
 export const Route = createFileRoute("/_public/pricing")({
@@ -25,7 +25,7 @@ function Pricing() {
       </Section>
       <Section className="pt-0 sm:pt-0">
         <SinglePlanCard
-          title="Hotel Desk for your hotel"
+          title="Zikora for your hotel"
           lead={<>30 days free to start. Then a simple monthly price based on the size of your hotel. <Link to="/contact" className="font-semibold text-primary-foreground underline underline-offset-4">Talk to us</Link> for yours.</>}
           includes={[
             "Bookings, walk-ins, check-in and check-out",

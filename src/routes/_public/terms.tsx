@@ -4,8 +4,8 @@ import { LegalPart } from "@/components/public/legal";
 import { ToConfirm } from "@/components/public/to-confirm";
 import { pageHead } from "@/lib/seo";
 
-const TITLE = "Terms of Use | Hotel Desk";
-const DESCRIPTION = "The terms for using Hotel Desk: free trial, plans, your data, payments and taxes, and how to cancel.";
+const TITLE = "Terms of Use | Zikora";
+const DESCRIPTION = "The terms for using Zikora: free trial, plans, your data, payments and taxes, and how to cancel.";
 
 export const Route = createFileRoute("/_public/terms")({
   head: () => pageHead({ title: TITLE, description: DESCRIPTION }),
@@ -25,7 +25,7 @@ function Terms() {
       <div className="mt-6"><DraftNotice /></div>
       <p className="mb-6 text-[15px] leading-relaxed text-muted-foreground"><strong className="text-foreground">In short.</strong> You get a free trial. After it, your hotel pays a price we agree together. Your data stays yours. We keep the service running with care, and we explain here what happens when things go wrong.</p>
       <LegalPart title="1. The service">
-        <p>Hotel Desk is a hotel management system provided by <ToConfirm what="company name" /> ("we", "us"). It runs in a web browser and needs an internet connection. By creating an account or using the service, you agree to these terms on behalf of your hotel.</p>
+        <p>Zikora is a hotel management system provided by <ToConfirm what="company name" /> ("we", "us"). It runs in a web browser and needs an internet connection. By creating an account or using the service, you agree to these terms on behalf of your hotel.</p>
       </LegalPart>
       <LegalPart title="2. Your account">
         <p>You decide who in your hotel can sign in and what each person can do. Keep sign-in details private, and tell us if you think someone else has them. You are responsible for what is done under your hotel's account.</p>
@@ -44,7 +44,7 @@ function Terms() {
       </LegalPart>
       <LegalPart title="7. Payments and taxes">
         <ul>
-          <li>Hotel Desk records payments you take outside the system. It does not charge cards or move money.</li>
+          <li>Zikora records payments you take outside the system. It does not charge cards or move money.</li>
           <li>Your hotel sets its own tax and service charge rates. Set them with your accountant's advice. You remain responsible for the tax returns your hotel files.</li>
         </ul>
       </LegalPart>

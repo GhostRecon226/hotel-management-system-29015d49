@@ -24,7 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { RoomName } from "@/components/room-name";
 
 export const Route = createFileRoute("/_authenticated/_app/front-desk")({
-  head: () => ({ meta: [{ title: "Front Desk · Hotel Desk" }] }),
+  head: () => ({ meta: [{ title: "Front Desk · Zikora" }] }),
   component: FrontDesk,
 });
 
@@ -134,6 +134,7 @@ function FrontDesk() {
                     {formatDay(a.arrival_date)} – {formatDay(a.departure_date)}
                     <span className="block text-sm text-muted-foreground">{nightsLabel(a.nights)} · {a.room_type_code}</span>
                     {a.is_late && <Badge variant="danger">Late arrival</Badge>}
+                    {a.arrival_ready && <Badge variant="success">Ready</Badge>}
                   </TableCell>
                   <TableCell>
                     {a.room_number

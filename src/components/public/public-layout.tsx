@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { hasStoredSession } from "@/lib/session-hint";
+import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -25,8 +26,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6">
           <Link to="/" className="flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
-            <span className="grid size-9 place-items-center rounded-xl bg-accent-fill text-sm font-extrabold text-primary-foreground shadow-accent" aria-hidden>HD</span>
-            <span className="text-[17px] font-bold">Hotel Desk</span>
+            <BrandLogo className="h-9 w-auto" />
           </Link>
           <nav aria-label="Main" className="order-3 -mx-2 flex w-full gap-1 overflow-x-auto sm:order-none sm:mx-0 sm:w-auto">
             {NAV.map((n) => (
@@ -49,8 +49,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))] sm:px-6">
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="grid size-8 place-items-center rounded-lg bg-accent-fill text-xs font-extrabold text-primary-foreground" aria-hidden>HD</span>
-              <span className="font-bold">Hotel Desk</span>
+              <BrandLogo className="h-8 w-auto" />
             </div>
             <p className="mt-3 max-w-sm text-sm text-muted-foreground">Hotel management software built in Africa, for independent hotels. Know every payment that comes through your front desk.</p>
           </div>

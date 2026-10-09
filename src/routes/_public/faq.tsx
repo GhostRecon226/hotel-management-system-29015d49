@@ -5,7 +5,7 @@ import { Section } from "@/components/public/public-layout";
 import { pageHead } from "@/lib/seo";
 import { SITE_INFO } from "@/lib/site-info";
 
-const TITLE = "Hotel Software FAQ: Price, Tax and Your Data | Hotel Desk";
+const TITLE = "Hotel Software FAQ: Price, Tax and Your Data | Zikora";
 const DESCRIPTION = "Answers on price, VAT and service charge, payments, housekeeping, staff access and where your hotel's data is kept.";
 
 const helpText = `Email ${SITE_INFO["contact email"]} or call ${SITE_INFO["phone"]}. Support hours: ${SITE_INFO["support hours"]}.`;

@@ -13,9 +13,9 @@ import { useHydrated } from "@/lib/use-hydrated";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in | Hotel Desk" },
+      { title: "Sign in | Zikora" },
       { name: "description", content: "Sign in or create an account to manage your hotel." },
-      { property: "og:title", content: "Sign in | Hotel Desk" },
+      { property: "og:title", content: "Sign in | Zikora" },
       { property: "og:description", content: "Sign in or create an account to manage your hotel." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

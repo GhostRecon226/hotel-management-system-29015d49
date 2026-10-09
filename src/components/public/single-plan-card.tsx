@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 /*
  * One centred plan card: headline instead of a price, a checklist, short trust notes and the call to action.
  * Layout based on "Single Plan Pricing Card" (pricing-17) by LN (lndev-ui) on 21st.dev (MIT licence).
- * Rebuilt for Hotel Desk with the tokens in src/theme.css; no code copied. No prices: plan tiers are not decided (A16).
+ * Rebuilt for Zikora with the tokens in src/theme.css; no code copied. No prices: plan tiers are not decided (A16).
  */
 export function SinglePlanCard({ title, lead, includes, notes }: { title: string; lead: ReactNode; includes: string[]; notes: string[] }) {
   return (

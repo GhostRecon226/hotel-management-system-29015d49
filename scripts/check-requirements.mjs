@@ -9,7 +9,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const PREFIXES = "PLT|ADM|SET|RES|FO|GST|ROOM|HK|MNT|SVC|FIN|DAY|RPT|NFR";
+const PREFIXES = "AI|PLT|GRP|ADM|SET|RES|FO|GST|ROOM|HK|MNT|SVC|FIN|DAY|RPT|NFR";
 const ID = new RegExp(`\\b((?:${PREFIXES})-\\d{3}[a-z]?)\\b`, "g");
 const TAG = new RegExp(`\\[((?:${PREFIXES})-\\d{3}[a-z]?)\\]`, "g");
 
@@ -36,6 +36,7 @@ const note = (id, file) => { if (!used.has(id)) used.set(id, new Set()); used.ge
 const sqlFiles = [
   ...readdirSync("supabase/tests/db").filter((f) => f.endsWith(".sql")).map((f) => join("supabase/tests/db", f)),
   "supabase/tests/upgrade/after.sql",
+  "supabase/tests/concurrency/last_room.sh",
 ];
 for (const f of sqlFiles) for (const m of readFileSync(f, "utf8").matchAll(TAG)) note(m[1], f);
 for (const f of readdirSync("e2e").filter((f) => f.endsWith(".spec.ts")).map((f) => join("e2e", f)))

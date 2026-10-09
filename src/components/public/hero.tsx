@@ -6,7 +6,7 @@ import { Eyebrow } from "@/components/public/public-layout";
 /*
  * Hero: label, headline, one paragraph and two buttons, centred.
  * Layout based on "Hero with text and two button" by Tommy Jepsen on 21st.dev (MIT licence).
- * Rebuilt for Hotel Desk with the tokens in src/theme.css; no code copied. See THIRD_PARTY_NOTICES.md.
+ * Rebuilt for Zikora with the tokens in src/theme.css; no code copied. See THIRD_PARTY_NOTICES.md.
  */
 export function Hero({ label, title, text }: { label: string; title: string; text: string }) {
   return (

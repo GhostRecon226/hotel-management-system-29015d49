@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
 
 const TITLE = "Hotel Software Features: Front Desk, Billing, Housekeeping";
-const DESCRIPTION = "See what Hotel Desk does: reservations, check-in, VAT and service charge billing, housekeeping, maintenance and daily reports for Nigerian hotels.";
+const DESCRIPTION = "See what Zikora does: reservations, check-in, VAT and service charge billing, housekeeping, maintenance and daily reports for Nigerian hotels.";
 
 export const Route = createFileRoute("/_public/features")({
   head: () => pageHead({ title: TITLE, description: DESCRIPTION, jsonLd: [ORGANIZATION_LD] }),
@@ -28,7 +28,7 @@ function Features() {
     <Section className="max-w-4xl">
       <Eyebrow>Features</Eyebrow>
       <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">Everything your hotel's front office runs on, in one system.</h1>
-      <p className="mt-4 max-w-2xl text-base text-muted-foreground">From the first booking to the final invoice, Hotel Desk keeps your team, your rooms and your money in step. Here is what it does today.</p>
+      <p className="mt-4 max-w-2xl text-base text-muted-foreground">From the first booking to the final invoice, Zikora keeps your team, your rooms and your money in step. Here is what it does today.</p>
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
         {AREAS.map((a) => (
           <section key={a.title} className="rounded-xl border border-border/70 bg-card p-6 shadow-card">

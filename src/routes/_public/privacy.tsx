@@ -4,8 +4,8 @@ import { LegalPart } from "@/components/public/legal";
 import { ToConfirm } from "@/components/public/to-confirm";
 import { pageHead } from "@/lib/seo";
 
-const TITLE = "Privacy Notice | Hotel Desk";
-const DESCRIPTION = "How Hotel Desk stores and protects information for hotels, their staff and their guests.";
+const TITLE = "Privacy Notice | Zikora";
+const DESCRIPTION = "How Zikora stores and protects information for hotels, their staff and their guests.";
 
 export const Route = createFileRoute("/_public/privacy")({
   head: () => pageHead({ title: TITLE, description: DESCRIPTION }),
@@ -23,13 +23,13 @@ function Privacy() {
       <h1 className="mt-4 text-4xl font-extrabold tracking-tight">Privacy notice</h1>
       <p className="mt-3 text-sm text-muted-foreground">Last updated: <ToConfirm what="date of the final version" /></p>
       <div className="mt-6"><DraftNotice /></div>
-      <p className="mb-6 text-[15px] leading-relaxed text-muted-foreground"><strong className="text-foreground">In short.</strong> Hotels use Hotel Desk to run their business. The hotel decides what it records about its guests and is responsible for it. We store that information for the hotel, we keep each hotel's data separate, and we never sell it.</p>
+      <p className="mb-6 text-[15px] leading-relaxed text-muted-foreground"><strong className="text-foreground">In short.</strong> Hotels use Zikora to run their business. The hotel decides what it records about its guests and is responsible for it. We store that information for the hotel, we keep each hotel's data separate, and we never sell it.</p>
       <LegalPart title="1. Who we are">
-        <p>Hotel Desk is provided by <ToConfirm what="company name" /> ("we", "us"). We run the software that hotels use. <ToConfirm what="company role and registration, after legal review" /></p>
+        <p>Zikora is provided by <ToConfirm what="company name" /> ("we", "us"). We run the software that hotels use. <ToConfirm what="company role and registration, after legal review" /></p>
       </LegalPart>
       <LegalPart title="2. Whose information this covers">
         <ul>
-          <li><strong>Hotel staff</strong> who sign in to Hotel Desk.</li>
+          <li><strong>Hotel staff</strong> who sign in to Zikora.</li>
           <li><strong>Hotel guests</strong> whose details a hotel records.</li>
           <li><strong>Visitors</strong> to this website.</li>
         </ul>

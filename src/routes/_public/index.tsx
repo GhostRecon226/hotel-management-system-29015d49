@@ -9,11 +9,11 @@ import { Button } from "@/components/ui/button";
 import { hasStoredSession } from "@/lib/session-hint";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
 
-const TITLE = "Hotel Management Software for Africa | Hotel Desk";
+const TITLE = "Hotel Management Software for Africa | Zikora";
 const DESCRIPTION = "Take bookings, check guests in and out and keep every bill correct. Hotel software built in Africa, launching in Nigeria. Try it free for 30 days.";
 
 const softwareLd = {
-  "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Hotel Desk",
+  "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Zikora",
   applicationCategory: "BusinessApplication", operatingSystem: "Web browser", description: DESCRIPTION,
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "30-day free trial" },
 };
@@ -46,7 +46,7 @@ function Home() {
     <>
       <Hero label="Hotel management software for Africa"
         title="Know every payment that comes through your front desk."
-        text="Hotel Desk is hotel management software built in Africa, for independent hotels. Take bookings, check guests in and out, keep rooms ready and keep every bill correct, in your own currency. We are launching in Nigeria." />
+        text="Zikora is hotel management software built in Africa, for independent hotels. Take bookings, check guests in and out, keep rooms ready and keep every bill correct, in your own currency. We are launching in Nigeria." />
 
       <Section className="pt-0 sm:pt-0">
         <div className="mx-auto max-w-3xl rounded-2xl border border-border/70 bg-card p-6 shadow-card sm:p-8">
@@ -54,7 +54,7 @@ function Home() {
           <ul className="mt-4 space-y-2.5 text-[15px] text-muted-foreground">
             {PAINS.map((p) => <li key={p} className="flex gap-2.5"><span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />{p}</li>)}
           </ul>
-          <p className="mt-5 font-semibold">Hotel Desk is built to end these problems, one screen at a time.</p>
+          <p className="mt-5 font-semibold">Zikora is built to end these problems, one screen at a time.</p>
         </div>
       </Section>
 
@@ -73,7 +73,7 @@ function Home() {
             { icon: BadgeCheck, title: "Figures every morning", text: "The day closes by itself each night. Open the app to see occupancy, average daily rate and revenue per available room, and export to a spreadsheet." },
           ]} />
         </div>
-        <p className="mt-6 text-center text-sm"><Link to="/features" className="font-semibold text-primary underline-offset-4 hover:underline">See everything Hotel Desk does</Link></p>
+        <p className="mt-6 text-center text-sm"><Link to="/features" className="font-semibold text-primary underline-offset-4 hover:underline">See everything Zikora does</Link></p>
       </Section>
 
       <RoleScreens />
@@ -108,7 +108,7 @@ function Home() {
       <Section className="pt-0 sm:pt-0">
         <div className="relative overflow-hidden rounded-2xl bg-accent-fill px-6 py-12 text-center text-primary-foreground shadow-accent sm:px-12">
           <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/10" />
-          <h2 className="relative text-2xl font-extrabold tracking-tight sm:text-3xl">Try Hotel Desk free for 30 days.</h2>
+          <h2 className="relative text-2xl font-extrabold tracking-tight sm:text-3xl">Try Zikora free for 30 days.</h2>
           <p className="relative mx-auto mt-2 max-w-xl text-[15px] text-on-primary-muted">No card needed. If you decide it is not for you, nothing is deleted.</p>
           <div className="relative mt-6 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg" variant="secondary"><Link to="/auth">Start your free trial</Link></Button>

@@ -1,15 +1,13 @@
 import type { ReactNode } from "react";
 import { BedDouble, ConciergeBell, FileText } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 /** Two-column layout for sign-in, sign-up and first-time setup. Brand panel hides on small screens. */
 export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boolean }) {
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <aside className="hidden flex-col justify-between bg-sidebar p-10 text-sidebar-foreground lg:flex">
-        <div className="flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-md bg-sidebar-primary font-bold text-sidebar-primary-foreground">HD</div>
-          <span className="text-lg font-semibold text-sidebar-primary">Hotel Desk</span>
-        </div>
+        <BrandLogo variant="login" className="h-14 w-auto self-start" />
         <div className="max-w-sm">
           <h2 className="text-3xl font-semibold leading-tight text-sidebar-primary">Run your front desk with less effort.</h2>
           <ul className="mt-8 space-y-4 text-[15px]">
@@ -22,10 +20,7 @@ export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boo
       </aside>
       <main className="flex items-center justify-center px-4 py-10 sm:px-8">
         <div className={wide ? "w-full max-w-lg" : "w-full max-w-md"}>
-          <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <div className="grid size-10 place-items-center rounded-md bg-primary font-bold text-primary-foreground">HD</div>
-            <span className="text-lg font-semibold">Hotel Desk</span>
-          </div>
+          <BrandLogo variant="login" className="mb-8 h-11 w-auto lg:hidden" />
           {children}
         </div>
       </main>

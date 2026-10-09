@@ -1,4 +1,4 @@
-# Hotel Desk — multi-tenant hotel management
+# Zikora — multi-tenant hotel management
 
 A web app for running hotels, built for Nigeria first (base currency NGN, ₦) and then the rest of Africa. One account (tenant) can hold several properties. It covers reservations and availability, front desk (check-in, walk-in, move, extend, check-out), room board and room blocks, folios with an immutable ledger, approvals, invoices, housekeeping, maintenance, guest service, guests, business-date rollover, reports and CSV exports, admin (staff, roles, approval limits, audit log, subscription) and a message outbox.
 

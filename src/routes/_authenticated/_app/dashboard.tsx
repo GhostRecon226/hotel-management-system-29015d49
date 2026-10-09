@@ -6,6 +6,9 @@ import { useAccess } from "@/lib/access";
 import { formatDay } from "@/lib/reservations";
 import { addDays, formatPercent, useDashboardSummary, useKpis } from "@/lib/reports";
 import { PageHeader } from "@/components/page-header";
+import { SetupCard } from "@/components/setup-checklist";
+import { MorningBrief } from "@/components/morning-brief";
+import { OwnerSummaryCard } from "@/components/owner-summary";
 import { ArrowDownRight, ArrowUpRight, BedDouble, CheckCircle2, Gauge, Wrench } from "lucide-react";
 import { AvailabilityBar, FilledStat, StatTile } from "@/components/stats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,9 +18,9 @@ import { EmptyState, LoadingState } from "@/components/ui/states";
 export const Route = createFileRoute("/_authenticated/_app/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Hotel Desk" },
+      { title: "Dashboard — Zikora" },
       { name: "description", content: "Today's arrivals, rooms, approvals and 30-day performance for your hotel." },
-      { property: "og:title", content: "Dashboard — Hotel Desk" },
+      { property: "og:title", content: "Dashboard — Zikora" },
       { property: "og:description", content: "Today's arrivals, rooms, approvals and 30-day performance for your hotel." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -47,6 +50,9 @@ function Dashboard() {
   return (
     <div className="space-y-5">
       <PageHeader title="Dashboard" description={`Welcome back${firstName ? `, ${firstName}` : ""}. ${property.name} · business date ${formatDay(property.business_date)}.`} />
+      <SetupCard />
+      <OwnerSummaryCard />
+      <MorningBrief />
       {s.isLoading ? <LoadingState label="Loading today…" /> : (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {showKpi ? (

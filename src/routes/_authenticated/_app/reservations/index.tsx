@@ -28,6 +28,7 @@ function ReservationList() {
       <PageHeader title="Reservations" description="Search bookings by guest, booking number, company or phone."
         actions={<>
           <Button variant="outline" asChild><Link to="/reservations/availability">Availability</Link></Button>
+          <Button variant="outline" asChild><Link to="/reservations/groups">Groups</Link></Button>
           {can("res.create") && <Button asChild><Link to="/reservations/new">New booking</Link></Button>}
         </>} />
       <div className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">

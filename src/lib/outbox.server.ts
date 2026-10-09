@@ -11,7 +11,7 @@ function escapeHtml(s: string) {
 }
 
 async function sendEmail(row: OutboxRow, resendKey: string) {
-  const from = process.env["OUTBOX_FROM_EMAIL"] || "Hotel Desk <onboarding@resend.dev>";
+  const from = process.env["OUTBOX_FROM_EMAIL"] || "Zikora <onboarding@resend.dev>";
   const res = await fetch(`${resendUrl()}/emails`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendKey}` },

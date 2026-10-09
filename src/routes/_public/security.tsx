@@ -3,8 +3,8 @@ import { Eyebrow, Section } from "@/components/public/public-layout";
 import { Button } from "@/components/ui/button";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
 
-const TITLE = "Hotel Data Security and Privacy | Hotel Desk";
-const DESCRIPTION = "How Hotel Desk protects guest records and hotel money: separate hotel data, approvals, an audit trail and private ID photos.";
+const TITLE = "Hotel Data Security and Privacy | Zikora";
+const DESCRIPTION = "How Zikora protects guest records and hotel money: separate hotel data, approvals, an audit trail and private ID photos.";
 
 export const Route = createFileRoute("/_public/security")({
   head: () => pageHead({ title: TITLE, description: DESCRIPTION, jsonLd: [ORGANIZATION_LD] }),
@@ -32,7 +32,7 @@ function Security() {
     <Section className="max-w-3xl">
       <Eyebrow>Security</Eyebrow>
       <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">Guest records and hotel money, protected on purpose.</h1>
-      <p className="mt-4 text-base text-muted-foreground">A hotel holds names, ID details and money. We built Hotel Desk so that only the right person sees each, and so that no record can be changed quietly.</p>
+      <p className="mt-4 text-base text-muted-foreground">A hotel holds names, ID details and money. We built Zikora so that only the right person sees each, and so that no record can be changed quietly.</p>
       <div className="mt-8 space-y-4">
         {PARTS.map((p) => (
           <section key={p.title} className="rounded-xl border border-border/70 bg-card p-6 shadow-card">

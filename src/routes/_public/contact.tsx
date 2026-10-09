@@ -5,7 +5,7 @@ import { Eyebrow, Section } from "@/components/public/public-layout";
 import { ToConfirm } from "@/components/public/to-confirm";
 import { pageHead } from "@/lib/seo";
 
-const TITLE = "Contact Hotel Desk | Get a Price for Your Hotel";
+const TITLE = "Contact Zikora | Get a Price for Your Hotel";
 const DESCRIPTION = "Talk to us for a price for your hotel, to start or cancel a plan, or for help. Email, phone and WhatsApp.";
 
 export const Route = createFileRoute("/_public/contact")({

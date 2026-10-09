@@ -17,9 +17,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export const Route = createFileRoute("/_authenticated/_app/approvals")({
   head: () => ({
     meta: [
-      { title: "Approvals — Hotel Desk" },
+      { title: "Approvals — Zikora" },
       { name: "description", content: "Approve or reject discounts, adjustments, reversals and refunds." },
-      { property: "og:title", content: "Approvals — Hotel Desk" },
+      { property: "og:title", content: "Approvals — Zikora" },
       { property: "og:description", content: "Approve or reject discounts, adjustments, reversals and refunds." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

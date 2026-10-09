@@ -12,7 +12,7 @@ export function NightShift() {
       <div className="mx-auto max-w-3xl">
         <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Tuesday, 11:40pm. Check-out is in the morning.</h2>
         <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">A guest asks for a big discount on the way up to bed. The night receptionist is alone. Earlier, a guest was moved to another room and nobody told housekeeping.</p>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">With Hotel Desk, a discount above the limit waits for a manager to approve it. The room move creates a cleaning task. Every change is on record with a name against it. In the morning you open the app and see what happened, instead of asking.</p>
+        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">With Zikora, a discount above the limit waits for a manager to approve it. The room move creates a cleaning task. Every change is on record with a name against it. In the morning you open the app and see what happened, instead of asking.</p>
       </div>
     </Section>
   );
