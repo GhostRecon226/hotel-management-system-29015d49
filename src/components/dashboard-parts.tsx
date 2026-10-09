@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BedDouble, CalendarPlus, LogOut, Sparkles, Wallet, type LucideIcon } from "lucide-react";
+import { formatAmount } from "@/components/ui/money";
+import type { ActivityRow } from "@/lib/reports";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
 
@@ -80,3 +82,38 @@ export function Meta({ children }: { children: ReactNode }) {
   return <div className="col-start-1 flex flex-wrap items-center gap-x-3 gap-y-1 pl-12 md:contents md:pl-0">{children}</div>;
 }
 export const ROW_ACTION = "col-start-2 row-span-2 row-start-1 justify-self-end md:col-start-auto md:row-span-1 md:row-start-auto";
+
+const FALLBACK_ICON = { icon: CalendarPlus, chip: "bg-primary-soft text-primary-strong" };
+const ACTIVITY_ICON: Record<string, { icon: LucideIcon; chip: string }> = {
+  reservation_created: { icon: CalendarPlus, chip: "bg-primary-soft text-primary-strong" },
+  checked_in: { icon: BedDouble, chip: "bg-info-soft text-info-strong" },
+  checked_out: { icon: LogOut, chip: "bg-warning-soft text-warning-strong" },
+  payment: { icon: Wallet, chip: "bg-success-soft text-success-strong" },
+  room_clean: { icon: Sparkles, chip: "bg-success-soft text-success-strong" },
+};
+
+/** "10:24 AM" for something that happened on the business date's calendar day, otherwise "5 Oct, 10:24 AM". */
+export function activityTime(iso: string, timezone: string) {
+  const d = new Date(iso);
+  const day = (x: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(x);
+  const time = new Intl.DateTimeFormat("en-NG", { timeZone: timezone, hour: "numeric", minute: "2-digit", hour12: true }).format(d);
+  return day(d) === day(new Date()) ? time : `${new Intl.DateTimeFormat("en-NG", { timeZone: timezone, day: "numeric", month: "short" }).format(d)}, ${time}`;
+}
+
+/** One line of the Latest activity list. Amounts come from the database already as positive figures. */
+export function ActivityItem({ row, timezone }: { row: ActivityRow; timezone: string }) {
+  const m = ACTIVITY_ICON[row.kind] ?? FALLBACK_ICON;
+  const Icon = m.icon;
+  return (
+    <li className="flex items-start gap-3 border-t border-border/50 py-3 first:border-t-0 first:pt-0 last:pb-0">
+      <span aria-hidden className={cn("grid size-9 shrink-0 place-items-center rounded-lg", m.chip)}><Icon className="size-[18px]" /></span>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-semibold">{row.title}</div>
+        <div className="truncate text-[13px] text-muted-foreground">
+          {row.detail}{row.amount != null ? ` - ${formatAmount(row.amount, row.currency ?? "NGN")}` : ""}
+        </div>
+      </div>
+      <time dateTime={row.at} className="shrink-0 pt-0.5 text-xs text-muted-foreground tabular">{activityTime(row.at, timezone)}</time>
+    </li>
+  );
+}

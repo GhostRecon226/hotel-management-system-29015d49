@@ -475,6 +475,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Permission: `fin.nightaudit.run`
 - Errors: `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`
 
+### `public.recent_activity`
+- Args: `p_property_id uuid, p_limit integer DEFAULT 8`
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: `res.view`, `fo.view`, `fin.folio.view`, `hk.view` (each kind of line needs its own right)
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`
+
 ### `public.record_minibar_use`
 - Args: `p_room_id uuid, p_items jsonb, p_idempotency_key text`
 - Returns: `uuid`
