@@ -6,14 +6,14 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import { useAccess } from "@/lib/access";
 import { formatDay, nightsBetween, nightsLabel } from "@/lib/reservations";
 import { useArrivals, useInHouse } from "@/lib/front-desk";
-import { addDays, formatPercent, useDashboardSummary, useKpis } from "@/lib/reports";
+import { addDays, formatPercent, useDashboardSummary, useKpis, useRecentActivity } from "@/lib/reports";
 import { PageHeader } from "@/components/page-header";
 import { SetupCard } from "@/components/setup-checklist";
 import { MorningBrief } from "@/components/morning-brief";
 import { OwnerSummaryCard } from "@/components/owner-summary";
 import { ArrowDownRight, ArrowUpRight, BedDouble, CalendarPlus, CheckCircle2, Receipt, Sparkles, UserPlus, Wrench, LogOut, KeyRound, type LucideIcon } from "lucide-react";
 import { StatTile } from "@/components/stats";
-import { HeadRow, Initials, ListCard, Meta, ROW_ACTION, RoomStatusDonut, Row } from "@/components/dashboard-parts";
+import { ActivityItem, HeadRow, Initials, ListCard, Meta, ROW_ACTION, RoomStatusDonut, Row } from "@/components/dashboard-parts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -45,7 +45,7 @@ function greeting(hour: number) {
 }
 
 function Dashboard() {
-  const { ctx, property, can, canAny } = useAccess();
+  const { ctx, property, can, canAny, level } = useAccess();
   const s = useDashboardSummary();
   const showKpi = canAny(["rpt.operations.view", "rpt.finance.view"]);
   const [days, setDays] = useState("7");
@@ -62,6 +62,9 @@ function Dashboard() {
     queryFn: () => callRpc<{ occupancy: string | null; adr: string | null; revpar: string | null }>("kpi_summary", { p_property_id: property!.id, p_from: from30, p_to: to }),
   });
   const seeFd = can("fo.view");
+  // The database decides which lines each person may see; it refuses someone with none of these rights, so we do not ask.
+  const seeActivity = can("res.view") || can("fo.view") || can("fin.folio.view") || (can("hk.view") && level("hk.view") !== "O");
+  const activity = useRecentActivity(seeActivity);
   const arrivalsQ = useArrivals(seeFd ? property?.id : undefined);
   const inHouseQ = useInHouse(seeFd ? property?.id : undefined);
 
@@ -76,6 +79,9 @@ function Dashboard() {
   const guests = inHouseQ.data ? inHouseQ.data.reduce((n, r) => n + (r.adults ?? 0) + (r.children ?? 0), 0) : null;
   const totalRooms = d ? d.in_house + d.vacant_clean + d.vacant_dirty + d.out_of_order : 0;
   const occupiedPct = totalRooms > 0 && d ? Math.round((d.in_house / totalRooms) * 100) : null;
+  // Expected tonight: guests staying on, plus arrivals still to come, minus departures still to leave (room counts, not money).
+  const tonight = d && totalRooms > 0 ? Math.max(0, Math.min(totalRooms, d.in_house - d.departures_pending + d.arrivals_pending)) : null;
+  const tonightPct = tonight != null && totalRooms > 0 ? Math.round((tonight / totalRooms) * 100) : null;
 
   const actions: { label: string; icon: LucideIcon; to: ActionTo; show: boolean; primary?: boolean }[] = [
     { label: "New reservation", icon: CalendarPlus, to: "/reservations/new", show: can("res.create"), primary: true },
@@ -92,6 +98,13 @@ function Dashboard() {
         <h1 className="sr-only">Dashboard</h1>
         <h2 className="text-[28px] font-semibold leading-tight sm:text-4xl">{hello}{firstName ? `, ${firstName}` : ""}</h2>
         <p className="mt-1.5 text-[15px] text-white/85">Here is what is happening at {property.name} today, {formatDay(property.business_date)}.</p>
+        {tonight != null && (
+          <div className="mt-4 inline-flex items-baseline gap-2 rounded-xl bg-white/10 px-4 py-2 ring-1 ring-white/15 sm:absolute sm:right-7 sm:top-1/2 sm:mt-0 sm:-translate-y-1/2 sm:flex-col sm:items-end sm:gap-0 sm:py-3">
+            <span className="text-xs uppercase tracking-wide text-white/75">Expected tonight</span>
+            <span className="text-2xl font-bold tabular sm:text-3xl">{tonight} <span className="text-base font-semibold text-white/80">of {totalRooms} rooms</span></span>
+            <span className="text-sm text-white/80">{tonightPct}% full</span>
+          </div>
+        )}
       </section>
 
       <SetupCard />
@@ -115,6 +128,14 @@ function Dashboard() {
             className="col-span-2 sm:col-span-1" to={can("room.view") ? "/rooms" : undefined} />
         </div>
       )}
+
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+        <h2 className="sr-only">Needs attention</h2>
+        <StatTile compact icon={CheckCircle2} tone={d?.pending_approvals ? "warning" : "neutral"} label="Approvals waiting" value={d?.pending_approvals}
+          sub={d?.pending_approvals ? "Waiting for a manager" : "Nothing waiting"} to="/approvals" />
+        <StatTile compact icon={Wrench} tone={d?.urgent_tickets ? "danger" : "neutral"} label="Open maintenance tickets" value={d?.open_tickets}
+          sub={d?.urgent_tickets ? `${d.urgent_tickets} urgent` : "None urgent"} to={canAny(["mnt.view", "mnt.ticket.create"]) ? "/maintenance" : undefined} />
+      </div>
 
       {visibleActions.length > 0 && (
         <section aria-label="Quick actions">
@@ -220,13 +241,18 @@ function Dashboard() {
             ]} />
           </CardContent>
         </Card>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 lg:content-start">
-          <h2 className="sr-only">Needs attention</h2>
-          <StatTile compact icon={CheckCircle2} tone={d?.pending_approvals ? "warning" : "neutral"} label="Approvals waiting" value={d?.pending_approvals}
-            sub={d?.pending_approvals ? "Waiting for a manager" : "Nothing waiting"} to="/approvals" />
-          <StatTile compact icon={Wrench} tone={d?.urgent_tickets ? "danger" : "neutral"} label="Open maintenance tickets" value={d?.open_tickets}
-            sub={d?.urgent_tickets ? `${d.urgent_tickets} urgent` : "None urgent"} to={canAny(["mnt.view", "mnt.ticket.create"]) ? "/maintenance" : undefined} />
-        </div>
+        {seeActivity && !activity.isError && (
+          <Card className="lg:col-span-2 2xl:col-span-1">
+            <CardHeader className="pb-3"><CardTitle>Latest activity</CardTitle></CardHeader>
+            <CardContent>
+              {activity.isLoading ? <LoadingState label="Loading activity…" /> : (activity.data ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nothing has happened yet today.</p>
+              ) : (
+                <ul>{(activity.data ?? []).map((row, i) => <ActivityItem key={`${row.kind}-${row.at}-${i}`} row={row} timezone={property.timezone} />)}</ul>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
