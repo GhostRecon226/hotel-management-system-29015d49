@@ -9,8 +9,8 @@ The approved artwork is Peter's own picture (teal and gold Z, serif name). The P
 
 | File | Use |
 |---|---|
-| zikora-logo-login.png | Sign-in and sign-up screens (`BrandLogo variant="login"`) |
-| zikora-logo-notagline.png | Sidebar (via `BrandLogo`) |
+| zikora-logo-login.png | Sidebar and sign-in screens (`BrandLogo`, the approved current logo, no tagline) |
+| zikora-logo-notagline.png | Older cut of the first picture. Not used in the app |
 | zikora-logo.png | Invoices, emails, anywhere 200 px wide or more |
 | zikora-icon.png, zikora-icon-tab.png | The Z alone; the Z on sand for the tab, phone home screen |
 | zikora-logo-dark-screen.svg, zikora-icon-dark-screen.svg | Dark mode (`BrandLogo` picks it). The picture is too dark to read on dark screens |
