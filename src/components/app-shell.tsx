@@ -49,8 +49,8 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav className="flex h-full flex-col px-4 pb-4 pt-5">
       <div className="mb-5 px-2">
-        <BrandLogo className="h-9 w-auto" />
-        <div className="mt-1.5 truncate text-xs text-muted-foreground">{ctx.tenant?.name}</div>
+        <BrandLogo onDark className="h-9 w-auto" />
+        <div className="mt-1.5 truncate text-xs text-sidebar-foreground/70">{ctx.tenant?.name}</div>
       </div>
       <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-1">
         {items.map((m) => {
@@ -58,7 +58,7 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
           const cls = "group flex h-10 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-sidebar-ring/40";
           return m.to ? (
             <Link key={m.label} to={m.to} onClick={onNavigate}
-              className={cn(cls, "text-sidebar-foreground hover:bg-muted hover:text-foreground")}
+              className={cn(cls, "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground")}
               activeProps={{ className: "bg-sidebar-accent font-semibold !text-sidebar-accent-foreground" }}>
               <Icon className="size-[18px] shrink-0 group-data-[status=active]:text-sidebar-primary" /> {m.label}
             </Link>
