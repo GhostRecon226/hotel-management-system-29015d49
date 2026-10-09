@@ -142,3 +142,12 @@
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.72 0.1 195);
 }
+
+/* Brand panel on the sign-in screens: the hotel lobby photo (public/brand/login-hero.jpg) under a dark teal wash so the white text stays readable. */
+.auth-hero {
+  background:
+    linear-gradient(100deg, oklch(0.2 0.045 205 / 0.92) 0%, oklch(0.2 0.045 205 / 0.78) 55%, oklch(0.2 0.045 205 / 0.38) 100%),
+    linear-gradient(0deg, oklch(0.18 0.04 205 / 0.75), transparent 35%),
+    url("/brand/login-hero.jpg") 70% center / cover no-repeat,
+    oklch(0.22 0.045 205);
+}
