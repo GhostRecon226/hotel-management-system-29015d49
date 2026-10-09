@@ -17,7 +17,7 @@ The approved artwork is Peter's own picture (teal and gold Z, serif name). The P
 | zikora-logo-one-color.svg | Print in black |
 | zikora-logo-white.svg | On Main teal or photos |
 
-The tab icons are `public/favicon.ico`, `favicon-32.png` and `apple-touch-icon.png`.
+The tab icons are Peter's exports: `public/favicon.ico` (16, 32, 48 px), `favicon-16.png`, `favicon-32.png`, `favicon-96.png`, `icon-192.png`, `icon-512.png`, and `apple-touch-icon.png` (the 512 px export at 180 px). They are a raster crop of the Z on an ivory square, not a flat redraw.
 
 ## Colors
 
