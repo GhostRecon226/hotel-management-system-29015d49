@@ -8,7 +8,7 @@ test("QA-11 the owner sees themselves in Admin, opens the invite form and every 
   await expect(page.getByRole("heading", { name: "Admin", exact: true })).toBeVisible();
 
   // Staff tab: the owner is listed and marked as the signed-in person.
-  await expect(page.getByText("Tess Tester")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole("cell", { name: "Tess Tester" })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("(you)")).toBeVisible();
 
   // The invite form opens and closes.
