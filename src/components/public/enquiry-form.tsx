@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ToConfirm } from "@/components/public/to-confirm";
 import { useHydrated } from "@/lib/use-hydrated";
 import { SITE_INFO } from "@/lib/site-info";
 
@@ -64,7 +63,7 @@ export function EnquiryForm({ fields, subject, submitLabel }: { fields: EnquiryF
         })}
         <Button type="submit" size="lg"><Mail aria-hidden /> {submitLabel}</Button>
         <p className="text-sm text-muted-foreground">
-          This opens your email app with your enquiry filled in. Nothing is sent until you send that email. If no email app opens, write to <ToConfirm what="contact email" />.
+          This opens your email app with your enquiry filled in. Nothing is sent until you send that email. If no email app opens, write to {SITE_INFO["contact email"]}.
         </p>
         {opened && (
           <p role="status" className="rounded-md bg-info-soft px-3 py-2.5 text-sm text-info-strong">

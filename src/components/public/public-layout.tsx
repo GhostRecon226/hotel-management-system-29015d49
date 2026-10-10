@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { hasStoredSession } from "@/lib/session-hint";
 import { BrandLogo } from "@/components/brand-logo";
-import { ToConfirm } from "@/components/public/to-confirm";
+import { SITE_INFO } from "@/lib/site-info";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -66,7 +66,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="border-t border-border/70">
           <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
-            © <ToConfirm what="copyright year" /> Zikora. <ToConfirm what="legal entity and company details" />
+            © {SITE_INFO["copyright year"]} Zikora. {SITE_INFO["legal entity and company details"]}
           </p>
         </div>
       </footer>
