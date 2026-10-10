@@ -4,6 +4,7 @@ Things we know about and chose to do later. Newest at the top. Move an item to a
 
 | Item | Why it matters | Added |
 | --- | --- | --- |
+| **LAST ITEM, NOT DONE: legal pages and production website.** Public site merged on 10 Oct 2026 with stand-in text. The Privacy and Terms pages still hold 13 placeholders, the Terms still say a 30-day trial, and production builds are blocked (`scripts/check-to-confirm.mjs`) until they are filled. Do this after all functions, workflows and the build are complete: counsel reviews the legal pack v0.2 (kept outside the repository), Peter decides the open items, then the placeholders are filled from the final text. The trial and overdue notices, the acceptance record and the offboarding export must be built first. | The website cannot deploy to production until this is done. Merging to main does not change the live hotel database. | 10 Oct 2026 |
 | Search box in the top bar (guests, reservations, rooms) | Front desk staff find a guest or booking from any screen. Needs one search function in the database that respects who can see guests. | 9 Oct 2026 |
 | Change on in-house guests ("up 12%") on the dashboard | Needs yesterday's in-house figure kept by the nightly roll. Shown only when the figure exists. | 9 Oct 2026 |
 | Property photo in the sidebar | Hotels upload a picture for each property. Needs a private image upload like ID photos, plus a Setup screen. | 9 Oct 2026 |
