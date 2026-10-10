@@ -13,7 +13,7 @@ export default defineConfig({
   retries: 0,
   // The dev server compiles pages on first visit; give checks time on a cold start.
   expect: { timeout: 15_000 },
-  reporter: [["list"]],
+  reporter: process.env.GITHUB_ACTIONS ? [["list"], ["github"]] : [["list"]], // on GitHub, failures also appear as readable annotations
   use: { baseURL: "http://localhost:8081", trace: "retain-on-failure" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {

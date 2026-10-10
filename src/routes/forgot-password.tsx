@@ -10,7 +10,7 @@ import { AuthLayout } from "@/components/auth-layout";
 import { useHydrated } from "@/lib/use-hydrated";
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset your password — Zikora" }, { name: "description", content: "Get a link to set a new password." }] }),
+  head: () => ({ meta: [{ title: "Reset your password | Zikora" }, { name: "description", content: "Get a link to set a new password." }, { name: "robots", content: "noindex" }] }),
   component: ForgotPassword,
 });
 
@@ -48,14 +48,13 @@ function ForgotPassword() {
         {sent ? (
           <>
             <p className="mt-2 text-[15px] text-muted-foreground" role="status">
-              If an account exists for that email, we have sent a link to set a new password. The link works for one hour.
-              Check your spam folder if it does not arrive in a few minutes.
+              If an account matches that email address, reset instructions will be sent. Check your inbox and spam folder. The link works for one hour.
             </p>
             <Button asChild variant="outline" className="mt-8"><Link to="/auth">Back to sign in</Link></Button>
           </>
         ) : (
           <>
-            <p className="mb-6 mt-1 text-[15px] text-muted-foreground">Enter the email you sign in with. We will send you a link to set a new password.</p>
+            <p className="mb-6 mt-1 text-[15px] text-muted-foreground">Enter the email address associated with your Zikora account. If an account matches, we’ll send instructions to reset your password.</p>
             <form onSubmit={submit}>
               <fieldset disabled={!hydrated} className="space-y-5">
                 <div className="space-y-1.5">

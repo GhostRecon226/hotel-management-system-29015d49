@@ -9,16 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CheckEmailRouteImport } from './routes/check-email'
-import { Route as DesignRouteImport } from './routes/design'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenticated/create-hotel'
 import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicAboutRouteImport } from './routes/_public/about'
+import { Route as PublicContactRouteImport } from './routes/_public/contact'
+import { Route as PublicFaqRouteImport } from './routes/_public/faq'
+import { Route as PublicFeaturesRouteImport } from './routes/_public/features'
+import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
+import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PublicSecurityRouteImport } from './routes/_public/security'
+import { Route as PublicTermsRouteImport } from './routes/_public/terms'
+import { Route as PublicWalkthroughRouteImport } from './routes/_public/walkthrough'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/_app/admin'
 import { Route as AuthenticatedAppApprovalsRouteImport } from './routes/_authenticated/_app/approvals'
 import { Route as AuthenticatedAppCashierRouteImport } from './routes/_authenticated/_app/cashier'
@@ -68,13 +77,12 @@ import { Route as AuthenticatedAppSetupRoomsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppReservationsGroupsIndexRouteImport } from './routes/_authenticated/_app/reservations/groups.index'
 import { Route as AuthenticatedAppReservationsGroupsIdRouteImport } from './routes/_authenticated/_app/reservations/groups.$id'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicRouteRoute = PublicRouteRouteImport.update({
+  id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -85,11 +93,6 @@ const AuthRoute = AuthRouteImport.update({
 const CheckEmailRoute = CheckEmailRouteImport.update({
   id: '/check-email',
   path: '/check-email',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DesignRoute = DesignRouteImport.update({
-  id: '/design',
-  path: '/design',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -116,6 +119,56 @@ const AuthenticatedPlatformRoute = AuthenticatedPlatformRouteImport.update({
   id: '/platform',
   path: '/platform',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const PublicIndexRoute = PublicIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicAboutRoute = PublicAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicContactRoute = PublicContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicFaqRoute = PublicFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicFeaturesRoute = PublicFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicPricingRoute = PublicPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicSecurityRoute = PublicSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicTermsRoute = PublicTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicWalkthroughRoute = PublicWalkthroughRouteImport.update({
+  id: '/walkthrough',
+  path: '/walkthrough',
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
   id: '/admin',
@@ -398,14 +451,22 @@ const AuthenticatedAppReservationsGroupsIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof PublicIndexRoute
   '/auth': typeof AuthRoute
   '/check-email': typeof CheckEmailRoute
-  '/design': typeof DesignRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/platform': typeof AuthenticatedPlatformRoute
+  '/about': typeof PublicAboutRoute
+  '/contact': typeof PublicContactRoute
+  '/faq': typeof PublicFaqRoute
+  '/features': typeof PublicFeaturesRoute
+  '/pricing': typeof PublicPricingRoute
+  '/privacy': typeof PublicPrivacyRoute
+  '/security': typeof PublicSecurityRoute
+  '/terms': typeof PublicTermsRoute
+  '/walkthrough': typeof PublicWalkthroughRoute
   '/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
   '/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/housekeeping': typeof AuthenticatedAppHousekeepingRouteRouteWithChildren
@@ -456,14 +517,22 @@ export interface FileRoutesByFullPath {
   '/reservations/groups/': typeof AuthenticatedAppReservationsGroupsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof PublicIndexRoute
   '/auth': typeof AuthRoute
   '/check-email': typeof CheckEmailRoute
-  '/design': typeof DesignRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/platform': typeof AuthenticatedPlatformRoute
+  '/about': typeof PublicAboutRoute
+  '/contact': typeof PublicContactRoute
+  '/faq': typeof PublicFaqRoute
+  '/features': typeof PublicFeaturesRoute
+  '/pricing': typeof PublicPricingRoute
+  '/privacy': typeof PublicPrivacyRoute
+  '/security': typeof PublicSecurityRoute
+  '/terms': typeof PublicTermsRoute
+  '/walkthrough': typeof PublicWalkthroughRoute
   '/admin': typeof AuthenticatedAppAdminRoute
   '/approvals': typeof AuthenticatedAppApprovalsRoute
   '/cashier': typeof AuthenticatedAppCashierRoute
@@ -508,16 +577,25 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_public': typeof PublicRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/check-email': typeof CheckEmailRoute
-  '/design': typeof DesignRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/create-hotel': typeof AuthenticatedCreateHotelRoute
   '/_authenticated/platform': typeof AuthenticatedPlatformRoute
+  '/_public/about': typeof PublicAboutRoute
+  '/_public/contact': typeof PublicContactRoute
+  '/_public/faq': typeof PublicFaqRoute
+  '/_public/features': typeof PublicFeaturesRoute
+  '/_public/pricing': typeof PublicPricingRoute
+  '/_public/privacy': typeof PublicPrivacyRoute
+  '/_public/security': typeof PublicSecurityRoute
+  '/_public/terms': typeof PublicTermsRoute
+  '/_public/walkthrough': typeof PublicWalkthroughRoute
+  '/_public/': typeof PublicIndexRoute
   '/_authenticated/_app/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
   '/_authenticated/_app/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/_authenticated/_app/housekeeping': typeof AuthenticatedAppHousekeepingRouteRouteWithChildren
@@ -573,11 +651,19 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/check-email'
-    | '/design'
     | '/forgot-password'
     | '/reset-password'
     | '/create-hotel'
     | '/platform'
+    | '/about'
+    | '/contact'
+    | '/faq'
+    | '/features'
+    | '/pricing'
+    | '/privacy'
+    | '/security'
+    | '/terms'
+    | '/walkthrough'
     | '/folios'
     | '/guests'
     | '/housekeeping'
@@ -631,11 +717,19 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/check-email'
-    | '/design'
     | '/forgot-password'
     | '/reset-password'
     | '/create-hotel'
     | '/platform'
+    | '/about'
+    | '/contact'
+    | '/faq'
+    | '/features'
+    | '/pricing'
+    | '/privacy'
+    | '/security'
+    | '/terms'
+    | '/walkthrough'
     | '/admin'
     | '/approvals'
     | '/cashier'
@@ -679,16 +773,25 @@ export interface FileRouteTypes {
     | '/reservations/groups'
   id:
     | '__root__'
-    | '/'
     | '/_authenticated'
+    | '/_public'
     | '/auth'
     | '/check-email'
-    | '/design'
     | '/forgot-password'
     | '/reset-password'
     | '/_authenticated/_app'
     | '/_authenticated/create-hotel'
     | '/_authenticated/platform'
+    | '/_public/about'
+    | '/_public/contact'
+    | '/_public/faq'
+    | '/_public/features'
+    | '/_public/pricing'
+    | '/_public/privacy'
+    | '/_public/security'
+    | '/_public/terms'
+    | '/_public/walkthrough'
+    | '/_public/'
     | '/_authenticated/_app/folios'
     | '/_authenticated/_app/guests'
     | '/_authenticated/_app/housekeeping'
@@ -740,11 +843,10 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  PublicRouteRoute: typeof PublicRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CheckEmailRoute: typeof CheckEmailRoute
-  DesignRoute: typeof DesignRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiCronIdPhotoCleanupRoute: typeof ApiCronIdPhotoCleanupRoute
@@ -754,18 +856,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PublicRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -780,13 +882,6 @@ declare module '@tanstack/react-router' {
       path: '/check-email'
       fullPath: '/check-email'
       preLoaderRoute: typeof CheckEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/design': {
-      id: '/design'
-      path: '/design'
-      fullPath: '/design'
-      preLoaderRoute: typeof DesignRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -823,6 +918,76 @@ declare module '@tanstack/react-router' {
       fullPath: '/platform'
       preLoaderRoute: typeof AuthenticatedPlatformRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_public/': {
+      id: '/_public/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/about': {
+      id: '/_public/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof PublicAboutRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/contact': {
+      id: '/_public/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof PublicContactRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/faq': {
+      id: '/_public/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof PublicFaqRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/features': {
+      id: '/_public/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof PublicFeaturesRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/pricing': {
+      id: '/_public/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PublicPricingRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/privacy': {
+      id: '/_public/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PublicPrivacyRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/security': {
+      id: '/_public/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof PublicSecurityRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/terms': {
+      id: '/_public/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof PublicTermsRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/walkthrough': {
+      id: '/_public/walkthrough'
+      path: '/walkthrough'
+      fullPath: '/walkthrough'
+      preLoaderRoute: typeof PublicWalkthroughRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_authenticated/_app/admin': {
       id: '/_authenticated/_app/admin'
@@ -1379,12 +1544,41 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface PublicRouteRouteChildren {
+  PublicAboutRoute: typeof PublicAboutRoute
+  PublicContactRoute: typeof PublicContactRoute
+  PublicFaqRoute: typeof PublicFaqRoute
+  PublicFeaturesRoute: typeof PublicFeaturesRoute
+  PublicPricingRoute: typeof PublicPricingRoute
+  PublicPrivacyRoute: typeof PublicPrivacyRoute
+  PublicSecurityRoute: typeof PublicSecurityRoute
+  PublicTermsRoute: typeof PublicTermsRoute
+  PublicWalkthroughRoute: typeof PublicWalkthroughRoute
+  PublicIndexRoute: typeof PublicIndexRoute
+}
+
+const PublicRouteRouteChildren: PublicRouteRouteChildren = {
+  PublicAboutRoute: PublicAboutRoute,
+  PublicContactRoute: PublicContactRoute,
+  PublicFaqRoute: PublicFaqRoute,
+  PublicFeaturesRoute: PublicFeaturesRoute,
+  PublicPricingRoute: PublicPricingRoute,
+  PublicPrivacyRoute: PublicPrivacyRoute,
+  PublicSecurityRoute: PublicSecurityRoute,
+  PublicTermsRoute: PublicTermsRoute,
+  PublicWalkthroughRoute: PublicWalkthroughRoute,
+  PublicIndexRoute: PublicIndexRoute,
+}
+
+const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
+  PublicRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  PublicRouteRoute: PublicRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CheckEmailRoute: CheckEmailRoute,
-  DesignRoute: DesignRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiCronIdPhotoCleanupRoute: ApiCronIdPhotoCleanupRoute,

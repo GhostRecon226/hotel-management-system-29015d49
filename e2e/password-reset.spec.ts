@@ -15,7 +15,7 @@ test("a user who forgot their password resets it from the emailed link and signs
   await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
   await page.getByLabel("Email").fill(user.email);
   await page.getByRole("button", { name: "Send reset link" }).click();
-  await expect(page.getByText(/If an account exists for that email/)).toBeVisible();
+  await expect(page.getByText(/If an account matches that email address/)).toBeVisible();
 
   // 2. Open the link in the email.
   const link = await latestAuthLink(user.email, /reset/i);

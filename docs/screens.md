@@ -44,8 +44,6 @@ Every screen inside the shell also relies on `my_context` (loaded once by the sh
 | `/` | Auth gate: redirects signed-out users to /auth. | — | — |
 | `/auth` | Sign in / sign up (email + password, email confirmation required). | — | — |
 | `/check-email` | Check-your-email page after sign-up. | — | — |
-| `/design` | Design system preview (every component and status colour). Public. | — | — |
-| `/` | Landing: redirects to sign-in or dashboard. | — | — |
 
 Server functions (not database functions):
 - `src/lib/invite.functions.ts` — invite staff (Admin → Staff).

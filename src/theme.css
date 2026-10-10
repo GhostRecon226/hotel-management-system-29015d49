@@ -159,3 +159,13 @@
     url("/brand/login-hero.jpg") 60% 45% / cover no-repeat,
     oklch(0.22 0.045 205);
 }
+
+/* Landing page hero (marketing only): the lobby photo under a dark teal wash. Gold is for marketing, never app screens. */
+.landing-hero {
+  background:
+    linear-gradient(100deg, oklch(0.2 0.045 205 / 0.96) 0%, oklch(0.2 0.045 205 / 0.86) 45%, oklch(0.2 0.045 205 / 0.5) 100%),
+    linear-gradient(0deg, oklch(0.18 0.04 205 / 0.7), transparent 30%),
+    url("/brand/login-hero.jpg") 65% center / cover no-repeat,
+    oklch(0.22 0.045 205);
+}
+.text-gold { color: oklch(0.8 0.12 82); }

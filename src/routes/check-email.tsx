@@ -8,12 +8,13 @@ export const Route = createFileRoute("/check-email")({
   validateSearch: z.object({ email: z.string().optional() }),
   head: () => ({
     meta: [
-      { title: "Check your email — Zikora" },
+      { title: "Check your email | Zikora" },
       { name: "description", content: "Confirm your email address to finish creating your account." },
-      { property: "og:title", content: "Check your email — Zikora" },
+      { property: "og:title", content: "Check your email | Zikora" },
       { property: "og:description", content: "Confirm your email address to finish creating your account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
     ],
   }),
   component: CheckEmail,
