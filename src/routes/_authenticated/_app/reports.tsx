@@ -27,6 +27,7 @@ import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RoomName } from "@/components/room-name";
+import { CollectionsPanel } from "@/components/collections-panel";
 
 export const Route = createFileRoute("/_authenticated/_app/reports")({
   head: () => ({
@@ -116,6 +117,7 @@ function Reports() {
           {fin && <TabsTrigger value="source">By booking source</TabsTrigger>}
           {fin && <TabsTrigger value="balances">Outstanding balances</TabsTrigger>}
           {fin && <TabsTrigger value="ageing">Ageing</TabsTrigger>}
+          {fin && <TabsTrigger value="collections">Collections</TabsTrigger>}
           {fin && <TabsTrigger value="payments">Payments</TabsTrigger>}
           <TabsTrigger value="stays">Cancellations and stay length</TabsTrigger>
           {fin && <TabsTrigger value="byguest">Balances by guest</TabsTrigger>}
@@ -262,6 +264,8 @@ function Reports() {
             </Table>
           </TabsContent>
         )}
+
+        {fin && <TabsContent value="collections"><CollectionsPanel /></TabsContent>}
 
         {fin && (
           <TabsContent value="payments">

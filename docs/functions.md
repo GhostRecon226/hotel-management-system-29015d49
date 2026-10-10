@@ -9,6 +9,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 
 ## Schema `public`
 
+### `public.add_collection_note`
+- Args: `p_folio_id uuid, p_outcome text, p_note text, p_promised_date date DEFAULT NULL::date`
+- Returns: `uuid`
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.payment.post (and fin.folio.view on the folio)`
+- Errors: `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`, `E_REQUIRED`
+
 ### `public.add_guest_feedback`
 - Args: `p_guest_id uuid, p_category text, p_text text`
 - Returns: `uuid`
@@ -183,6 +190,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: `mnt.ticket.close`
 - Errors: `E_INVALID`, `E_READ_ONLY`, `E_SOD`
+
+### `public.collections_list`
+- Args: `p_property_id uuid`
+- Returns: `TABLE(folio_id, folio_number, reservation_id, reservation_number, guest_id, guest_name, phone, email, departure_date, days_overdue, currency, balance, notes_count, last_outcome, last_note, last_note_date, promised_date, next_action_date, follow_up_due)`
+- Callable by signed-in users: yes · security definer
+- Permission: `rpt.finance.view (phone and email also need guest.view)`
+- Errors: `E_FORBIDDEN`
 
 ### `public.complete_hk_task`
 - Args: `p_id uuid, p_checklist jsonb DEFAULT NULL::jsonb, p_notes text DEFAULT NULL::text`
