@@ -4,7 +4,7 @@ Blunt list. Nothing here is hidden elsewhere.
 
 ## Testing
 - Every screen was clicked through on the local copy with a demo hotel (`scripts/seed-demo.sh`) on 30 Sep 2026. Not yet on the real project.
-- Database tests now live in `supabase/tests/db` and run on local Supabase with `scripts/test-db.sh` (448 checks on 30 Sep 2026, 21 open failures). Open failures are listed in `docs/status-report.md`.
+- Database tests live in `supabase/tests/db` and run on local Supabase with `scripts/test-db.sh`. Every pull request must end with `ALL OK` in CI. The 21 failures listed on 30 Sep 2026 in `docs/status-report.md` are fixed. Only the history there is old.
 - Concurrency (two clerks booking the last room) is load-tested by `supabase/tests/concurrency/last_room.sh` (NFR-006, 7 Oct 2026): 8 sessions at once. It is not yet proved at hotel-group scale or on the live project.
 - Authenticated screens after the design restyle (Setup, Guests and everything built later) were not visually checked.
 
@@ -31,10 +31,11 @@ Blunt list. Nothing here is hidden elsewhere.
 - Hold room blocks reduce availability only when approved; OOO/OOS/hold all behave the same for availability.
 - Stayover tasks are created only by the rollover. No auto tickets from failed inspections. Housekeeping checklists are generic starter lists.
 - Service request categories were invented; service requests are only for in-house guests.
+- Front desk officers cannot cancel or reinstate a booking (only managers hold the right). Room attendants cannot be given service requests, so laundry or room service goes to front desk staff. Both are by design today; the dry run should say if hotels want them changed.
 - Guest stay history is basic; no guest-level service/maintenance history.
-- Reservation settings (max stay 30 nights, 24 h tentative hold) are columns on `properties` but have no Setup screen.
+- Reservation settings (longest stay, tentative hold hours) have a Setup screen since 8 Oct 2026 (SET-012).
 - Staff invite: no temporary passwords. If the invite email fails, nothing is created. Unaccepted invites can be sent again from Admin, Staff.
-- Admin "Subscription" is read-only; there is no billing integration. A daily clock expires trials and suspends unpaid hotels; activation is manual through `app.platform_set_subscription` (decision 5e).
+- Billing is built (PLT-011, PLT-012: Paystack payment, webhook, cancel) but not switched on. It needs `PAYSTACK_SECRET_KEY` in Vercel and the webhook address set in Paystack, and plan prices are empty until A16 is decided. Until then a daily clock expires trials and suspends unpaid hotels, and platform staff activate pilots by hand in the platform console (decision 5e, PLT-008).
 
 ## Hacky or doubtful
 - `housekeeping_tasks` is deprecated (replaced by `hk_tasks`) but still in the schema because tables are never dropped.
