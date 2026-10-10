@@ -8,6 +8,7 @@ import {
   AssignTicketDialog, BlockTicketRoomDialog, PRIORITY, StatusBadge, TextReasonDialog, TICKET_STATUS,
   useTicket, useTicketBlocks, useWorkMutation,
 } from "@/lib/maintenance";
+import { TicketPhotos } from "@/components/ticket-photos";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,7 @@ function TicketDetail() {
             </dl>
           </CardContent>
         </Card>
+        <TicketPhotos ticketId={t.id} canAdd={!(["closed", "cancelled"].includes(t.status)) && (can("mnt.ticket.create") || can("mnt.ticket.work") || t.assignee_id === ctx.user_id || t.created_by === ctx.user_id)} canRemoveAny={can("mnt.ticket.assign")} />
         {t.room_id && (
           <Card className="lg:col-span-2">
             <CardHeader><CardTitle>Room blocks from this ticket</CardTitle></CardHeader>
