@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DraftNotice, Eyebrow, Section } from "@/components/public/public-layout";
 import { LegalPart } from "@/components/public/legal";
+import { SITE_INFO } from "@/lib/site-info";
 import { ToConfirm } from "@/components/public/to-confirm";
 import { pageHead } from "@/lib/seo";
 
@@ -25,7 +26,7 @@ function Terms() {
       <div className="mt-6"><DraftNotice /></div>
       <p className="mb-6 text-[15px] leading-relaxed text-muted-foreground"><strong className="text-foreground">In short.</strong> You get a free trial. After it, your hotel pays a price we agree together. Your data stays yours. We keep the service running with care, and we explain here what happens when things go wrong.</p>
       <LegalPart title="1. The service">
-        <p>Zikora is a hotel management system provided by <ToConfirm what="company name" /> ("we", "us"). It runs in a web browser and needs an internet connection. By creating an account or using the service, you agree to these terms on behalf of your hotel.</p>
+        <p>Zikora is a hotel management system provided by {SITE_INFO["company name"]} ("we", "us"). It runs in a web browser and needs an internet connection. By creating an account or using the service, you agree to these terms on behalf of your hotel.</p>
       </LegalPart>
       <LegalPart title="2. Your account">
         <p>You decide who in your hotel can sign in and what each person can do. Keep sign-in details private, and tell us if you think someone else has them. You are responsible for what is done under your hotel's account.</p>
@@ -67,7 +68,7 @@ function Terms() {
         <p>We will tell you about important changes before they start. Using the service after a change means you accept it.</p>
       </LegalPart>
       <LegalPart title="14. Contact">
-        <p><ToConfirm what="company name" />, <ToConfirm what="contact email" />, <ToConfirm what="phone" />.</p>
+        <p>{SITE_INFO["company name"]}, {SITE_INFO["contact email"]}.</p>
       </LegalPart>
     </Section>
   );

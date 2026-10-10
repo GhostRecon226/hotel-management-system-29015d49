@@ -3,10 +3,10 @@ import { BarChart3, BedDouble, CalendarDays, ConciergeBell } from "lucide-react"
 import { BrandLogo } from "@/components/brand-logo";
 
 const FEATURES = [
-  { icon: CalendarDays, title: "Reservations", text: "Manage bookings in one place" },
-  { icon: ConciergeBell, title: "Front desk", text: "Faster check-in and check-out" },
-  { icon: BedDouble, title: "Rooms", text: "Track availability, housekeeping and maintenance" },
-  { icon: BarChart3, title: "Reports", text: "Make decisions with figures from the day" },
+  { icon: CalendarDays, title: "Reservations", text: "Bookings, holds and groups in one place" },
+  { icon: ConciergeBell, title: "Front desk", text: "Arrivals, walk-ins and departures" },
+  { icon: BedDouble, title: "Rooms", text: "Room status, housekeeping and maintenance" },
+  { icon: BarChart3, title: "Reports", text: "Daily figures and outstanding balances" },
 ];
 
 /**
@@ -19,9 +19,9 @@ export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boo
       <aside className="auth-hero relative hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex">
         <BrandLogo variant="login" onDark className="relative h-14 w-auto self-start" />
         <div className="relative max-w-md">
-          <h2 className="text-5xl font-semibold leading-[1.1]">Simpler operations. Happier guests.</h2>
+          <h2 className="text-5xl font-semibold leading-[1.1]">Know what’s happening in your hotel.</h2>
           <p className="mt-5 text-base leading-relaxed text-white/80">
-            One system for the front desk, housekeeping and the bills, in naira. Built for hotels in Nigeria and across Africa.
+            One connected system for reservations, front desk, housekeeping, maintenance and the hotel’s financial records.
           </p>
           <ul className="mt-9 space-y-5">
             {FEATURES.map(({ icon: Icon, title, text }) => (
@@ -37,7 +37,7 @@ export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boo
             ))}
           </ul>
         </div>
-        <p className="relative text-xs uppercase tracking-[0.3em] text-white/70">Built for modern hospitality</p>
+        <p className="relative text-xs uppercase tracking-[0.3em] text-white/70">Hotel operations. Clearer control.</p>
       </aside>
       <main className="flex items-center justify-center px-4 py-10 sm:px-8">
         <div className={wide ? "w-full max-w-lg" : "w-full max-w-md"}>

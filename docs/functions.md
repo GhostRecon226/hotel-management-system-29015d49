@@ -9,6 +9,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 
 ## Schema `public`
 
+### `public.add_collection_note`
+- Args: `p_folio_id uuid, p_outcome text, p_note text, p_promised_date date DEFAULT NULL::date`
+- Returns: `uuid`
+- Callable by signed-in users: yes · security definer
+- Permission: `fin.payment.post (and fin.folio.view on the folio)`
+- Errors: `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`, `E_REQUIRED`
+
 ### `public.add_guest_feedback`
 - Args: `p_guest_id uuid, p_category text, p_text text`
 - Returns: `uuid`
@@ -100,6 +107,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Permission: `adm.audit.view`
 - Errors: `E_FORBIDDEN`
 
+### `public.begin_ticket_photo_upload`
+- Args: `p_ticket_id uuid, p_mime text, p_size integer`
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: `mnt.ticket.create` or `mnt.ticket.work`, or the ticket's creator or assignee
+- Errors: `E_FORBIDDEN`, `E_INVALID`, `E_LIMIT`, `E_NOT_FOUND`, `E_READ_ONLY`
+
 ### `public.block_room_for_ticket`
 - Args: `p_id uuid, p_type text, p_from date, p_to date, p_reason text DEFAULT NULL::text`
 - Returns: `uuid`
@@ -176,6 +190,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: `mnt.ticket.close`
 - Errors: `E_INVALID`, `E_READ_ONLY`, `E_SOD`
+
+### `public.collections_list`
+- Args: `p_property_id uuid`
+- Returns: `TABLE(folio_id, folio_number, reservation_id, reservation_number, guest_id, guest_name, phone, email, departure_date, days_overdue, currency, balance, notes_count, last_outcome, last_note, last_note_date, promised_date, next_action_date, follow_up_due)`
+- Callable by signed-in users: yes · security definer
+- Permission: `rpt.finance.view (phone and email also need guest.view)`
+- Errors: `E_FORBIDDEN`
 
 ### `public.complete_hk_task`
 - Args: `p_id uuid, p_checklist jsonb DEFAULT NULL::jsonb, p_notes text DEFAULT NULL::text`
@@ -268,6 +289,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Permission: `adm.role.manage`
 - Errors: `E_FORBIDDEN`, `E_IN_USE`, `E_NOT_FOUND`, `E_READ_ONLY`, `E_SYSTEM_ROLE`
 
+### `public.delete_ticket_photo`
+- Args: `p_file_id uuid, p_reason text`
+- Returns: `void`
+- Callable by signed-in users: yes · security definer
+- Permission: the uploader, or `mnt.ticket.assign`
+- Errors: `E_FORBIDDEN`, `E_NOT_FOUND`, `E_READ_ONLY`, `E_REQUIRED`
+
 ### `public.export_data`
 - Args: `p_kind text, p_property_id uuid, p_from date, p_to date`
 - Returns: `jsonb`
@@ -281,6 +309,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: —
 - Errors: `E_INVALID`, `E_NO_RATE`, `E_ROOM_TAKEN`
+
+### `public.finish_ticket_photo_upload`
+- Args: `p_file_id uuid`
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: the uploader
+- Errors: `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`
 
 ### `public.get_assignable_rooms`
 - Args: `p_id uuid`
@@ -352,6 +387,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: `hk.minibar.record`
 - Errors: `E_FORBIDDEN`
+
+### `public.list_ticket_photos`
+- Args: `p_ticket_id uuid`
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer
+- Permission: `mnt.view`, `mnt.ticket.work`, or the ticket's creator or assignee
+- Errors: `E_FORBIDDEN`, `E_NOT_FOUND`
 
 ### `public.mark_all_notifications_read`
 - Args: `—`
@@ -431,6 +473,13 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: `fin.charge.post`, `fin.folio.view`, `fin.payment.post`
 - Errors: `E_FORBIDDEN`, `E_INVALID`, `E_NOT_FOUND`, `E_READ_ONLY`
+
+### `public.open_ticket_photo`
+- Args: `p_file_id uuid`
+- Returns: `text`
+- Callable by signed-in users: yes · security definer
+- Permission: same as list
+- Errors: `E_FORBIDDEN`, `E_NOT_FOUND`
 
 ### `public.outbox_claim`
 - Args: `p_limit integer, p_channels text[], p_tenant uuid DEFAULT NULL::uuid`
@@ -890,6 +939,20 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Returns: `boolean`
 - Callable by signed-in users: yes · security definer
 - Permission: —
+- Errors: —
+
+### `public.ticket_photo_cleanup_due`
+- Args: `p_limit integer`
+- Returns: `TABLE(file_id uuid, path text)`
+- Callable by signed-in users: no (service role) · security definer
+- Permission: server only (service role)
+- Errors: —
+
+### `public.ticket_photo_files_removed`
+- Args: `p_ids uuid[]`
+- Returns: `integer`
+- Callable by signed-in users: no (service role) · security definer
+- Permission: server only (service role)
 - Errors: —
 
 ### `public.transfer_transaction`

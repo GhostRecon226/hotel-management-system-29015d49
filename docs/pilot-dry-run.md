@@ -27,7 +27,7 @@ Purpose: prove one hotel day works from booking to night audit, with real people
 | 1.3 | Book Guest C arriving today with a **deposit rate plan**. | Saved. Deposit amount follows the plan. | |
 | 1.4 | Open the availability grid. Fill the last room of a type, then try one more booking. | The extra booking is refused with a clear "no rooms free" message. | |
 | 1.5 | Click Save twice quickly on a booking, or refresh after saving. | One reservation only. | |
-| 1.6 | Cancel one test booking. Then reinstate it. | Both work and show in the history. | |
+| 1.6 | As the **manager**, cancel one test booking, then reinstate it. (A front desk officer is refused: only managers hold the cancel right.) | Both work and show in the history. | |
 
 ## 2. Arrivals and check-in
 
@@ -47,7 +47,7 @@ Purpose: prove one hotel day works from booking to night audit, with real people
 | 3.2 | Post the room charge for the night from Front Desk. Run it twice. | Charged once. The second run adds nothing. | |
 | 3.3 | Ask for a discount larger than the front desk limit. | It becomes an approval request. Nothing posts yet. | |
 | 3.4 | As the manager, approve it. Then try approving your own request. | Approval posts the discount. Self-approval is refused. | |
-| 3.5 | Create a service request from the In house list. Assign it and complete it. | Chargeable requests post once to the folio. | |
+| 3.5 | Create a service request from the In house list. Assign it to a **front desk** user and complete it. (Room attendants cannot be given service requests.) | Chargeable requests post once to the folio. | |
 | 3.6 | Extend Guest A's stay by one night. Try the same departure again. | Extension works. The repeat is refused. | |
 | 3.7 | Maintenance: raise a ticket for a room, assign, start, resolve, then close it with a **different** person than the one who resolved it. | Same-person close is refused. Block the room and check it leaves availability. | |
 

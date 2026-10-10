@@ -5,13 +5,11 @@
  * can reach the live address by accident. Preview addresses build fine.
  */
 export const SITE_INFO: Record<string, string> = {
-  "company name": "Zikora Ltd",
-  "contact email": "hello@zikorahq.example",
-  "phone": "+234 800 000 0000",
-  "WhatsApp": "+234 800 000 0000",
+  "company name": "Evogue Consulting",
+  "contact email": "hello@zikorahq.com",
   "support hours": "Monday to Friday, 8am to 6pm (Lagos time)",
-  "about text":
-    "We started Zikora after seeing how much time independent hotels lose to paper registers, spreadsheets and bills that do not add up. We wanted one simple system for the front desk, housekeeping and the accounts, in naira, that a small team can pick up quickly. We are working with a small number of pilot hotels first, and we build what they ask for.",
+  "copyright year": "2026",
+  "legal entity and company details": "Zikora is a product of Evogue Consulting.",
   "date of the final version": "6 October 2026 (draft)",
   "purpose and legal basis, for example a guest register rule, after legal review":
     "to keep the guest register the law requires and to confirm who is staying (draft wording)",

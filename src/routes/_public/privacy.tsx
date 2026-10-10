@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DraftNotice, Eyebrow, Section } from "@/components/public/public-layout";
 import { LegalPart } from "@/components/public/legal";
+import { SITE_INFO } from "@/lib/site-info";
 import { ToConfirm } from "@/components/public/to-confirm";
 import { pageHead } from "@/lib/seo";
 
@@ -25,7 +26,7 @@ function Privacy() {
       <div className="mt-6"><DraftNotice /></div>
       <p className="mb-6 text-[15px] leading-relaxed text-muted-foreground"><strong className="text-foreground">In short.</strong> Hotels use Zikora to run their business. The hotel decides what it records about its guests and is responsible for it. We store that information for the hotel, we keep each hotel's data separate, and we never sell it.</p>
       <LegalPart title="1. Who we are">
-        <p>Zikora is provided by <ToConfirm what="company name" /> ("we", "us"). We run the software that hotels use. <ToConfirm what="company role and registration, after legal review" /></p>
+        <p>Zikora is provided by {SITE_INFO["company name"]} ("we", "us"). We run the software that hotels use. <ToConfirm what="company role and registration, after legal review" /></p>
       </LegalPart>
       <LegalPart title="2. Whose information this covers">
         <ul>
@@ -75,7 +76,7 @@ function Privacy() {
         </ul>
       </LegalPart>
       <LegalPart title="9. Your rights and requests">
-        <p><ToConfirm what="rights and response times, after legal review" /> Write to <ToConfirm what="who answers data requests" /> at <ToConfirm what="contact email" />. If you are a hotel guest, you can also ask the hotel directly.</p>
+        <p><ToConfirm what="rights and response times, after legal review" /> Write to <ToConfirm what="who answers data requests" /> at {SITE_INFO["contact email"]}. If you are a hotel guest, you can also ask the hotel directly.</p>
       </LegalPart>
       <LegalPart title="10. Changes to this notice">
         <p>We will update this page when we change how we handle information, and we will change the date at the top. See also the <Link to="/security" className={link}>security page</Link> and the <Link to="/terms" className={link}>terms of use</Link>.</p>

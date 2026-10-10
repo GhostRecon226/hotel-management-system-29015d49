@@ -3,32 +3,33 @@ import { Eyebrow, Section } from "@/components/public/public-layout";
 import { Button } from "@/components/ui/button";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
 
-const TITLE = "Hotel Software Features: Front Desk, Billing, Housekeeping";
-const DESCRIPTION = "See what Zikora does: reservations, check-in, VAT and service charge billing, housekeeping, maintenance and daily reports for Nigerian hotels.";
+const TITLE = "Hotel Management Features | Zikora";
+const DESCRIPTION = "Explore Zikora workflows for reservations, front desk, guest folios, cashiering, approvals, housekeeping, maintenance and hotel reporting.";
 
 export const Route = createFileRoute("/_public/features")({
-  head: () => pageHead({ title: TITLE, description: DESCRIPTION, jsonLd: [ORGANIZATION_LD] }),
+  head: () => pageHead({ title: TITLE, description: DESCRIPTION, path: "/features", jsonLd: [ORGANIZATION_LD] }),
   component: Features,
 });
 
+// Every sentence comes from the v3 copy and was checked against the status document of 10 Oct 2026.
 const AREAS: { title: string; text: string }[] = [
-  { title: "Reservations", text: "Take bookings and walk-ins. Choose a room type and dates, see what is available, and hold a room while a guest decides. Set cancellation rules by rate plan, and fees are posted once to the right bill. A room can only be sold once, even when two staff book at the same moment." },
-  { title: "Front desk", text: "See arrivals, guests in house and departures at a glance. Check a guest in only when the booking is confirmed, the arrival date has come and the ID is recorded. Move a guest to another room, change the departure date, or undo a check-in or check-out made by mistake on the same day." },
-  { title: "Guests", text: "One profile per guest across all your bookings. Merge duplicate profiles, with a reason on record. ID details are hidden from staff who do not need them. If you choose, keep a photo of the ID in private storage, with every view recorded." },
-  { title: "Bills and payments", text: "Every charge shows the price, service charge, VAT and any state levy. Record cash, POS, transfer and card payments you take outside the system, including payments in another currency at the rate you set. Take deposits, transfer charges between bills, and print interim and final invoices. Issued invoices never change." },
-  { title: "Approvals and control", text: "Discounts above a limit, adjustments, reversals and refunds wait for a second person. The person who asks cannot approve their own request. Every action is recorded with who did it and when." },
-  { title: "Housekeeping", text: "Cleaning tasks appear when a guest leaves or moves rooms. Attendants see their own tasks. A supervisor inspects each room, and a failed inspection sends the room back with the defects listed. Hotels without a supervisor can switch inspections off." },
-  { title: "Maintenance and service requests", text: "Staff report a fault, assign it, track it and close it. Take a room out of sale while it is repaired, and put it back when it is fixed. Log guest requests, and charge the ones that cost money to the guest's bill once." },
-  { title: "Reports and the daily close", text: "Every night the day closes by itself: room charges are posted, guests who did not arrive are marked and the day's figures are saved. Open the app to see occupancy, average daily rate, revenue per available room, outstanding balances and payments. Export bookings, transactions and guests to a spreadsheet." },
-  { title: "Staff and access", text: "Use ready-made roles for front desk, reservations, housekeeping, maintenance, cashier and accounts, or make your own. Nobody can give out a permission they do not hold." },
+  { title: "Reservations and front desk", text: "Manage bookings by room type and rate plan, place time-limited holds, handle group bookings and apply configured cancellation and no-show rules. Use arrivals, in-house and departures lists to manage check-ins, walk-ins, room moves, extensions and supported stay corrections. A last-room safeguard helps prevent two clerks from selling the same final room." },
+  { title: "Guest records", text: "Maintain guest profiles, merge duplicates when appropriate and limit visibility of identity details by role. Optional ID photos are private and off by default. When enabled, access is logged and photos are scheduled for deletion under the product’s 12-month retention rule." },
+  { title: "Folios, charges and payment records", text: "Record room charges, payments, tax lines, discounts, adjustments, refunds and reversals. Issued invoices are not silently edited, and a duplicate-payment warning helps staff spot a possible repeat entry. Zikora records payments made through the hotel’s existing process; integrated online card or transfer collection inside Zikora is not currently available." },
+  { title: "Cashiering and collections", text: "Open a cashier shift with a float, record payments, count and close the shift. Review what remains open before the day ends. For guests who leave with an outstanding balance, log follow-ups such as called, promised, unreachable or disputed, and record the next due date." },
+  { title: "Approvals and staff permissions", text: "Set roles and approval limits. Discounts above configured limits, adjustments, reversals and refunds require another authorised person’s approval. A requester cannot approve their own request, and staff cannot grant permissions they do not hold." },
+  { title: "Housekeeping and guest service", text: "Create cleaning tasks at check-out or room moves, assign work, track completion and require a separate inspection. Record minibar activity, lost-and-found items and guest service requests such as laundry or food; completed service requests can post the relevant charge to the folio once." },
+  { title: "Maintenance", text: "Assign a ticket, track it through work and resolution, attach up to five photos, and close it through a separate person. Block a room from sale while it is unavailable." },
+  { title: "Business day and reporting", text: "The configured business-date rollover handles nightly room charges, no-shows, expired booking holds and stored daily figures. If the rollover fails, it is designed to leave the data unchanged and alert managers. Review occupancy, ADR, RevPAR, revenue by charge code, payments, outstanding balances, ageing and collections, with CSV exports and an owner summary." },
+  { title: "Setup and continuity", text: "Use guided setup for rooms, room types, rate plans, prices, taxes, charge codes and payment methods. Import supported data by CSV. A printable downtime pack helps teams refer to essential information during a power or network disruption; the application does not currently operate offline." },
 ];
 
 function Features() {
   return (
     <Section className="max-w-4xl">
       <Eyebrow>Features</Eyebrow>
-      <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">Everything your hotel's front office runs on, in one system.</h1>
-      <p className="mt-4 max-w-2xl text-base text-muted-foreground">From the first booking to the final invoice, Zikora keeps your team, your rooms and your money in step. Here is what it does today.</p>
+      <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">The workflows behind a well-run hotel.</h1>
+      <p className="mt-4 max-w-2xl text-base text-muted-foreground">Zikora connects the work that happens between a booking and the end-of-day review. Each team has the tools and records it needs, while managers can follow activity across the operation.</p>
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
         {AREAS.map((a) => (
           <section key={a.title} className="rounded-xl border border-border/70 bg-card p-6 shadow-card">
@@ -38,11 +39,8 @@ function Features() {
         ))}
       </div>
       <div className="mt-10 flex flex-col items-start gap-4 rounded-2xl bg-accent-fill p-8 text-primary-foreground shadow-accent sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xl font-extrabold tracking-tight">See it with your own rooms.</h2>
-        <div className="flex flex-wrap gap-3">
-          <Button asChild variant="secondary"><Link to="/auth">Start your free trial</Link></Button>
-          <Button asChild variant="secondary"><Link to="/contact">Talk to us</Link></Button>
-        </div>
+        <h2 className="text-xl font-extrabold tracking-tight">See the workflows that matter to your hotel.</h2>
+        <Button asChild variant="secondary"><Link to="/walkthrough">Request a walkthrough</Link></Button>
       </div>
     </Section>
   );
