@@ -1,12 +1,17 @@
 import { useAccess } from "@/lib/access";
-import { NoAccess, SectionHeader } from "@/lib/setup";
+import { Field, NoAccess, SectionHeader } from "@/lib/setup";
 import { formatDateTime } from "@/lib/reservations";
-import { useBillingOptions, useSubscriptionInfo } from "@/lib/admin";
+import { useAdminAction, useBillingOptions, useSubscriptionInfo, type SubscriptionInfo } from "@/lib/admin";
+import { useState } from "react";
 import { startPlanCheckout } from "@/lib/billing.functions";
 import { errorMessage } from "@/lib/errors";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -121,6 +126,44 @@ function PayForPlan() {
   );
 }
 
+/** Ends the hotel's own subscription. The database keeps access until the paid period ends. Shown for paid, active plans only:
+ *  cancelling a trial would stop access at once, because a trial has no paid period to run out. */
+function CancelSubscription({ s }: { s: SubscriptionInfo }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const cancel = useAdminAction("cancel_subscription", "Subscription cancelled. Your hotel keeps working until the end of the paid period.");
+  const ends = s.current_period_end ? formatDateTime(s.current_period_end) : null;
+  return (
+    <Card>
+      <CardContent className="pt-6">
+        <SectionHeader title="Cancel subscription" description="Stop the plan from continuing. You can ask us to start it again later." />
+        <Button variant="destructive" onClick={() => { setReason(""); setOpen(true); }}>Cancel subscription</Button>
+        <AlertDialog open={open} onOpenChange={setOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel your subscription?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Your hotel keeps working until the end of the paid period{ends ? ` (${ends})` : ""}. After that the hotel becomes read-only.
+                Nothing is deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <Field label="Reason for cancelling" htmlFor="cs-reason">
+              <Textarea id="cs-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} required />
+            </Field>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep subscription</AlertDialogCancel>
+              <Button variant="destructive" disabled={!reason.trim() || cancel.isPending}
+                onClick={() => cancel.mutate({ p_reason: reason.trim() }, { onSuccess: () => setOpen(false) })}>
+                {cancel.isPending ? "Cancelling…" : "Cancel subscription"}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function SubscriptionPanel() {
   const { can } = useAccess();
   const allowed = can("adm.subscription.manage") || can("adm.user.manage");
@@ -179,6 +222,8 @@ export function SubscriptionPanel() {
       </Card>
 
       {can("adm.subscription.manage") && <PayForPlan />}
+
+      {can("adm.subscription.manage") && s.status === "active" && <CancelSubscription s={s} />}
 
       <Card>
         <CardContent className="pt-6">

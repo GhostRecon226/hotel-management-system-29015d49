@@ -1519,6 +1519,22 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Permission: —
 - Errors: —
 
+### `app.run_subscription_clock`
+- Args: `—`
+- Returns: `integer` (how many subscriptions changed state)
+- Called by: pg_cron job `subscription-clock` (daily, 00:15 UTC) and the service role only
+- Permission: — (not callable by signed-in users)
+- Errors: —
+- Changes state as before: trial to expired, active to past due, past due to suspended after 14 days, cancelled at the end of the paid period.
+- Also queues emails (QA-05) to the hotel's active System Administrators and General Managers: trial ends in 7 days, in 1 day, and when it ends; payment overdue, 3 days of grace left, and suspended. Each email has a dedupe key `kind:tenant:date:user`, so a repeat run never sends twice. The status is read at send time, so a hotel that converted gets nothing.
+
+### `app.send_subscription_notice`
+- Args: `p_tenant uuid, p_kind text, p_date date, p_subject text, p_body text`
+- Returns: `void`
+- Permission: — (helper, not callable by signed-in users)
+- Errors: —
+- Queues one email per active System Administrator and General Manager through `app.enqueue_message`.
+
 ### `app.warn_before_rollover`
 - Args: `p_now timestamptz DEFAULT now()`
 - Returns: `integer` (notifications written)
