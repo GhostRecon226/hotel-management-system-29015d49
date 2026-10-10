@@ -176,7 +176,7 @@ function DepositBlock({ due, currency, value, onChange }: { due: number; currenc
   return (
     <Alert>
       <AlertDescription className="space-y-3">
-        <p>A deposit of <strong>{formatAmount(due, currency)}</strong> is required before check-in. Payments are recorded on the folio, which is not built yet.</p>
+        <p>A deposit of <strong>{formatAmount(due, currency)}</strong> is required before check-in. Record the deposit as a payment on the folio, then check in.</p>
         {can("fo.deposit.waive")
           ? <Field label="Reason for waiving the deposit" htmlFor="fd-waive"><Input id="fd-waive" value={value} onChange={(e) => onChange(e.target.value)} maxLength={300} /></Field>
           : <p className="text-sm">Ask a manager to waive the deposit.</p>}
