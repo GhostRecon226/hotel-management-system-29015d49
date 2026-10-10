@@ -31,6 +31,7 @@ Blunt list. Nothing here is hidden elsewhere.
 - Hold room blocks reduce availability only when approved; OOO/OOS/hold all behave the same for availability.
 - Stayover tasks are created only by the rollover. No auto tickets from failed inspections. Housekeeping checklists are generic starter lists.
 - Service request categories were invented; service requests are only for in-house guests.
+- Front desk officers cannot cancel or reinstate a booking (only managers hold the right). Room attendants cannot be given service requests, so laundry or room service goes to front desk staff. Both are by design today; the dry run should say if hotels want them changed.
 - Guest stay history is basic; no guest-level service/maintenance history.
 - Reservation settings (longest stay, tentative hold hours) have a Setup screen since 8 Oct 2026 (SET-012).
 - Staff invite: no temporary passwords. If the invite email fails, nothing is created. Unaccepted invites can be sent again from Admin, Staff.
