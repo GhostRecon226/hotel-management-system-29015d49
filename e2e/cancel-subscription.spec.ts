@@ -26,7 +26,7 @@ async function makeActive(hotelName: string) {
 test("a trial hotel does not see Cancel subscription", async ({ page }) => {
   await signInAndCreateHotel(page, "canceltrial");
   await page.goto("/admin#plan");
-  await expect(page.getByText("Your plan")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your plan" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Cancel subscription" })).toHaveCount(0);
 });
 

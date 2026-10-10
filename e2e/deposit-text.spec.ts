@@ -20,7 +20,7 @@ test("check-in shows the corrected deposit sentence when a deposit is due", asyn
     const plus = (d: string, n: number) => new Date(Date.parse(d) + n * 86_400_000).toISOString().slice(0, 10);
     const rt = await call("save_room_type", { p_property_id: p.id, p_id: null, p_code: "STD", p_name: "Standard", p_max_adults: 2, p_max_children: 0, p_description: null, p_is_active: true });
     await call("bulk_add_rooms", { p_property_id: p.id, p_from: 1, p_to: 1, p_room_type_id: rt, p_floor: "1" });
-    const rp = await call("save_rate_plan", { p_property_id: p.id, p_id: null, p_code: "DEP", p_name: "Deposit rate", p_is_corporate: false, p_cancellation_type: "none", p_cancellation_value: 0, p_no_show_type: "none", p_no_show_value: 0, p_deposit_type: "fixed", p_deposit_value: 10000, p_is_active: true });
+    const rp = await call("save_rate_plan", { p_property_id: p.id, p_id: null, p_code: "DEP", p_name: "Deposit rate", p_is_corporate: false, p_cancellation_type: "none", p_cancellation_value: 0, p_no_show_type: "none", p_no_show_value: 0, p_deposit_type: "amount", p_deposit_value: 10000, p_is_active: true });
     await call("save_rate_plan_price", { p_id: null, p_rate_plan_id: rp, p_room_type_id: rt, p_valid_from: plus(p.business_date, -5), p_valid_to: plus(p.business_date, 90), p_amount: 50000, p_currency: "NGN" });
     return out;
   });
