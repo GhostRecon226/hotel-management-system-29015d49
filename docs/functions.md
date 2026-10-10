@@ -1475,6 +1475,7 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Returns: `jsonb`
 - Permission: —
 - Errors: —
+- DAY-008: counts cashier shifts still open at roll time, adds `open_shifts` to the result and the roll log, and writes one `rollover_open_shifts` notification per active user with `fin.nightaudit.run`. The roll never waits for a shift (DAY-005).
 
 ### `app.roll_room_charges`
 - Args: `p properties, p_date date`
