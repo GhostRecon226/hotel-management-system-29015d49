@@ -11,7 +11,6 @@ Blunt list. Nothing here is hidden elsewhere.
 ## Money and tax
 - **Nigerian tax defaults are guesses** (service charge 10%, VAT 7.5% on net + service charge, state levy 0%). They are marked unverified. Confirm with an accountant before any real use.
 - Cancellation and no-show fees are posted to the main folio once (fixed 30 Sep 2026). Free-cancellation days are set per rate plan on the rate plan screen (default 2).
-- Early departure does not recalculate the reservation total; unused nights are just removed.
 - Discounts, adjustments and service-request charges are in base currency only.
 - Refunds are capped at the folio's credit balance. A discount must be reversed before its charge can be transferred.
 - Check-out with an approved balance leaves unsettled folios open with no follow-up/collections process.

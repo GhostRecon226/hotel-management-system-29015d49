@@ -176,6 +176,7 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: `fo.checkout.unsettled`
 - Errors: `E_BALANCE_DUE`, `E_INVALID`, `E_NOT_APPROVED`, `E_READ_ONLY`, `E_REQUIRED`
+- RES-014: sets `reservations.total_amount` to the nights kept (plus the same-day night when charged) and saves the old total in the check-out snapshot.
 
 ### `public.close_folio`
 - Args: `p_id uuid`
@@ -975,6 +976,7 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Callable by signed-in users: yes · security definer
 - Permission: —
 - Errors: `E_INVALID`, `E_READ_ONLY`, `E_REQUIRED`, `E_ROOM_TAKEN`
+- RES-014: restores the booking total saved at check-out.
 
 ### `public.update_property`
 - Args: `p_property_id uuid, p_name text, p_address text, p_city text, p_country text, p_timezone text, p_check_in_time time without time zone, p_check_out_time time without time zone`
