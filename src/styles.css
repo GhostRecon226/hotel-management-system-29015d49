@@ -2,7 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 /* The fonts are bundled with the app (no calls to Google Fonts): variable files, normal style. */
-@import "@fontsource-variable/figtree/wght.css";
+@import "@fontsource-variable/inter/wght.css";
 @import "@fontsource-variable/fraunces/wght.css";
 
 @custom-variant dark (&:is(.dark *));
