@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Zikora" },
-      { name: "description", content: "Hotel management for Africa." },
+      { name: "description", content: "Bring reservations, front desk, housekeeping, maintenance and hotel financial records into one connected hotel management system." },
     ],
     links: [
       {

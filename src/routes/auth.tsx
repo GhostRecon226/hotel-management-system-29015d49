@@ -14,10 +14,10 @@ import { useHydrated } from "@/lib/use-hydrated";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in | Zikora" },
-      { name: "description", content: "Sign in or create an account to manage your hotel." },
-      { property: "og:title", content: "Sign in | Zikora" },
-      { property: "og:description", content: "Sign in or create an account to manage your hotel." },
+      { title: "Sign in to Zikora" },
+      { name: "description", content: "Sign in to continue to your hotel workspace." },
+      { property: "og:title", content: "Sign in to Zikora" },
+      { property: "og:description", content: "Sign in to continue to your hotel workspace." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -35,8 +35,8 @@ function AuthPage() {
   return (
     <AuthLayout>
       <div>
-        <h1 className="text-[32px] font-semibold">Welcome back</h1>
-        <p className="mb-6 mt-1 text-[15px] text-muted-foreground">Sign in to your hotel management account, or create one.</p>
+        <h1 className="text-[32px] font-semibold">Welcome back.</h1>
+        <p className="mb-6 mt-1 text-[15px] text-muted-foreground">Sign in to continue to your hotel workspace.</p>
         <Tabs defaultValue="signin">
           <TabsList className="mb-6 grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign in</TabsTrigger>
@@ -117,7 +117,10 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         </div>
         {mode === "signup" && <p className="text-sm text-muted-foreground">At least 8 characters.</p>}
         {mode === "signin" && (
-          <p className="text-right text-sm"><Link to="/forgot-password" className="text-primary hover:underline">Forgot password?</Link></p>
+          <p className="flex flex-wrap items-center justify-between gap-x-4 text-sm">
+            <span className="text-muted-foreground">Need access? Ask your hotel administrator.</span>
+            <Link to="/forgot-password" className="text-primary hover:underline">Forgot password?</Link>
+          </p>
         )}
       </div>
       {error && <p className="rounded-md bg-danger-soft px-3 py-2.5 text-sm text-danger-strong" role="alert">{error}</p>}

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BarChart3, ConciergeBell, Smile } from "lucide-react";
+import { ArrowRight, BarChart3, BedDouble, ReceiptText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /*
@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
  * Layout inspired by the reference mock-up Peter shared; code and wording are ours.
  */
 const PILLARS = [
-  { icon: ConciergeBell, text: "Streamline operations" },
-  { icon: Smile, text: "Delight your guests" },
-  { icon: BarChart3, text: "Grow revenue" },
+  { icon: ReceiptText, text: "A traceable money record" },
+  { icon: BedDouble, text: "Rooms tied to the work" },
+  { icon: BarChart3, text: "Daily visibility" },
 ];
 
-export function Hero({ label, lead, rest, text }: { label: string; lead: string; rest: string; text: string }) {
+export function Hero({ label, lead, rest, text, trust }: { label: string; lead: string; rest: string; text: string; trust: string }) {
   return (
     <section className="landing-hero relative overflow-hidden text-white">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:py-24">
@@ -24,10 +24,10 @@ export function Hero({ label, lead, rest, text }: { label: string; lead: string;
           </h1>
           <p className="mt-5 max-w-xl text-base text-white/85 sm:text-lg">{text}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" variant="secondary"><Link to="/auth">Start your free trial <ArrowRight aria-hidden /></Link></Button>
-            <Button asChild size="lg" variant="outline" className="border-white/50 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link to="/contact">Talk to us</Link></Button>
+            <Button asChild size="lg" variant="secondary"><Link to="/walkthrough">Request a walkthrough <ArrowRight aria-hidden /></Link></Button>
+            <Button asChild size="lg" variant="outline" className="border-white/50 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link to="/features">Explore the platform</Link></Button>
           </div>
-          <p className="mt-3 text-sm text-white/70">30 days free. No card needed.</p>
+          <p className="mt-3 text-sm text-white/70">{trust}</p>
           <ul className="mt-8 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
             {PILLARS.map(({ icon: Icon, text: t }) => (
               <li key={t} className="flex items-center gap-3">

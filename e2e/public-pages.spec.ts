@@ -4,13 +4,14 @@ import { test, expect } from "@playwright/test";
 import { createTestUser } from "./local-supabase";
 
 const PAGES: [string, RegExp][] = [
-  ["/", /Know every payment that comes through your front desk/],
-  ["/features", /Everything your hotel's front office runs on/],
-  ["/pricing", /Try it free\. Pay for the size of your hotel/],
-  ["/security", /Guest records and hotel money, protected on purpose/],
-  ["/faq", /Questions hotel owners ask/],
-  ["/about", /About Zikora/],
-  ["/contact", /Talk to a real person/],
+  ["/", /Know what’s happening in your hotel\. Keep control of the details\./],
+  ["/features", /The workflows behind a well-run hotel/],
+  ["/pricing", /The right tools for the way your hotel runs/],
+  ["/security", /Accountability should be built into the workflow/],
+  ["/faq", /Frequently asked questions/],
+  ["/about", /Built around the work that keeps a hotel running/],
+  ["/contact", /Tell us about your hotel/],
+  ["/walkthrough", /See how the workflows fit together/],
   ["/privacy", /Privacy notice/],
   ["/terms", /Terms of use/],
 ];
@@ -22,7 +23,7 @@ test("every public page opens signed out, with one main heading and no database 
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-    await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Sign in" }).first()).toBeVisible(); // header and footer both link to sign-in
     await expect(page).toHaveURL(new RegExp(`${path === "/" ? "/$" : path}`));
   }
   expect(dbCalls, "public pages must not call the database").toEqual([]);
@@ -45,10 +46,10 @@ test("the first Tab on a public page offers Skip to content", async ({ page }) =
 test("FAQ answers open with the keyboard", async ({ page }) => {
   await page.goto("/faq");
   await page.waitForLoadState("networkidle"); // the questions open once the page has started up
-  const q = page.getByRole("button", { name: /Does it work without internet/ });
+  const q = page.getByRole("button", { name: /Does it work offline/ });
   await q.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByText("No, it needs an internet connection.")).toBeVisible();
+  await expect(page.getByText(/Zikora requires an internet connection/)).toBeVisible();
 });
 
 test("signed in: / goes to the app; other public pages stay readable with Open the app", async ({ page }) => {

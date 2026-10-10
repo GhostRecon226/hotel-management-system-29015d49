@@ -1,37 +1,79 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BarChart3, BedDouble, CalendarDays, ConciergeBell, Download, Globe2, Lock, Receipt, Sparkles, Wifi, type LucideIcon } from "lucide-react";
+import { ArrowRight, BarChart3, BedDouble, CalendarDays, ConciergeBell, Check, Database, Lock, Receipt, ShieldCheck, Sparkles, UserCheck, type LucideIcon } from "lucide-react";
 import { Section } from "@/components/public/public-layout";
 import { Button } from "@/components/ui/button";
 
 /*
- * Extra home and pricing sections. Ideas only (a night-shift story, role screens, size bands, growth steps);
- * all wording is ours and every claim is checked against the app. No customer numbers or quotes: there are none yet.
+ * Homepage sections (copy revamp v3, Oct 2026). Every statement here is checked against what the app does.
+ * No customer numbers, logos, quotes, savings figures or integrations: none exist or are confirmed.
  */
 
-export function NightShift() {
+const HANDOVERS = [
+  { q: "Was that discount approved?", text: "A guest asks for a reduction. The desk agrees. Later, nobody can say who allowed it." },
+  { q: "Has the room actually been cleaned?", text: "A guest moves rooms. The front desk thinks the old room is ready. Housekeeping was never told." },
+  { q: "Was the payment recorded, and what is still owed?", text: "Money changes hands at the desk. By the end of the day, the figures do not match what people remember." },
+];
+
+/** The problem: three handover failures a hotel operator recognises. */
+export function Handovers() {
   return (
-    <Section className="pt-0 sm:pt-0">
-      <div className="mx-auto max-w-3xl">
-        <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Tuesday, 11:40pm. Check-out is in the morning.</h2>
-        <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">A guest asks for a big discount on the way up to bed. The night receptionist is alone. Earlier, a guest was moved to another room and nobody told housekeeping.</p>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">With Zikora, a discount above the limit waits for a manager to approve it. The room move creates a cleaning task. Every change is on record with a name against it. In the morning you open the app and see what happened, instead of asking.</p>
+    <Section>
+      <div className="mx-auto max-w-3xl text-center">
+        <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">A hotel day has too many handovers</h2>
+        <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">When reservations, the front desk, housekeeping and accounts work from separate records, small gaps become difficult questions.</p>
       </div>
+      <ul className="mx-auto mt-8 grid max-w-5xl gap-4 sm:grid-cols-3">
+        {HANDOVERS.map((h) => (
+          <li key={h.q} className="rounded-xl border border-border/70 bg-card p-5 shadow-card">
+            <h3 className="font-bold">{h.q}</h3>
+            <p className="mt-2 text-[15px] text-muted-foreground">{h.text}</p>
+          </li>
+        ))}
+      </ul>
+      <p className="mx-auto mt-6 max-w-3xl text-center font-semibold">Zikora brings the key workflows together, with records and responsibilities that are easier to follow.</p>
     </Section>
   );
 }
 
-const ROLES = [
-  { who: "Front desk", line: "See today's arrivals, guests in house and departures. Check a guest in, take payment, move a room." },
-  { who: "Housekeeping", line: "See the rooms to clean and the rooms to inspect. Mark each one started and done." },
-  { who: "Manager and accounts", line: "Approve discounts and refunds. Read the day's figures and export them to a spreadsheet." },
+const PILLARS: { icon: LucideIcon; title: string; text: string }[] = [
+  { icon: Receipt, title: "Put the money trail in order", text: "Record charges and payments against guest folios. Keep issued invoices unchanged. When a correction is needed, use a linked adjustment, reversal or refund instead of silently overwriting the original entry. Selected discounts, refunds and reversals require approval from another authorised person." },
+  { icon: BedDouble, title: "Keep room status connected to the work", text: "When a guest checks out, a cleaning task can open automatically. Housekeeping can take the task on a phone browser, mark it done and have another team member inspect it. If maintenance makes a room unavailable, the room can be blocked from sale while the issue is being handled." },
+  { icon: BarChart3, title: "See the day, not just the bookings", text: "Review occupancy, average daily rate, RevPAR, revenue by charge code, payments, outstanding balances, ageing and collections. Export supported reports to CSV and prepare an owner summary or an accountant brief." },
 ];
 
-export function RoleScreens() {
+/** Three proof pillars. */
+export function ProofPillars() {
   return (
     <Section className="pt-0 sm:pt-0">
-      <h2 className="text-center text-2xl font-extrabold tracking-tight sm:text-3xl">Each person sees what their job needs</h2>
+      <ul className="grid gap-4 lg:grid-cols-3">
+        {PILLARS.map(({ icon: Icon, title, text }) => (
+          <li key={title} className="rounded-xl border border-border/70 bg-card p-6 shadow-card">
+            <span aria-hidden className="grid size-10 place-items-center rounded-lg bg-primary-soft text-primary-strong"><Icon className="size-5" /></span>
+            <h2 className="mt-4 text-lg font-bold">{title}</h2>
+            <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{text}</p>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+const TEAMS = [
+  { who: "Front desk", line: "Work from arrivals, in-house guests and departures." },
+  { who: "Cashiers", line: "Open a shift with a float, record collections, count and close the shift." },
+  { who: "Managers", line: "Review activity and see which balances still need attention." },
+];
+
+/** One workflow story: the handover between teams. */
+export function TeamHandover() {
+  return (
+    <Section className="pt-0 sm:pt-0">
+      <div className="mx-auto max-w-3xl text-center">
+        <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">A clearer handover between teams</h2>
+        <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">Each team works from the same record, and managers can see the activity behind the day's numbers.</p>
+      </div>
       <div className="mx-auto mt-8 grid max-w-5xl gap-4 sm:grid-cols-3">
-        {ROLES.map((r) => (
+        {TEAMS.map((r) => (
           <div key={r.who} className="rounded-xl border border-border/70 bg-card p-5 shadow-card">
             <h3 className="font-bold">{r.who}</h3>
             <p className="mt-2 text-[15px] text-muted-foreground">{r.line}</p>
@@ -42,94 +84,26 @@ export function RoleScreens() {
   );
 }
 
-const STAGES = [
-  { n: "1", title: "One hotel", text: "Set up your rooms, rates and staff and take your first booking." },
-  { n: "2", title: "A second hotel", text: "A manager adds another property, within what your plan allows." },
-  { n: "3", title: "Keep the same system", text: "Each hotel has its own rooms, rates and team. Switch between them in the app." },
-];
-
-export function GrowthStrip() {
-  return (
-    <Section className="pt-0 sm:pt-0">
-      <h2 className="text-center text-2xl font-extrabold tracking-tight sm:text-3xl">Start with one hotel. Add more when you are ready.</h2>
-      <ol className="mx-auto mt-8 grid max-w-4xl gap-4 sm:grid-cols-3">
-        {STAGES.map((s) => (
-          <li key={s.n} className="rounded-xl border border-border/70 bg-card p-5 shadow-card">
-            <span className="grid size-9 place-items-center rounded-full bg-primary-soft text-sm font-extrabold text-primary-strong" aria-hidden>{s.n}</span>
-            <h3 className="mt-3 font-bold">{s.title}</h3>
-            <p className="mt-1 text-[15px] text-muted-foreground">{s.text}</p>
-          </li>
-        ))}
-      </ol>
-    </Section>
-  );
-}
-
-// Size bands are a draft. Plans and prices are still an open decision (A16); change these when it is made.
-const BANDS = ["1 to 24 rooms", "25 to 40 rooms", "41 to 80 rooms", "81 to 200 rooms", "More than 200 rooms"];
-
-export function SizeBands() {
-  return (
-    <Section className="pt-0 sm:pt-0">
-      <div className="mx-auto max-w-3xl">
-        <h2 className="text-2xl font-extrabold tracking-tight">Priced by the size of your hotel</h2>
-        <p className="mt-2 text-[15px] text-muted-foreground">Your price depends on the number of rooms. We agree it with you, in your hotel's currency.</p>
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {BANDS.map((b) => <li key={b} className="rounded-full border border-border/70 bg-card px-3.5 py-1.5 text-sm font-semibold">{b}</li>)}
-        </ul>
-        <p className="mt-4 text-sm text-muted-foreground"><Link to="/contact" className="font-semibold text-primary underline-offset-4 hover:underline">Ask for your price</Link></p>
-      </div>
-    </Section>
-  );
-}
-
-const FACTS: { icon: LucideIcon; text: string }[] = [
-  { icon: Globe2, text: "Data stored in the European Union (Ireland)" },
-  { icon: Lock, text: "Each hotel's data kept apart from every other hotel's" },
-  { icon: Wifi, text: "Runs in your browser. Nothing to install" },
-  { icon: Download, text: "Export to a spreadsheet at any time" },
-];
-
-/** Facts strip under the hero. Real facts only: there are no customer names or logos to show yet. */
-export function FactsStrip() {
-  return (
-    <section aria-label="Built for independent hotels" className="border-b border-border/70 bg-card">
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Built in Africa, for independent hotels</p>
-        <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {FACTS.map(({ icon: Icon, text }) => (
-            <li key={text} className="flex items-center gap-3 text-sm font-semibold">
-              <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary-strong"><Icon className="size-4" /></span>
-              {text}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
 const TILES: { icon: LucideIcon; title: string; text: string; tone: string }[] = [
-  { icon: CalendarDays, title: "Reservations", text: "Take bookings and walk-ins. A room is never booked twice.", tone: "bg-primary-soft text-primary-strong" },
-  { icon: ConciergeBell, title: "Front desk", text: "Check guests in and out. Arrivals, in house and departures on one screen.", tone: "bg-warning-soft text-warning-strong" },
-  { icon: BedDouble, title: "Rooms", text: "See which rooms are clean, dirty or out of order.", tone: "bg-info-soft text-info-strong" },
-  { icon: Sparkles, title: "Housekeeping", text: "A cleaning task appears when a guest leaves or moves rooms.", tone: "bg-info-soft text-info-strong" },
-  { icon: Receipt, title: "Billing and folio", text: "Service charge and VAT on every charge, in your currency.", tone: "bg-danger-soft text-danger-strong" },
-  { icon: BarChart3, title: "Reports", text: "Occupancy, ADR and RevPAR every morning. Export to a spreadsheet.", tone: "bg-success-soft text-success-strong" },
+  { icon: CalendarDays, title: "Reservations", text: "Bookings, holds and groups, with a last-room safeguard.", tone: "bg-primary-soft text-primary-strong" },
+  { icon: ConciergeBell, title: "Front desk", text: "Arrivals, walk-ins, room moves, extensions and departures.", tone: "bg-warning-soft text-warning-strong" },
+  { icon: Receipt, title: "Folios and cashiering", text: "Charges, payments, tax lines, invoices and cashier shifts.", tone: "bg-danger-soft text-danger-strong" },
+  { icon: Sparkles, title: "Housekeeping and maintenance", text: "Cleaning tasks, inspections, tickets and room blocks.", tone: "bg-info-soft text-info-strong" },
+  { icon: UserCheck, title: "Approvals", text: "Roles, limits and a second check on selected decisions.", tone: "bg-info-soft text-info-strong" },
+  { icon: BarChart3, title: "Reports", text: "Daily figures, outstanding balances and collections.", tone: "bg-success-soft text-success-strong" },
 ];
 
-/** "Everything you need" block: heading, six tiles and a photo card. */
-export function AllInOne() {
+/** Compact capability overview that links to Features. */
+export function CapabilityOverview() {
   return (
-    <Section>
-      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,4fr)_minmax(0,6fr)_minmax(0,3.4fr)]">
+    <Section className="pt-0 sm:pt-0">
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-strong">All in one place</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Everything you need to run a modern hotel</h2>
-          <p className="mt-4 text-[15px] text-muted-foreground">From the booking to the housekeeping round to the final bill, your whole operation lives in one system.</p>
-          <Button asChild size="lg" className="mt-6"><Link to="/features">Explore features <ArrowRight aria-hidden /></Link></Button>
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Designed for the realities of hotel operations</h2>
+          <p className="mt-4 text-[15px] text-muted-foreground">Zikora is designed to support the practical demands of hotel operations, with configurable tax and service-charge settings. Tax treatment and configuration should be confirmed with your accountant before use.</p>
+          <Button asChild size="lg" className="mt-6"><Link to="/features">Explore the platform <ArrowRight aria-hidden /></Link></Button>
         </div>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {TILES.map(({ icon: Icon, title, text, tone }) => (
             <li key={title} className="rounded-xl border border-border/70 bg-card p-4 shadow-card">
               <span aria-hidden className={`grid size-10 place-items-center rounded-lg ${tone}`}><Icon className="size-5" /></span>
@@ -138,8 +112,50 @@ export function AllInOne() {
             </li>
           ))}
         </ul>
-        <div className="landing-hero relative hidden min-h-72 overflow-hidden rounded-2xl text-white xl:block xl:h-full">
-          <p className="absolute inset-x-4 bottom-4 rounded-xl bg-black/45 px-4 py-3 text-sm font-semibold backdrop-blur-sm">A smooth check-in. A correct bill. A room that is ready.</p>
+      </div>
+    </Section>
+  );
+}
+
+const CONTROLS: { icon: LucideIcon; title: string; text: string }[] = [
+  { icon: Database, title: "Changes leave a trail", text: "Payments and issued invoices keep their history. Corrections are linked entries." },
+  { icon: ShieldCheck, title: "Sensitive actions need a second person", text: "Selected discounts, adjustments, reversals and refunds need another authorised person." },
+  { icon: Lock, title: "Hotel data is separated", text: "Each hotel's data is kept apart from other hotels' data. The current database is hosted in Ireland." },
+];
+
+/** Security and control strip: three verified points. */
+export function ControlStrip() {
+  return (
+    <Section className="pt-0 sm:pt-0">
+      <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-card sm:p-8">
+        <h2 className="text-xl font-bold sm:text-2xl">Accountability built into the workflow</h2>
+        <ul className="mt-5 grid gap-5 sm:grid-cols-3">
+          {CONTROLS.map(({ icon: Icon, title, text }) => (
+            <li key={title} className="flex gap-3">
+              <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary-strong"><Icon className="size-4" /></span>
+              <div>
+                <h3 className="text-[15px] font-bold">{title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-5 flex items-center gap-2 text-sm"><Check aria-hidden className="size-4 text-success-strong" /><Link to="/security" className="font-semibold text-primary underline-offset-4 hover:underline">Read how Zikora handles security and data</Link></p>
+      </div>
+    </Section>
+  );
+}
+
+/** Closing call to action. */
+export function ClosingCta({ title, text, button = "Request a walkthrough" }: { title: string; text: string; button?: string }) {
+  return (
+    <Section className="pt-0 sm:pt-0">
+      <div className="relative overflow-hidden rounded-2xl bg-accent-fill px-6 py-12 text-center text-primary-foreground shadow-accent sm:px-12">
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/10" />
+        <h2 className="relative text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h2>
+        <p className="relative mx-auto mt-2 max-w-xl text-[15px] text-on-primary-muted">{text}</p>
+        <div className="relative mt-6 flex justify-center">
+          <Button asChild size="lg" variant="secondary"><Link to="/walkthrough">{button}</Link></Button>
         </div>
       </div>
     </Section>

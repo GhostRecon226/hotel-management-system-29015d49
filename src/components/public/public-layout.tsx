@@ -3,12 +3,13 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { hasStoredSession } from "@/lib/session-hint";
 import { BrandLogo } from "@/components/brand-logo";
+import { ToConfirm } from "@/components/public/to-confirm";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/features", label: "Features" },
-  { to: "/pricing", label: "Pricing" },
   { to: "/security", label: "Security" },
+  { to: "/pricing", label: "Pricing" },
   { to: "/faq", label: "FAQ" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
@@ -42,29 +43,38 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               ? <Button asChild size="sm"><Link to="/dashboard">Open the app</Link></Button>
               : <>
                   <Button asChild size="sm" variant="outline"><Link to="/auth">Sign in</Link></Button>
-                  <Button asChild size="sm" className="hidden sm:inline-flex"><Link to="/auth">Start free trial</Link></Button>
+                  <Button asChild size="sm"><Link to="/walkthrough">Request a walkthrough</Link></Button>
                 </>}
           </div>
         </div>
       </header>
       <main id="main" className="flex-1">{children}</main>
       <footer className="border-t border-border/70 bg-card">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))] sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] sm:px-6">
           <div>
             <div className="flex items-center gap-2.5">
               <BrandLogo className="h-8 w-auto" />
             </div>
-            <p className="mt-3 max-w-sm text-sm text-muted-foreground">Hotel management software built in Africa, for independent hotels. Know every payment that comes through your front desk.</p>
+            <p className="mt-3 max-w-sm text-sm text-muted-foreground">Zikora brings the daily work of running a hotel into one connected system, with a clearer record of rooms, service and money.</p>
           </div>
-          <FooterLinks title="Product" links={[{ to: "/", label: "Home" }, { to: "/features", label: "Features" }, { to: "/pricing", label: "Pricing" }, { to: "/security", label: "Security" }, { to: "/faq", label: "FAQ" }]} />
-          <FooterLinks title="Company" links={[{ to: "/about", label: "About" }, { to: "/contact", label: "Contact" }, { to: "/privacy", label: "Privacy notice" }, { to: "/terms", label: "Terms of use" }]} />
+          <FooterLinks title="Product" links={[{ to: "/features", label: "Features" }, { to: "/security", label: "Security" }, { to: "/faq", label: "FAQ" }]} />
+          <FooterLinks title="Company" links={[{ to: "/about", label: "About" }, { to: "/contact", label: "Contact" }]} />
+          <FooterLinks title="Get started" links={signedIn
+            ? [{ to: "/walkthrough", label: "Request a walkthrough" }]
+            : [{ to: "/walkthrough", label: "Request a walkthrough" }, { to: "/auth", label: "Sign in" }]} />
+          <FooterLinks title="Legal" links={[{ to: "/privacy", label: "Privacy notice" }, { to: "/terms", label: "Terms of use" }]} />
+        </div>
+        <div className="border-t border-border/70">
+          <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
+            © <ToConfirm what="copyright year" /> Zikora. <ToConfirm what="legal entity and company details" />
+          </p>
         </div>
       </footer>
     </div>
   );
 }
 
-type FooterLink = { to: "/" | "/features" | "/security" | "/pricing" | "/faq" | "/about" | "/contact" | "/privacy" | "/terms"; label: string };
+type FooterLink = { to: "/" | "/features" | "/security" | "/pricing" | "/faq" | "/about" | "/contact" | "/privacy" | "/terms" | "/walkthrough" | "/auth"; label: string };
 function FooterLinks({ title, links }: { title: string; links: FooterLink[] }) {
   return (
     <div>

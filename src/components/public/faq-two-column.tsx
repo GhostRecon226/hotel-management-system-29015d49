@@ -3,7 +3,7 @@ import { MessageCircleQuestion } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/public/public-layout";
-import { HelpAnswer, type Faq } from "@/components/public/faq-content";
+import type { Faq } from "@/components/public/faq-content";
 
 const link = "font-semibold text-primary underline-offset-4 hover:underline";
 
@@ -23,9 +23,9 @@ export function FaqTwoColumn({ faqs, title, intro }: { faqs: Faq[]; title: strin
         <p className="mt-3 text-[15px] text-muted-foreground">{intro}</p>
         <div className="mt-6 rounded-xl border border-border/70 bg-card p-5 shadow-card">
           <span className="grid size-10 place-items-center rounded-lg bg-primary-soft text-primary-strong" aria-hidden><MessageCircleQuestion className="size-5" /></span>
-          <h2 className="mt-3 text-base font-bold">Still have a question?</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Tell us about your hotel and we will answer.</p>
-          <Button asChild className="mt-4"><Link to="/contact">Contact us</Link></Button>
+          <h2 className="mt-3 text-base font-bold">Have another question?</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Contact the Zikora team.</p>
+          <Button asChild className="mt-4"><Link to="/contact">Contact the Zikora team</Link></Button>
         </div>
       </div>
       <div className="space-y-8">
@@ -35,15 +35,6 @@ export function FaqTwoColumn({ faqs, title, intro }: { faqs: Faq[]; title: strin
             <FaqList faqs={faqs.filter((f) => f.group === g)} />
           </section>
         ))}
-        <section aria-labelledby="faq-help">
-          <h2 id="faq-help" className="mb-3 text-lg font-bold">Help</h2>
-          <Accordion type="multiple" className="rounded-xl border border-border/70 bg-card px-5 shadow-card">
-            <AccordionItem value="help">
-              <AccordionTrigger>How do I get help?</AccordionTrigger>
-              <AccordionContent><HelpAnswer /></AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </section>
       </div>
     </div>
   );

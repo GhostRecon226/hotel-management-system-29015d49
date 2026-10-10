@@ -1,7 +1,5 @@
-import { ToConfirm } from "@/components/public/to-confirm";
-
 /**
- * Public FAQ. Every answer was checked against what the app does (2 Oct 2026, reviewed 6 Oct 2026).
+ * Public FAQ. Copy revamp v3 (Oct 2026). Every answer was checked against the status document of 10 Oct 2026.
  * Do not add a claim here without checking it in the app first. Features that are not built stay off the site.
  * Answers are plain text so the same words feed the FAQ structured data for search engines.
  * `more` adds one link after the answer.
@@ -11,71 +9,48 @@ export type Faq = {
   group: string;
   q: string;
   a: string;
-  more?: { to: "/contact" | "/security" | "/privacy"; label: string };
+  more?: { to: "/contact" | "/security" | "/walkthrough"; label: string };
 };
 
 export const FAQS: Faq[] = [
-  { id: "what", group: "Getting started", q: "What is Zikora?",
-    a: "Zikora is hotel management software that runs in your web browser. It handles bookings, check-in and check-out, rooms and housekeeping, maintenance, guest bills, invoices and reports. It is built in Africa, for African hotels, and each hotel works in its own currency." },
-  { id: "fit", group: "Getting started", q: "Is Zikora made for hotels like mine?",
-    a: "It is built for independent hotels in Africa, where the front desk takes cash, transfers and POS payments and one small team does many jobs. If you run guest rooms and a front desk, it fits." },
-  { id: "countries", group: "Getting started", q: "Which countries does Zikora work in?",
-    a: "We are launching in Nigeria. A hotel in Ghana, Kenya or South Africa is set up with its own currency and time zone, and the system works for it. Tax rules are ready for Nigeria today. We add other countries' tax rules country by country, so tell us where you are and we will say what is ready.",
-    more: { to: "/contact", label: "Tell us where you are" } },
-  { id: "cost", group: "Getting started", q: "How much does it cost?",
-    a: "You start with a free trial. After that, the price depends on the size of your hotel. Talk to us and we will give you a price for your hotel.",
-    more: { to: "/contact", label: "Talk to us" } },
-  { id: "card", group: "Getting started", q: "Do I need a card to start the free trial?",
-    a: "No. Create your account and your hotel, and your 30 days start. We never ask for card details." },
-  { id: "trial-end", group: "Getting started", q: "What happens when my free trial ends?",
-    a: "Your hotel becomes read-only until your plan starts. Your team can still record payments, settle bills and check guests out, but cannot add new bookings or charges. Nothing is deleted." },
-  { id: "start-plan", group: "Getting started", q: "How do I start a paid plan, or cancel?",
-    a: "Contact us. We agree the price, then switch your plan on. To cancel, contact us the same way.",
+  { id: "what", group: "About Zikora", q: "What is Zikora?",
+    a: "Zikora is a hotel management system that connects reservations, front desk, guest records, folios, cashiering, housekeeping, maintenance, collections and reporting." },
+  { id: "who", group: "About Zikora", q: "Who is Zikora for?",
+    a: "Zikora is designed for hotel operators who want their teams and key operating records in one connected system. Contact us to discuss whether the current workflows suit your property.",
     more: { to: "/contact", label: "Contact us" } },
 
-  { id: "tax", group: "Money and tax", q: "Does it work out VAT and service charge?",
-    a: "Yes. Every charge shows the price, the service charge, VAT and any state levy. Each hotel sets its own rates, so set them with your accountant's advice." },
-  { id: "payments", group: "Money and tax", q: "Does it take card payments?",
-    a: "No. It records payments you take outside the system, such as cash, POS, bank transfer or card, and keeps every bill correct. It does not charge cards or move money." },
-  { id: "duplicates", group: "Money and tax", q: "Can it stop us recording the same payment twice?",
-    a: "Yes. A retry never posts twice. If a payment looks like one already recorded, the system shows the earlier payment and asks the cashier to confirm it is a second payment, with a reason." },
-  { id: "invoices", group: "Money and tax", q: "Can I print invoices?",
-    a: "Yes. Print interim bills during a stay and final invoices at check-out, with each tax shown. Issued invoices never change." },
-  { id: "currency", group: "Money and tax", q: "Can I record payments in dollars or another currency?",
-    a: "Yes. Record a payment in another currency at the exchange rate you set. Bills are in your hotel's own currency." },
+  { id: "payments", group: "Money and controls", q: "Can Zikora record payments?",
+    a: "Yes. Zikora records payments made through the hotel's existing payment process and links them to the relevant financial records. Integrated online card or transfer collection inside Zikora is not currently available." },
+  { id: "approvals", group: "Money and controls", q: "Can staff approve their own refunds or discounts?",
+    a: "No. Configured high-risk actions, including discounts above limits, adjustments, reversals and refunds, require approval from another authorised person. A requester cannot approve their own request." },
+  { id: "cashier", group: "Money and controls", q: "Can it help with cashier accountability?",
+    a: "Cashiers can open a shift with a float, record payments, count and close the shift, and review what remains open." },
+  { id: "tax", group: "Money and controls", q: "Does Zikora calculate VAT and service charge?",
+    a: "Zikora includes configurable tax and service-charge settings with local defaults. An accountant should confirm the correct treatment for your hotel. Zikora does not claim tax-authority approval or tax compliance on your behalf." },
 
-  { id: "grow", group: "Staff and control", q: "Can I run more than one hotel?",
-    a: "Yes. A manager can add another hotel, within what your plan allows. Each hotel has its own rooms, rates and staff, and you switch between hotels in the app. Figures show one hotel at a time." },
-  { id: "devices", group: "Daily use", q: "Can I use it on a phone or tablet?",
-    a: "Yes. It works in the browser on a computer, tablet or phone. There is nothing to install." },
-  { id: "offline", group: "Daily use", q: "Does it work without internet?",
-    a: "No, it needs an internet connection." },
-  { id: "housekeeping", group: "Daily use", q: "Does it handle housekeeping and maintenance?",
-    a: "Yes. Housekeeping sees which rooms are clean, dirty or out of order, gets cleaning tasks when guests leave or move rooms, and records inspections. Staff report repairs, and rooms can be taken out of sale while they are fixed." },
-  { id: "night-audit", group: "Daily use", q: "Does it close the day for me?",
-    a: "Yes. Every night it closes the day by itself. It posts room charges, marks guests who did not arrive and saves the day's figures." },
-  { id: "reports", group: "Daily use", q: "What reports do I get?",
-    a: "Occupancy, average daily rate, revenue per available room, revenue by type of charge, outstanding balances, payments, cancellations and length of stay. You can export bookings, transactions and guests to a spreadsheet." },
+  { id: "housekeeping", group: "Daily operations", q: "Does it connect housekeeping to check-out?",
+    a: "A cleaning task can open automatically at check-out or a room move. Staff can complete the task in a phone browser, and a different team member can inspect it." },
+  { id: "offline", group: "Daily operations", q: "Does it work offline?",
+    a: "No. Zikora requires an internet connection. A printable downtime pack is available for use during a disruption." },
 
-  { id: "roles", group: "Staff and control", q: "Can I give staff different access?",
-    a: "Yes. Use ready-made roles such as front desk, reservations, housekeeping, maintenance, cashier and accountant, or make your own." },
-  { id: "approvals", group: "Staff and control", q: "Can staff give discounts or refunds on their own?",
-    a: "Only within the limit you set. Discounts above a limit, adjustments, reversals and refunds need a second person to approve, and nobody can approve their own request." },
+  { id: "messages", group: "What is not available yet", q: "Can Zikora send guest messages by email or WhatsApp?",
+    a: "Guest email, SMS and WhatsApp messaging integrations are not currently available." },
+  { id: "channels", group: "What is not available yet", q: "Does it connect to online booking sites?",
+    a: "A direct booking engine and channel-manager integrations are future roadmap items, not current features." },
 
-  { id: "data", group: "Your data", q: "Where is my data kept, and is it safe?",
-    a: "Your data is stored on secure servers in the European Union (Ireland). Each hotel's data is kept separate, and staff see only what their role allows.",
+  { id: "data", group: "Data and security", q: "Where is hotel data stored?",
+    a: "The current database is hosted in Ireland. Each hotel's data is separated from other hotels' data. Hotels should review their own contractual and data-protection obligations with appropriate advice.",
     more: { to: "/security", label: "Read about security" } },
-  { id: "own-data", group: "Your data", q: "Who owns my data? Can I take it with me?",
-    a: "You do. Export bookings, transactions and guests to a spreadsheet whenever you like. We do not sell your information.",
-    more: { to: "/privacy", label: "Read the privacy notice" } },
-  { id: "id-photos", group: "Your data", q: "Do you keep photos of guests' ID?",
-    a: "Only if your hotel switches that on. Photos are stored privately, opened through short-lived links, and deleted automatically 12 months after the guest's last check-out." },
+  { id: "certification", group: "Data and security", q: "Does Zikora have ISO or SOC certification?",
+    a: "No. Zikora does not currently hold ISO or SOC security certifications." },
+
+  { id: "cost", group: "Pricing and next steps", q: "How much does it cost?",
+    a: "Zikora is subscription-based. Plans and pricing are still being finalised, so contact us for current pricing and to confirm what fits your property.",
+    more: { to: "/contact", label: "Contact us" } },
+  { id: "demo", group: "Pricing and next steps", q: "How do I see it in action?",
+    a: "Request a walkthrough and tell us about your hotel. The team can focus on the workflows most relevant to your operation.",
+    more: { to: "/walkthrough", label: "Request a walkthrough" } },
 ];
 
-/** Help answer: its contact details come from src/lib/site-info.ts through <ToConfirm>. */
-export function HelpAnswer() {
-  return <>Email <ToConfirm what="contact email" /> or call <ToConfirm what="phone" />. Support hours: <ToConfirm what="support hours" />.</>;
-}
-
-/** The five questions shown on the pricing page. */
-export const PRICING_FAQ_IDS = ["cost", "card", "trial-end", "devices", "data"];
+/** The questions shown on the pricing page. */
+export const PRICING_FAQ_IDS = ["cost", "payments", "tax", "data", "demo"];
