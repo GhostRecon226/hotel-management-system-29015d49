@@ -2,9 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { useAccess } from "@/lib/access";
-import { formatDate, fullName, GuestFormDialog, useGuestSearch } from "@/lib/guests";
+import { formatDate, fullName, GuestFormDialog, useGuestPages } from "@/lib/guests";
 import { PageHeader, FilterBar } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
+import { LoadMore } from "@/components/ui/load-more";
 import { TableSkeletonRows } from "@/components/ui/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,7 @@ function GuestList() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
-  const { data = [], isLoading } = useGuestSearch(q);
+  const { data, isLoading, hasMore, loadMore, isLoadingMore } = useGuestPages(q);
 
   return (
     <div>
@@ -58,6 +59,7 @@ function GuestList() {
           ))}
         </TableBody>
       </Table>
+      <LoadMore shown={data.length} hasMore={hasMore} loading={isLoadingMore} onClick={loadMore} />
       <GuestFormDialog open={open} onOpenChange={setOpen}
         onSaved={(id) => navigate({ to: "/guests/$id", params: { id } })} />
     </div>

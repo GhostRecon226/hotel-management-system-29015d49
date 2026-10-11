@@ -68,13 +68,15 @@ export function useCheckOutNight(reservationId?: string) {
     queryFn: () => callRpc<CheckOutNight>("preview_check_out_charge", { p_id: reservationId }),
   });
 }
-export function useFolioList(propertyId: string | undefined, status: string) {
+export const FOLIO_PAGE = 200;
+/** Folios, newest first. Each Load more asks for another FOLIO_PAGE; the first page keeps the key the offline cache uses. */
+export function useFolioList(propertyId: string | undefined, status: string, limit = FOLIO_PAGE) {
   return useQuery({
-    queryKey: ["folios", "list", propertyId, status], enabled: !!propertyId,
+    queryKey: limit === FOLIO_PAGE ? ["folios", "list", propertyId, status] : ["folios", "list-more", propertyId, status, limit], enabled: !!propertyId,
     queryFn: async () => {
       let q = (supabase.from as any)("v_folio_balances").select("*").eq("property_id", propertyId);
       if (status !== "all") q = q.eq("status", status);
-      const { data, error } = await q.order("created_at", { ascending: false }).limit(200);
+      const { data, error } = await q.order("created_at", { ascending: false }).order("folio_id").limit(limit);
       if (error) throw error;
       return data as FolioSummary[];
     },
