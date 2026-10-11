@@ -72,7 +72,7 @@ function GroupPage() {
         </div>
       )}
 
-      <Table>
+      <Table wide>
         <TableHeader>
           <TableRow>
             <TableHead>Branch</TableHead>
@@ -92,7 +92,7 @@ function GroupPage() {
           ) : rows.map((r) => (
             <TableRow key={r.property_id}>
               <TableCell>
-                <button type="button" className="text-left font-semibold text-primary hover:underline" onClick={() => openBranch(r.property_id)}>{r.name}</button>
+                <button type="button" className="min-h-9 text-left font-semibold text-primary hover:underline" onClick={() => openBranch(r.property_id)}>{r.name}</button>
                 <div className="text-xs text-muted-foreground">{[r.city, r.code].filter(Boolean).join(" · ")}</div>
               </TableCell>
               <TableCell className="tabular">{formatDay(r.business_date)}</TableCell>

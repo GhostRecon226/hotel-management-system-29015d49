@@ -111,7 +111,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
             value={password} onChange={(e) => setPassword(e.target.value)} required />
           <button type="button" onClick={() => setShowPassword((v) => !v)} aria-pressed={showPassword} aria-label="Reveal characters"
-            className="absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
+            className="absolute right-0.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
             {showPassword ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
           </button>
         </div>

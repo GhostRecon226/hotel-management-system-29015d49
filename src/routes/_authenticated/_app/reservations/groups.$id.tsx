@@ -26,7 +26,7 @@ function GroupDetailPage() {
   const live = reservations.filter((r) => r.status !== "cancelled" && r.status !== "no_show").length;
   return (
     <div>
-      <Link to="/reservations/groups" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link to="/reservations/groups" className="mb-1 inline-flex min-h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> All groups
       </Link>
       <PageHeader

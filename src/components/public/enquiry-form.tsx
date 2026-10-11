@@ -19,7 +19,7 @@ export type EnquiryField = {
   kind?: "text" | "email" | "number" | "textarea" | "select"; options?: string[]; autoComplete?: string; rows?: number;
 };
 
-const selectClass = "flex h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-[15px] shadow-xs focus-visible:outline-hidden focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25";
+const selectClass = "flex h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-base shadow-xs pointer-fine:text-[15px] focus-visible:outline-hidden focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25";
 
 export function EnquiryForm({ fields, subject, submitLabel }: { fields: EnquiryField[]; subject: string; submitLabel: string }) {
   const uid = useId();

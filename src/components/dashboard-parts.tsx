@@ -39,7 +39,7 @@ export function Row({ cols, children }: { cols: string; children: ReactNode }) {
 }
 export function HeadRow({ cols, labels }: { cols: string; labels: string[] }) {
   return (
-    <div className={cn("hidden items-center gap-x-3 border-y border-border/60 bg-muted/50 px-5 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:grid", cols)}>
+    <div className={cn("hidden items-center gap-x-3 border-y border-border/60 bg-muted/50 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:grid", cols)}>
       {labels.map((l, i) => <span key={l + i}>{l}</span>)}
     </div>
   );

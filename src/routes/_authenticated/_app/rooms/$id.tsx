@@ -20,7 +20,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="grid grid-cols-3 gap-2 border-b py-3 text-[15px] last:border-0">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="col-span-2">{children || "—"}</dd>
+      <dd className="col-span-2 min-w-0 [overflow-wrap:anywhere]">{children || "—"}</dd>
     </div>
   );
 }
@@ -46,7 +46,7 @@ function RoomDetail() {
 
   return (
     <div>
-      <Link to="/rooms" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link to="/rooms" className="mb-1 inline-flex min-h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Rooms
       </Link>
       <PageHeader title={room.room_number} description={`${room.room_type_name}${room.floor ? ` · Floor ${room.floor}` : ""}`}

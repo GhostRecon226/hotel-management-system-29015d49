@@ -83,7 +83,7 @@ function MergeGuests() {
 
   return (
     <div className="space-y-4">
-      <Link to="/guests" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> All guests</Link>
+      <Link to="/guests" className="inline-flex min-h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> All guests</Link>
       <PageHeader title="Merge duplicate guests" description="Choose the profile to keep and the duplicate to remove." className="mb-2" />
       <div className="grid gap-4 md:grid-cols-2">
         <Picker label="Keep this guest" value={keep} onChange={setKeep} exclude={remove} />

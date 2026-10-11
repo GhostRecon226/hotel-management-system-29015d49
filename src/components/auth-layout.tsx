@@ -15,7 +15,7 @@ const FEATURES = [
  */
 export function AuthLayout({ children, wide }: { children: ReactNode; wide?: boolean }) {
   return (
-    <div className="grid min-h-screen bg-background lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
+    <div className="grid min-h-dvh bg-background lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
       <aside className="auth-hero relative hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex">
         <BrandLogo variant="login" onDark className="relative h-14 w-auto self-start" />
         <div className="relative max-w-md">

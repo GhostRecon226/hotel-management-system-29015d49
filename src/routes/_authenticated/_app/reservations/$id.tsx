@@ -31,7 +31,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] gap-3 border-b border-border/70 py-2.5 text-sm">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="whitespace-pre-wrap font-medium">{children || "—"}</dd>
+      <dd className="whitespace-pre-wrap font-medium [overflow-wrap:anywhere]">{children || "—"}</dd>
     </div>
   );
 }
@@ -68,7 +68,7 @@ function ReservationDetailPage() {
 
   return (
     <div>
-      <Link to="/reservations" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link to="/reservations" className="mb-1 inline-flex min-h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> All bookings
       </Link>
       <PageHeader
@@ -244,7 +244,7 @@ function FeeDialog({ kind, open, onOpenChange, data }: { kind: "cancel" | "nosho
       <Field label="Reason" htmlFor="fee-reason"><Textarea id="fee-reason" required value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })} /></Field>
       {fee > 0 && (
         <label className="flex min-h-11 items-center gap-3 text-[15px]">
-          <input type="checkbox" className="size-5 accent-primary" checked={f.waive} onChange={(e) => setF({ ...f, waive: e.target.checked })} />
+          <input type="checkbox" className="size-6 shrink-0 accent-primary pointer-fine:size-5" checked={f.waive} onChange={(e) => setF({ ...f, waive: e.target.checked })} />
           Waive the fee
         </label>
       )}
