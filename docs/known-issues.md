@@ -26,6 +26,7 @@ Blunt list. Nothing here is hidden elsewhere.
 
 ## Features that are partial
 - Forgot password works (1 Oct 2026): Sign in > Forgot password? emails a one-hour link to /reset-password. On a live project, Supabase > Authentication > URL Configuration must allow `<app address>/reset-password` (or `<app address>/**`), otherwise the link lands on the Site URL instead. Google sign-in is not built.
+- Change password inside the app (QA-19, 11 Oct 2026): account menu, Change password. It asks for the current password first and needs no email. A Create account tab and a dark theme are still not built.
 - Dark theme tokens exist but there is no toggle.
 - Hold room blocks reduce availability only when approved; OOO/OOS/hold all behave the same for availability.
 - Stayover tasks are created only by the rollover. No auto tickets from failed inspections. Housekeeping checklists are generic starter lists.
