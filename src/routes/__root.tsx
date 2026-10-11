@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, onlineManager } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -119,7 +119,7 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => installBrowserErrorReporting(), []);
-  useEffect(() => { registerServiceWorker(); }, []);
+  useEffect(() => { registerServiceWorker(); onlineManager.setOnline(navigator.onLine); }, []);
   useEffect(() => startSavingLists(queryClient, currentSavingUser), [queryClient]);
 
   useEffect(() => {

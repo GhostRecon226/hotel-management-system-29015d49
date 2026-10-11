@@ -1,12 +1,18 @@
-import { useQueryClient, onlineManager } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSyncExternalStore } from "react";
 import { WifiOff } from "lucide-react";
 import { newestListTime } from "@/lib/offline/cache";
 
+// The browser's own online flag. TanStack's onlineManager only changes on a switch event, so a page that
+// opens while already offline would still read "online".
 function useOnline() {
   return useSyncExternalStore(
-    (cb) => onlineManager.subscribe(cb),
-    () => onlineManager.isOnline(),
+    (cb) => {
+      window.addEventListener("online", cb);
+      window.addEventListener("offline", cb);
+      return () => { window.removeEventListener("online", cb); window.removeEventListener("offline", cb); };
+    },
+    () => navigator.onLine,
     () => true,
   );
 }
