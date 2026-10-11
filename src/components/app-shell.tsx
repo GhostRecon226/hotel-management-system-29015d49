@@ -19,6 +19,7 @@ import { SETUP_PERMS } from "@/lib/setup";
 import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
 import { SHIFT_PERMS } from "@/lib/cashier";
 import { NotificationBell } from "@/components/notification-bell";
+import { GlobalSearch } from "@/components/global-search";
 import { BrandLogo } from "@/components/brand-logo";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { OfflineBanner } from "@/components/offline-banner";
@@ -120,7 +121,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {properties.length > 0 && (
             <Select value={property?.id ?? ""} onValueChange={setPropertyId}>
-              <SelectTrigger className="h-10 w-44 rounded-full border-border bg-card px-4 font-semibold sm:w-56" aria-label="Property"><SelectValue placeholder="Property" /></SelectTrigger>
+              <SelectTrigger className="h-10 w-32 rounded-full border-border bg-card px-4 font-semibold sm:w-56" aria-label="Property"><SelectValue placeholder="Property" /></SelectTrigger>
               <SelectContent>
                 {properties.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
@@ -136,6 +137,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
 
           <div className="ml-auto flex items-center gap-1">
+            <GlobalSearch />
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
