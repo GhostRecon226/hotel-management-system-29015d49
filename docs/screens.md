@@ -13,6 +13,11 @@ Every screen inside the shell also relies on `my_context` (loaded once by the sh
 | `/folios/` | Folio list for the property. | — | v_folio_balances |
 | `/front-desk` | Tabs Arrivals / In house / Departures today; check-in, walk-in, move, extend, void, service request, post room charges. | create_service_request, extend_stay, get_front_desk_rooms, move_room, open_main_folio, post_room_charges, save_guest, search_guests, svc_staff, void_check_in, walk_in_check_in | charge_codes, rate_plans, room_types, v_arrivals, v_in_house |
 | `/downtime` | Printable downtime pack: arrivals due, in house with balance, departures due, blank lines for paper walk-ins, paper routine. Print button. | (none) | v_arrivals, v_in_house, v_folio_balances |
+| `/group` | All branches: one row per branch with occupancy, arrivals, approvals and urgent repairs; Copy setup to a branch. | copy_property_setup, group_overview | — |
+| `/cashier` | Cashier shift: open a shift, count each payment method, close and reconcile. | close_cashier_shift, list_cashier_shifts, open_cashier_shift, reconcile_cashier_shift | cashier_shifts |
+| `/reservations/groups/` | Group bookings list: contact, dates, rooms, nights, total. | list_group_bookings | — |
+| `/reservations/groups/$id` | One group: rooms, totals, Add a room, Cancel group (refused while bookings are live). | get_group_booking, set_group_booking_status | — |
+| `/platform` | Platform console for operators only (separate sign-in, second-factor check in the database): hotels, subscriptions, failed payments, support access. No guest data. | platform_change_subscription, platform_failed_payments, platform_list_tenants, platform_request_support_access, platform_support_requests, platform_support_snapshot, platform_tenant_history, platform_whoami | — |
 | `/guests/$id` | Guest profile: details, documents (masked), stay history, feedback, edit, anonymise. | add_guest_feedback, anonymise_guest, get_guest, remove_guest_document, save_guest, save_guest_document, set_guest_feedback_status | — |
 | `/guests/` | Guest list with search; create. | save_guest, search_guests | — |
 | `/guests/merge` | Merge duplicates with preview. | get_guest, merge_guests, search_guests | — |
