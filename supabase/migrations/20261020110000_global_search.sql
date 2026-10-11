@@ -12,13 +12,13 @@ begin
 
   if app.can('guest.view', null) then
     select coalesce(jsonb_agg(jsonb_build_object('id', s.id, 'name', btrim(s.first_name || ' ' || s.last_name),
-      'phone', s.phone, 'email', s.email)), '[]') into v_guests from public.search_guests(v_q, 5, 0) s;
+      'phone', s.phone, 'email', s.email)), '[]') into v_guests from public.search_guests(v_q, 5) s;
   end if;
 
   if p_property_id is not null and app.can('res.view', p_property_id) then
     select coalesce(jsonb_agg(jsonb_build_object('id', s.id, 'number', s.number, 'guest_name', s.guest_name,
       'arrival_date', s.arrival_date, 'departure_date', s.departure_date, 'status', s.status, 'room_number', s.room_number)), '[]')
-    into v_res from public.search_reservations(p_property_id, v_q, null, null, null, 5, 0) s;
+    into v_res from public.search_reservations(p_property_id, v_q, null, null, null, 5) s;
   end if;
 
   if p_property_id is not null and app.has_property_access(p_property_id) then
