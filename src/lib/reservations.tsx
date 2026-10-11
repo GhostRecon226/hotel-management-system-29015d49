@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { callRpc } from "@/lib/setup";
+import { usePaged } from "@/lib/paging";
 import { formatAmount } from "@/components/ui/money";
 import { errorMessage } from "@/lib/errors";
 import { Badge } from "@/components/ui/badge";
@@ -95,14 +96,11 @@ export function formatDateTime(ts: string | null | undefined) {
 export function useReservationSearch(propertyId: string | undefined, f: { q: string; status: string; from: string; to: string }) {
   const [q, setQ] = useState(f.q);
   useEffect(() => { const t = setTimeout(() => setQ(f.q), 250); return () => clearTimeout(t); }, [f.q]);
-  return useQuery({
-    queryKey: ["reservations", "search", propertyId, q, f.status, f.from, f.to],
-    enabled: !!propertyId,
-    queryFn: () => callRpc<ResRow[]>("search_reservations", {
+  return usePaged<ResRow>(["reservations", "search", propertyId, q, f.status, f.from, f.to], 100,
+    (offset, limit) => callRpc<ResRow[]>("search_reservations", {
       p_property_id: propertyId, p_query: q, p_status: f.status === "all" ? null : f.status,
-      p_from: f.from || null, p_to: f.to || null, p_limit: 200,
-    }),
-  });
+      p_from: f.from || null, p_to: f.to || null, p_limit: limit, p_offset: offset,
+    }), !!propertyId);
 }
 
 export function useReservation(id: string) {

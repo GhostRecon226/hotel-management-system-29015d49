@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useAccess } from "@/lib/access";
-import { useFolioList, type FolioSummary } from "@/lib/folios";
+import { FOLIO_PAGE, useFolioList, type FolioSummary } from "@/lib/folios";
+import { LoadMore } from "@/components/ui/load-more";
 import { formatDay } from "@/lib/reservations";
 import { Badge } from "@/components/ui/badge";
 import { formatAmount } from "@/components/ui/money";
@@ -16,7 +18,8 @@ export function FolioBalanceChip({ f }: { f: Pick<FolioSummary, "amount_due" | "
 /** Open folios beside a folio's detail on wide screens (list and detail layout). */
 export function FolioListPane({ activeId, className }: { activeId: string; className?: string }) {
   const { property } = useAccess();
-  const { data = [], isLoading } = useFolioList(property?.id, "open");
+  const [limit, setLimit] = useState(FOLIO_PAGE);
+  const { data = [], isLoading, isFetching } = useFolioList(property?.id, "open", limit);
   return (
     <aside aria-label="Open folios" className={cn("rounded-xl border border-border/70 bg-card shadow-card", className)}>
       <div className="flex items-center justify-between border-b border-border/70 px-4 py-3.5">
@@ -44,6 +47,7 @@ export function FolioListPane({ activeId, className }: { activeId: string; class
           </li>
         ))}
       </ul>
+      <LoadMore shown={data.length} hasMore={data.length >= limit} loading={isFetching} onClick={() => setLimit(limit + FOLIO_PAGE)} />
     </aside>
   );
 }

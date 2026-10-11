@@ -9,7 +9,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const PREFIXES = "AI|PLT|GRP|ADM|SET|RES|FO|GST|ROOM|HK|MNT|SVC|FIN|DAY|RPT|NFR|DRY|OFF|SRC";
+const PREFIXES = "AI|PLT|GRP|ADM|SET|RES|FO|GST|ROOM|HK|MNT|SVC|FIN|DAY|RPT|NFR|DRY|OFF|PAG|SRC";
 const ID = new RegExp(`\\b((?:${PREFIXES})-\\d{3}[a-z]?)\\b`, "g");
 const TAG = new RegExp(`\\[((?:${PREFIXES})-\\d{3}[a-z]?)\\]`, "g");
 
