@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAccess } from "@/lib/access";
 import { callRpc, Field, NoAccess, SectionHeader } from "@/lib/setup";
 import { formatDateTime } from "@/lib/reservations";
+import { usePaged } from "@/lib/paging";
+import { LoadMore } from "@/components/ui/load-more";
 import { useAdminUsers, type AuditRow } from "@/lib/admin";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,26 +61,25 @@ export function AuditPanel() {
     queryFn: () => callRpc<{ tables: string[]; actions: string[]; people: { id: string; full_name: string }[] }>("audit_filters", {}),
   });
 
-  const log = useQuery({
-    queryKey: ["admin", "audit", actor, table, action, from, to], enabled: allowed,
-    queryFn: () => callRpc<AuditRow[]>("audit_log", {
+  const log = usePaged<AuditRow>(["admin", "audit", actor, table, action, from, to], 100,
+    (offset, limit) => callRpc<AuditRow[]>("audit_log", {
       p_actor: actor === ANY ? null : actor,
       p_table: table === ANY ? null : table,
       p_action: action === ANY ? null : action,
       p_from: from || null,
       p_to: to || null,
-      p_limit: 200,
-    }),
-  });
+      p_limit: limit,
+      p_offset: offset,
+    }), allowed);
 
   if (!allowed) return <NoAccess />;
   const people = filters.data?.people ?? (users.data ?? []).map((u) => ({ id: u.id, full_name: u.full_name }));
-  const rows = log.data ?? [];
+  const rows = log.data;
 
   return (
     <Card>
       <CardContent className="pt-6">
-        <SectionHeader title="Audit log" description="Who changed what, and when. The 200 most recent matches are shown." />
+        <SectionHeader title="Audit log" description="Who changed what, and when. The newest matches show first; load more for older ones." />
         <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <Field label="Person" htmlFor="au-actor">
             <Select value={actor} onValueChange={setActor}>
@@ -132,6 +133,7 @@ export function AuditPanel() {
             ))}
           </TableBody>
         </Table>
+        <LoadMore shown={rows.length} hasMore={log.hasMore} loading={log.isLoadingMore} onClick={log.loadMore} />
       </CardContent>
     </Card>
   );

@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAccess } from "@/lib/access";
-import { useFolioList } from "@/lib/folios";
+import { FOLIO_PAGE, useFolioList } from "@/lib/folios";
 import { formatDay } from "@/lib/reservations";
 import { PageHeader, FilterBar } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Money } from "@/components/ui/money";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
+import { LoadMore } from "@/components/ui/load-more";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RoomName } from "@/components/room-name";
@@ -16,12 +17,13 @@ export const Route = createFileRoute("/_authenticated/_app/folios/")({ component
 function FolioList() {
   const { property } = useAccess();
   const [status, setStatus] = useState("open");
-  const { data = [], isLoading } = useFolioList(property?.id, status);
+  const [limit, setLimit] = useState(FOLIO_PAGE);
+  const { data = [], isLoading, isFetching } = useFolioList(property?.id, status, limit);
   return (
     <div>
       <PageHeader title="Folios" description="Every guest bill. Folios open when a guest checks in or when a deposit is recorded." />
       <FilterBar>
-        <Select value={status} onValueChange={setStatus}>
+        <Select value={status} onValueChange={(v) => { setStatus(v); setLimit(FOLIO_PAGE); }}>
           <SelectTrigger className="w-44" aria-label="Status"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="open">Open</SelectItem><SelectItem value="closed">Closed</SelectItem><SelectItem value="all">All</SelectItem>
@@ -49,6 +51,7 @@ function FolioList() {
           ))}
         </TableBody>
       </Table>
+      <LoadMore shown={data.length} hasMore={data.length >= limit} loading={isFetching} onClick={() => setLimit(limit + FOLIO_PAGE)} />
     </div>
   );
 }

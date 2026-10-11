@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Money } from "@/components/ui/money";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
+import { LoadMore } from "@/components/ui/load-more";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RoomName } from "@/components/room-name";
@@ -19,7 +20,7 @@ function ReservationList() {
   const { property, can } = useAccess();
   const navigate = useNavigate();
   const [f, setF] = useState({ q: "", status: "all", from: property?.business_date ?? "", to: "" });
-  const { data = [], isLoading } = useReservationSearch(property?.id, f);
+  const { data, isLoading, hasMore, loadMore, isLoadingMore } = useReservationSearch(property?.id, f);
   const filtered = f.q || f.status !== "all" || f.from || f.to;
   const count = (status: string) => data.filter((r) => r.status === status).length;
 
@@ -82,6 +83,7 @@ function ReservationList() {
           ))}
         </TableBody>
       </Table>
+      <LoadMore shown={data.length} hasMore={hasMore} loading={isLoadingMore} onClick={loadMore} />
     </div>
   );
 }
