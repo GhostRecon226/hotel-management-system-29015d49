@@ -104,3 +104,23 @@ test("phone: an attendant's task list works at 390px wide", async ({ page }) => 
   await complete.tap();
   await expect(toasts(page).filter({ hasText: "Done. Waiting for inspection." })).toBeVisible();
 });
+
+const screens = [
+  "/dashboard", "/front-desk", "/reservations", "/reservations/new", "/reservations/availability", "/reservations/groups",
+  "/rooms", "/guests", "/housekeeping", "/housekeeping/my-tasks", "/maintenance", "/service-requests", "/cashier",
+  "/approvals", "/reports", "/admin", "/setup",
+];
+
+test("phone: no main screen scrolls sideways at 390px wide", async ({ page }) => {
+  await signInAndCreateHotel(page, "phoneall");
+  await setUpRoomsAndRates(page);
+  const problems: string[] = [];
+  for (const path of screens) {
+    await page.goto(path);
+    await expect(page.getByRole("heading").first()).toBeVisible({ timeout: 10_000 });
+    await page.waitForTimeout(500); // let lists and tabs finish drawing
+    const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    if (over > 1) problems.push(`${path}: scrolls sideways by ${over}px`);
+  }
+  expect(problems).toEqual([]);
+});
