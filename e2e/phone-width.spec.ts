@@ -112,6 +112,7 @@ const screens = [
 ];
 
 test("phone: no main screen scrolls sideways at 390px wide", async ({ page }) => {
+  test.setTimeout(150_000); // the first visit to each page compiles it
   await signInAndCreateHotel(page, "phoneall");
   await setUpRoomsAndRates(page);
   const problems: string[] = [];
