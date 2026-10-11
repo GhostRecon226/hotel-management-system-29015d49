@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import {
-  Bell, BedDouble, BarChart3, CalendarDays, ConciergeBell, LayoutDashboard, LogOut, Menu,
+  Bell, BedDouble, BarChart3, CalendarDays, ConciergeBell, KeyRound, LayoutDashboard, LogOut, Menu,
   Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wallet, Wrench, CalendarClock, Building2, Printer,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +20,7 @@ import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
 import { SHIFT_PERMS } from "@/lib/cashier";
 import { NotificationBell } from "@/components/notification-bell";
 import { BrandLogo } from "@/components/brand-logo";
+import { ChangePasswordDialog } from "@/components/change-password-dialog";
 
 type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/cashier" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" | "/downtime" };
 
@@ -80,6 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
   const properties = ctx.properties ?? [];
 
   async function signOut() {
@@ -140,11 +142,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <div className="text-xs text-muted-foreground">{ctx.tenant?.name}</div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem className="h-10" onClick={() => setPwOpen(true)}><KeyRound className="mr-2 h-4 w-4" /> Change password</DropdownMenuItem>
                 <DropdownMenuItem className="h-10" onClick={signOut}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
+        <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} />
         <SubscriptionBanner />
         <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 pb-10 pt-2 sm:px-6">{children}</main>
       </div>
