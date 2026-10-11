@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, onlineManager } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { installBrowserErrorReporting, reportBrowserError } from "@/lib/error-report";
+import { clearOfflineData, currentSavingUser, rememberUser, startSavingLists } from "@/lib/offline/cache";
+import { registerServiceWorker } from "@/lib/offline/register";
 
 import appCss from "../styles.css?url";
 
@@ -117,6 +119,8 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => installBrowserErrorReporting(), []);
+  useEffect(() => { registerServiceWorker(); onlineManager.setOnline(navigator.onLine); }, []);
+  useEffect(() => startSavingLists(queryClient, currentSavingUser), [queryClient]);
 
   useEffect(() => {
     // Do not reload the router on sign-in. The sign-in page and the email link already navigate, and
@@ -130,6 +134,8 @@ function RootComponent() {
       if (event === "SIGNED_OUT") {
         currentUserId = null;
         queryClient.clear(); // never show one user's data to the next
+        rememberUser(null);
+        void clearOfflineData(); // and nothing stays saved on this device
         router.invalidate(); // guards send the user to /auth
         return;
       }

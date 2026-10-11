@@ -21,6 +21,7 @@ import { SHIFT_PERMS } from "@/lib/cashier";
 import { NotificationBell } from "@/components/notification-bell";
 import { BrandLogo } from "@/components/brand-logo";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { OfflineBanner } from "@/components/offline-banner";
 
 type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/cashier" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" | "/downtime" };
 
@@ -149,6 +150,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} />
+        <OfflineBanner />
         <SubscriptionBanner />
         <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 pb-10 pt-2 sm:px-6">{children}</main>
       </div>
