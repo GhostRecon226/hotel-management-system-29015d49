@@ -1,3 +1,4 @@
+// Requirements: OFF-003, OFF-004
 // Offline mode, stage 2: a charge and a cleaning task started with no connection wait on the device,
 // then send when the connection returns, and post exactly once. Local Supabase only.
 import { test, expect, type Page } from "@playwright/test";

@@ -14,16 +14,17 @@ Where the detail lives:
 
 ## 1. Done
 
-- 144 of 150 R1 requirements are built and tested. The other 6 are listed in section 3.
+- 148 of 154 R1 requirements are built and tested. The other 6 are listed in section 3.
 - QA audit: the browser test list is finished (13 screens, cashier shift, housekeeping, maintenance, approvals with two users, group bookings, reports, service requests, Setup). QA-15, QA-16, QA-23 and QA-19 (change password) are fixed. QA-20 needs no change.
 - Phone layout: tests at 390px wide found and fixed two faults (Front Desk tabs and the off-screen Check in button).
+- Offline mode stages 1 and 2 are built and merged (11 Oct 2026): saved lists readable with no connection, and charges, payments and housekeeping updates wait on the device and send when the connection returns. Register rows OFF-001 to OFF-004.
 - Practice database is current with main (81 migrations, applied 11 Oct 2026). Live is at 77.
 
 ## 2. In progress (this week)
 
 | Item | Who | State |
 |---|---|---|
-| Merge the docs pull request (#69) | Peter | CI running |
+| Offline docs, public page wording and register rows (this change) | Peter merges | Open |
 | Test hotel and staff on practice for the 14 Oct dry run | Peter, with Claude | Not started. Practice has one hotel, one admin, 2 rooms. |
 | Dry run of one hotel day (`docs/pilot-dry-run.md`) | Peter and a second person | 14 Oct 2026 |
 | Fixes from the dry run | Claude | Keep a day free after the run |
@@ -70,15 +71,15 @@ Nothing blocks the pilot in code. The list below is optional polish.
 |---|---|
 | Subscription tiers and prices (A16). Proposed: starter 20 rooms, standard 60, pro 150, enterprise unlimited. | Decide before signup opens to the public. Pilots stay free. |
 | Overbooking allowance (QA-17) | Skip for the pilot. |
-| Offline mode: how much, and when | Decide after the pilot. The downtime pack (printable arrivals, in house and departures, `/downtime`) covers outages until then. |
+| Offline stage 3 (check-in, check-out, room moves) | Decide after stages 1 and 2 are used in a pilot hotel. The downtime pack (`/downtime`) covers longer outages. |
 | Tax treatment of fees and discounts (A11) | Accountant decides. |
 
 ## 5. Offline mode, in plain terms
 
-- Today the app needs internet. This was decided on purpose (A12). The database design keeps client ids and idempotency keys, so adding offline later is possible.
-- What exists now: a printable downtime pack. Staff print it, work on paper during an outage, and enter the paper records after.
-- Options when you want more, smallest first:
+- Stages 1 and 2 are built. A signed-in device keeps reading its last loaded lists with no connection, and charges, payments and housekeeping updates wait and send on return. Sign-in itself and everything else still need internet. A printable downtime pack covers longer outages.
+- Stage 3 is not built.
+- Stages, smallest first (1 and 2 done):
   1. Keep the last-loaded lists (arrivals, in house, room board) readable when the connection drops. Small to medium. No new risk.
   2. Queue simple actions offline (charge, payment, housekeeping status) and send them when the connection returns. Medium to large. Safe for money because every money write already has an idempotency key.
   3. Full offline for check-in, check-out and room moves. Large. Hard part: two devices can promise the same room while both are offline, so the app needs rules for who wins.
-- My advice: ask the pilot hotels how often they lose connection and what they do then. Build option 1 first if it is common.
+- My advice: ask the pilot hotels how often the connection drops during a shift, and whether stage 3 is needed.
