@@ -12,7 +12,7 @@
 
 :root {
   /* Fonts */
-  /* Figtree (text) and Fraunces (headings and the logo) are bundled with the app (src/styles.css imports them); no font is loaded from another site. */
+  /* Inter (text) and Fraunces (headings and the logo) are bundled with the app (src/styles.css imports them); no font is loaded from another site. */
   --font-sans-app: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-display-app: "Fraunces Variable", Georgia, serif;
   --font-mono-app: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
