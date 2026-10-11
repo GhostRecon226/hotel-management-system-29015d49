@@ -1,3 +1,4 @@
+// Requirements: OFF-001, OFF-002
 // Offline mode, stage 1: after one online visit, the front desk lists open again with the network off.
 // Local Supabase only. The service worker is turned on with a flag, and told to treat the network as down,
 // because the browser's own offline switch does not always reach a service worker.
