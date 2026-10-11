@@ -44,5 +44,5 @@ test("QA-11 completing a laundry request posts its charge to the guest's folio",
   await expect(row).toHaveCount(0, { timeout: 10_000 });
 
   // 3,000 plus 18.25% tax lands on the folio.
-  await expect.poll(balance, { timeout: 10_000 }).toBe(before + 3000 * 1.1825);
+  await expect.poll(async () => Math.round(((await balance()) - before) * 100) / 100, { timeout: 10_000 }).toBe(3547.5);
 });
