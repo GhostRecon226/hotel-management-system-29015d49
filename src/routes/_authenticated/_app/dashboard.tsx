@@ -200,7 +200,7 @@ function Dashboard() {
             </CardHeader>
             <CardContent>
               {kpi.isLoading ? <LoadingState label="Loading figures…" /> : rows.length === 0 ? (
-                <EmptyState title="No figures yet" description="Figures appear after the first business date roll." />
+                <EmptyState title="History starts tonight" description="This chart fills in after tonight's business date roll. Today's live figures are in the tiles above." />
               ) : (
                 <div className="h-56" role="img" aria-label="Occupancy rate by day">
                   <ResponsiveContainer width="100%" height="100%">
