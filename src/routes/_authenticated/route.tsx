@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { rememberUser, restoreSavedLists } from "@/lib/offline/cache";
+import { loadQueue } from "@/lib/offline/queue";
 
 /**
  * Who is signed in. Normally the server confirms it. With no connection the server cannot be reached, so the
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/_authenticated")({
     if (!user) throw redirect({ to: "/auth" });
     rememberUser(user.id);
     await restoreSavedLists(context.queryClient, user.id);
+    await loadQueue(user.id);
     return { user };
   },
   component: () => <Outlet />,

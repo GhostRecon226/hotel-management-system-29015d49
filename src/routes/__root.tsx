@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { installBrowserErrorReporting, reportBrowserError } from "@/lib/error-report";
 import { clearOfflineData, currentSavingUser, rememberUser, startSavingLists } from "@/lib/offline/cache";
 import { registerServiceWorker } from "@/lib/offline/register";
+import { startQueueSender } from "@/lib/offline/queue";
 
 import appCss from "../styles.css?url";
 
@@ -121,6 +122,7 @@ function RootComponent() {
   useEffect(() => installBrowserErrorReporting(), []);
   useEffect(() => { registerServiceWorker(); onlineManager.setOnline(navigator.onLine); }, []);
   useEffect(() => startSavingLists(queryClient, currentSavingUser), [queryClient]);
+  useEffect(() => startQueueSender(queryClient), [queryClient]);
 
   useEffect(() => {
     // Do not reload the router on sign-in. The sign-in page and the email link already navigate, and

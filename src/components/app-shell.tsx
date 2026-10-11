@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Bell, BedDouble, BarChart3, CalendarDays, ConciergeBell, KeyRound, LayoutDashboard, LogOut, Menu,
   Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wallet, Wrench, CalendarClock, Building2, Printer,
@@ -22,6 +22,9 @@ import { NotificationBell } from "@/components/notification-bell";
 import { BrandLogo } from "@/components/brand-logo";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { OfflineBanner } from "@/components/offline-banner";
+import { warmOfflineData } from "@/lib/offline/warm";
+import { flushQueue, waitingCount } from "@/lib/offline/queue";
+import { toast } from "sonner";
 
 type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/cashier" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" | "/downtime" };
 
@@ -85,7 +88,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [pwOpen, setPwOpen] = useState(false);
   const properties = ctx.properties ?? [];
 
+  // While online, keep open folios and the charge and payment lists ready in case the connection drops.
+  useEffect(() => { if (property?.id && navigator.onLine) void warmOfflineData(queryClient, property.id); }, [property?.id, queryClient]);
+
   async function signOut() {
+    // Entries waiting on this device would be lost on sign-out, so send them first.
+    if (waitingCount() > 0 && navigator.onLine) await flushQueue(queryClient);
+    if (waitingCount() > 0) {
+      toast.error(`${waitingCount()} change(s) are still waiting to send from this device. Sign out after the connection returns and they have sent.`);
+      return;
+    }
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();

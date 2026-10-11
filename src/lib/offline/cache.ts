@@ -13,6 +13,12 @@ const SAVED: unknown[][] = [
   ["reservations", "fd", "in-house"],
   ["rooms", "board"],
   ["housekeeping", "tasks"],
+  ["folios", "list"],
+  ["folios", "one"],
+  ["folios", "tx"],
+  ["setup", "charge_codes"],
+  ["setup", "payment_methods"],
+  ["setup", "exchange_rates"],
 ];
 
 export function isSavedList(key: readonly unknown[]) {
