@@ -13,7 +13,7 @@ Blunt list. Nothing here is hidden elsewhere.
 - Cancellation and no-show fees are posted to the main folio once (fixed 30 Sep 2026). Free-cancellation days are set per rate plan on the rate plan screen (default 2).
 - Discounts, adjustments and service-request charges are in base currency only.
 - Refunds are capped at the folio's credit balance. A discount must be reversed before its charge can be transferred.
-- Check-out with an approved balance leaves unsettled folios open with no follow-up/collections process.
+- Check-out with an approved balance leaves the folio open. Finance follows it up in Reports, Collections (FIN-021), where each call or promise is logged.
 - `numeric(20,4)` everywhere but tax lines round to 2 dp; the rounding remainder goes on the last tax that has a rate. On odd amounts an invoice's net and taxable figures can differ from the folio by 1 kobo. Check this with the accountant.
 
 ## Scheduling and messaging
