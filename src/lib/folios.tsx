@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/lib/access";
 import { errorCode, errorMessage } from "@/lib/errors";
 import { callRpc, Field, FormDialog, useSetupList } from "@/lib/setup";
+import { callRpcQueued, QUEUED } from "@/lib/offline/queue";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
@@ -93,8 +94,9 @@ export function useFolioTransactions(folioId: string) {
 export function useFolioMutation<T = unknown>(name: string, success: string, quietCodes: string[] = []) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (args: Record<string, unknown>) => callRpc<T>(name, args),
-    onSuccess: () => {
+    mutationFn: (args: Record<string, unknown>) => callRpcQueued<T>(name, args) as Promise<T>,
+    onSuccess: (data) => {
+      if ((data as unknown) === QUEUED) { toast.info("Saved on this device. It will be sent when the connection returns."); return; }
       qc.invalidateQueries({ queryKey: ["folios"] });
       qc.invalidateQueries({ queryKey: ["reservations"] });
       toast.success(success);

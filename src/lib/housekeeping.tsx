@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/lib/access";
 import { errorMessage } from "@/lib/errors";
 import { callRpc, Field, FormDialog } from "@/lib/setup";
+import { callRpcQueued, QUEUED } from "@/lib/offline/queue";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -83,8 +84,9 @@ export function useHkStaff() {
 export function useHkMutation(name: string, success: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (args: Record<string, unknown>) => callRpc(name, args),
-    onSuccess: () => {
+    mutationFn: (args: Record<string, unknown>) => callRpcQueued(name, args),
+    onSuccess: (data) => {
+      if (data === QUEUED) { toast.info("Saved on this device. It will be sent when the connection returns."); return; }
       ["housekeeping", "rooms", "notifications"].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
       toast.success(success);
     },
