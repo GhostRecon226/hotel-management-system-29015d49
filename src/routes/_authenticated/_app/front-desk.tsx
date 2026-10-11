@@ -77,7 +77,7 @@ function FrontDesk() {
               <TableCell className="tabular">{formatDay(s.departure_date)}{s.is_departing && <Badge variant="warning" className="ml-2">Due out</Badge>}</TableCell>
               <TableCell className="tabular">{s.adults}{s.children ? ` + ${s.children}` : ""}</TableCell>
               <TableCell><Money amount={s.total_amount} currency={s.currency} /></TableCell>
-              <TableCell className="text-right whitespace-nowrap">
+              <TableCell className="sticky right-0 border-l border-border/60 bg-card text-right whitespace-nowrap">
                 {/* Plain button for the most common action; the same link stays in the menu. DOM order = keyboard order. */}
                 {can("fo.checkout") && (
                   <Button size="sm" variant="outline" className="mr-1" asChild>
@@ -143,7 +143,7 @@ function FrontDesk() {
                   </TableCell>
                   <TableCell><ResStatusBadge status={a.status} holdUntil={a.hold_until} /></TableCell>
                   <TableCell><Money amount={a.deposit_due} currency={a.currency} /></TableCell>
-                  <TableCell className="text-right">{can("fo.checkin") && <Button size="sm" onClick={() => setCheckIn(a)}>Check in</Button>}</TableCell>
+                  <TableCell className="sticky right-0 border-l border-border/60 bg-card text-right">{can("fo.checkin") && <Button size="sm" onClick={() => setCheckIn(a)}>Check in</Button>}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
