@@ -60,16 +60,17 @@ export function OfflineBanner() {
                 </div>
                 {e.error && <p className="text-danger-strong">{e.error}</p>}
                 <div className="text-xs text-muted-foreground">Entered {new Date(e.createdAt).toLocaleString("en-NG")}</div>
+                {e.idErased && <p className="text-xs text-muted-foreground">The guest's ID number was erased from this device. Check the guest in again on the Front Desk.</p>}
                 {e.status === "failed" && (
                   <div className="flex gap-2 pt-1">
-                    <Button size="sm" variant="outline" onClick={() => { retryEntry(e.id); void flushQueue(qc); }}>Try again</Button>
+                    {!e.idErased && <Button size="sm" variant="outline" onClick={() => { retryEntry(e.id); void flushQueue(qc); }}>Try again</Button>}
                     <Button size="sm" variant="ghost" onClick={() => discardEntry(e.id)}>Remove</Button>
                   </div>
                 )}
               </li>
             ))}
           </ul>
-          <p className="text-xs text-muted-foreground">Entries send by themselves when the connection returns. A charge or payment is posted once, even if it is sent twice.</p>
+          <p className="text-xs text-muted-foreground">Entries send by themselves when the connection returns. A charge or payment is posted once, even if it is sent twice. A check-in keeps the guest's ID number on this device only until it is sent.</p>
         </DialogContent>
       </Dialog>
     </>

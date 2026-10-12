@@ -6,7 +6,7 @@ import { callRpc } from "@/lib/setup";
 import { errorMessage } from "@/lib/errors";
 import { kvGet, kvSet } from "./store";
 
-export const QUEUEABLE = new Set(["post_charge", "post_payment", "start_hk_task", "complete_hk_task", "check_out", "move_room"]);
+export const QUEUEABLE = new Set(["post_charge", "post_payment", "start_hk_task", "complete_hk_task", "check_out", "move_room", "check_in"]);
 /** Reason the database records when a check-out with a balance was entered with no connection (needs fo.checkout.unsettled). */
 export const OFFLINE_CHECKOUT_REASON = "Checked out with no connection";
 export const QUEUED = Symbol("queued");
@@ -14,6 +14,8 @@ export const QUEUED = Symbol("queued");
 export type QueueEntry = {
   id: string; userId: string; name: string; args: Record<string, unknown>; label: string; createdAt: number;
   status: "waiting" | "failed"; error?: string;
+  /** A refused check-in has its ID number erased from the device, so it cannot be sent again as it was. */
+  idErased?: boolean;
 };
 
 const KEY = "queue";
@@ -40,6 +42,12 @@ export async function loadQueue(userId: string) {
 const hints = new Map<string, string>();
 export const setLabelHint = (name: string, id: string, text: string) => { hints.set(`${name}:${id}`, text); };
 
+/** Takes the guest's ID number and expiry out of a queued check-in. They stay on the device only until the entry is sent. */
+function withoutIdNumber(args: Record<string, unknown>) {
+  const reg = (args["p_registration"] ?? {}) as Record<string, unknown>;
+  return { ...args, p_registration: { ...reg, id_number: "", id_expiry: null } };
+}
+
 export function labelFor(name: string, args: Record<string, unknown>) {
   const hint = hints.get(`${name}:${String(args["p_id"] ?? "")}`);
   if (hint) return hint;
@@ -50,6 +58,7 @@ export function labelFor(name: string, args: Record<string, unknown>) {
   if (name === "complete_hk_task") return "Complete cleaning task";
   if (name === "check_out") return "Check out";
   if (name === "move_room") return "Move room";
+  if (name === "check_in") return "Check in";
   return name;
 }
 
@@ -99,7 +108,12 @@ export async function flushQueue(queryClient: QueryClient) {
         entries = entries.filter((e) => e.id !== entry.id);
       } catch (e) {
         if (isNetworkError(e)) break;
-        entries = entries.map((x) => (x.id === entry.id ? { ...x, status: "failed" as const, error: errorMessage(e) } : x));
+        entries = entries.map((x) => {
+          if (x.id !== entry.id) return x;
+          const failed = { ...x, status: "failed" as const, error: errorMessage(e) };
+          // A refused check-in must not keep the guest's ID number on the device. Staff check the guest in again online.
+          return x.name === "check_in" ? { ...failed, args: withoutIdNumber(x.args), idErased: true } : failed;
+        });
       }
       persist();
       emit();
@@ -112,7 +126,7 @@ export async function flushQueue(queryClient: QueryClient) {
 
 export function retryEntry(id: string) {
   entries = entries.map((e) => {
-    if (e.id !== id) return e;
+    if (e.id !== id || e.idErased) return e;
     const { error: _drop, ...rest } = e;
     return { ...rest, status: "waiting" as const };
   });
