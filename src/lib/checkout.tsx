@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { errorMessage } from "@/lib/errors";
 import { callRpc } from "@/lib/setup";
+import { callRpcQueued, QUEUED } from "@/lib/offline/queue";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -65,8 +66,9 @@ export function useCheckoutApprovals(reservationId: string) {
 export function useCheckoutAction<T = unknown>(name: string, success: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (args: Record<string, unknown>) => callRpc<T>(name, args),
-    onSuccess: () => {
+    mutationFn: (args: Record<string, unknown>) => callRpcQueued<T>(name, args) as Promise<T>,
+    onSuccess: (d) => {
+      if ((d as unknown) === QUEUED) { toast.info("Saved on this device. It will be sent when the connection returns."); return; }
       ["checkout", "folios", "reservations", "approvals", "front-desk", "rooms", "notifications"].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
       toast.success(success);
     },
