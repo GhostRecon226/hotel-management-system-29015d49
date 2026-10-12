@@ -4,19 +4,16 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { Suspense, lazy, useEffect, type ReactNode } from "react";
-import { hasSavedSignIn } from "@/lib/saved-sign-in";
+import { useEffect, type ReactNode } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { installBrowserErrorReporting, reportBrowserError } from "@/lib/error-report";
-import { currentSavingUser, startSavingLists } from "@/lib/offline/cache";
+import { clearOfflineData, currentSavingUser, rememberUser, startSavingLists } from "@/lib/offline/cache";
 import { registerServiceWorker } from "@/lib/offline/register";
 import { startQueueSender } from "@/lib/offline/queue";
-
-// Toast messages are only used inside the signed-in app and the sign-in pages. Public pages skip the toast library.
-const Toaster = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
 
 import appCss from "../styles.css?url";
 
@@ -123,7 +120,6 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
-  const isPublic = useRouterState({ select: (s) => s.matches.some((m) => m.routeId === "/_public") });
 
   useEffect(() => installBrowserErrorReporting(), []);
   useEffect(() => { registerServiceWorker(); onlineManager.setOnline(navigator.onLine); }, []);
@@ -131,26 +127,41 @@ function RootComponent() {
   useEffect(() => startQueueSender(queryClient), [queryClient]);
 
   useEffect(() => {
-    // The sign-in library loads only for a visitor with a saved sign-in, or once someone signs in.
-    // Public pages never download it. See src/lib/auth-watch.ts for what the watcher does.
-    let started = false;
-    let cancelled = false;
-    let stop: (() => void) | undefined;
-    const start = () => {
-      if (started || !hasSavedSignIn()) return;
-      started = true;
-      void import("@/lib/auth-watch").then((m) => { if (!cancelled) stop = m.watchAuth(queryClient, () => router.invalidate()); });
-    };
-    start();
-    const unsubscribe = router.subscribe("onResolved", start);
-    return () => { cancelled = true; unsubscribe(); stop?.(); };
+    // Do not reload the router on sign-in. The sign-in page and the email link already navigate, and
+    // the route guards check the session and the hotel context on that navigation. Reloading at the
+    // same moment raced with the guards' redirect and left a blank page ("Uncaught undefined").
+    // Supabase also repeats SIGNED_IN for the same person (email link, tab focus); that is ignored.
+    let currentUserId: string | null | undefined;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      const userId = session?.user.id ?? null;
+      if (event === "INITIAL_SESSION") { currentUserId = userId; return; }
+      if (event === "SIGNED_OUT") {
+        currentUserId = null;
+        queryClient.clear(); // never show one user's data to the next
+        rememberUser(null);
+        void clearOfflineData(); // and nothing stays saved on this device
+        router.invalidate(); // guards send the user to /auth
+        return;
+      }
+      if (event === "SIGNED_IN") {
+        const switched = !!currentUserId && currentUserId !== userId;
+        currentUserId = userId;
+        if (switched) { queryClient.clear(); router.invalidate(); } // a different person in the same tab
+        return;
+      }
+      if (event === "USER_UPDATED") {
+        // Let checks that are already running finish instead of cancelling them.
+        queryClient.invalidateQueries(undefined, { cancelRefetch: false });
+      }
+    });
+    return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      {!isPublic && <Suspense fallback={null}><Toaster /></Suspense>}
+      <Toaster />
     </QueryClientProvider>
   );
 }
