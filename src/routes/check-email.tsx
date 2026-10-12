@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MailCheck } from "lucide-react";
-import { z } from "zod";
 import { AuthLayout } from "@/components/auth-layout";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/check-email")({
-  validateSearch: z.object({ email: z.string().optional() }),
+  validateSearch: (search: Record<string, unknown>): { email?: string } => (typeof search["email"] === "string" ? { email: search["email"] } : {}),
   head: () => ({
     meta: [
       { title: "Check your email | Zikora" },

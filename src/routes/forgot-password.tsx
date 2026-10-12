@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +13,11 @@ export const Route = createFileRoute("/forgot-password")({
   component: ForgotPassword,
 });
 
-const schema = z.object({ email: z.string().trim().email("Enter a valid email address.").max(255) });
+// zod loads only when the form is sent, so it stays out of the first page load.
+const makeSchema = async () => {
+  const { z } = await import("zod");
+  return z.object({ email: z.string().trim().email("Enter a valid email address.").max(255) });
+};
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -26,7 +29,7 @@ function ForgotPassword() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    const parsed = schema.safeParse({ email });
+    const parsed = (await makeSchema()).safeParse({ email });
     if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Please check the form."); return; }
     setBusy(true);
     try {

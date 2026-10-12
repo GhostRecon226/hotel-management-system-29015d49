@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { AccessProvider, myContextQuery } from "@/lib/access";
+import { AccessProvider } from "@/lib/access";
+import { myContextQuery, whoamiQuery } from "@/lib/queries";
 import { AppShell } from "@/components/app-shell";
-import { whoamiQuery } from "@/lib/platform";
 
 export const Route = createFileRoute("/_authenticated/_app")({
   beforeLoad: async ({ context }) => {

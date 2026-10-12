@@ -22,10 +22,7 @@ export interface PlatformHistoryRow {
 }
 export type PlatformAction = "extend_trial" | "activate" | "suspend" | "change_plan" | "cancel";
 
-export const whoamiQuery = {
-  queryKey: ["platform", "whoami"],
-  queryFn: () => callRpc<{ operator: boolean; mfa: boolean }>("platform_whoami", {}),
-};
+export { whoamiQuery } from "@/lib/queries";
 
 export function usePlatformTenants(enabled: boolean) {
   return useQuery({ queryKey: ["platform", "tenants"], enabled, queryFn: () => callRpc<PlatformTenant[]>("platform_list_tenants", {}) });

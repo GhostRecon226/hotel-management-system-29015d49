@@ -1,14 +1,12 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { whoamiQuery } from "@/lib/platform";
+import { myContextQuery, whoamiQuery } from "@/lib/queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
-import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { myContextQuery } from "@/lib/access";
 import { errorMessage } from "@/lib/errors";
 import { AuthLayout } from "@/components/auth-layout";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -34,13 +32,17 @@ export const Route = createFileRoute("/_authenticated/create-hotel")({
 
 const COUNTRIES = ["Nigeria", "Ghana", "Kenya", "South Africa", "Other"] as const;
 
-const schema = z.object({
-  business_name: z.string().trim().min(1, "Business name is required.").max(120),
-  country: z.enum(COUNTRIES, { message: "Choose a country." }),
-  property_name: z.string().trim().min(1, "Property name is required.").max(120),
-  full_name: z.string().trim().min(1, "Your full name is required.").max(120),
-  city: z.string().trim().min(1, "City is required.").max(80),
-});
+// zod loads only when the form is sent, so it stays out of the first page load.
+const makeSchema = async () => {
+  const { z } = await import("zod");
+  return z.object({
+    business_name: z.string().trim().min(1, "Business name is required.").max(120),
+    country: z.enum(COUNTRIES, { message: "Choose a country." }),
+    property_name: z.string().trim().min(1, "Property name is required.").max(120),
+    full_name: z.string().trim().min(1, "Your full name is required.").max(120),
+    city: z.string().trim().min(1, "City is required.").max(80),
+  });
+};
 
 function CreateHotel() {
   const navigate = useNavigate();
@@ -54,7 +56,7 @@ function CreateHotel() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    const parsed = schema.safeParse(form);
+    const parsed = (await makeSchema()).safeParse(form);
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Please check the form.");
       return;

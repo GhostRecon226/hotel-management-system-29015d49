@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { queryOptions } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 export type GrantLevel = "Y" | "L" | "O";
 
@@ -32,15 +31,8 @@ export interface MyContext {
   properties?: PropertyAccess[];
 }
 
-export const myContextQuery = queryOptions({
-  queryKey: ["my-context"],
-  queryFn: async (): Promise<MyContext> => {
-    const { data, error } = await supabase.rpc("my_context");
-    if (error) throw error;
-    return data as unknown as MyContext;
-  },
-  staleTime: 60_000,
-});
+export { myContextQuery } from "@/lib/queries";
+import { myContextQuery } from "@/lib/queries";
 
 interface AccessValue {
   ctx: MyContext;

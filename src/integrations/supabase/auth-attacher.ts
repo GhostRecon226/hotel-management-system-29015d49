@@ -1,11 +1,12 @@
 // Sends the signed-in user's token with every server function call.
 import { createMiddleware } from '@tanstack/react-start'
-import { supabase } from './client'
 
 // Must be registered as a global `functionMiddleware` in `src/start.ts`; otherwise
 // the browser never attaches the bearer token to serverFn RPCs.
 export const attachSupabaseAuth = createMiddleware({ type: 'function' }).client(
   async ({ next }) => {
+    // Loaded here, not at the top, so pages that never call the server do not download the sign-in library.
+    const { supabase } = await import('./client')
     const { data } = await supabase.auth.getSession()
     const token = data.session?.access_token
     return next({

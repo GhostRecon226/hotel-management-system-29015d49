@@ -16,7 +16,8 @@
     "check:money": "scripts/check-no-browser-money.sh",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:requirements": "node scripts/check-requirements.mjs",
-    "check:confirm": "node scripts/check-to-confirm.mjs"
+    "check:confirm": "node scripts/check-to-confirm.mjs",
+    "check:bundle": "node scripts/check-bundle.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
