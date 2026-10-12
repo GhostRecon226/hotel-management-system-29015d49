@@ -1,6 +1,6 @@
 # Roadmap: the one page
 
-Last updated 11 Oct 2026. This is the first page to open. It says what is done, what is in progress and what is left. Each line points to the file that holds the detail. When something changes, change it here first.
+Last updated 12 Oct 2026. This is the first page to open. It says what is done, what is in progress and what is left. Each line points to the file that holds the detail. When something changes, change it here first.
 
 Where the detail lives:
 
@@ -8,54 +8,68 @@ Where the detail lives:
 - Decisions: `docs/decisions.md`.
 - Ideas we chose to do later: `docs/backlog.md`.
 - Faults we know about: `docs/known-issues.md`.
-- QA audit of 10 Oct 2026: `Zikora_QA_Audit_2026-10-10.xlsx` (outside the repository).
+- Full audit of 12 Oct 2026 and the kitchen, store and audit scope: Claude Docs, shared by Peter.
 - Dry run steps: `docs/pilot-dry-run.md`.
 - Setup and launch steps: `docs/setup-checklist.md`, `docs/deployment-plan.md`.
 
 ## 1. Done
 
-- 148 of 154 R1 requirements are built and tested. The other 6 are listed in section 3.
-- QA audit: the browser test list is finished (13 screens, cashier shift, housekeeping, maintenance, approvals with two users, group bookings, reports, service requests, Setup). QA-15, QA-16, QA-23 and QA-19 (change password) are fixed. QA-20 needs no change.
-- Phone layout: tests at 390px wide found and fixed two faults (Front Desk tabs and the off-screen Check in button).
-- Load more on long lists (PAG-001, QA-22), the top-bar search (SRC-001) and one rule for money collected (RPT-009) are built and merged (11 Oct 2026). The first two have migrations that practice does not have yet.
-- Offline mode stages 1 and 2 are built and merged (11 Oct 2026): saved lists readable with no connection, and charges, payments and housekeeping updates wait on the device and send when the connection returns. Register rows OFF-001 to OFF-004.
-- Offline stage 3a (12 Oct 2026): check-out and room moves wait on the device too (OFF-005, OFF-006). Check-in is stage 3b (OFF-007, OFF-008). Walk-in is not built.
-- Practice database is current with main (81 migrations, applied 11 Oct 2026). Live is at 77.
+- 165 of 167 R1 requirements are built and tested (3 are database only, 1 has a known limit). The other 2 are in section 3.
+- Practice and live databases are both at 87 migrations (applied 12 Oct 2026).
+- Day 61 after the trial (PLT-018): the hotel moves to the cheapest plan that fits, has 14 days to pay, then becomes read-only. Plan prices are entered (Starter ₦30,000, Standard ₦45,000, Pro ₦80,000 a month; yearly is 10 months).
+- Offline mode stages 1, 2, 3a and 3b: saved lists readable with no connection, and charges, payments, housekeeping, check-out, room moves and check-in wait on the device and send when the connection returns. An ID number typed offline stays on the device only until it is sent. Walk-in is not built.
+- Website: the contact form sends through the server (PLT-019, needs the Resend key to start sending), security headers on every page (PLT-020), and a web app manifest so Zikora can be added to a phone home screen (PLT-021).
+- QA audit, phone layout fixes, Load more on long lists, top-bar search and one rule for money collected are done.
+- Full audit of what is built, in progress and outstanding was written on 12 Oct 2026.
 
 ## 2. In progress (this week)
 
 | Item | Who | State |
 |---|---|---|
-| Offline docs, public page wording and register rows (this change) | Peter merges | Open |
-| Test hotel and staff on practice for the 14 Oct dry run | Peter, with Claude | Not started. Practice has one hotel, one admin, 2 rooms. |
+| Test the staff screens on a real iPhone and an Android phone, including Add to Home Screen and an ID photo | Peter | Not started |
+| Test hotel and staff on practice for the 14 Oct dry run | Peter, with Claude | Not started |
 | Dry run of one hotel day (`docs/pilot-dry-run.md`) | Peter and a second person | 14 Oct 2026 |
 | Fixes from the dry run | Claude | Keep a day free after the run |
+| Questions to the pilot hotel on kitchen and store | Peter sends | Draft ready |
+| Tax questions to the accountant | Peter sends | Draft ready |
+| Legal pack to counsel | Peter sends | Draft ready |
+| Error and uptime monitoring (Sentry, UptimeRobot) | Peter | Not started |
 
-## 3. Left to build
+## 3. Left to build or settle
 
 ### Before the first pilot hotel
-Nothing blocks the pilot in code, and the optional polish list is finished (Load more on long lists, top-bar search, one "money collected" rule). New ideas go in `docs/backlog.md`.
+Nothing blocks the pilot in code. New ideas go in `docs/backlog.md`.
 
 ### Before the first paying hotel
 | Item | Owner | Source |
 |---|---|---|
-| Switch billing on (Paystack key, webhook) and show prices on the pricing page | Peter and Claude | A16 prices entered, PLT-017 |
-| Billing integration (pilots are invoiced by hand until then) | Claude | decision A13 (R1b) |
-| Tax rates signed off, plus how fees and discounts are taxed | Accountant | decision A11, QA-04 |
-| Email sending: Resend key and sender domain | Peter | QA-02 |
-| Vercel Pro (turns the 5-minute email job back on), Supabase Pro | Peter | decisions D5 |
+| Switch billing on (Paystack key, webhook). Until then payment is arranged by email to hello@zikorahq.com | Peter and Claude | PLT-017, A13 |
+| Tax rates signed off: service charge 10%, VAT 7.5%, levy 0% are unverified. Also fees, discounts, and tax on food and drink | Accountant | A11 |
+| Email sending: Resend key and sender in Vercel (also starts the contact form). Resend is on the Free plan, 30 emails an hour | Peter | QA-02 |
+| Vercel Pro (turns the 5-minute email job back on), Supabase Pro and backups check | Peter | D5 |
 | Sentry, UptimeRobot, GitHub Pro | Peter | `docs/safety-net.md` |
 | CRON_SECRET in Vercel, live Supabase Site URL | Peter | QA-13, QA-03 |
-| Legal pages (13 placeholders), then switch off the Vercel build override | Peter and counsel | QA-24, backlog |
+| Confirm hello@zikorahq.com is a real mailbox | Peter | audit |
+| Legal pages (14 stand-ins, Terms section 4, the FAQ offline answer), then switch off the Vercel build override | Peter and counsel | QA-24 |
+| Sign-up controls: open sign-up has no CAPTCHA | Peter decides | audit |
+| Full script policy (CSP) and home page weight (about 1.7 MB of script) | Claude, after phone tests | audit |
+
+### Asked for by a pilot hotel (not built)
+| Item | Size | State |
+|---|---|---|
+| Store and stock (items, receive, issue, counts, variances) | About 1 week | Scoped. Waits for the hotel's answers. |
+| Restaurant and point of sale (orders, kitchen tickets, room charge or pay at table) | About 2 weeks | Scoped. Waits for the hotel's answers. |
+| Night audit and stock audit upgrades | A few days | Scoped. |
 
 ### Not built, by choice (R2 or later)
 | Item | Why it waits | Source |
 |---|---|---|
-| Work without internet, then sync | Large. See section 4. | decision A12 |
+| Offline walk-in | Needs a new guest made on the device (client ids, a database change) | decision A12 |
 | Night audit gate (stop the roll while a shift is open) | A hard stop could freeze a small hotel | DAY-005 |
 | Overbooking allowance | Changes how rooms are sold; no pilot hotel has asked | SET-002, QA-17 |
 | Company accounts as a real record | Corporate is a booking source and a free-text name for now | decision A3 |
 | Daily owner summary by email | Needs email first | backlog |
+| Recipes, batches and expiry, supplier orders, room service | After store and restaurant | scope doc |
 | Property photo, weather, "up 12%" on the dashboard | Nice to have | backlog |
 | Photos on damage reports and service requests | Maintenance tickets are done | backlog |
 | Google sign-in, dark theme | Nice to have | QA-19 |
@@ -65,17 +79,15 @@ Nothing blocks the pilot in code, and the optional polish list is finished (Load
 
 | Decision | Recommendation |
 |---|---|
-| Switch billing on (Paystack key, webhook). Day 61 is built (PLT-018): the hotel moves to its plan and has 14 days to pay. | Do before signup opens to the public. Pilots stay free: set them to Active first. |
+| Demo hotels (two Euro Bar Hotel records) and pilot hotels: set to Active, or let day 61 run. First warnings land 23 Oct and 28 Oct. | Set demo and pilot hotels to Active. |
+| Build kitchen, store and restaurant, and in what order | Ask the pilot hotel the 8 questions first. Store first, then restaurant. |
+| Offline walk-in | Ask the pilot hotels how often the connection drops. The downtime pack (`/downtime`) covers longer outages. |
+| Open sign-up controls (CAPTCHA, or close sign-up until launch) | Decide before launch on 28 Oct. |
+| Fix the last-room test so it runs on any machine | Needs Peter's yes, because it changes an existing test. I show before and after. |
 | Overbooking allowance (QA-17) | Skip for the pilot. |
-| Offline stage 3b walk-in | Check-in of an existing booking is built (OFF-007, OFF-008). A walk-in needs a new guest to be made offline (client ids, a database change). Decide with Peter whether walk-ins matter offline. The downtime pack (`/downtime`) covers longer outages. |
-| Tax treatment of fees and discounts (A11) | Accountant decides. |
 
 ## 5. Offline mode, in plain terms
 
-- Stages 1 and 2 are built. A signed-in device keeps reading its last loaded lists with no connection, and charges, payments and housekeeping updates wait and send on return. Sign-in itself and everything else still need internet. A printable downtime pack covers longer outages.
-- Stage 3 is not built.
-- Stages, smallest first (1 and 2 done):
-  1. Keep the last-loaded lists (arrivals, in house, room board) readable when the connection drops. Small to medium. No new risk.
-  2. Queue simple actions offline (charge, payment, housekeeping status) and send them when the connection returns. Medium to large. Safe for money because every money write already has an idempotency key.
-  3. Full offline for check-in, check-out and room moves. Large. Hard part: two devices can promise the same room while both are offline, so the app needs rules for who wins.
-- My advice: ask the pilot hotels how often the connection drops during a shift, and whether stage 3 is needed.
+- Built: a signed-in device keeps reading its last loaded lists with no connection. Charges, payments, housekeeping updates, check-out, room moves and check-in wait on the device and send when the connection returns. Every money write has an idempotency key, so a repeat never posts twice.
+- Not built: walk-in, sign-in itself, and everything else not listed above. They still need internet.
+- A printable downtime pack covers longer outages.

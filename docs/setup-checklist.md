@@ -8,6 +8,18 @@ How to use this:
 - **Keys and passwords never go in chat, email or git.** You copy them from one dashboard and paste them straight into another. Keep a copy in a password manager that you and your second person share.
 - Nothing here deploys the app or changes the live database. When everything is ticked, send me the short "accounts are ready" message at the end.
 
+## Status on 12 Oct 2026
+
+What is known from the live site and the release reports. Boxes below are ticked only for what is confirmed. Everything marked "to confirm" needs you to check the dashboard.
+
+- **Domain:** the site runs on zikorahq.com (the public pages and www.zikorahq.com). Read `yourdomain.com` in the steps below as `zikorahq.com`. The app address may be `app.zikorahq.com` or the same host; confirm which.
+- **Practice project:** exists (`vxkresricneodgvqphrn`). Live is `urbpxybyrfjczqbrpdsq`. Both are at 87 migrations.
+- **Vercel:** still the Hobby plan. The 5-minute email sender is off until Pro. The daily ID photo clean-up runs at 02:00 UTC and needs `CRON_SECRET`.
+- **Lovable:** disconnected on 5 Oct 2026.
+- **Email (Resend):** on the Free plan, 30 emails an hour. To confirm: the domain is verified, the SMTP settings are on both Supabase projects, and `RESEND_API_KEY` and `OUTBOX_FROM_EMAIL` are in Vercel. Until they are, app emails wait in the queue and the website contact form falls back to the visitor's email app.
+- **Still to confirm:** `CRON_SECRET` in Vercel, the live Supabase Site URL (E11), the Supabase plan and backups (C2, C7), two-step sign-in and the second person on every account, the GitHub Apps, Webhooks and Deploy keys page (F3), Dependabot (F4), and that hello@zikorahq.com is a real mailbox.
+- **Monitoring not set up yet:** Sentry and UptimeRobot (`docs/safety-net.md`).
+
 ## Status on 5 Oct 2026: first live deploy done
 
 - **Live address:** https://hotel-management-system-29015d49.vercel.app, deployed from `main`. Every push to GitHub deploys by itself: `main` goes live, every other branch gets a preview address. No Ignored Build Step.
@@ -31,7 +43,7 @@ Placeholders: wherever you see `yourdomain.com`, use the domain you buy in step 
 
 ## B. The domain
 
-- [ ] **B1. YOU.** Buy the domain at a registrar (for example Cloudflare, Namecheap, or a `.ng` registrar). Turn on two-step sign-in at the registrar and add your second person if the registrar allows it. Turn on auto-renew.
+- [x] **B1. YOU.** (Done: zikorahq.com.) Buy the domain at a registrar (for example Cloudflare, Namecheap, or a `.ng` registrar). Turn on two-step sign-in at the registrar and add your second person if the registrar allows it. Turn on auto-renew.
 - [ ] **B2. YOU.** Write these two addresses down; we will use them everywhere:
   - The app: `app.yourdomain.com`
   - Email sender: `mail.yourdomain.com` (emails will come from `no-reply@mail.yourdomain.com`)
@@ -49,7 +61,7 @@ Placeholders: wherever you see `yourdomain.com`, use the domain you buy in step 
   - Click **Save**.
 - [ ] **C6. YOU.** Live project > **Authentication** > **Sign In / Providers** (or **Providers**) > **Email**: check **Confirm email** is on, set **Minimum password length** to **8** (the app asks for 8), and turn on **Prevent use of leaked passwords** (a Pro feature). Save.
 - [ ] **C7. YOU.** Live project > **Database** > **Backups**: check daily backups now show (they start once the plan is Pro). Nothing to click.
-- [ ] **C8. YOU.** Create the practice project: organization page > **New project**:
+- [x] **C8. YOU.** (Done.) Create the practice project: organization page > **New project**:
   - Name: `hotel-desk-practice`
   - Region: **West EU (Ireland)**, the same as the live project
   - Database password: click **Generate a password**, then save it in the shared vault. Do not send it to me; I do not need it.
