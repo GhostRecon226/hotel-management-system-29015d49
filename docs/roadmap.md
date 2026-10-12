@@ -19,6 +19,7 @@ Where the detail lives:
 - Phone layout: tests at 390px wide found and fixed two faults (Front Desk tabs and the off-screen Check in button).
 - Load more on long lists (PAG-001, QA-22), the top-bar search (SRC-001) and one rule for money collected (RPT-009) are built and merged (11 Oct 2026). The first two have migrations that practice does not have yet.
 - Offline mode stages 1 and 2 are built and merged (11 Oct 2026): saved lists readable with no connection, and charges, payments and housekeeping updates wait on the device and send when the connection returns. Register rows OFF-001 to OFF-004.
+- Offline stage 3a (13 Oct 2026, open PR): check-out and room moves wait on the device too (OFF-005, OFF-006). Check-in and walk-in are stage 3b.
 - Practice database is current with main (81 migrations, applied 11 Oct 2026). Live is at 77.
 
 ## 2. In progress (this week)
@@ -66,7 +67,7 @@ Nothing blocks the pilot in code, and the optional polish list is finished (Load
 |---|---|
 | Switch billing on (Paystack key, webhook). Day 61 is built (PLT-018): the hotel moves to its plan and has 14 days to pay. | Do before signup opens to the public. Pilots stay free: set them to Active first. |
 | Overbooking allowance (QA-17) | Skip for the pilot. |
-| Offline stage 3 (check-in, check-out, room moves) | Decide after stages 1 and 2 are used in a pilot hotel. The downtime pack (`/downtime`) covers longer outages. |
+| Offline stage 3b (check-in, walk-in) | Peter chose to build stage 3 on 12 Oct 2026. 3a (check-out, room moves) is built. 3b waits on one decision: a queued check-in would keep the guest's ID number on the device until it sends, which the design forbids. The downtime pack (`/downtime`) covers longer outages. |
 | Tax treatment of fees and discounts (A11) | Accountant decides. |
 
 ## 5. Offline mode, in plain terms

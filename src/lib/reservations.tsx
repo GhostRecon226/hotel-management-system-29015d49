@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { callRpc } from "@/lib/setup";
+import { callRpcQueued, QUEUED } from "@/lib/offline/queue";
 import { usePaged } from "@/lib/paging";
 import { formatAmount } from "@/components/ui/money";
 import { errorMessage } from "@/lib/errors";
@@ -118,8 +119,9 @@ export function useAvailability(propertyId: string | undefined, arrival: string,
 export function useResMutation<T = unknown>(name: string, success?: string | ((d: T) => string)) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (args: Record<string, unknown>) => callRpc<T>(name, args),
+    mutationFn: (args: Record<string, unknown>) => callRpcQueued<T>(name, args) as Promise<T>,
     onSuccess: (d) => {
+      if ((d as unknown) === QUEUED) { toast.info("Saved on this device. It will be sent when the connection returns."); return; }
       qc.invalidateQueries({ queryKey: ["reservations"] });
       qc.invalidateQueries({ queryKey: ["guests"] });
       if (success) toast.success(typeof success === "function" ? success(d) : success);

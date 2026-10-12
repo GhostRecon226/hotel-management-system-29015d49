@@ -6,7 +6,7 @@ Started 11 Oct 2026. Decision A12 said online only in R1 and offline in R2. Pete
 
 - **Stage 1: read.** After a staff member has signed in once on a device, the app opens without internet. Arrivals, in house, the room board, folio balances and housekeeping tasks show the last saved copy, with a banner: "No connection. Showing the list as of 14:32."
 - **Stage 2: write.** Charges, payments, housekeeping updates and service requests can be entered offline. They show as "Waiting to send" and go to the server by themselves when the connection returns. Nothing is lost if the browser closes.
-- **Stage 3: check-in and check-out.** Check-in, walk-in, check-out and room moves offline. This is the hard part (see Risks). Stage 3 follows once stages 1 and 2 work in a real hotel.
+- **Stage 3: check-in and check-out.** Check-in, walk-in, check-out and room moves offline. This is the hard part (see Risks). Peter chose on 12 Oct 2026 to build it now, in two parts. **3a (built): check-out and room moves.** They use the same queue. Both are already safe to repeat in the database (a second check-out returns the first; a second move to the same room is refused). A check-out with a balance is accepted at send time only for someone who holds fo.checkout.unsettled (Peter chose "allow it, flag it for Finance"); the reason recorded is "Checked out with no connection", and the balance shows in Collections. Anyone else sees it under Needs attention. **3b (not built): check-in and walk-in.** A queued check-in carries the ID number and a walk-in needs ids made on the device. See the open decision below.
 
 ## How it works
 
@@ -51,3 +51,7 @@ Started 11 Oct 2026. Decision A12 said online only in R1 and offline in R2. Pete
 - Playwright switches the network off (`context.setOffline(true)`) after loading, reloads, and checks the lists show with the banner.
 - A repeat-send test replays the same queue entry twice and checks one posting.
 - All run in CI only (this workspace has no Docker).
+
+## Open decision for stage 3b
+
+A queued check-in holds the registration, including the guest's ID number, on the device until it sends. "What stays on the device" says ID numbers are never saved. Options: keep the number on the device only until sent, then erase it (simple, a short exposure on a lost phone); or queue the check-in without the number and ask staff to add it online afterwards (nothing sensitive stored, extra step). Peter decides.

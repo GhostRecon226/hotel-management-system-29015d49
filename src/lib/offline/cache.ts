@@ -16,6 +16,13 @@ const SAVED: unknown[][] = [
   ["folios", "list"],
   ["folios", "one"],
   ["folios", "tx"],
+  // Stage 3: what the check-out page and the Move room form read.
+  ["checkout", "stay"],
+  ["folios", "res"],
+  ["folios", "outstanding"],
+  ["folios", "same-day-night"],
+  ["approvals", "checkout"],
+  ["reservations", "fd", "rooms"],
   ["setup", "charge_codes"],
   ["setup", "payment_methods"],
   ["setup", "exchange_rates"],

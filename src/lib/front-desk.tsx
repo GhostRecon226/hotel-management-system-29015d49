@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { setLabelHint } from "@/lib/offline/queue";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/lib/access";
 import { callRpc, Field, FormDialog, useSetupList } from "@/lib/setup";
@@ -296,6 +297,7 @@ export function MoveRoomDialog({ stay, onOpenChange }: { stay: InHouseRow | null
   const from = property?.business_date ?? "";
   const rooms = useFdRooms(null, from, stay?.departure_date ?? "", stay?.reservation_id ?? null, !!stay);
   const m = useResMutation("move_room", "Guest moved.");
+  useEffect(() => { if (stay) setLabelHint("move_room", stay.reservation_id, `Move ${stay.guest_name ?? "guest"} out of ${stay.room_number}`); }, [stay]);
   const [rate, setRate] = useState<"" | "keep" | "new">("");
   useEffect(() => { if (stay) { setRoom(""); setReason(""); setOvr(""); setRate(""); } }, [stay]);
   const picked = rooms.data?.find((r) => r.id === room);
