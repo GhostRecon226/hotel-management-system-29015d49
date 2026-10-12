@@ -23,6 +23,7 @@ export const Route = createFileRoute("/auth")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { mode?: "signin" | "signup" } => (search["mode"] === "signup" ? { mode: "signup" } : {}),
   component: AuthPage,
 });
 
@@ -32,12 +33,13 @@ const schema = z.object({
 });
 
 function AuthPage() {
+  const { mode } = Route.useSearch();
   return (
     <AuthLayout>
       <div>
         <h1 className="text-[32px] font-semibold">Welcome back.</h1>
         <p className="mb-6 mt-1 text-[15px] text-muted-foreground">Sign in to continue to your hotel workspace.</p>
-        <Tabs defaultValue="signin">
+        <Tabs defaultValue={mode === "signup" ? "signup" : "signin"}>
           <TabsList className="mb-6 grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign in</TabsTrigger>
             <TabsTrigger value="signup">Create account</TabsTrigger>

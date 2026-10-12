@@ -67,3 +67,12 @@ test("signed in: / goes to the app; other public pages stay readable with Open t
   await expect(page.getByRole("link", { name: "Open the app" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Sign in" })).toHaveCount(0);
 });
+
+// [PLT-016] The pricing page offers 60 days free, and the button opens the Create account tab.
+test("[PLT-016] pricing page offers 60 days free and the button opens Create account", async ({ page }) => {
+  await page.goto("/pricing");
+  await expect(page.getByRole("heading", { level: 2, name: "Try Zikora free for 60 days." })).toBeVisible();
+  await page.getByRole("link", { name: "Start your free trial" }).click();
+  await expect(page).toHaveURL(/\/auth\?mode=signup$/);
+  await expect(page.getByRole("tab", { name: "Create account" })).toHaveAttribute("aria-selected", "true");
+});

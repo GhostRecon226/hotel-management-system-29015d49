@@ -32,7 +32,7 @@ function Terms() {
         <p>You decide who in your hotel can sign in and what each person can do. Keep sign-in details private, and tell us if you think someone else has them. You are responsible for what is done under your hotel's account.</p>
       </LegalPart>
       <LegalPart title="3. Free trial">
-        <p>When you create your hotel, a 30-day free trial starts. You do not need a card.</p>
+        <p>When you create your hotel, a 60-day free trial with every feature starts. You do not need a card.</p>
       </LegalPart>
       <LegalPart title="4. When the trial or a plan ends">
         <p>Your hotel becomes read-only. Your team can still record payments, settle bills and check guests out, but cannot add new bookings or charges. Nothing is deleted. We switch a plan on after we agree it with you.</p>

@@ -11,7 +11,7 @@ Newest changes go at the bottom of each row's notes. Date format is day month ye
 | A10 | Nigeria first. NGN base currency. Multi-currency with recorded FX rate. Payments are taken outside the system. | Confirmed | Avoids a payment licence in R1. |
 | A11 | Tax seed: 10% service charge, 7.5% VAT on net plus prior, state levy 0%. | Open | Accountant must confirm. Also confirm cancellation and no-show fees are non-taxable (posted untaxed for now, 30 Sep 2026), and whether a discount reduces tax. |
 | A12 | Online only in R1. Client ids and idempotency keys keep offline possible. | Confirmed | Offline mode is R2. |
-| A13 | Self-service signup with a 30-day trial. Billing integration is R1b. Pilots are invoiced by hand. | Confirmed | Speed to first pilot. |
+| A13 | Self-service signup with a 60-day trial, every feature (30 days until 12 Oct 2026). Billing integration is R1b. Pilots are invoiced by hand. | Confirmed 12 Oct 2026 | Speed to first pilot. |
 | A14 | Cloud hosting on Supabase. Project `urbpxybyrfjczqbrpdsq` in West EU (Ireland). | Confirmed 30 Sep 2026 | Region chosen. Still get data protection advice before signing a bank or chain. |
 | A16 | Plans are configuration. Proposed: starter 20 rooms, standard 60, pro 150, enterprise unlimited. Unpriced. | Open | Peter to pick tiers and prices. Pilots are free for now (30 Sep 2026). |
 | D1 | Adjustments, reversals and refunds always need approval. A discount above the user's limit waits for approval. | Confirmed | Audit trail and control (BR-015). |
