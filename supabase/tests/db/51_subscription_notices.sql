@@ -29,7 +29,7 @@ begin
   select subject, body into v_subject, v_body from public.notification_outbox where tenant_id = t.id('tenantA') limit 1;
   perform t.ok(v_body like '%hello@zikorahq.com%' and v_body like '%read-only%' and lower(v_body) like '%nothing is deleted%',
     '[PLT-014] the email says what happens, that nothing is deleted, and who to contact');
-  perform t.ok(v_body not like '%—%' and v_subject not like '%—%' and v_body !~* '(₦|NGN|naira)', '[PLT-014] no em dash and no price in the email');
+  perform t.ok(v_body not like '%—%' and v_subject not like '%—%' and v_body like '%₦30,000%', '[PLT-014] no em dash, and the email names the price');
 
   perform app.run_subscription_clock();
   perform t.eq(t.notices('trial7'), 2, '[PLT-014] a second clock run sends nothing twice');
@@ -43,7 +43,7 @@ begin
   update public.tenant_subscriptions set trial_ends_at = now() - interval '1 hour' where tenant_id = t.id('tenantA');
   perform app.run_subscription_clock();
   perform app.run_subscription_clock();
-  perform t.eq((select status from public.tenants where id = t.id('tenantA')), 'expired', '[PLT-014] the clock still expires the trial');
+  perform t.eq((select status from public.tenants where id = t.id('tenantA')), 'past_due', '[PLT-014] the clock moves the hotel to past due when the trial ends (day 61, PLT-018)');
   perform t.eq(t.notices('trialend'), 2, '[PLT-014] when the trial ends, each administrator is told once');
 
   -- A hotel that converts before the date gets no notice.

@@ -14,7 +14,7 @@ Blunt list. Nothing here is hidden elsewhere.
 - The room availability calendar and the downtime pack are true grids. They scroll sideways inside their own box on purpose.
 - The business date chip in the top bar is hidden on a phone (no room). The dashboard and the Front Desk show the date.
 - Printing is unchanged. Cards apply to screens only.
-- `e2e/rooms-add.spec.ts` is intermittent on a busy machine: it reads the room list the moment the "rooms added" message appears, before the list has refreshed. It passed 4 of 4 on untouched `main` and failed on some runs after the phone changes, then passed again. Not changed (needs Peter's yes).
+- Fixed 12 Oct 2026: `e2e/rooms-add.spec.ts` now waits for the room list to refresh instead of reading it once (Peter said yes). Watch the next CI runs.
 
 ## Money and tax
 - **Nigerian tax defaults are guesses** (service charge 10%, VAT 7.5% on net + service charge, state levy 0%). They are marked unverified. Confirm with an accountant before any real use.
@@ -43,7 +43,7 @@ Blunt list. Nothing here is hidden elsewhere.
 - Guest stay history is basic; no guest-level service/maintenance history.
 - Reservation settings (longest stay, tentative hold hours) have a Setup screen since 8 Oct 2026 (SET-012).
 - Staff invite: no temporary passwords. If the invite email fails, nothing is created. Unaccepted invites can be sent again from Admin, Staff.
-- Billing is built (PLT-011, PLT-012: Paystack payment, webhook, cancel) but not switched on. It needs `PAYSTACK_SECRET_KEY` in Vercel and the webhook address set in Paystack, and plan prices are in the plans table (A16, PLT-017) but the public pricing page does not show them yet. Until then a daily clock expires trials and suspends unpaid hotels, and platform staff activate pilots by hand in the platform console (decision 5e, PLT-008).
+- Billing is built (PLT-011, PLT-012: Paystack payment, webhook, cancel) but not switched on. It needs `PAYSTACK_SECRET_KEY` in Vercel and the webhook address set in Paystack, and plan prices are in the plans table (A16, PLT-017) and the public pricing page shows them. Until then payment is arranged by email. A daily clock moves a hotel to its paid plan when the trial ends (day 61, PLT-018), then suspends it after 14 unpaid days. Platform staff activate pilots by hand in the platform console (decision 5e, PLT-008). **A hotel still on trial converts to Past due on its trial end date and is emailed a payment request, so set pilot hotels to Active (or extend the trial) in the platform console first.** The Terms (section 4) still say the hotel becomes read-only at trial end and need counsel to reword.
 
 ## Hacky or doubtful
 - `housekeeping_tasks` is deprecated (replaced by `hk_tasks`) but still in the schema because tables are never dropped.
