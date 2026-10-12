@@ -1527,8 +1527,27 @@ Generated from the migrations in `supabase/migrations` (replayed on an empty dat
 - Called by: pg_cron job `subscription-clock` (daily, 00:15 UTC) and the service role only
 - Permission: — (not callable by signed-in users)
 - Errors: —
-- Changes state as before: trial to expired, active to past due, past due to suspended after 14 days, cancelled at the end of the paid period.
+- Changes state: **trial to past due on day 61 (PLT-018)**: the hotel moves to `app.trial_plan`, `current_period_end` is set to the trial end, and it has 14 days to pay; active to past due; past due to suspended after 14 days; cancelled at the end of the paid period. The trial-end email names the plan and price (`app.plan_price_text`); a hotel on Enterprise is told to contact us. The generic payment-overdue email is skipped when the trial-end email already went out for that date. The 7 and 1 day trial warnings name the plan and price too.
 - Also queues emails (QA-05) to the hotel's active System Administrators and General Managers: trial ends in 7 days, in 1 day, and when it ends; payment overdue, 3 days of grace left, and suspended. Each email has a dedupe key `kind:tenant:date:user`, so a repeat run never sends twice. The status is read at send time, so a hotel that converted gets nothing.
+
+### `app.trial_plan`
+- Args: `p_tenant uuid`
+- Returns: `text` (plan code)
+- Permission: — (helper, not callable by signed-in users)
+- Errors: —
+- PLT-018: the plan with the fewest rooms that the hotel's active rooms, properties and staff fit; Enterprise (no limits) comes last.
+
+### `app.plan_price_text`
+- Args: `p_plan text, p_tenant uuid`
+- Returns: `text` (for example `₦30,000`), or null when the plan has no monthly price in the hotel's currency
+- Permission: — (helper, not callable by signed-in users)
+- Errors: —
+
+### `app.trial_plan_sentence`
+- Args: `p_plan_name text, p_price text`
+- Returns: `text` (the sentence the 7 and 1 day trial warnings use)
+- Permission: — (helper, not callable by signed-in users)
+- Errors: —
 
 ### `app.send_subscription_notice`
 - Args: `p_tenant uuid, p_kind text, p_date date, p_subject text, p_body text`

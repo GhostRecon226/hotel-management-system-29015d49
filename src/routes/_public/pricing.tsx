@@ -34,8 +34,8 @@ const REASSURANCE = [
 const TRIAL_POINTS = [
   "Every feature, with no card needed",
   "We email you 7 days and 1 day before the 60 days end",
-  "To keep full access after that, pay for the plan that fits your hotel",
-  "If you do not, the hotel becomes read-only. Nothing is deleted",
+  "On day 61 your hotel moves to the cheapest plan that fits its size, and you have 14 days to pay. It keeps working meanwhile",
+  "If it is not paid by then, the hotel becomes read-only. Nothing is deleted",
 ];
 
 function Pricing() {

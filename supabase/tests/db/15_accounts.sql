@@ -45,10 +45,10 @@ begin
   update public.tenant_subscriptions set trial_ends_at = now() + interval '10 days' where tenant_id = t.id('tenantB');
   v_n := app.run_subscription_clock();
   perform t.eq(v_n, 1, '[M4][PLT-005] the daily clock expired one trial');
-  perform t.eq((select status from public.tenants where id = t.id('tenantA')), 'expired', '[M4][PLT-005] trial is expired and the hotel is read-only');
-  perform t.eq((select status from public.tenant_subscriptions where tenant_id = t.id('tenantA')), 'expired', '[M4] the subscription shows expired');
+  perform t.eq((select status from public.tenants where id = t.id('tenantA')), 'past_due', '[M4][PLT-005] when the trial ends the hotel moves to past due and has 14 days to pay (PLT-018)');
+  perform t.eq((select status from public.tenant_subscriptions where tenant_id = t.id('tenantA')), 'past_due', '[M4] the subscription shows past due');
   perform t.eq((select status from public.tenants where id = t.id('tenantB')), 'trial', '[M4] a hotel still in its trial is untouched');
-  perform t.ok(exists (select 1 from public.subscription_history where tenant_id = t.id('tenantA') and to_status = 'expired'), '[M4][PLT-005] the change is in the subscription history');
+  perform t.ok(exists (select 1 from public.subscription_history where tenant_id = t.id('tenantA') and to_status = 'past_due'), '[M4][PLT-005] the change is in the subscription history');
   perform t.ok(exists (select 1 from cron.job where jobname = 'subscription-clock'), '[M4] the clock is scheduled daily');
 
   perform t.login('adminA');
