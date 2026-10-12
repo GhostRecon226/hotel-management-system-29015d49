@@ -197,6 +197,7 @@ export function CheckInDialog({ arrival, onOpenChange }: { arrival: ArrivalRow |
   const open = !!arrival;
   const rooms = useFdRooms(arrival?.room_type_id ?? null, property?.business_date ?? "", arrival?.departure_date ?? "", arrival?.id ?? null, open);
   const m = useResMutation("check_in", "Guest checked in.");
+  useEffect(() => { if (arrival) setLabelHint("check_in", arrival.id, `Check in ${arrival.guest_name ?? "guest"}`); }, [arrival]);
   const photo = usePhotoStep(arrival?.guest_id, open);
   useEffect(() => { if (arrival) { setReg(EMPTY_REG); setRoom(arrival.room_id ?? ""); setOvr(""); setWaive(""); photo.reset(); } }, [arrival]); // eslint-disable-line react-hooks/exhaustive-deps
   const picked = rooms.data?.find((r) => r.id === room);

@@ -41,8 +41,29 @@ export async function warmOfflineData(queryClient: QueryClient, propertyId: stri
       });
     }
     await warmInHouse(queryClient, propertyId, businessDate);
+    await warmArrivals(queryClient, propertyId, businessDate);
   } catch {
     lastWarm = 0; // try again next time
+  }
+}
+
+/** Stage 3b: the room lists the Check in form reads, for today's arrivals (first 30). */
+async function warmArrivals(queryClient: QueryClient, propertyId: string, businessDate?: string) {
+  if (!businessDate) return;
+  const { data: rows, error } = await (supabase.from as any)("v_arrivals").select("id, room_type_id, departure_date").eq("property_id", propertyId).limit(30);
+  if (error || !rows) return;
+  for (const r of rows as { id: string; room_type_id: string; departure_date: string }[]) {
+    if (r.departure_date < businessDate) continue;
+    await queryClient.prefetchQuery({
+      queryKey: ["reservations", "fd", "rooms", propertyId, r.room_type_id, businessDate, r.departure_date, r.id],
+      queryFn: async () => {
+        const { data, error: e } = await (supabase.rpc as any)("get_front_desk_rooms", {
+          p_property_id: propertyId, p_room_type_id: r.room_type_id, p_from: businessDate, p_to: r.departure_date, p_reservation_id: r.id,
+        });
+        if (e) throw e;
+        return data;
+      },
+    });
   }
 }
 
