@@ -67,3 +67,26 @@ test("signed in: / goes to the app; other public pages stay readable with Open t
   await expect(page.getByRole("link", { name: "Open the app" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Sign in" })).toHaveCount(0);
 });
+
+// [NFR-008] The public header stays one slim row on a phone and a tablet, and the menu reaches every page.
+for (const [label, width, height] of [["phone", 390, 844], ["tablet", 768, 1024]] as const) {
+  test(`[NFR-008] public header is one row with a working menu on a ${label}`, async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width, height }, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    for (const path of ["/", "/features", "/pricing", "/contact"]) {
+      await page.goto(path);
+      const m = await page.evaluate(() => ({ h: document.querySelector("header")!.getBoundingClientRect().height, sw: document.documentElement.scrollWidth, iw: innerWidth }));
+      expect(m.h, `${path} header height`).toBeLessThanOrEqual(72);
+      expect(m.sw, `${path} scrolls sideways`).toBeLessThanOrEqual(m.iw);
+    }
+    await page.goto("/");
+    await page.getByRole("button", { name: "Open menu" }).tap();
+    for (const name of ["Features", "Security", "Pricing", "FAQ", "About", "Contact", "Request a walkthrough"]) {
+      await expect(page.getByRole("dialog").getByRole("link", { name })).toBeVisible();
+    }
+    await page.getByRole("dialog").getByRole("link", { name: "Pricing" }).tap();
+    await expect(page).toHaveURL(/\/pricing$/);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await ctx.close();
+  });
+}
