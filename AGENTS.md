@@ -104,4 +104,4 @@ Plain and short. No em dashes. Active voice. Explain choices in business terms.
 
 ## Open decisions
 
-Plan tiers and prices (A16; pilots are free), tax seed sign-off (A11, accountant), fee and discount tax treatment (accountant). See `docs/decisions.md`. Decided: region West EU, Ireland (A14, 30 Sep 2026); same-day stays charged one night, a manager can waive it (DAY-006, 30 Sep and 1 Oct 2026).
+Plan tiers and prices (A16; pilots are free; every new hotel gets 60 days free, A13), tax seed sign-off (A11, accountant), fee and discount tax treatment (accountant). See `docs/decisions.md`. Decided: region West EU, Ireland (A14, 30 Sep 2026); same-day stays charged one night, a manager can waive it (DAY-006, 30 Sep and 1 Oct 2026).

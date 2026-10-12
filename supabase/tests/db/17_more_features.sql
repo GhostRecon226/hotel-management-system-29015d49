@@ -17,7 +17,7 @@ begin
   perform t.eq((select timezone from public.properties where id = t.id('propA')), 'Africa/Lagos', '[PLT-004][NFR-005] and the Lagos timezone');
   perform t.ok((select count(*) from public.charge_codes where property_id = t.id('propA') and code in ('ROOM', 'REST', 'LAUNDRY')) = 3, '[PLT-004] the engine''s charge codes exist for every property');
   perform t.eq((select status from public.tenant_subscriptions where tenant_id = t.id('tenantB')), 'trial', '[PLT-001] a new hotel starts on trial');
-  perform t.ok((select trial_ends_at::date - created_at::date from public.tenant_subscriptions where tenant_id = t.id('tenantB')) = 30, '[PLT-001] for thirty days');
+  perform t.ok((select trial_ends_at::date - created_at::date from public.tenant_subscriptions where tenant_id = t.id('tenantB')) = 60, '[PLT-001][PLT-016] for sixty days');
   insert into auth.users (id, email, email_confirmed_at, aud, role) values (v_gh, 'gh@test.local', now(), 'authenticated', 'authenticated');
   perform t.put('adminGH', v_gh);
   perform t.login('adminGH');

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { pageHead } from "@/lib/seo";
 
 const TITLE = "Zikora Pricing | Hotel Management Software Plans";
-const DESCRIPTION = "Zikora is subscription-based. Ask about pilot access, plan options and pricing for your hotel before you subscribe.";
+const DESCRIPTION = "Try Zikora free for 60 days with every feature. Plan options and pricing are confirmed before your trial ends.";
 
 export const Route = createFileRoute("/_public/pricing")({
   head: () => pageHead({ title: TITLE, description: DESCRIPTION, path: "/pricing" }),
@@ -29,7 +29,18 @@ function Pricing() {
       <Section className="pb-10 text-center sm:pb-12">
         <Eyebrow>Pricing</Eyebrow>
         <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">The right tools for the way your hotel runs.</h1>
-        <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground">Zikora is subscription-based. Plan inclusions, billing terms and current pricing will be confirmed before you subscribe.</p>
+        <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground">Zikora is subscription-based, and every new hotel starts with 60 days free. Plan inclusions, billing terms and pricing are confirmed before your trial ends.</p>
+      </Section>
+      <Section className="pb-4 pt-0 sm:pb-4 sm:pt-0">
+        <div className="mx-auto max-w-4xl rounded-2xl bg-accent-fill p-8 text-center text-primary-foreground shadow-accent">
+          <p className="text-sm font-bold uppercase tracking-wide text-on-primary-muted">New hotels</p>
+          <h2 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">Try Zikora free for 60 days.</h2>
+          <p className="mx-auto mt-3 max-w-xl text-[15px] text-on-primary-muted">Every feature. No card. Create your hotel, add your rooms and run your front desk, housekeeping and billing for two months before you pay anything.</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button asChild size="lg" variant="secondary"><Link to="/auth" search={{ mode: "signup" }}>Start your free trial</Link></Button>
+            <Button asChild size="lg" variant="secondary"><Link to="/walkthrough">Request a walkthrough</Link></Button>
+          </div>
+        </div>
       </Section>
       <Section className="pt-0 sm:pt-0">
         <div className="mx-auto grid max-w-4xl gap-4 md:grid-cols-2">

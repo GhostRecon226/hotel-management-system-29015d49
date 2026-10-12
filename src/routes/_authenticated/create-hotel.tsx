@@ -92,7 +92,7 @@ function CreateHotel() {
         <fieldset disabled={!hydrated} className="space-y-5">
         <div className="mb-2">
           <h1 className="text-[28px] font-semibold">Create your hotel</h1>
-          <p className="mt-1 text-[15px] text-muted-foreground">You get a 30-day free trial on the Starter plan.</p>
+          <p className="mt-1 text-[15px] text-muted-foreground">You get a 60-day free trial with every feature, on the Starter plan.</p>
         </div>
         <Field id="business_name" label="Business name" value={form.business_name} onChange={set("business_name")} />
         <div className="space-y-1.5">

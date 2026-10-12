@@ -68,6 +68,15 @@ test("signed in: / goes to the app; other public pages stay readable with Open t
   await expect(page.getByRole("link", { name: "Sign in" })).toHaveCount(0);
 });
 
+// [PLT-016] The pricing page offers 60 days free, and the button opens the Create account tab.
+test("[PLT-016] pricing page offers 60 days free and the button opens Create account", async ({ page }) => {
+  await page.goto("/pricing");
+  await expect(page.getByRole("heading", { level: 2, name: "Try Zikora free for 60 days." })).toBeVisible();
+  await page.getByRole("link", { name: "Start your free trial" }).click();
+  await expect(page).toHaveURL(/\/auth\?mode=signup$/);
+  await expect(page.getByRole("tab", { name: "Create account" })).toHaveAttribute("aria-selected", "true");
+});
+
 // [NFR-008] The public header stays one slim row on a phone and a tablet, and the menu reaches every page.
 for (const [label, width, height] of [["phone", 390, 844], ["tablet", 768, 1024]] as const) {
   test(`[NFR-008] public header is one row with a working menu on a ${label}`, async ({ browser }) => {
