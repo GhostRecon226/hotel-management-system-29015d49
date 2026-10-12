@@ -105,4 +105,4 @@ Plain and short. No em dashes. Active voice. Explain choices in business terms.
 
 ## Open decisions
 
-Plan prices are decided but not entered in the plans table (A16, 12 Oct 2026; pilots are free; every new hotel gets 60 days free, A13), tax seed sign-off (A11, accountant), fee and discount tax treatment (accountant). See `docs/decisions.md`. Decided: region West EU, Ireland (A14, 30 Sep 2026); same-day stays charged one night, a manager can waive it (DAY-006, 30 Sep and 1 Oct 2026).
+Plan prices are decided and entered (A16, PLT-017, 12 Oct 2026; list price and 12-month launch lock not built; pilots are free; every new hotel gets 60 days free, A13), tax seed sign-off (A11, accountant), fee and discount tax treatment (accountant). See `docs/decisions.md`. Decided: region West EU, Ireland (A14, 30 Sep 2026); same-day stays charged one night, a manager can waive it (DAY-006, 30 Sep and 1 Oct 2026).

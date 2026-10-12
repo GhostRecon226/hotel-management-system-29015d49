@@ -43,7 +43,7 @@ Blunt list. Nothing here is hidden elsewhere.
 - Guest stay history is basic; no guest-level service/maintenance history.
 - Reservation settings (longest stay, tentative hold hours) have a Setup screen since 8 Oct 2026 (SET-012).
 - Staff invite: no temporary passwords. If the invite email fails, nothing is created. Unaccepted invites can be sent again from Admin, Staff.
-- Billing is built (PLT-011, PLT-012: Paystack payment, webhook, cancel) but not switched on. It needs `PAYSTACK_SECRET_KEY` in Vercel and the webhook address set in Paystack, and plan prices are empty until A16 is decided. Until then a daily clock expires trials and suspends unpaid hotels, and platform staff activate pilots by hand in the platform console (decision 5e, PLT-008).
+- Billing is built (PLT-011, PLT-012: Paystack payment, webhook, cancel) but not switched on. It needs `PAYSTACK_SECRET_KEY` in Vercel and the webhook address set in Paystack, and plan prices are in the plans table (A16, PLT-017) but the public pricing page does not show them yet. Until then a daily clock expires trials and suspends unpaid hotels, and platform staff activate pilots by hand in the platform console (decision 5e, PLT-008).
 
 ## Hacky or doubtful
 - `housekeeping_tasks` is deprecated (replaced by `hk_tasks`) but still in the schema because tables are never dropped.

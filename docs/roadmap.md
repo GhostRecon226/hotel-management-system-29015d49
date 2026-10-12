@@ -38,7 +38,7 @@ Nothing blocks the pilot in code, and the optional polish list is finished (Load
 ### Before the first paying hotel
 | Item | Owner | Source |
 |---|---|---|
-| Enter the A16 prices in the plans table (migration), then switch billing on | Claude, after Peter's go | decision A16 decided 12 Oct 2026 |
+| Switch billing on (Paystack key, webhook) and show prices on the pricing page | Peter and Claude | A16 prices entered, PLT-017 |
 | Billing integration (pilots are invoiced by hand until then) | Claude | decision A13 (R1b) |
 | Tax rates signed off, plus how fees and discounts are taxed | Accountant | decision A11, QA-04 |
 | Email sending: Resend key and sender domain | Peter | QA-02 |
@@ -64,7 +64,7 @@ Nothing blocks the pilot in code, and the optional polish list is finished (Load
 
 | Decision | Recommendation |
 |---|---|
-| Plan prices entered in the plans table (A16 decided 12 Oct 2026: Starter 20,000 launch, Standard 45,000, Pro 80,000). | Do before signup opens to the public. Pilots stay free. |
+| Show the A16 prices on the public pricing page, build the Starter 12-month price lock, and switch billing on (Paystack key, webhook). | Do before signup opens to the public. Pilots stay free. |
 | Overbooking allowance (QA-17) | Skip for the pilot. |
 | Offline stage 3 (check-in, check-out, room moves) | Decide after stages 1 and 2 are used in a pilot hotel. The downtime pack (`/downtime`) covers longer outages. |
 | Tax treatment of fees and discounts (A11) | Accountant decides. |
