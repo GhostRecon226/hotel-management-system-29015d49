@@ -77,6 +77,7 @@ begin
         || E'\n\n' || 'To arrange payment, contact hello@zikorahq.com.' || E'\n\nZikora');
       n := n + 1; v_changed := true;
       v_status := 'past_due';
+      r.current_period_end := r.trial_ends_at; -- the overdue check below must read the new period end, not a stale one
     elsif r.status = 'active' and r.current_period_end is not null and r.current_period_end <= now() then
       perform app.change_subscription(r.tenant_id, 'past_due', 'past_due', 'Paid period ended without payment', 'clock');
       n := n + 1; v_changed := true;
