@@ -43,7 +43,8 @@ Multi-tenant hotel management system for Nigeria, then Africa. Peter owns the pr
 - One branch per change. Never merge: Peter merges.
 - Practice database (`vxkresricneodgvqphrn`) first: dry run, then apply, then report. Keep the folder linked to practice.
 - Live database (`urbpxybyrfjczqbrpdsq`) only after Peter's separate yes for that release: back up first into `~/hotel-desk-backups`, dry run and apply only if it lists exactly the agreed migrations, confirm the count matches the code, check the new objects exist, then link back to practice.
-- Apply the database before the app is merged: the app calls the new functions.
+- Apply the database before the app is merged: the app calls the new functions. A report for a change with a migration says when Peter can merge: after the live release, not before.
+- After every merge to main, and before saying the live site works, compare main's migration files with live's applied list. Read live with `supabase migration list` (read only: the one touch of live allowed outside a release), then link back to practice at once. If main has a migration live does not, say that first, name the screens that call it, and ask for "yes, live". Never apply it without that yes. Why: on 12 Oct 2026 list paging and top bar search were merged before their database part, and the Guests list, Reservations list, audit log and top bar search failed on live until they were released.
 - Every report to Peter starts with one line, "Project: practice" or "Project: live", and says which project the next step needs.
 - Claude does all Supabase CLI linking and relinking. Never ask Peter to switch, link or check which project is active.
 - When any task finishes, the CLI is linked back to practice; the report's last line says so.
