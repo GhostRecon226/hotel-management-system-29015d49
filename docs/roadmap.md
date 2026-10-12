@@ -17,6 +17,7 @@ Where the detail lives:
 - 148 of 154 R1 requirements are built and tested. The other 6 are listed in section 3.
 - QA audit: the browser test list is finished (13 screens, cashier shift, housekeeping, maintenance, approvals with two users, group bookings, reports, service requests, Setup). QA-15, QA-16, QA-23 and QA-19 (change password) are fixed. QA-20 needs no change.
 - Phone layout: tests at 390px wide found and fixed two faults (Front Desk tabs and the off-screen Check in button).
+- Load more on long lists (PAG-001, QA-22), the top-bar search (SRC-001) and one rule for money collected (RPT-009) are built and merged (11 Oct 2026). The first two have migrations that practice does not have yet.
 - Offline mode stages 1 and 2 are built and merged (11 Oct 2026): saved lists readable with no connection, and charges, payments and housekeeping updates wait on the device and send when the connection returns. Register rows OFF-001 to OFF-004.
 - Practice database is current with main (81 migrations, applied 11 Oct 2026). Live is at 77.
 
@@ -32,13 +33,7 @@ Where the detail lives:
 ## 3. Left to build
 
 ### Before the first pilot hotel
-Nothing blocks the pilot in code. The list below is optional polish.
-
-| Item | Size | Source |
-|---|---|---|
-| Pagination on long lists (folios stop at 200) | Medium | QA-22 |
-| Search box in the top bar (guests, reservations, rooms) | Medium | backlog |
-| One rule for "money collected" across reports | Small | backlog |
+Nothing blocks the pilot in code, and the optional polish list is finished (Load more on long lists, top-bar search, one "money collected" rule). New ideas go in `docs/backlog.md`.
 
 ### Before the first paying hotel
 | Item | Owner | Source |
