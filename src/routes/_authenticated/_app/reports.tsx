@@ -126,7 +126,7 @@ function Reports() {
 
         <TabsContent value="kpi">
           <div className="mb-3 flex justify-end"><Button variant="outline" disabled={k.length === 0} onClick={exportKpi}><Download className="h-4 w-4" /> Download CSV</Button></div>
-          <Table>
+          <Table wide>
             <TableHeader><TableRow>
               <TableHead>Date</TableHead><TableHead className="text-right">Available</TableHead><TableHead className="text-right">Sold</TableHead>
               <TableHead className="text-right">Occupancy</TableHead><TableHead className="text-right">ADR</TableHead><TableHead className="text-right">RevPAR</TableHead>
@@ -182,7 +182,7 @@ function Reports() {
 
         {fin && (
           <TabsContent value="source">
-            <Table>
+            <Table wide>
               <TableHeader><TableRow>
                 <TableHead>Source</TableHead><TableHead className="text-right">Bookings</TableHead><TableHead className="text-right">Cancelled</TableHead>
                 <TableHead className="text-right">No-shows</TableHead><TableHead className="text-right">Room nights</TableHead>
@@ -210,7 +210,7 @@ function Reports() {
 
         {fin && (
           <TabsContent value="ageing">
-            <Table>
+            <Table wide>
               <TableHeader><TableRow>
                 <TableHead>Source</TableHead><TableHead className="text-right">Bills</TableHead><TableHead className="text-right">Current</TableHead>
                 <TableHead className="text-right">1 to 7 days</TableHead><TableHead className="text-right">8 to 30 days</TableHead>

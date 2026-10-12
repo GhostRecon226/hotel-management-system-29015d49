@@ -51,7 +51,7 @@ function FolioPage() {
 
   return (
     <div>
-      <Link to="/reservations/$id" params={{ id: folio.reservation_id }} className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link to="/reservations/$id" params={{ id: folio.reservation_id }} className="mb-1 inline-flex min-h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Booking {folio.reservation_number}
       </Link>
       <PageHeader

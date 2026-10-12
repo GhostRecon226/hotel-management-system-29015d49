@@ -56,7 +56,7 @@ function ReservationList() {
           <Input type="date" className="w-44" value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} /></label>
         {filtered && <Button variant="ghost" onClick={() => setF({ q: "", status: "all", from: "", to: "" })}>Clear</Button>}
       </FilterBar>
-      <Table>
+      <Table wide>
         <TableHeader><TableRow>
           <TableHead>Booking</TableHead><TableHead>Guest</TableHead><TableHead>Arrival</TableHead><TableHead>Departure</TableHead>
           <TableHead>Nights</TableHead><TableHead>Room</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Total</TableHead>

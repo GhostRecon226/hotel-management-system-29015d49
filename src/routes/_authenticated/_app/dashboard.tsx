@@ -188,7 +188,7 @@ function Dashboard() {
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-[minmax(0,5fr)_minmax(0,4fr)_minmax(0,3fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2 2xl:grid-cols-[minmax(0,5fr)_minmax(0,4fr)_minmax(0,3fr)]">
         {showKpi && (
           <Card className="lg:col-span-2 2xl:col-span-1">
             <CardHeader className="flex-row items-center justify-between gap-3 space-y-0 pb-2">

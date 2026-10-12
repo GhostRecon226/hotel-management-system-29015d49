@@ -71,7 +71,7 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
           ) : (
             <span key={m.label} className={cn(cls, "cursor-not-allowed text-sidebar-foreground/45")} title="Coming soon">
               <Icon className="size-[18px]" /> {m.label}
-              <span className="ml-auto text-[11px] uppercase tracking-wide">Soon</span>
+              <span className="ml-auto text-xs uppercase tracking-wide">Soon</span>
             </span>
           );
         })}
@@ -106,7 +106,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-dvh bg-background">
       <aside className="sticky top-0 hidden print:!hidden h-screen w-60 shrink-0 border-r border-sidebar-border bg-sidebar lg:block">
         <Nav />
       </aside>

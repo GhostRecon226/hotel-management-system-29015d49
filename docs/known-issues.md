@@ -8,6 +8,14 @@ Blunt list. Nothing here is hidden elsewhere.
 - Concurrency (two clerks booking the last room) is load-tested by `supabase/tests/concurrency/last_room.sh` (NFR-006, 7 Oct 2026): 8 sessions at once. It is not yet proved at hotel-group scale or on the live project.
 - Authenticated screens after the design restyle (Setup, Guests and everything built later) were not visually checked.
 
+## Phones and tablets (11 Oct 2026)
+- Checked with Chromium at 360, 390, 768 and 1024 pixels wide on a busy demo hotel: every screen, the public site and the main pop-up forms (`e2e/phone-layout.spec.ts`, NFR-008; `e2e/responsive-audit.spec.ts` takes screenshots). **Not yet tried on a real iPhone, a real Android phone or Safari.** Do this before the first pilot hotel.
+- Under 768 pixels every table is a stack of cards. The 7 widest tables are cards under 1280 pixels too. Comparing many days side by side is easier on a wide screen.
+- The room availability calendar and the downtime pack are true grids. They scroll sideways inside their own box on purpose.
+- The business date chip in the top bar is hidden on a phone (no room). The dashboard and the Front Desk show the date.
+- Printing is unchanged. Cards apply to screens only.
+- `e2e/rooms-add.spec.ts` is intermittent on a busy machine: it reads the room list the moment the "rooms added" message appears, before the list has refreshed. It passed 4 of 4 on untouched `main` and failed on some runs after the phone changes, then passed again. Not changed (needs Peter's yes).
+
 ## Money and tax
 - **Nigerian tax defaults are guesses** (service charge 10%, VAT 7.5% on net + service charge, state levy 0%). They are marked unverified. Confirm with an accountant before any real use.
 - Cancellation and no-show fees are posted to the main folio once (fixed 30 Sep 2026). Free-cancellation days are set per rate plan on the rate plan screen (default 2).

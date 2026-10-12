@@ -66,7 +66,7 @@ function ServiceRequests() {
           </SelectContent>
         </Select>
       </FilterBar>
-      <Table>
+      <Table wide>
         <TableHeader><TableRow>
           <TableHead>Room</TableHead><TableHead>Request</TableHead><TableHead>Status</TableHead><TableHead>Assigned to</TableHead>
           <TableHead className="text-right">Charge</TableHead><TableHead>Created</TableHead><TableHead className="w-44" />

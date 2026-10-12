@@ -27,7 +27,7 @@ function InvoicePage() {
   return (
     <div className="mx-auto max-w-4xl bg-background p-6 text-foreground print:max-w-none print:p-0">
       <div className="mb-6 flex items-center justify-between print:hidden">
-        <Link to="/folios/$id" params={{ id: inv.folio_id }} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/folios/$id" params={{ id: inv.folio_id }} className="inline-flex min-h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to folio
         </Link>
         <Button onClick={() => window.print()}><Printer className="h-4 w-4" /> Print</Button>

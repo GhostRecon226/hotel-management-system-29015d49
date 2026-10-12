@@ -20,7 +20,7 @@ function AppLayout() {
   const { data } = useSuspenseQuery(myContextQuery);
   if (data.disabled) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-6 text-center">
+      <div className="flex min-h-dvh items-center justify-center p-6 text-center">
         <p className="max-w-sm text-sm">Your account has been disabled. Ask your hotel's System Administrator to re-enable it.</p>
       </div>
     );

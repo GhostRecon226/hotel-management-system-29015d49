@@ -60,7 +60,7 @@ export function GlobalSearch() {
           <DialogDescription className="sr-only">Find a guest, a booking or a room.</DialogDescription>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 size-[18px] -translate-y-1/2 text-muted-foreground" />
-            <Input className="pl-10" autoFocus placeholder="Guest name, phone, booking number or room" aria-label="Search" value={text}
+            <Input className="pl-10 pr-11" autoFocus placeholder="Guest name, phone, booking number or room" aria-label="Search" value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key !== "Enter" || !data) return;

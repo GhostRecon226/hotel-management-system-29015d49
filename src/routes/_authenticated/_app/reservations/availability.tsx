@@ -32,7 +32,7 @@ function AvailabilityGrid() {
 
   return (
     <div>
-      <Link to="/reservations" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link to="/reservations" className="mb-1 inline-flex min-h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Reservations
       </Link>
       <PageHeader title="Availability" description="Free rooms per room type per night. Out-of-order and inactive rooms are not counted." />
@@ -48,13 +48,13 @@ function AvailabilityGrid() {
         : rows.length === 0 ? <EmptyState title="No room types yet" description="Add room types and rooms in Setup first." />
         : (
           <div className="overflow-x-auto rounded-xl border border-border/70 bg-card shadow-card">
-            <table className="w-full border-collapse text-sm">
+            <table data-scroll className="w-full border-collapse text-sm">
               <thead className="sticky top-0 bg-surface">
                 <tr>
-                  <th className="sticky left-0 z-10 min-w-40 bg-surface px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Room type</th>
+                  <th className="sticky left-0 z-10 min-w-40 bg-surface px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Room type</th>
                   {dates.map((d) => (
                     <th key={d} className="min-w-14 px-1.5 py-2.5 text-center text-[13px] font-semibold">
-                      <span className="block text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{formatDay(d, { weekday: "short" })}</span>
+                      <span className="block text-xs font-medium uppercase tracking-wide text-muted-foreground">{formatDay(d, { weekday: "short" })}</span>
                       {formatDay(d, { day: "numeric", month: "short" })}
                     </th>
                   ))}

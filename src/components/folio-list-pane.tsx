@@ -26,7 +26,7 @@ export function FolioListPane({ activeId, className }: { activeId: string; class
         <h2 className="text-[15px] font-bold">Open folios</h2>
         <Badge variant="brand">{data.length}</Badge>
       </div>
-      <ul className="max-h-[calc(100vh-11rem)] space-y-1 overflow-y-auto p-2">
+      <ul className="max-h-[calc(100dvh-11rem)] space-y-1 overflow-y-auto p-2">
         {isLoading && <li className="px-3 py-2 text-sm text-muted-foreground">Loading…</li>}
         {!isLoading && data.length === 0 && <li className="px-3 py-2 text-sm text-muted-foreground">No open folios.</li>}
         {data.map((f) => (

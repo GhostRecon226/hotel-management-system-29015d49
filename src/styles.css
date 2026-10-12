@@ -109,3 +109,95 @@
 @utility tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/*
+ * Tables on a phone or small tablet (under 768px): each row becomes a small card of label and value pairs. The labels are copied from the
+ * column headings by the Table component (data-label). The first column is the card's title. Cells with no heading
+ * (action buttons) go at the bottom. A table marked `scroll` is a real grid and keeps its columns.
+ * These rules are outside the layers on purpose: they must win over the cell padding and height utilities.
+ */
+@media (max-width: 767.98px) {
+  table[data-cards], table[data-cards] tbody, table[data-cards] tfoot { display: block; width: 100%; }
+  table[data-cards] thead {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  table[data-cards] tr { display: block; padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); }
+  table[data-cards] tbody tr:last-child { border-bottom: 0; }
+  table[data-cards] td {
+    display: grid; grid-template-columns: minmax(5.25rem, 38%) minmax(0, 1fr); column-gap: 0.75rem; align-items: baseline;
+    height: auto; min-height: 0; padding: 0.2rem 0 !important; text-align: left; white-space: normal;
+  }
+  table[data-cards] td::before {
+    content: attr(data-label); font-size: 0.75rem; line-height: 1.25rem; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--color-muted-foreground);
+  }
+  /* The first cell is the card's title: full width, no label. */
+  table[data-cards] td:first-child { display: block; padding-bottom: 0.35rem !important; }
+  table[data-cards] td:first-child::before { display: none; }
+  /* Cells with no column heading (buttons, links) and empty-state rows span the card. */
+  table[data-cards] td[data-label=""] { display: block; }
+  table[data-cards] td[data-label=""]::before { display: none; }
+  table[data-cards] td[colspan] { text-align: center; padding: 1.25rem 0 !important; }
+  table[data-cards] td > * { grid-column: 2; min-width: 0; }
+  table[data-cards] td:first-child > *, table[data-cards] td[data-label=""] > * { grid-column: auto; }
+  /* Sticky or ruled action columns made for the wide table do not belong on a card. */
+  table[data-cards] td { position: static !important; border-left: 0 !important; box-shadow: none !important; background: transparent !important; }
+  table[data-cards] td[data-empty] { display: none; }
+  table[data-cards] td .text-right { text-align: left; }
+  /* A cell that holds only buttons: give them room and let them wrap. */
+  table[data-cards] td[data-label=""]:has(button, a[role=button]) { display: flex; flex-wrap: wrap; gap: 0.5rem; padding-top: 0.5rem !important; }
+}
+
+/* The widest tables (8 or more columns) become cards on tablets too, under 1280px. Mark them with `wide`. */
+@media (max-width: 1279.98px) {
+  table[data-cards="wide"], table[data-cards="wide"] tbody, table[data-cards="wide"] tfoot { display: block; width: 100%; }
+  table[data-cards="wide"] thead {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  table[data-cards="wide"] tr { display: block; padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); }
+  table[data-cards="wide"] tbody tr:last-child { border-bottom: 0; }
+  table[data-cards="wide"] td {
+    display: grid; grid-template-columns: minmax(5.25rem, 38%) minmax(0, 1fr); column-gap: 0.75rem; align-items: baseline;
+    height: auto; min-height: 0; padding: 0.2rem 0 !important; text-align: left; white-space: normal;
+  }
+  table[data-cards="wide"] td::before {
+    content: attr(data-label); font-size: 0.75rem; line-height: 1.25rem; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--color-muted-foreground);
+  }
+  /* The first cell is the card's title: full width, no label. */
+  table[data-cards="wide"] td:first-child { display: block; padding-bottom: 0.35rem !important; }
+  table[data-cards="wide"] td:first-child::before { display: none; }
+  /* Cells with no column heading (buttons, links) and empty-state rows span the card. */
+  table[data-cards="wide"] td[data-label=""] { display: block; }
+  table[data-cards="wide"] td[data-label=""]::before { display: none; }
+  table[data-cards="wide"] td[colspan] { text-align: center; padding: 1.25rem 0 !important; }
+  table[data-cards="wide"] td > * { grid-column: 2; min-width: 0; }
+  table[data-cards="wide"] td:first-child > *, table[data-cards="wide"] td[data-label=""] > * { grid-column: auto; }
+  /* Sticky or ruled action columns made for the wide table do not belong on a card. */
+  table[data-cards="wide"] td { position: static !important; border-left: 0 !important; box-shadow: none !important; background: transparent !important; }
+  table[data-cards="wide"] td[data-empty] { display: none; }
+  table[data-cards="wide"] td .text-right { text-align: left; }
+  /* A cell that holds only buttons: give them room and let them wrap. */
+  table[data-cards="wide"] td[data-label=""]:has(button, a[role=button]) { display: flex; flex-wrap: wrap; gap: 0.5rem; padding-top: 0.5rem !important; }
+}
+
+/* Links on a phone or any touch screen: a comfortable height to hit. Links inside a sentence are inline, so min-height does not change them. */
+@media (max-width: 767.98px), (pointer: coarse) {
+  main a[href] { min-height: 1.75rem; }
+  table[data-cards] td a:not([class*="h-"]) { display: inline-flex; align-items: center; }
+}
+
+/* A table that scrolls sideways shows a soft shadow on the edge that has more. The cover gradients are fixed to the
+   content (local); the shadows are fixed to the box (scroll). */
+.table-box {
+  background-color: var(--color-card);
+  background-image:
+    linear-gradient(to right, var(--color-card) 30%, transparent),
+    linear-gradient(to left, var(--color-card) 30%, transparent),
+    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 0.16), transparent),
+    radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / 0.16), transparent);
+  background-position: left center, right center, left center, right center;
+  background-size: 2rem 100%, 2rem 100%, 0.6rem 100%, 0.6rem 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
+}

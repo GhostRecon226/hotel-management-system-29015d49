@@ -20,7 +20,7 @@ function GroupList() {
   const { data = [], isLoading } = useGroupList(property?.id, status);
   return (
     <div>
-      <Link to="/reservations" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link to="/reservations" className="mb-1 inline-flex min-h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Reservations
       </Link>
       <PageHeader title="Group bookings" description="Weddings, teams and tours. Each group holds many bookings under one name." />

@@ -71,7 +71,7 @@ function Downtime() {
       <h1 className="mb-1 hidden text-xl font-bold print:block">{property?.name} · Downtime pack · {formatDay(today)}</h1>
 
       <Section title="Arrivals due">
-        <table className="w-full border-collapse"><thead><tr>
+        <div className="overflow-x-auto"><table data-scroll className="w-full border-collapse"><thead><tr>
           <th className={th}>Booking</th><th className={th}>Guest</th><th className={th}>Phone</th><th className={th}>Room</th>
           <th className={th}>Nights</th><th className={th}>Deposit due</th><th className={th}>Arrived (tick)</th>
         </tr></thead><tbody>
@@ -83,11 +83,11 @@ function Downtime() {
               <td className={td}>{a.nights}</td><td className={td}><Money amount={a.deposit_due} currency={a.currency} /></td><td className={td} />
             </tr>
           ))}
-        </tbody></table>
+        </tbody></table></div>
       </Section>
 
       <Section title="In house">
-        <table className="w-full border-collapse"><thead><tr>
+        <div className="overflow-x-auto"><table data-scroll className="w-full border-collapse"><thead><tr>
           <th className={th}>Room</th><th className={th}>Guest</th><th className={th}>Phone</th><th className={th}>Departure</th>
           <th className={th}>Balance</th><th className={th}>Paid / notes</th>
         </tr></thead><tbody>
@@ -98,11 +98,11 @@ function Downtime() {
               <td className={td}>{formatDay(s.departure_date)}</td><td className={td}>{bal(s.reservation_id)}</td><td className={td} />
             </tr>
           ))}
-        </tbody></table>
+        </tbody></table></div>
       </Section>
 
       <Section title="Departures due">
-        <table className="w-full border-collapse"><thead><tr>
+        <div className="overflow-x-auto"><table data-scroll className="w-full border-collapse"><thead><tr>
           <th className={th}>Room</th><th className={th}>Guest</th><th className={th}>Balance</th><th className={th}>Paid (method, amount)</th><th className={th}>Keys back</th>
         </tr></thead><tbody>
           {departures.length === 0 && <tr><td className={td} colSpan={5}>No departures due.</td></tr>}
@@ -112,18 +112,18 @@ function Downtime() {
               <td className={td}>{bal(s.reservation_id)}</td><td className={td} /><td className={td} />
             </tr>
           ))}
-        </tbody></table>
+        </tbody></table></div>
       </Section>
 
       <Section title="New guests on paper">
-        <table className="w-full border-collapse"><thead><tr>
+        <div className="overflow-x-auto"><table data-scroll className="w-full border-collapse"><thead><tr>
           <th className={th}>Name</th><th className={th}>Phone</th><th className={th}>ID type and number</th><th className={th}>Room</th>
           <th className={th}>Nights</th><th className={th}>Paid (method, amount)</th><th className={th}>Signed</th>
         </tr></thead><tbody>
           {BLANK_LINES.map((i) => (
             <tr key={i} className="h-10">{Array.from({ length: 7 }, (_, c) => <td key={c} className={td} />)}</tr>
           ))}
-        </tbody></table>
+        </tbody></table></div>
       </Section>
 
       <Section title="Paper routine">

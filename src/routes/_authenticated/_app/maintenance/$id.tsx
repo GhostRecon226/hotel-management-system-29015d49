@@ -21,7 +21,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="grid grid-cols-3 gap-2 border-b py-3 text-[15px] last:border-0">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="col-span-2">{children || "—"}</dd>
+      <dd className="col-span-2 min-w-0 [overflow-wrap:anywhere]">{children || "—"}</dd>
     </div>
   );
 }

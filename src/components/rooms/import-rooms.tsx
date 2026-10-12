@@ -48,7 +48,7 @@ export function ImportRoomsButton() {
     <>
       <Button variant="outline" onClick={() => setOpen(true)}><Sparkles className="mr-2 size-4" /> Import from a list</Button>
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setDraft(null); }}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader><DialogTitle>Import rooms from a list</DialogTitle></DialogHeader>
           {!draft ? (
             <div className="space-y-3">

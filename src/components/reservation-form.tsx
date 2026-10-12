@@ -243,7 +243,7 @@ export function ReservationForm({ initial, mode, reservationId, onDone, onCancel
             <CardHeader><CardTitle className="text-base">Rate override</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <label className="flex min-h-11 items-center gap-3 text-[15px]">
-                <input type="checkbox" className="size-5 accent-primary" checked={f.override} onChange={(e) => set("override", e.target.checked)} />
+                <input type="checkbox" className="size-6 shrink-0 accent-primary pointer-fine:size-5" checked={f.override} onChange={(e) => set("override", e.target.checked)} />
                 Use a different nightly rate from the rate plan
               </label>
               {f.override && (

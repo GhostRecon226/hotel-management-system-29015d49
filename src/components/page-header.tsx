@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/** Page title, one line of help, and page actions on the right. */
+/** Page title, one line of help, and page actions. On a phone the actions sit under the title; from tablet width up they sit on the right. */
 export function PageHeader({ title, description, actions, className }: {
   title: ReactNode; description?: ReactNode; actions?: ReactNode; className?: string;
 }) {
   return (
-    <header className={cn("mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between", className)}>
+    <header className={cn("mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4", className)}>
       <div className="min-w-0">
-        <h1 className="truncate text-2xl font-bold tracking-tight sm:text-[26px]">{title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight [overflow-wrap:anywhere] sm:truncate sm:text-[26px]">{title}</h1>
         {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

@@ -41,7 +41,7 @@ function Row({ label, value }: { label: string; value: string | null | undefined
   return (
     <div className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] gap-3 border-b border-border/70 py-2.5 text-sm">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="whitespace-pre-wrap font-medium">{value || "—"}</dd>
+      <dd className="whitespace-pre-wrap font-medium [overflow-wrap:anywhere]">{value || "—"}</dd>
     </div>
   );
 }
@@ -117,7 +117,7 @@ function GuestProfile() {
 
   return (
     <div>
-      <Link to="/guests" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link to="/guests" className="mb-1 inline-flex min-h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> All guests
       </Link>
       <PageHeader title={<span className="inline-flex items-center gap-3"><span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-full bg-accent-fill text-base font-bold text-primary-foreground">{fullName(g).split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("")}</span>{fullName(g)}</span>} description={<span className="inline-flex flex-wrap items-center gap-2">Guest since {formatDate(g.created_at)}

@@ -77,7 +77,7 @@ export function UsersPanel() {
           description="People who can sign in to this hotel. Roles are given per property."
           action={<Button onClick={() => { setPropertyId(properties[0]?.id ?? ""); setInvite(true); }}><UserPlus className="mr-2 size-4" />Invite staff</Button>}
         />
-        <Table>
+        <Table wide>
           <TableHeader><TableRow>
             <TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Roles</TableHead>
             <TableHead>Last signed in</TableHead><TableHead>Status</TableHead><TableHead className="w-72" />
@@ -97,7 +97,7 @@ export function UsersPanel() {
                         {r.role_name} · {r.property_name}
                         <button
                           type="button" aria-label={`Remove ${r.role_name}`}
-                          className="text-muted-foreground hover:text-destructive"
+                          className="-m-[11px] p-[11px] text-muted-foreground hover:text-destructive pointer-fine:m-0 pointer-fine:p-0"
                           onClick={() => removeRole.mutate({ p_user_id: u.id, p_property_id: r.property_id, p_role_id: r.role_id })}
                         ><X className="size-3.5" /></button>
                       </span>
