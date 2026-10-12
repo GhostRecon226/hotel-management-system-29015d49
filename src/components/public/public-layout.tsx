@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { hasStoredSession } from "@/lib/session-hint";
 import { BrandLogo } from "@/components/brand-logo";
 import { SITE_INFO } from "@/lib/site-info";
@@ -18,6 +20,7 @@ const NAV = [
 /** Header and footer for the public pages. Static: no database calls. */
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [signedIn, setSignedIn] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => setSignedIn(hasStoredSession()), []);
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -25,11 +28,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-x-6 px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
             <BrandLogo className="h-9 w-auto" />
           </Link>
-          <nav aria-label="Main" className="order-3 -mx-2 flex w-full gap-1 overflow-x-auto sm:order-none sm:mx-0 sm:w-auto">
+          <nav aria-label="Main" className="hidden gap-1 lg:flex">
             {NAV.map((n) => (
               <Link key={n.to} to={n.to}
                 className="shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/40"
@@ -43,8 +46,26 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               ? <Button asChild size="sm"><Link to="/dashboard">Open the app</Link></Button>
               : <>
                   <Button asChild size="sm" variant="outline"><Link to="/auth">Sign in</Link></Button>
-                  <Button asChild size="sm"><Link to="/walkthrough">Request a walkthrough</Link></Button>
+                  <Button asChild size="sm" className="hidden sm:inline-flex"><Link to="/walkthrough">Request a walkthrough</Link></Button>
                 </>}
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu"><Menu className="size-5" /></Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+                <nav aria-label="Menu" className="mt-8 flex flex-col gap-1">
+                  {NAV.map((n) => (
+                    <Link key={n.to} to={n.to} onClick={() => setMenuOpen(false)}
+                      className="flex h-12 items-center rounded-xl px-3 text-base font-semibold text-foreground outline-none hover:bg-primary-soft focus-visible:ring-3 focus-visible:ring-ring/40"
+                      activeProps={{ className: "bg-primary-soft !text-primary-strong" }}>
+                      {n.label}
+                    </Link>
+                  ))}
+                  <Button asChild className="mt-4"><Link to="/walkthrough" onClick={() => setMenuOpen(false)}>Request a walkthrough</Link></Button>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
