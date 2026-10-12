@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Bell, BedDouble, BarChart3, CalendarDays, ConciergeBell, KeyRound, LayoutDashboard, LogOut, Menu,
   Receipt, Settings, CheckCircle2, Shield, Sparkles, Users, Wallet, Wrench, CalendarClock, Building2, Printer,
@@ -19,8 +19,13 @@ import { SETUP_PERMS } from "@/lib/setup";
 import { APPROVAL_MENU_PERMS } from "@/lib/approvals";
 import { SHIFT_PERMS } from "@/lib/cashier";
 import { NotificationBell } from "@/components/notification-bell";
+import { GlobalSearch } from "@/components/global-search";
 import { BrandLogo } from "@/components/brand-logo";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { OfflineBanner } from "@/components/offline-banner";
+import { warmOfflineData } from "@/lib/offline/warm";
+import { flushQueue, waitingCount } from "@/lib/offline/queue";
+import { toast } from "sonner";
 
 type Item = { label: string; icon: typeof Bell; perms: string[] | null; to?: "/dashboard" | "/setup" | "/guests" | "/reservations" | "/front-desk" | "/rooms" | "/folios" | "/cashier" | "/approvals" | "/housekeeping" | "/maintenance" | "/service-requests" | "/reports" | "/admin" | "/group" | "/downtime" };
 
@@ -84,7 +89,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [pwOpen, setPwOpen] = useState(false);
   const properties = ctx.properties ?? [];
 
+  // While online, keep open folios and the charge and payment lists ready in case the connection drops.
+  useEffect(() => { if (property?.id && navigator.onLine) void warmOfflineData(queryClient, property.id); }, [property?.id, queryClient]);
+
   async function signOut() {
+    // Entries waiting on this device would be lost on sign-out, so send them first.
+    if (waitingCount() > 0 && navigator.onLine) await flushQueue(queryClient);
+    if (waitingCount() > 0) {
+      toast.error(`${waitingCount()} change(s) are still waiting to send from this device. Sign out after the connection returns and they have sent.`);
+      return;
+    }
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
@@ -107,7 +121,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {properties.length > 0 && (
             <Select value={property?.id ?? ""} onValueChange={setPropertyId}>
-              <SelectTrigger className="h-10 w-44 rounded-full border-border bg-card px-4 font-semibold sm:w-56" aria-label="Property"><SelectValue placeholder="Property" /></SelectTrigger>
+              <SelectTrigger className="h-10 w-32 rounded-full border-border bg-card px-4 font-semibold sm:w-56" aria-label="Property"><SelectValue placeholder="Property" /></SelectTrigger>
               <SelectContent>
                 {properties.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
@@ -123,6 +137,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
 
           <div className="ml-auto flex items-center gap-1">
+            <GlobalSearch />
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -149,6 +164,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} />
+        <OfflineBanner />
         <SubscriptionBanner />
         <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 pb-10 pt-2 sm:px-6">{children}</main>
       </div>

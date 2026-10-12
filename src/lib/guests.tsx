@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { callRpc, Field, FormDialog } from "@/lib/setup";
+import { usePaged } from "@/lib/paging";
 import { errorMessage } from "@/lib/errors";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,6 +43,14 @@ export function useGuestSearch(query: string, limit = 50) {
     queryKey: ["guests", "search", q, limit],
     queryFn: () => callRpc<GuestRow[]>("search_guests", { p_query: q, p_limit: limit }),
   });
+}
+
+/** The Guests screen: 50 at a time, with Load more. */
+export function useGuestPages(query: string) {
+  const [q, setQ] = useState(query);
+  useEffect(() => { const t = setTimeout(() => setQ(query), 250); return () => clearTimeout(t); }, [query]);
+  return usePaged<GuestRow>(["guests", "search", q], 50,
+    (offset, limit) => callRpc<GuestRow[]>("search_guests", { p_query: q, p_limit: limit, p_offset: offset }));
 }
 
 export function useGuest(id: string | null) {
