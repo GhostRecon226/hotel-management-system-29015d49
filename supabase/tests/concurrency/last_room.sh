@@ -27,7 +27,9 @@ if [ -z "$FREE" ] || [ "$FREE" -lt 1 ]; then echo "not ok - [NFR-006] could not 
 
 # Sell every room but one, as a front desk user, one at a time.
 BOOK="select t.login('fdo'); select public.create_reservation('$PROP', %s, '$GUEST', '$WIN', '$OUT', '$TYPE', '$PLAN', 1, 0, 'confirmed', 'direct', null, null, null, 'none', null, null, null, null);"
-for i in $(seq 1 $((FREE - 1))); do
+i=0
+while [ "$i" -lt $((FREE - 1)) ]; do # not seq: on macOS "seq 1 0" counts down and books extra rooms
+  i=$((i + 1))
   q -c "$(printf "$BOOK" "'race-fill-$OFFSET-$i'")" >/dev/null || { echo "not ok - [NFR-006] set-up booking $i failed"; exit 1; }
 done
 
