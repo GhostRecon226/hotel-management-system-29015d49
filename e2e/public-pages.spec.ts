@@ -11,7 +11,6 @@ const PAGES: [string, RegExp][] = [
   ["/faq", /Frequently asked questions/],
   ["/about", /Built around the work that keeps a hotel running/],
   ["/contact", /Tell us about your hotel/],
-  ["/walkthrough", /See how the workflows fit together/],
   ["/privacy", /Privacy notice/],
   ["/terms", /Terms of use/],
 ];
@@ -94,7 +93,7 @@ for (const [label, width, height] of [["phone", 390, 844], ["tablet", 768, 1024]
       await page.getByRole("button", { name: "Open menu" }).tap();
       await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 20_000 });
-    for (const name of ["Features", "Security", "Pricing", "FAQ", "About", "Contact", "Request a walkthrough"]) {
+    for (const name of ["Features", "Security", "Pricing", "FAQ", "About", "Contact", "Start free trial"]) {
       await expect(page.getByRole("dialog").getByRole("link", { name })).toBeVisible();
     }
     await page.getByRole("dialog").getByRole("link", { name: "Pricing" }).tap();

@@ -24,7 +24,7 @@ export function Hero({ label, lead, rest, text, trust }: { label: string; lead: 
           </h1>
           <p className="mt-5 max-w-xl text-base text-white/85 sm:text-lg">{text}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" variant="secondary"><Link to="/walkthrough">Request a walkthrough <ArrowRight aria-hidden /></Link></Button>
+            <Button asChild size="lg" variant="secondary"><Link to="/auth" search={{ mode: "signup" }}>Start free trial <ArrowRight aria-hidden /></Link></Button>
             <Button asChild size="lg" variant="outline" className="border-white/50 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link to="/features">Explore the platform</Link></Button>
           </div>
           <p className="mt-3 text-sm text-white/70">{trust}</p>

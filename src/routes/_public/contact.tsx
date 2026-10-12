@@ -7,7 +7,7 @@ import { SITE_INFO } from "@/lib/site-info";
 import { pageHead } from "@/lib/seo";
 
 const TITLE = "Contact Zikora | Hotel Software Enquiries";
-const DESCRIPTION = "Contact Zikora to discuss your hotel, request a product walkthrough or ask about current pilot access.";
+const DESCRIPTION = "Contact Zikora to discuss your hotel, ask a product question or ask about pilot access.";
 
 export const Route = createFileRoute("/_public/contact")({
   head: () => pageHead({ title: TITLE, description: DESCRIPTION, path: "/contact" }),
@@ -20,7 +20,7 @@ const FIELDS: EnquiryField[] = [
   { name: "hotel", label: "Hotel or company name", required: true, autoComplete: "organization" },
   { name: "role", label: "Role", required: true, autoComplete: "organization-title" },
   { name: "location", label: "City and country", required: true },
-  { name: "topic", label: "What would you like to discuss?", kind: "select", required: true, options: ["Walkthrough", "Pilot access", "Product question", "Existing account"] },
+  { name: "topic", label: "What would you like to discuss?", kind: "select", required: true, options: ["Pilot access", "Product question", "Existing account"] },
   { name: "message", label: "Message", kind: "textarea", required: true, hint: "What is one part of your hotel operation you would most like to improve?" },
 ];
 

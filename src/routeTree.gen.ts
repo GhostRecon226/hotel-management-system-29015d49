@@ -27,7 +27,6 @@ import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
 import { Route as PublicSecurityRouteImport } from './routes/_public/security'
 import { Route as PublicTermsRouteImport } from './routes/_public/terms'
-import { Route as PublicWalkthroughRouteImport } from './routes/_public/walkthrough'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/_app/admin'
 import { Route as AuthenticatedAppApprovalsRouteImport } from './routes/_authenticated/_app/approvals'
 import { Route as AuthenticatedAppCashierRouteImport } from './routes/_authenticated/_app/cashier'
@@ -163,11 +162,6 @@ const PublicSecurityRoute = PublicSecurityRouteImport.update({
 const PublicTermsRoute = PublicTermsRouteImport.update({
   id: '/terms',
   path: '/terms',
-  getParentRoute: () => PublicRouteRoute,
-} as any)
-const PublicWalkthroughRoute = PublicWalkthroughRouteImport.update({
-  id: '/walkthrough',
-  path: '/walkthrough',
   getParentRoute: () => PublicRouteRoute,
 } as any)
 const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
@@ -466,7 +460,6 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PublicPrivacyRoute
   '/security': typeof PublicSecurityRoute
   '/terms': typeof PublicTermsRoute
-  '/walkthrough': typeof PublicWalkthroughRoute
   '/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
   '/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
   '/housekeeping': typeof AuthenticatedAppHousekeepingRouteRouteWithChildren
@@ -532,7 +525,6 @@ export interface FileRoutesByTo {
   '/privacy': typeof PublicPrivacyRoute
   '/security': typeof PublicSecurityRoute
   '/terms': typeof PublicTermsRoute
-  '/walkthrough': typeof PublicWalkthroughRoute
   '/admin': typeof AuthenticatedAppAdminRoute
   '/approvals': typeof AuthenticatedAppApprovalsRoute
   '/cashier': typeof AuthenticatedAppCashierRoute
@@ -594,7 +586,6 @@ export interface FileRoutesById {
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/security': typeof PublicSecurityRoute
   '/_public/terms': typeof PublicTermsRoute
-  '/_public/walkthrough': typeof PublicWalkthroughRoute
   '/_public/': typeof PublicIndexRoute
   '/_authenticated/_app/folios': typeof AuthenticatedAppFoliosRouteRouteWithChildren
   '/_authenticated/_app/guests': typeof AuthenticatedAppGuestsRouteRouteWithChildren
@@ -663,7 +654,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/security'
     | '/terms'
-    | '/walkthrough'
     | '/folios'
     | '/guests'
     | '/housekeeping'
@@ -729,7 +719,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/security'
     | '/terms'
-    | '/walkthrough'
     | '/admin'
     | '/approvals'
     | '/cashier'
@@ -790,7 +779,6 @@ export interface FileRouteTypes {
     | '/_public/privacy'
     | '/_public/security'
     | '/_public/terms'
-    | '/_public/walkthrough'
     | '/_public/'
     | '/_authenticated/_app/folios'
     | '/_authenticated/_app/guests'
@@ -980,13 +968,6 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof PublicTermsRouteImport
-      parentRoute: typeof PublicRouteRoute
-    }
-    '/_public/walkthrough': {
-      id: '/_public/walkthrough'
-      path: '/walkthrough'
-      fullPath: '/walkthrough'
-      preLoaderRoute: typeof PublicWalkthroughRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/_authenticated/_app/admin': {
@@ -1553,7 +1534,6 @@ interface PublicRouteRouteChildren {
   PublicPrivacyRoute: typeof PublicPrivacyRoute
   PublicSecurityRoute: typeof PublicSecurityRoute
   PublicTermsRoute: typeof PublicTermsRoute
-  PublicWalkthroughRoute: typeof PublicWalkthroughRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
@@ -1566,7 +1546,6 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicPrivacyRoute: PublicPrivacyRoute,
   PublicSecurityRoute: PublicSecurityRoute,
   PublicTermsRoute: PublicTermsRoute,
-  PublicWalkthroughRoute: PublicWalkthroughRoute,
   PublicIndexRoute: PublicIndexRoute,
 }
 

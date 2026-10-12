@@ -9,7 +9,7 @@ export type Faq = {
   group: string;
   q: string;
   a: string;
-  more?: { to: "/contact" | "/security" | "/walkthrough"; label: string };
+  more?: { to: "/contact" | "/security" | "/pricing"; label: string };
 };
 
 export const FAQS: Faq[] = [
@@ -45,12 +45,12 @@ export const FAQS: Faq[] = [
     a: "No. Zikora does not currently hold ISO or SOC security certifications." },
 
   { id: "cost", group: "Pricing and next steps", q: "How much does it cost?",
-    a: "Zikora is subscription-based. Plans and pricing are still being finalised, so contact us for current pricing and to confirm what fits your property.",
-    more: { to: "/contact", label: "Contact us" } },
-  { id: "demo", group: "Pricing and next steps", q: "How do I see it in action?",
-    a: "Request a walkthrough and tell us about your hotel. The team can focus on the workflows most relevant to your operation.",
-    more: { to: "/walkthrough", label: "Request a walkthrough" } },
+    a: "Zikora is subscription-based, billed in naira. Starter is ₦30,000 a month for up to 20 rooms, Standard is ₦45,000 for up to 60 rooms and Pro is ₦80,000 for up to 150 rooms and 3 properties. Larger groups get a quote. Every new hotel starts with 60 days free.",
+    more: { to: "/pricing", label: "See pricing" } },
+  { id: "trial", group: "Pricing and next steps", q: "How do I see it in action?",
+    a: "Start the free trial. You get every feature for 60 days, with no card, so you can set up your own rooms and run your front desk before you pay anything.",
+    more: { to: "/pricing", label: "See pricing" } },
 ];
 
 /** The questions shown on the pricing page. */
-export const PRICING_FAQ_IDS = ["cost", "payments", "tax", "data", "demo"];
+export const PRICING_FAQ_IDS = ["cost", "payments", "tax", "data", "trial"];
