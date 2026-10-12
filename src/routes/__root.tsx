@@ -4,11 +4,11 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { Suspense, lazy, useEffect, type ReactNode } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { useEffect, type ReactNode } from "react";
 import { hasSavedSignIn } from "@/lib/saved-sign-in";
 import { installBrowserErrorReporting, reportBrowserError } from "@/lib/error-report";
 import { currentSavingUser, startSavingLists } from "@/lib/offline/cache";
@@ -16,7 +16,6 @@ import { registerServiceWorker } from "@/lib/offline/register";
 import { startQueueSender } from "@/lib/offline/queue";
 
 // Toast messages are only used inside the signed-in app and the sign-in pages. Public pages skip the toast library.
-const Toaster = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
 
 import appCss from "../styles.css?url";
 
@@ -123,7 +122,6 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
-  const isPublic = useRouterState({ select: (s) => s.matches.some((m) => m.routeId === "/_public") });
 
   useEffect(() => installBrowserErrorReporting(), []);
   useEffect(() => { registerServiceWorker(); onlineManager.setOnline(navigator.onLine); }, []);
@@ -150,7 +148,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      {!isPublic && <Suspense fallback={null}><Toaster /></Suspense>}
+      <Toaster />
     </QueryClientProvider>
   );
 }
