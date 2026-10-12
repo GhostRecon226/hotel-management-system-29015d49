@@ -9,7 +9,7 @@ const TITLE = "Terms of Use | Zikora";
 const DESCRIPTION = "The terms for using Zikora: free trial, plans, your data, payments and taxes, and how to cancel.";
 
 export const Route = createFileRoute("/_public/terms")({
-  head: () => pageHead({ title: TITLE, description: DESCRIPTION }),
+  head: () => pageHead({ title: TITLE, description: DESCRIPTION, path: "/terms" }),
   component: Terms,
 });
 
