@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useAccess } from "@/lib/access";
 import { Field, FormDialog, NoAccess } from "@/lib/setup";
 import { formatDateTime, formatDay } from "@/lib/reservations";
 import { useCheckOutNight, useCheckoutOutstanding, useReservationFolios } from "@/lib/folios";
+import { setLabelHint } from "@/lib/offline/queue";
+import { useWaitingFor } from "@/lib/offline/use-queue";
 import { useCheckoutAction, useCheckoutApprovals, useCheckoutStay } from "@/lib/checkout";
 import { PageHeader } from "@/components/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -31,6 +33,9 @@ function CheckoutPage() {
   const [dialog, setDialog] = useState<null | "force" | "request" | "undo" | "waive">(null);
   const postNight = useCheckoutAction("post_check_out_charge", "One night posted to the folio.");
   const checkOut = useCheckoutAction("check_out", "Guest checked out. Room marked dirty and sent to housekeeping.");
+  const waitingOut = useWaitingFor("check_out", id);
+  const who = stay.data;
+  useEffect(() => { if (who) setLabelHint("check_out", id, `Check out ${who.room_number}${who.guest_name ? `, ${who.guest_name}` : ""}`); }, [who, id]);
 
   if (!can("fo.view")) return <NoAccess />;
   if (stay.isLoading) return <LoadingState label="Loading check-out…" />;
@@ -42,6 +47,7 @@ function CheckoutPage() {
   const outstanding = outstandingQ.data ?? "0";
   const settled = outstandingQ.isSuccess && Number(outstanding) === 0;
   const inHouse = s.status === "in_house";
+  const canAct = inHouse && !waitingOut;
   const approved = (approvals.data ?? []).find((a) => a.status === "approved" && !a.is_used);
   const pending = (approvals.data ?? []).find((a) => a.status === "pending");
   const canForce = can("fo.checkout.unsettled");
@@ -56,18 +62,24 @@ function CheckoutPage() {
           {inHouse ? <Badge variant="info">In house</Badge> : <Badge variant="neutral">Checked out</Badge>}</span>}
         description={`${s.guest_name ?? "Guest"} · ${s.number} · ${formatDay(s.arrival_date)} → ${formatDay(s.departure_date)}`}
         actions={<>
-          {inHouse && can("fo.checkout") && settled &&
+          {canAct && can("fo.checkout") && settled &&
             <Button disabled={checkOut.isPending} onClick={() => checkOut.mutate({ p_id: id })}>Check out</Button>}
-          {inHouse && can("fo.checkout") && !settled && approved &&
+          {canAct && can("fo.checkout") && !settled && approved &&
             <Button disabled={checkOut.isPending} onClick={() => checkOut.mutate({ p_id: id, p_approval_id: approved.id })}>Check out (approved)</Button>}
-          {inHouse && can("fo.checkout") && !settled && !approved && canForce &&
+          {canAct && can("fo.checkout") && !settled && !approved && canForce &&
             <Button variant="destructive" onClick={() => setDialog("force")}>Check out with balance</Button>}
-          {inHouse && can("fo.checkout") && !settled && !approved && !canForce && !pending &&
+          {canAct && can("fo.checkout") && !settled && !approved && !canForce && !pending &&
             <Button onClick={() => setDialog("request")}>Ask to check out with balance</Button>}
           {!inHouse && s.can_undo && can("fo.checkout.undo") &&
             <Button variant="outline" onClick={() => setDialog("undo")}>Undo check-out</Button>}
         </>} />
 
+      {waitingOut && (
+        <Alert className="mb-4">
+          <AlertTitle>Check-out is waiting to send</AlertTitle>
+          <AlertDescription>It was saved on this device. It goes to the server when the connection returns. If the balance is not zero then, only someone who may check out with a balance can complete it; otherwise it appears under Needs attention.</AlertDescription>
+        </Alert>
+      )}
       {inHouse && !settled && (
         <Alert variant="filled" className="mb-4 p-5">
           <AlertTitle className="mb-2 text-2xl font-bold tabular">Outstanding {formatAmount(outstanding, s.currency)}</AlertTitle>

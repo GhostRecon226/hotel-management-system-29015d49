@@ -90,7 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const properties = ctx.properties ?? [];
 
   // While online, keep open folios and the charge and payment lists ready in case the connection drops.
-  useEffect(() => { if (property?.id && navigator.onLine) void warmOfflineData(queryClient, property.id); }, [property?.id, queryClient]);
+  useEffect(() => { if (property?.id && navigator.onLine) void warmOfflineData(queryClient, property.id, property.business_date); }, [property?.id, property?.business_date, queryClient]);
 
   async function signOut() {
     // Entries waiting on this device would be lost on sign-out, so send them first.

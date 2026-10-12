@@ -1,12 +1,14 @@
-// Offline mode, stage 2: actions entered with no connection wait on this device and are sent when it returns.
-// Only the actions in QUEUEABLE can wait. Each already carries a repeat-safe key (money) or is refused by the
-// database if it was already done (housekeeping), so sending one twice never posts twice.
+// Offline mode, stages 2 and 3: actions entered with no connection wait on this device and are sent when it returns.
+// Only the actions in QUEUEABLE can wait. Each already carries a repeat-safe key (money) or is refused or answered
+// by the database if it was already done (housekeeping, check-out, room moves), so sending one twice never repeats it.
 import type { QueryClient } from "@tanstack/react-query";
 import { callRpc } from "@/lib/setup";
 import { errorMessage } from "@/lib/errors";
 import { kvGet, kvSet } from "./store";
 
-export const QUEUEABLE = new Set(["post_charge", "post_payment", "start_hk_task", "complete_hk_task"]);
+export const QUEUEABLE = new Set(["post_charge", "post_payment", "start_hk_task", "complete_hk_task", "check_out", "move_room"]);
+/** Reason the database records when a check-out with a balance was entered with no connection (needs fo.checkout.unsettled). */
+export const OFFLINE_CHECKOUT_REASON = "Checked out with no connection";
 export const QUEUED = Symbol("queued");
 
 export type QueueEntry = {
@@ -34,12 +36,20 @@ export async function loadQueue(userId: string) {
   emit();
 }
 
+// Pages tell the queue who an entry is about, so "Check out" in the waiting list reads "Check out 101, Ada Obi".
+const hints = new Map<string, string>();
+export const setLabelHint = (name: string, id: string, text: string) => { hints.set(`${name}:${id}`, text); };
+
 export function labelFor(name: string, args: Record<string, unknown>) {
+  const hint = hints.get(`${name}:${String(args["p_id"] ?? "")}`);
+  if (hint) return hint;
   const amount = args["p_amount"] ? String(args["p_amount"]) : "";
   if (name === "post_charge") return `Charge ${amount}`.trim();
   if (name === "post_payment") return `Payment ${amount} ${String(args["p_currency"] ?? "")}`.trim();
   if (name === "start_hk_task") return "Start cleaning task";
   if (name === "complete_hk_task") return "Complete cleaning task";
+  if (name === "check_out") return "Check out";
+  if (name === "move_room") return "Move room";
   return name;
 }
 
@@ -53,6 +63,9 @@ export function isNetworkError(e: unknown) {
 
 function enqueue(name: string, args: Record<string, unknown>) {
   if (!currentUser) throw new Error("Sign in again before saving changes.");
+  // A check-out cannot ask for an approval or a reason later. The database still refuses it at send time unless the
+  // person holds the right to check out with a balance, and it lands on Finance's follow-up list when a balance remains.
+  if (name === "check_out" && !args["p_reason"]) args = { ...args, p_reason: OFFLINE_CHECKOUT_REASON };
   entries = [...entries, { id: crypto.randomUUID(), userId: currentUser, name, args, label: labelFor(name, args), createdAt: Date.now(), status: "waiting" }];
   persist();
   emit();
@@ -72,7 +85,7 @@ export async function callRpcQueued<T = unknown>(name: string, args: Record<stri
 }
 
 let flushing = false;
-const REFRESH = ["folios", "reservations", "housekeeping", "rooms"];
+const REFRESH = ["folios", "reservations", "housekeeping", "rooms", "checkout", "approvals", "front-desk"];
 
 /** Sends waiting entries, oldest first. Stops at the first one that cannot reach the server. */
 export async function flushQueue(queryClient: QueryClient) {
@@ -118,5 +131,8 @@ export function startQueueSender(queryClient: QueryClient) {
   run();
   return () => { window.removeEventListener("online", run); clearInterval(timer); };
 }
+
+/** True while a waiting entry of this kind is on the device for this booking. */
+export const isWaitingFor = (name: string, id: string) => entries.some((e) => e.status === "waiting" && e.name === name && e.args["p_id"] === id);
 
 export const waitingCount = () => entries.filter((e) => e.status === "waiting").length;
