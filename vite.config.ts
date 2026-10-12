@@ -6,6 +6,7 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 import { nitro } from "nitro/vite";
+import { SECURITY_HEADERS } from "./src/lib/security-headers";
 
 export default defineConfig(({ command }) => ({
   // "localhost" only: the dev server answers on this Mac and not to other devices on the same network.
@@ -28,6 +29,8 @@ export default defineConfig(({ command }) => ({
     // The daily ID photo clean-up (GST-009, GST-010) runs at 02:00 UTC. Both need CRON_SECRET set in Vercel.
     ...(command === "build" ? [nitro({
       preset: process.env["NITRO_PRESET"] ?? "vercel",
+      // Security headers on every route (src/lib/security-headers.ts, PLT-020).
+      routeRules: { "/**": { headers: SECURITY_HEADERS } },
       vercel: { config: { version: 3, crons: [{ path: "/api/cron/id-photo-cleanup", schedule: "0 2 * * *" }] } },
     })] : []),
     viteReact(),
