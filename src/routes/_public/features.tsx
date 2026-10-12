@@ -39,8 +39,8 @@ function Features() {
         ))}
       </div>
       <div className="mt-10 flex flex-col items-start gap-4 rounded-2xl bg-accent-fill p-8 text-primary-foreground shadow-accent sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xl font-extrabold tracking-tight">See the workflows that matter to your hotel.</h2>
-        <Button asChild variant="secondary"><Link to="/walkthrough">Request a walkthrough</Link></Button>
+        <h2 className="text-xl font-extrabold tracking-tight">Try it on your own hotel, free for 60 days.</h2>
+        <Button asChild variant="secondary"><Link to="/auth" search={{ mode: "signup" }}>Start free trial</Link></Button>
       </div>
     </Section>
   );

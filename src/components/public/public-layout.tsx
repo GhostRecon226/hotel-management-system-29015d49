@@ -46,7 +46,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               ? <Button asChild size="sm"><Link to="/dashboard">Open the app</Link></Button>
               : <>
                   <Button asChild size="sm" variant="outline"><Link to="/auth">Sign in</Link></Button>
-                  <Button asChild size="sm" className="hidden sm:inline-flex"><Link to="/walkthrough">Request a walkthrough</Link></Button>
+                  <Button asChild size="sm" className="hidden sm:inline-flex"><Link to="/auth" search={{ mode: "signup" }}>Start free trial</Link></Button>
                 </>}
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
@@ -62,7 +62,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                       {n.label}
                     </Link>
                   ))}
-                  <Button asChild className="mt-4"><Link to="/walkthrough" onClick={() => setMenuOpen(false)}>Request a walkthrough</Link></Button>
+                  <Button asChild className="mt-4"><Link to="/auth" search={{ mode: "signup" }} onClick={() => setMenuOpen(false)}>Start free trial</Link></Button>
                 </nav>
               </SheetContent>
             </Sheet>
@@ -80,9 +80,17 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </div>
           <FooterLinks title="Product" links={[{ to: "/features", label: "Features" }, { to: "/security", label: "Security" }, { to: "/faq", label: "FAQ" }]} />
           <FooterLinks title="Company" links={[{ to: "/about", label: "About" }, { to: "/contact", label: "Contact" }]} />
-          <FooterLinks title="Get started" links={signedIn
-            ? [{ to: "/walkthrough", label: "Request a walkthrough" }]
-            : [{ to: "/walkthrough", label: "Request a walkthrough" }, { to: "/auth", label: "Sign in" }]} />
+          <div>
+            <h2 className="text-sm font-bold">Get started</h2>
+            <ul className="mt-3 space-y-2">
+              {signedIn
+                ? <li><Link to="/dashboard" className="text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:underline">Open the app</Link></li>
+                : <>
+                    <li><Link to="/auth" search={{ mode: "signup" }} className="text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:underline">Start free trial</Link></li>
+                    <li><Link to="/auth" className="text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:underline">Sign in</Link></li>
+                  </>}
+            </ul>
+          </div>
           <FooterLinks title="Legal" links={[{ to: "/privacy", label: "Privacy notice" }, { to: "/terms", label: "Terms of use" }]} />
         </div>
         <div className="border-t border-border/70">
@@ -95,7 +103,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   );
 }
 
-type FooterLink = { to: "/" | "/features" | "/security" | "/pricing" | "/faq" | "/about" | "/contact" | "/privacy" | "/terms" | "/walkthrough" | "/auth"; label: string };
+type FooterLink = { to: "/" | "/features" | "/security" | "/pricing" | "/faq" | "/about" | "/contact" | "/privacy" | "/terms"; label: string };
 function FooterLinks({ title, links }: { title: string; links: FooterLink[] }) {
   return (
     <div>

@@ -34,8 +34,8 @@ function Home() {
       <TeamHandover />
       <CapabilityOverview />
       <ControlStrip />
-      <ClosingCta title="See how Zikora fits the way your hotel works."
-        text="Bring your current process and the questions your team deals with every day. We’ll walk through the relevant workflows, explain what is available now, and discuss whether pilot access is a fit." />
+      <ClosingCta title="Try Zikora on your own hotel."
+        text="Create your hotel, add your rooms and run your front desk for 60 days. Every feature, no card needed." />
     </>
   );
 }
