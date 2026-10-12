@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 import { rememberUser, restoreSavedLists } from "@/lib/offline/cache";
 import { loadQueue } from "@/lib/offline/queue";
 
@@ -9,7 +10,6 @@ import { loadQueue } from "@/lib/offline/queue";
  * checks the sign-in on every call.
  */
 async function signedInUser(): Promise<User | null> {
-  const { supabase } = await import("@/integrations/supabase/client");
   const { data, error } = await supabase.auth.getUser();
   if (data.user) return data.user;
   const unreachable = !navigator.onLine || (error && (error.name === "AuthRetryableFetchError" || error.status === 0 || error.status === undefined));
