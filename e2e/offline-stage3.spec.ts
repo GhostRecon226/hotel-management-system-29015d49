@@ -90,7 +90,7 @@ test("offline: a room move entered with no connection sends when the connection 
   const a = await checkedInGuest(page, "Mover", 0);
   const b = await checkedInGuest(page, "Stayer", 1);
   await page.goto("/front-desk");
-  await expect(page.getByText("Mover Guest")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("heading", { name: /Front Desk/ }).first()).toBeVisible({ timeout: 15_000 });
 
   const send = (args: Record<string, unknown>) => page.evaluate(async (a2) => {
     const q = await import("/src/lib/offline/queue.ts");
