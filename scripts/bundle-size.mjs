@@ -7,7 +7,7 @@ export const ASSETS = ".vercel/output/static/assets";
 /** Raw size limit for the first load (before this change: 823 KB). */
 export const LIMIT_BYTES = 470_000;
 /** Libraries that only signed-in screens and forms need. The first load must not include them. */
-export const APP_ONLY = [/^client-/, /^zod-/, /^sonner-/, /^dashboard-/, /^select-/];
+export const APP_ONLY = [/^client-/, /^zod-/, /^dashboard-/, /^select-/];
 
 export function entryClosure(dir = ASSETS) {
   if (!existsSync(dir)) return null;

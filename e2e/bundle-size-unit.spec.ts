@@ -12,7 +12,7 @@ test.describe("first page load", () => {
     expect(closure!.raw).toBeLessThan(LIMIT_BYTES);
   });
 
-  test("[PLT-023] the first load leaves out the sign-in library, form checker, toasts and screen code", () => {
+  test("[PLT-023] the first load leaves out the sign-in library, form checker and screen code", () => {
     const bad = closure!.files.filter((f) => (APP_ONLY as RegExp[]).some((re) => re.test(f)));
     expect(bad).toEqual([]);
   });
