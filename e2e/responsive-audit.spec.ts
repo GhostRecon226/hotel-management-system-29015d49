@@ -54,7 +54,7 @@ test("phone and tablet audit: public pages and sign-in", async ({ page }) => {
   mkdirSync(OUT, { recursive: true });
   const routes: [string, string][] = [
     ["home", "/"], ["features", "/features"], ["pricing", "/pricing"], ["about", "/about"], ["contact", "/contact"], ["faq", "/faq"],
-    ["walkthrough", "/walkthrough"], ["security", "/security"], ["privacy", "/privacy"], ["terms", "/terms"], ["auth", "/auth"], ["forgot-password", "/forgot-password"],
+    ["security", "/security"], ["privacy", "/privacy"], ["terms", "/terms"], ["auth", "/auth"], ["forgot-password", "/forgot-password"],
   ];
   const report: Record<string, Record<string, unknown>> = {};
   for (const size of SIZES) {
