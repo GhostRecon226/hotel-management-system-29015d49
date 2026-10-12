@@ -5,7 +5,7 @@ do $$
 declare j jsonb;
 begin
   perform t.admin();
-  perform t.eq((select (prices->'NGN'->>'month')::bigint from public.plans where code = 'starter'), 2000000::bigint, '[PLT-017] Starter costs 20,000 naira a month');
+  perform t.eq((select (prices->'NGN'->>'month')::bigint from public.plans where code = 'starter'), 3000000::bigint, '[PLT-017] Starter costs 30,000 naira a month');
   perform t.eq((select (prices->'NGN'->>'month')::bigint from public.plans where code = 'standard'), 4500000::bigint, '[PLT-017] Standard costs 45,000 naira a month');
   perform t.eq((select (prices->'NGN'->>'month')::bigint from public.plans where code = 'pro'), 8000000::bigint, '[PLT-017] Pro costs 80,000 naira a month');
   perform t.ok(not exists (

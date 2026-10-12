@@ -64,7 +64,7 @@ Nothing blocks the pilot in code, and the optional polish list is finished (Load
 
 | Decision | Recommendation |
 |---|---|
-| Show the A16 prices on the public pricing page, build the Starter 12-month price lock, and switch billing on (Paystack key, webhook). | Do before signup opens to the public. Pilots stay free. |
+| Switch billing on (Paystack key, webhook) and decide what happens on day 61. | Do before signup opens to the public. Pilots stay free. |
 | Overbooking allowance (QA-17) | Skip for the pilot. |
 | Offline stage 3 (check-in, check-out, room moves) | Decide after stages 1 and 2 are used in a pilot hotel. The downtime pack (`/downtime`) covers longer outages. |
 | Tax treatment of fees and discounts (A11) | Accountant decides. |
