@@ -80,17 +80,15 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </div>
           <FooterLinks title="Product" links={[{ to: "/features", label: "Features" }, { to: "/security", label: "Security" }, { to: "/faq", label: "FAQ" }]} />
           <FooterLinks title="Company" links={[{ to: "/about", label: "About" }, { to: "/contact", label: "Contact" }]} />
-          <div>
-            <h2 className="text-sm font-bold">Get started</h2>
-            <ul className="mt-3 space-y-2">
-              {signedIn
-                ? <li><Link to="/dashboard" className="text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:underline">Open the app</Link></li>
-                : <>
-                    <li><Link to="/auth" search={{ mode: "signup" }} className="text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:underline">Start free trial</Link></li>
-                    <li><Link to="/auth" className="text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:underline">Sign in</Link></li>
-                  </>}
-            </ul>
-          </div>
+          {!signedIn && (
+            <div>
+              <h2 className="text-sm font-bold">Get started</h2>
+              <ul className="mt-3 space-y-2">
+                <li><Link to="/auth" search={{ mode: "signup" }} className="text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:underline">Start free trial</Link></li>
+                <li><Link to="/auth" className="text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:underline">Sign in</Link></li>
+              </ul>
+            </div>
+          )}
           <FooterLinks title="Legal" links={[{ to: "/privacy", label: "Privacy notice" }, { to: "/terms", label: "Terms of use" }]} />
         </div>
         <div className="border-t border-border/70">
