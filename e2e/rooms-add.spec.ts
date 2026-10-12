@@ -47,9 +47,10 @@ test("add several rooms by number, with a prefix and a preview, in natural order
   await expect(dialog.getByText("Already there, skipped: 1, 2")).toBeVisible();
   await dialog.getByRole("button", { name: "Add 8 rooms" }).click();
   await expect(toasts(page).filter({ hasText: "8 rooms added. 2 skipped (already there)." })).toBeVisible();
-  const tiles = await roomTiles(page);
-  const labels = tiles.map((t) => t.split("\n")[0]!.replace(/ \(Standard\)$/, ""));
-  expect(labels.slice(0, 10)).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+  // The list refreshes a moment after the message, so wait for it instead of reading it once.
+  await expect
+    .poll(async () => (await roomTiles(page)).slice(0, 10).map((t) => t.split("\n")[0]!.replace(/ \(Standard\)$/, "")))
+    .toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
 
   // A prefix: A1 to A3 on floor 2.
   await page.getByRole("button", { name: "Add several rooms" }).click();
@@ -82,8 +83,9 @@ test("add several rooms by name: one per line, duplicates skipped, names not all
   await dialog.getByLabel("Room names, one per line").fill("Zurich\nBoston\n\nzurich");
   await dialog.getByRole("button", { name: "Add 2 rooms" }).click();
   await expect(toasts(page).filter({ hasText: "2 rooms added. 1 skipped (already there)." })).toBeVisible();
-  const labels = (await roomTiles(page)).map((t) => t.split("\n")[0]);
-  expect(labels).toEqual(["1 (Standard)", "2 (Standard)", "Boston (Standard)", "Zurich (Standard)"]);
+  await expect
+    .poll(async () => (await roomTiles(page)).map((t) => t.split("\n")[0]))
+    .toEqual(["1 (Standard)", "2 (Standard)", "Boston (Standard)", "Zurich (Standard)"]);
 });
 
 test("front desk staff do not see the add buttons on the Rooms page", async ({ page, browser }) => {
