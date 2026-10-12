@@ -19,7 +19,7 @@ Where the detail lives:
 - Phone layout: tests at 390px wide found and fixed two faults (Front Desk tabs and the off-screen Check in button).
 - Load more on long lists (PAG-001, QA-22), the top-bar search (SRC-001) and one rule for money collected (RPT-009) are built and merged (11 Oct 2026). The first two have migrations that practice does not have yet.
 - Offline mode stages 1 and 2 are built and merged (11 Oct 2026): saved lists readable with no connection, and charges, payments and housekeeping updates wait on the device and send when the connection returns. Register rows OFF-001 to OFF-004.
-- Offline stage 3a (13 Oct 2026, open PR): check-out and room moves wait on the device too (OFF-005, OFF-006). Check-in is stage 3b (OFF-007, OFF-008). Walk-in is not built.
+- Offline stage 3a (12 Oct 2026): check-out and room moves wait on the device too (OFF-005, OFF-006). Check-in is stage 3b (OFF-007, OFF-008). Walk-in is not built.
 - Practice database is current with main (81 migrations, applied 11 Oct 2026). Live is at 77.
 
 ## 2. In progress (this week)
