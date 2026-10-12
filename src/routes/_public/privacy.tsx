@@ -9,7 +9,7 @@ const TITLE = "Privacy Notice | Zikora";
 const DESCRIPTION = "How Zikora stores and protects information for hotels, their staff and their guests.";
 
 export const Route = createFileRoute("/_public/privacy")({
-  head: () => pageHead({ title: TITLE, description: DESCRIPTION }),
+  head: () => pageHead({ title: TITLE, description: DESCRIPTION, path: "/privacy" }),
   component: Privacy,
 });
 

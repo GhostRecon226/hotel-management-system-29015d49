@@ -16,6 +16,9 @@ Blunt list. Nothing here is hidden elsewhere.
 - Printing is unchanged. Cards apply to screens only.
 - Fixed 12 Oct 2026: `e2e/rooms-add.spec.ts` now waits for the room list to refresh instead of reading it once (Peter said yes). Watch the next CI runs.
 
+## Website
+- `public/.well-known/security.txt` expires on 1 Oct 2027 (PLT-022). Renew the date before then; the test fails if it is under 30 days away.
+
 ## Money and tax
 - **Nigerian tax defaults are guesses** (service charge 10%, VAT 7.5% on net + service charge, state levy 0%). They are marked unverified. Confirm with an accountant before any real use.
 - Cancellation and no-show fees are posted to the main folio once (fixed 30 Sep 2026). Free-cancellation days are set per rate plan on the rate plan screen (default 2).

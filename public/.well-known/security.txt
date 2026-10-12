@@ -1,0 +1,6 @@
+# How to report a security problem with Zikora (RFC 9116).
+# Please tell us before you share it with anyone else. We will reply and keep you informed.
+Contact: https://www.zikorahq.com/contact
+Expires: 2027-10-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://www.zikorahq.com/.well-known/security.txt
