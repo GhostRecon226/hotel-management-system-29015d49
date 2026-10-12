@@ -80,7 +80,11 @@ for (const [label, width, height] of [["phone", 390, 844], ["tablet", 768, 1024]
       expect(m.sw, `${path} scrolls sideways`).toBeLessThanOrEqual(m.iw);
     }
     await page.goto("/");
-    await page.getByRole("button", { name: "Open menu" }).tap();
+    // The first tap can land before the page has finished loading, so tap again until the menu opens.
+    await expect(async () => {
+      await page.getByRole("button", { name: "Open menu" }).tap();
+      await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 20_000 });
     for (const name of ["Features", "Security", "Pricing", "FAQ", "About", "Contact", "Request a walkthrough"]) {
       await expect(page.getByRole("dialog").getByRole("link", { name })).toBeVisible();
     }
