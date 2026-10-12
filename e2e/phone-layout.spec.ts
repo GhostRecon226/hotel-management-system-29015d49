@@ -88,3 +88,37 @@ test("[NFR-008] pop-up forms fit a phone", async ({ page }) => {
   }
   expect(problems).toEqual([]);
 });
+
+// The top bar search is a pop-up with results: it must open inside the screen, take a finger, and not zoom an iPhone.
+test("[NFR-008] top bar search works on a phone", async ({ page }) => {
+  test.setTimeout(300_000);
+  await signInAndCreateHotel(page, "search");
+  await setUpRoomsAndRates(page);
+  const ids = await seedBusyHotel(page);
+  expect(ids.failures, "set-up calls").toEqual([]);
+  await page.goto("/dashboard");
+  await page.getByRole("button", { name: "Search guests, bookings and rooms" }).last().click();
+  const box = page.getByRole("textbox", { name: "Search" });
+  await expect(box).toBeVisible();
+  expect(await box.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)), "the field is 16px or more").toBeGreaterThanOrEqual(16);
+  await box.fill("Olu");
+  const rows = page.getByRole("dialog").getByRole("button").filter({ hasText: /Oluwaseun|RES-/ });
+  await expect(rows.first()).toBeVisible({ timeout: 10_000 });
+  const problems = await page.evaluate(() => {
+    const d = document.querySelector("[role=dialog]") as HTMLElement;
+    const r = d.getBoundingClientRect();
+    const out: string[] = [];
+    if (r.top < 0 || r.bottom > innerHeight + 1) out.push(`the search pop-up runs off the screen (${Math.round(r.top)} to ${Math.round(r.bottom)} of ${innerHeight})`);
+    if (r.left < 8 || innerWidth - r.right < 8) out.push("the search pop-up touches the screen edge");
+    if (document.documentElement.scrollWidth > innerWidth + 1) out.push("the page scrolls sideways with the search open");
+    for (const b of Array.from(d.querySelectorAll("li button"))) {
+      const br = b.getBoundingClientRect();
+      if (br.height < 36) out.push(`a result row is only ${Math.round(br.height)}px tall`);
+      if (br.right > r.right + 1) out.push("a result row runs past the pop-up");
+    }
+    return out;
+  });
+  expect(problems).toEqual([]);
+  await rows.first().click();
+  await expect(page).toHaveURL(/\/(guests|reservations)\//);
+});
