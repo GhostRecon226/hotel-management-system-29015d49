@@ -65,7 +65,7 @@ Nothing blocks the pilot in code, and the optional polish list is finished (Load
 
 | Decision | Recommendation |
 |---|---|
-| Switch billing on (Paystack key, webhook) and decide what happens on day 61. | Do before signup opens to the public. Pilots stay free. |
+| Switch billing on (Paystack key, webhook). Day 61 is built (PLT-018): the hotel moves to its plan and has 14 days to pay. | Do before signup opens to the public. Pilots stay free: set them to Active first. |
 | Overbooking allowance (QA-17) | Skip for the pilot. |
 | Offline stage 3b (check-in, walk-in) | Peter chose to build stage 3 on 12 Oct 2026. 3a (check-out, room moves) is built. 3b waits on one decision: a queued check-in would keep the guest's ID number on the device until it sends, which the design forbids. The downtime pack (`/downtime`) covers longer outages. |
 | Tax treatment of fees and discounts (A11) | Accountant decides. |
