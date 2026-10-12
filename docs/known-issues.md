@@ -14,7 +14,7 @@ Blunt list. Nothing here is hidden elsewhere.
 - The room availability calendar and the downtime pack are true grids. They scroll sideways inside their own box on purpose.
 - The business date chip in the top bar is hidden on a phone (no room). The dashboard and the Front Desk show the date.
 - Printing is unchanged. Cards apply to screens only.
-- `e2e/rooms-add.spec.ts` is intermittent on a busy machine: it reads the room list the moment the "rooms added" message appears, before the list has refreshed. It passed 4 of 4 on untouched `main` and failed on some runs after the phone changes, then passed again. Not changed (needs Peter's yes).
+- Fixed 12 Oct 2026: `e2e/rooms-add.spec.ts` now waits for the room list to refresh instead of reading it once (Peter said yes). Watch the next CI runs.
 
 ## Money and tax
 - **Nigerian tax defaults are guesses** (service charge 10%, VAT 7.5% on net + service charge, state levy 0%). They are marked unverified. Confirm with an accountant before any real use.
