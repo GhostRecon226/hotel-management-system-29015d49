@@ -66,7 +66,7 @@ begin
   perform t.raises($q$select public.start_subscription_payment('standard', 'month', '')$q$, 'E_REQUIRED', '[PLT-012] a payment needs an idempotency key');
   perform t.raises($q$select public.start_subscription_payment('standard', 'week', 'k1')$q$, 'E_INVALID', '[PLT-012] the period must be month or year');
   perform t.raises($q$select public.start_subscription_payment('nope', 'month', 'k1')$q$, 'E_NOT_FOUND', '[PLT-012] an unknown plan is refused');
-  perform t.raises($q$select public.start_subscription_payment('pro', 'month', 'k1')$q$, 'E_NO_PRICE', '[PLT-012] a plan with no price cannot be bought');
+  perform t.raises($q$select public.start_subscription_payment('enterprise', 'month', 'k1')$q$, 'E_NO_PRICE', '[PLT-012] a plan with no price cannot be bought');
   j := public.start_subscription_payment('standard', 'month', 'k-a1');
   perform t.eq((j->>'amount_minor')::bigint, 6000000::bigint, '[PLT-012] the price comes from the database');
   perform t.eq(j->>'currency', 'NGN', '[PLT-012] in the hotel''s currency');
