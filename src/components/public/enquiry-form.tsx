@@ -6,13 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useHydrated } from "@/lib/use-hydrated";
 import { SITE_INFO } from "@/lib/site-info";
+import { submitEnquiry } from "@/lib/enquiry.functions";
 
 /*
- * Enquiry form for the public pages.
- * Zikora has no inbox or message service behind the website yet, so this form cannot send anything itself.
- * On submit it opens the visitor's own email app with the enquiry written out, addressed to the contact email.
- * It never says "received" or "sent": nothing has been sent until the visitor sends the email.
- * When a real delivery route exists (a verified mailbox or a server function), replace the mailto in `submit`.
+ * Enquiry form for the public pages. [PLT-019]
+ * On submit it asks the server to email the enquiry to the contact address. It says "sent" only when the server confirms.
+ * If the server cannot send (no email key yet, or the email service is down), it opens the visitor's own email app
+ * with the enquiry written out, and says plainly that nothing has been received yet.
  */
 export type EnquiryField = {
   name: string; label: string; required?: boolean; hint?: string;
@@ -25,20 +25,26 @@ export function EnquiryForm({ fields, subject, submitLabel }: { fields: EnquiryF
   const uid = useId();
   const hydrated = useHydrated();
   const [values, setValues] = useState<Record<string, string>>({});
-  const [opened, setOpened] = useState(false);
-  const set = (name: string) => (e: { target: { value: string } }) => { setOpened(false); setValues((v) => ({ ...v, [name]: e.target.value })); };
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "mailto">("idle");
+  const [website, setWebsite] = useState("");
+  const set = (name: string) => (e: { target: { value: string } }) => { setState("idle"); setValues((v) => ({ ...v, [name]: e.target.value })); };
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
-    const body = fields.map((f) => `${f.label}: ${(values[f.name] ?? "").trim() || "-"}`).join("\n\n");
-    const href = `mailto:${SITE_INFO["contact email"]}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = href;
-    setOpened(true);
+    setState("sending");
+    const list = fields.map((f) => ({ label: f.label, value: (values[f.name] ?? "").trim() }));
+    try {
+      const r = await submitEnquiry({ data: { subject, fields: list, replyTo: values["email"] ?? "", website } });
+      if (r.sent) { setState("sent"); return; }
+    } catch { /* fall through to the email app */ }
+    const body = list.map((f) => `${f.label}: ${f.value || "-"}`).join("\n\n");
+    window.location.href = `mailto:${SITE_INFO["contact email"]}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setState("mailto");
   }
 
   return (
-    <form onSubmit={submit} className="space-y-5 rounded-xl border border-border/70 bg-card p-5 shadow-card sm:p-6">
-      <fieldset disabled={!hydrated} className="space-y-5">
+    <form onSubmit={submit} className="relative space-y-5 rounded-xl border border-border/70 bg-card p-5 shadow-card sm:p-6">
+      <fieldset disabled={!hydrated || state === "sending"} className="space-y-5">
         <legend className="sr-only">{subject}</legend>
         {fields.map((f) => {
           const id = `${uid}-${f.name}`;
@@ -61,13 +67,18 @@ export function EnquiryForm({ fields, subject, submitLabel }: { fields: EnquiryF
             </div>
           );
         })}
-        <Button type="submit" size="lg"><Mail aria-hidden /> {submitLabel}</Button>
-        <p className="text-sm text-muted-foreground">
-          This opens your email app with your enquiry filled in. Nothing is sent until you send that email. If no email app opens, write to {SITE_INFO["contact email"]}.
-        </p>
-        {opened && (
+        <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+          <label>Leave this empty<input tabIndex={-1} autoComplete="off" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} /></label>
+        </div>
+        <Button type="submit" size="lg"><Mail aria-hidden /> {state === "sending" ? "Sending..." : submitLabel}</Button>
+        {state === "sent" && (
+          <p role="status" className="rounded-md bg-success-soft px-3 py-2.5 text-sm text-success-strong">
+            Thank you. We have your enquiry and will reply by email.
+          </p>
+        )}
+        {state === "mailto" && (
           <p role="status" className="rounded-md bg-info-soft px-3 py-2.5 text-sm text-info-strong">
-            Your email app should now show your enquiry, ready to send. Zikora has not received anything yet.
+            We could not send this from the website. Your email app should now show your enquiry, ready to send. We have not received anything yet. If no email app opens, write to {SITE_INFO["contact email"]}.
           </p>
         )}
       </fieldset>
