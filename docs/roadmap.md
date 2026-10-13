@@ -1,6 +1,6 @@
 # Roadmap: the one page
 
-Last updated 12 Oct 2026. This is the first page to open. It says what is done, what is in progress and what is left. Each line points to the file that holds the detail. When something changes, change it here first.
+Last updated 13 Oct 2026. This is the first page to open. It says what is done, what is in progress and what is left. Each line points to the file that holds the detail. When something changes, change it here first.
 
 Where the detail lives:
 
@@ -14,11 +14,13 @@ Where the detail lives:
 
 ## 1. Done
 
-- 165 of 167 R1 requirements are built and tested (3 are database only, 1 has a known limit). The other 2 are in section 3.
-- Practice and live databases are both at 87 migrations (applied 12 Oct 2026).
+- 168 of 170 R1 requirements are built and tested (1 is database only, 1 has a known limit). The other 2 are in section 3.
+- Practice and live databases are both at 88 migrations (the newest, the platform summary, applied 13 Oct 2026).
 - Day 61 after the trial (PLT-018): the hotel moves to the cheapest plan that fits, has 14 days to pay, then becomes read-only. Plan prices are entered (Starter ₦30,000, Standard ₦45,000, Pro ₦80,000 a month; yearly is 10 months).
 - Offline mode stages 1, 2, 3a and 3b: saved lists readable with no connection, and charges, payments, housekeeping, check-out, room moves and check-in wait on the device and send when the connection returns. An ID number typed offline stays on the device only until it is sent. Walk-in is not built.
 - Website: the contact form sends through the server (PLT-019, needs the Resend key to start sending), security headers on every page (PLT-020), and a web app manifest so Zikora can be added to a phone home screen (PLT-021).
+- Owner summary at the top of the platform console (PLT-024): hotels by status, new hotels this week and month with a change on the week before, trials ending within 14 days, hotels gone quiet, and the monthly list price of Active hotels. Account data only. Merged 13 Oct 2026.
+- Home page weight (PLT-023): the first page load went from 823 KB to 456 KB of script (243 KB to 142 KB compressed). CI fails a build that goes over the limit.
 - QA audit, phone layout fixes, Load more on long lists, top-bar search and one rule for money collected are done.
 - Full audit of what is built, in progress and outstanding was written on 12 Oct 2026.
 
@@ -52,7 +54,7 @@ Nothing blocks the pilot in code. New ideas go in `docs/backlog.md`.
 | Confirm hello@zikorahq.com is a real mailbox | Peter | audit |
 | Legal pages (14 stand-ins, Terms section 4, the FAQ offline answer), then switch off the Vercel build override | Peter and counsel | QA-24 |
 | Sign-up controls: open sign-up has no CAPTCHA | Peter decides | audit |
-| Full script policy (CSP) and home page weight (about 1.7 MB of script) | Claude, after phone tests | audit |
+| Full script policy (CSP) | Claude, after phone tests | audit |
 
 ### Asked for by a pilot hotel (not built)
 | Item | Size | State |
