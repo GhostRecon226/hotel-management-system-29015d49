@@ -6,13 +6,13 @@ import { cn } from "@/lib/utils";
 /** Tile tones. Status tones keep their fixed meanings (see theme.css); "accent" and "neutral" carry no status. */
 export type Tone = "accent" | "neutral" | "success" | "warning" | "danger" | "info";
 
-const TILE: Record<Tone, { tile: string; chip: string }> = {
-  accent: { tile: "from-primary-tint", chip: "bg-primary-soft text-primary-strong" },
-  neutral: { tile: "from-muted", chip: "bg-muted text-muted-foreground" },
-  success: { tile: "from-success-soft/70", chip: "bg-success-soft text-success-strong" },
-  warning: { tile: "from-warning-soft/70", chip: "bg-warning-soft text-warning-strong" },
-  danger: { tile: "from-danger-soft/70", chip: "bg-danger-soft text-danger-strong" },
-  info: { tile: "from-info-soft/70", chip: "bg-info-soft text-info-strong" },
+const TILE: Record<Tone, { tile: string; chip: string; mark: string }> = {
+  accent: { tile: "from-primary-tint", chip: "bg-primary-soft text-primary-strong", mark: "text-primary" },
+  neutral: { tile: "from-muted", chip: "bg-muted text-muted-foreground", mark: "text-muted-foreground" },
+  success: { tile: "from-success-soft/70", chip: "bg-success-soft text-success-strong", mark: "text-success-strong" },
+  warning: { tile: "from-warning-soft/70", chip: "bg-warning-soft text-warning-strong", mark: "text-warning-strong" },
+  danger: { tile: "from-danger-soft/70", chip: "bg-danger-soft text-danger-strong", mark: "text-danger-strong" },
+  info: { tile: "from-info-soft/70", chip: "bg-info-soft text-info-strong", mark: "text-info-strong" },
 };
 
 type LinkTo = "/front-desk" | "/rooms" | "/approvals" | "/maintenance" | "/folios" | "/reports";
@@ -23,9 +23,25 @@ function Wrap({ to, children, className }: { to?: LinkTo | undefined; children: 
     : <div className={className}>{children}</div>;
 }
 
+function TrendLine({ points, className }: { points: number[]; className?: string }) {
+  const w = 96, h = 28, max = Math.max(...points, 1);
+  const xy = points.map((v, i) => `${(i * w) / (points.length - 1)},${h - 2 - (v / max) * (h - 4)}`).join(" ");
+  return (
+    <svg aria-hidden viewBox={`0 0 ${w} ${h}`} className={cn("pointer-events-none absolute bottom-12 right-4 h-7 w-24 opacity-70", className)} fill="none">
+      <polyline points={xy} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /** Pastel stat tile: icon chip, label, figure, one line underneath. `compact` puts it all on one row. */
-export function StatTile({ label, value, sub, icon: Icon, tone = "accent", to, className, compact }: {
+export function StatTile({ label, value, sub, icon: Icon, tone = "accent", to, className, compact, watermark: Watermark, badge, trend }: {
   label: string; value: ReactNode; sub?: ReactNode | undefined; icon: LucideIcon; tone?: Tone; to?: LinkTo | undefined; className?: string; compact?: boolean;
+  /** Large faded icon in the corner (decoration only). */
+  watermark?: LucideIcon | undefined;
+  /** Small chip in the top right corner, for example a change on last week. */
+  badge?: ReactNode | undefined;
+  /** Small trend line along the bottom right, drawn from the numbers given (oldest first). */
+  trend?: number[] | undefined;
 }) {
   const t = TILE[tone];
   if (compact) {
@@ -41,11 +57,16 @@ export function StatTile({ label, value, sub, icon: Icon, tone = "accent", to, c
     );
   }
   return (
-    <Wrap to={to} className={cn("h-full rounded-xl border border-border/70 bg-card bg-gradient-to-br to-card to-70% p-4 shadow-card", t.tile, className)}>
-      <span className={cn("grid size-9 place-items-center rounded-lg", t.chip)} aria-hidden><Icon className="size-[18px]" /></span>
-      <div className="mt-3 text-sm font-medium text-muted-foreground">{label}</div>
-      <div className="mt-0.5 text-[26px] font-bold leading-tight tracking-tight tabular">{value ?? "—"}</div>
-      {sub && <div className="mt-1 text-[13px] text-muted-foreground">{sub}</div>}
+    <Wrap to={to} className={cn("relative h-full overflow-hidden rounded-xl border border-border/70 bg-card bg-gradient-to-br to-card to-70% p-4 shadow-card", t.tile, className)}>
+      {Watermark && <Watermark aria-hidden className={cn("pointer-events-none absolute -right-2 top-3 size-20 opacity-[0.12]", t.mark)} strokeWidth={1.25} />}
+      <div className="relative flex items-start justify-between gap-2">
+        <span className={cn("grid size-9 place-items-center rounded-lg", t.chip)} aria-hidden><Icon className="size-[18px]" /></span>
+        {badge}
+      </div>
+      <div className="relative mt-3 text-sm font-medium text-muted-foreground">{label}</div>
+      <div className="relative mt-0.5 text-[26px] font-bold leading-tight tracking-tight tabular">{value ?? "—"}</div>
+      {sub && <div className="relative mt-1 text-[13px] text-muted-foreground">{sub}</div>}
+      {trend && trend.length > 1 && <TrendLine points={trend} className={t.mark} />}
     </Wrap>
   );
 }
