@@ -17,8 +17,9 @@ import { Field, FormDialog } from "@/lib/setup";
 import { formatDateTime, formatDay } from "@/lib/reservations";
 import {
   daysUntil, endOfDay, type PlatformAction, type PlatformTenant, TwoStepGate, usePlans, usePlatformChange, usePlatformHistory,
-  usePlatformFailedPayments, usePlatformTenants, whoamiQuery,
+  usePlatformFailedPayments, usePlatformTenants,
 } from "@/lib/platform";
+import { whoamiQuery } from "@/lib/queries";
 
 // Platform console (PLT-008, PLT-009, PLT-013): hotels' accounts only, never their guests, bookings or money.
 export const Route = createFileRoute("/_authenticated/platform")({

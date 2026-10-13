@@ -2,9 +2,11 @@
 // Only the actions in QUEUEABLE can wait. Each already carries a repeat-safe key (money) or is refused or answered
 // by the database if it was already done (housekeeping, check-out, room moves), so sending one twice never repeats it.
 import type { QueryClient } from "@tanstack/react-query";
-import { callRpc } from "@/lib/setup";
 import { errorMessage } from "@/lib/errors";
 import { kvGet, kvSet } from "./store";
+
+// Loaded on first use, so the sign-in library and screen code stay out of the first page load.
+const callRpc = async <T = unknown>(name: string, args: Record<string, unknown>): Promise<T> => (await import("@/lib/setup")).callRpc<T>(name, args);
 
 export const QUEUEABLE = new Set(["post_charge", "post_payment", "start_hk_task", "complete_hk_task", "check_out", "move_room", "check_in"]);
 /** Reason the database records when a check-out with a balance was entered with no connection (needs fo.checkout.unsettled). */

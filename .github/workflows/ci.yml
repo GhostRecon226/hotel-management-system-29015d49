@@ -63,6 +63,9 @@ jobs:
       - name: Build
         if: steps.changes.outputs.code == 'true'
         run: npm run build
+      - name: First page load size
+        if: steps.changes.outputs.code == 'true'
+        run: npm run check:bundle
       - uses: supabase/setup-cli@v3
         if: steps.changes.outputs.code == 'true'
         with:

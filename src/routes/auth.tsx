@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
@@ -27,10 +26,14 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const schema = z.object({
-  email: z.string().trim().email("Enter a valid email address.").max(255),
-  password: z.string().min(8, "Password must be at least 8 characters.").max(72),
-});
+// zod loads only when the form is sent, so it stays out of the first page load.
+const makeSchema = async () => {
+  const { z } = await import("zod");
+  return z.object({
+    email: z.string().trim().email("Enter a valid email address.").max(255),
+    password: z.string().min(8, "Password must be at least 8 characters.").max(72),
+  });
+};
 
 function AuthPage() {
   const { mode } = Route.useSearch();
@@ -64,7 +67,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    const parsed = schema.safeParse({ email, password });
+    const parsed = (await makeSchema()).safeParse({ email, password });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Please check the form.");
       return;
