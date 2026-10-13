@@ -43,6 +43,10 @@ begin
   perform t.eq((select count(*)::int from public.folio_transactions where tenant_id = t.id('tenantA')), v_led, '[PLT-025] and its ledger');
   perform t.eq((select count(*)::int from public.audit_events where tenant_id = t.id('tenantA')), v_audit, '[PLT-025] and its audit log');
   perform t.eq((select count(*)::int from auth.users where id in (select id from public.profiles where tenant_id = t.id('tenantA'))), v_users, '[PLT-025] and its staff sign-ins');
+  -- The same without replica mode (for a database role that may not set it): table triggers go off and come back on.
+  perform t.raises(format('select pg_temp.remove_hotels(array[%L]::uuid[], true, true)', t.id('tenantA')), 'E_DRY_RUN', '[PLT-025] a dry run without replica mode also works');
+  perform t.eq((select count(*)::int from public.folio_transactions where tenant_id = t.id('tenantA')), v_led, '[PLT-025] and leaves the ledger');
+  perform t.eq((select count(*)::int from pg_trigger where tgname = 'folio_transactions_immutable' and tgenabled <> 'O'), 0, '[PLT-025] with the ledger lock still on');
 end $$;
 
 -- The real run removes hotel A and only hotel A.
@@ -70,11 +74,16 @@ begin
   perform t.eq(current_setting('session_replication_role'), 'origin', '[PLT-025] the ledger locks are back on');
 end $$;
 
--- The ledger lock still works for the hotel that stays.
+-- Without replica mode, a real run removes hotel B and puts every lock back.
 do $$
 begin
   perform t.admin();
-  perform t.raises(format('delete from public.audit_events where tenant_id = %L', t.id('tenantB')), 'E_IMMUTABLE', '[PLT-025] the audit log of hotel B is still locked');
+  perform pg_temp.remove_hotels(array[t.id('tenantB')], false, true);
+  perform t.eq((select count(*)::int from public.tenants where id = t.id('tenantB')), 0, '[PLT-025] without replica mode: the hotel is gone');
+  perform t.eq((select count(*)::int from public.properties where tenant_id = t.id('tenantB')), 0, '[PLT-025] with its properties');
+  perform t.eq((select count(*)::int from auth.users where email = 'adminB@test.local'), 0, '[PLT-025] and its sign-in');
+  perform t.eq((select count(*)::int from pg_trigger where tgname in ('folio_transactions_immutable', 'audit_events_immutable') and tgenabled <> 'O'), 0, '[PLT-025] and the ledger and audit locks are back on');
+  perform t.eq((select count(*)::int from app.platform_operators where user_id = t.id('rmop')), 1, '[PLT-025] the platform operator still stays');
 end $$;
 
 rollback;

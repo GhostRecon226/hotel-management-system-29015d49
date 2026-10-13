@@ -6,7 +6,7 @@ One-time clean-up of demo hotels (PLT-025). The tool is `scripts/remove-hotels.s
 
 - Deletes every row the named hotels own, the hotels, and their staff sign-in accounts.
 - Leaves other hotels, the plan list, the permission list and every platform operator alone.
-- Lifts the ledger locks for this one transaction only, then puts them back.
+- Lifts the ledger locks for this one transaction only, then puts them back. If the database role may not do that in one step, it switches the locks off table by table and checks they are back on.
 - Refuses if a hotel still has ID photo files, if a platform operator is staff of the hotel, or if an id is unknown.
 - Rolls everything back if any row of the hotel is left or any row points at something removed.
 

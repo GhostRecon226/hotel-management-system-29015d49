@@ -15,11 +15,12 @@
 -- Every check below runs before anything is deleted, and the checks after the delete roll the whole run back
 -- if anything is left behind.
 
-create or replace function pg_temp.remove_hotels(p_ids uuid[], p_dry boolean default true)
+create or replace function pg_temp.remove_hotels(p_ids uuid[], p_dry boolean default true, p_no_replica boolean default false)
 returns text language plpgsql as $fn$
 declare
-  r record; n bigint; v_rows bigint := 0; v_tables int := 0; v_users uuid[]; v_names text; v_accounts int := 0;
+  r record; n bigint; v_rows bigint := 0; v_users uuid[]; v_names text; v_accounts int := 0;
   v_before bigint; v_after bigint; v_orphans bigint;
+  v_replica boolean := false; v_tabs text[]; v_tab text; v_pass int; v_left int; v_counts jsonb := '{}';
 begin
   if p_ids is null or coalesce(array_length(p_ids, 1), 0) = 0 then
     raise exception '[E_INVALID] Name at least one hotel id.'; end if;
@@ -54,23 +55,45 @@ begin
       and c.connamespace in ('public'::regnamespace, 'app'::regnamespace)
   loop execute r.q into n; v_before := v_before + n; end loop;
 
-  perform set_config('session_replication_role', 'replica', true);
-  if current_setting('session_replication_role') <> 'replica' then
-    raise exception '[E_PRIVILEGE] This database role cannot lift the ledger locks. Nothing was removed.'; end if;
+  select array_agg(format('%I.%I', c.table_schema, c.table_name) order by c.table_schema, c.table_name) into v_tabs
+  from information_schema.columns c
+  join information_schema.tables tb on tb.table_schema = c.table_schema and tb.table_name = c.table_name and tb.table_type = 'BASE TABLE'
+  where c.column_name = 'tenant_id' and c.table_schema in ('public', 'app');
 
-  for r in
-    select c.table_schema as s, c.table_name as t
-    from information_schema.columns c
-    join information_schema.tables tb on tb.table_schema = c.table_schema and tb.table_name = c.table_name and tb.table_type = 'BASE TABLE'
-    where c.column_name = 'tenant_id' and c.table_schema in ('public', 'app')
-    order by 1, 2
-  loop
-    execute format('delete from %I.%I where tenant_id = any($1)', r.s, r.t) using p_ids;
-    get diagnostics n = row_count;
-    if n > 0 then
-      v_rows := v_rows + n; v_tables := v_tables + 1;
-      raise notice '  % rows from %.%', lpad(n::text, 6), r.s, r.t;
-    end if;
+  -- Lift the locks. First choice: replica mode switches off every trigger for this transaction. Some hosted roles
+  -- may not set it; then switch off the tables' own triggers one by one (the table owner may) and delete in passes
+  -- until the foreign keys let every row go.
+  if not p_no_replica then
+    begin
+      perform set_config('session_replication_role', 'replica', true);
+      v_replica := current_setting('session_replication_role') = 'replica';
+    exception when insufficient_privilege then v_replica := false;
+    end;
+  end if;
+  if not v_replica then
+    raise notice 'Replica mode not used: switching off table triggers one by one.';
+    foreach v_tab in array v_tabs loop execute format('alter table %s disable trigger user', v_tab); end loop;
+  end if;
+
+  for v_pass in 1..12 loop
+    v_left := 0;
+    foreach v_tab in array v_tabs loop
+      begin
+        execute format('delete from %s where tenant_id = any($1)', v_tab) using p_ids;
+        get diagnostics n = row_count;
+        if n > 0 then
+          v_rows := v_rows + n;
+          v_counts := jsonb_set(v_counts, array[v_tab], to_jsonb(coalesce((v_counts ->> v_tab)::bigint, 0) + n));
+        end if;
+      exception when foreign_key_violation then v_left := v_left + 1;
+      end;
+    end loop;
+    exit when v_left = 0;
+  end loop;
+  if v_left > 0 then
+    raise exception '[E_INCOMPLETE] % table(s) still have rows that other rows depend on. Rolled back.', v_left; end if;
+  for r in select key, value from jsonb_each_text(v_counts) order by key loop
+    raise notice '  % rows from %', lpad(r.value, 6), r.key;
   end loop;
   delete from public.tenants where id = any(p_ids);
   get diagnostics n = row_count;
@@ -78,7 +101,9 @@ begin
     raise exception '[E_INCOMPLETE] Removed % hotel record(s), expected %. Rolled back.', n, array_length(p_ids, 1); end if;
 
   -- Locks back on, then the sign-in accounts (their own sessions and identities go with them).
-  perform set_config('session_replication_role', 'origin', true);
+  if v_replica then perform set_config('session_replication_role', 'origin', true);
+  else foreach v_tab in array v_tabs loop execute format('alter table %s enable trigger user', v_tab); end loop;
+  end if;
   if cardinality(v_users) > 0 then
     delete from auth.users where id = any(v_users);
     get diagnostics v_accounts = row_count;
@@ -108,7 +133,7 @@ begin
   if v_orphans > 0 then
     raise exception '[E_INCOMPLETE] % row(s) now point at something that was removed. Rolled back.', v_orphans; end if;
 
-  raise notice 'Removed % hotel(s), % rows in % tables, % sign-in account(s).', array_length(p_ids, 1), v_rows, v_tables, v_accounts;
+  raise notice 'Removed % hotel(s), % rows in % tables, % sign-in account(s).', array_length(p_ids, 1), v_rows, (select count(*) from jsonb_object_keys(v_counts)), v_accounts;
   if p_dry then
     raise exception '[E_DRY_RUN] Dry run. Everything above worked, and nothing was removed.'; end if;
   return format('Removed %s hotel(s), %s rows, %s sign-in account(s).', array_length(p_ids, 1), v_rows, v_accounts);
