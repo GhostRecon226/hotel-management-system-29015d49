@@ -14,7 +14,7 @@ Where the detail lives:
 
 ## 1. Done
 
-- 169 of 171 R1 requirements are built and tested (1 is database only, 1 has a known limit). The other 2 are in section 3.
+- 170 of 172 R1 requirements are built and tested (1 is database only, 1 has a known limit). The other 2 are in section 3.
 - Practice and live databases are both at 88 migrations (the newest, the platform summary, applied 13 Oct 2026).
 - Day 61 after the trial (PLT-018): the hotel moves to the cheapest plan that fits, has 14 days to pay, then becomes read-only. Plan prices are entered (Starter ₦30,000, Standard ₦45,000, Pro ₦80,000 a month; yearly is 10 months).
 - Offline mode stages 1, 2, 3a and 3b: saved lists readable with no connection, and charges, payments, housekeeping, check-out, room moves and check-in wait on the device and send when the connection returns. An ID number typed offline stays on the device only until it is sent. Walk-in is not built.
@@ -53,7 +53,7 @@ Nothing blocks the pilot in code. New ideas go in `docs/backlog.md`.
 | CRON_SECRET in Vercel, live Supabase Site URL | Peter | QA-13, QA-03 |
 | Confirm hello@zikorahq.com is a real mailbox | Peter | audit |
 | Legal pages (14 stand-ins, Terms section 4, the FAQ offline answer), then switch off the Vercel build override | Peter and counsel | QA-24 |
-| Sign-up controls: open sign-up has no CAPTCHA | Peter decides | audit |
+| Sign-up safety check (Turnstile, PLT-026): built, off until switched on. Create the Cloudflare widget, then follow `docs/setup-checklist.md` section F in order | Peter | PLT-026 |
 | Full script policy (CSP) | Claude, after phone tests | audit |
 
 ### Asked for by a pilot hotel (not built)
@@ -84,7 +84,7 @@ Nothing blocks the pilot in code. New ideas go in `docs/backlog.md`.
 | Demo hotels (two Euro Bar Hotel records) and pilot hotels: set to Active, or let day 61 run. First warnings land 23 Oct and 28 Oct. | Set demo and pilot hotels to Active. |
 | Build kitchen, store and restaurant, and in what order | Ask the pilot hotel the 8 questions first. Store first, then restaurant. |
 | Offline walk-in | Ask the pilot hotels how often the connection drops. The downtime pack (`/downtime`) covers longer outages. |
-| Open sign-up controls (CAPTCHA, or close sign-up until launch) | Decide before launch on 28 Oct. |
+| Sign-up safety check: built (PLT-026); switch-on steps in `docs/setup-checklist.md` section F. | Switch on before launch on 28 Oct. |
 | Fix the last-room test so it runs on any machine | Needs Peter's yes, because it changes an existing test. I show before and after. |
 | Make the offline check-in browser test stand alone (`e2e/offline-stage3.spec.ts`, "a check-in entered with no connection") | Known limit, not a fault in the app. Run alone it fails, even on main; in the full suite it passes. Leave as is for the pilot. A fix changes an existing test, so it needs Peter's yes, with before and after. |
 | Overbooking allowance (QA-17) | Skip for the pilot. |

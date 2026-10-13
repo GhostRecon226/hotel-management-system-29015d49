@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
+import { Turnstile } from "@/components/turnstile";
+import { captchaBlock, captchaOptions } from "@/lib/captcha";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
@@ -63,6 +65,8 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const hydrated = useHydrated();
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [captchaRound, setCaptchaRound] = useState(0);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -72,17 +76,19 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       setError(parsed.error.issues[0]?.message ?? "Please check the form.");
       return;
     }
+    const wait = captchaBlock(captcha);
+    if (wait) { setError(wait); return; }
     setBusy(true);
     try {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           ...parsed.data,
-          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+          options: { emailRedirectTo: `${window.location.origin}/dashboard`, ...captchaOptions(captcha) },
         });
         if (error) throw error;
         navigate({ to: "/check-email", search: { email: parsed.data.email } });
       } else {
-        const { error } = await supabase.auth.signInWithPassword(parsed.data);
+        const { error } = await supabase.auth.signInWithPassword({ ...parsed.data, options: { ...captchaOptions(captcha) } });
         if (error) {
           if (/confirm/i.test(error.message)) throw new Error("Please confirm your email first. Check your inbox.");
           throw error;
@@ -93,6 +99,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       setError(errorMessage(err));
     } finally {
       setBusy(false);
+      setCaptchaRound((n) => n + 1); // a token works once
     }
   }
 
@@ -128,6 +135,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           </p>
         )}
       </div>
+      <Turnstile onToken={setCaptcha} resetKey={captchaRound} />
       {error && <p className="rounded-md bg-danger-soft px-3 py-2.5 text-sm text-danger-strong" role="alert">{error}</p>}
       <Button type="submit" size="lg" className="h-11 w-full gap-2" disabled={busy}>
         {busy ? "Please wait…" : mode === "signup" ? "Create account" : <>Sign in <ArrowRight className="size-4" aria-hidden /></>}
