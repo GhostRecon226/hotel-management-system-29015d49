@@ -86,4 +86,17 @@ begin
   perform t.eq((select count(*)::int from app.platform_operators where user_id = t.id('rmop')), 1, '[PLT-025] the platform operator still stays');
 end $$;
 
+-- Removing an operator: refused for unknown or non-operator accounts; dry run changes nothing.
+do $$
+begin
+  perform t.admin();
+  perform t.raises('select pg_temp.remove_operator(''nobody-here@platform.test'')', 'E_NOT_FOUND', '[PLT-025] an unknown email: refused');
+  perform t.raises('select pg_temp.remove_operator(''adminB@test.local'')', 'E_NOT_FOUND', '[PLT-025] an account that is not an operator: refused');
+  perform t.raises('select pg_temp.remove_operator(''rm-op@platform.test'', true)', 'E_DRY_RUN', '[PLT-025] an operator dry run stops with E_DRY_RUN');
+  perform t.eq((select count(*)::int from app.platform_operators where user_id = t.id('rmop')), 1, '[PLT-025] and leaves the operator');
+  perform t.ok(pg_temp.remove_operator('RM-op@platform.test', false) like 'Removed operator%', '[PLT-025] the real run removes the operator');
+  perform t.eq((select count(*)::int from app.platform_operators where user_id = t.id('rmop')), 0, '[PLT-025] the operator record is gone');
+  perform t.eq((select count(*)::int from auth.users where id = t.id('rmop')), 0, '[PLT-025] with the operator sign-in');
+end $$;
+
 rollback;

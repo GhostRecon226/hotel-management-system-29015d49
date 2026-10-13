@@ -5,7 +5,7 @@ One-time clean-up of demo hotels (PLT-025). The tool is `scripts/remove-hotels.s
 ## What it does
 
 - Deletes every row the named hotels own, the hotels, and their staff sign-in accounts.
-- Leaves other hotels, the plan list, the permission list and every platform operator alone.
+- Leaves other hotels, the plan list and the permission list alone. Operators stay unless `remove_operator` is run on purpose.
 - Lifts the ledger locks for this one transaction only, then puts them back. If the database role may not do that in one step, it switches the locks off table by table and checks they are back on.
 - Refuses if a hotel still has ID photo files, if a platform operator is staff of the hotel, or if an id is unknown.
 - Rolls everything back if any row of the hotel is left or any row points at something removed.
@@ -18,7 +18,9 @@ One-time clean-up of demo hotels (PLT-025). The tool is `scripts/remove-hotels.s
 | Live | Euro Bar Hotel (30 Sep 2026) | 299f7487-0704-4fbb-8de0-d4b908d77a29 |
 | Live | Euro Bar Hotel (5 Oct 2026) | cde8c474-c2dc-491c-9c26-77cd4d2f2b8e |
 
-The platform operator `chibuzor.opara15@yahoo.com` stays on both.
+The platform operator `chibuzor.opara15@yahoo.com` is also removed on both (Peter, 13 Oct 2026; a new one is created later).
+Run it last, with `select pg_temp.remove_operator('chibuzor.opara15@yahoo.com', true);` (dry run), then `false`.
+Until a new operator exists nobody can open `/platform`. To create one: Supabase, Authentication, Users, Add user; then `select app.add_platform_operator('<email>');`; then set up two-step sign-in at first login.
 
 ## Steps (Claude runs these in the Mac session)
 

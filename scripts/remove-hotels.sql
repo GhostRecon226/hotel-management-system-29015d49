@@ -138,3 +138,24 @@ begin
     raise exception '[E_DRY_RUN] Dry run. Everything above worked, and nothing was removed.'; end if;
   return format('Removed %s hotel(s), %s rows, %s sign-in account(s).', array_length(p_ids, 1), v_rows, v_accounts);
 end $fn$;
+
+-- Remove a platform operator sign-in (used when the owner wants to start the platform account afresh).
+-- Refuses an account that belongs to a hotel. Dry run by default, like remove_hotels. Two-step sign-in factors go with it.
+-- Afterwards nobody can open /platform until a new operator is added (app.add_platform_operator).
+create or replace function pg_temp.remove_operator(p_email text, p_dry boolean default true)
+returns text language plpgsql as $fn$
+declare v_id uuid;
+begin
+  select u.id into v_id from auth.users u where lower(u.email) = lower(btrim(p_email));
+  if v_id is null then raise exception '[E_NOT_FOUND] No sign-in account has that email. Nothing was removed.'; end if;
+  if not exists (select 1 from app.platform_operators o where o.user_id = v_id) then
+    raise exception '[E_NOT_FOUND] That account is not a platform operator. Nothing was removed.'; end if;
+  if exists (select 1 from public.profiles p where p.id = v_id) then
+    raise exception '[E_FORBIDDEN] That account is staff of a hotel. Nothing was removed.'; end if;
+  delete from auth.users where id = v_id;
+  if exists (select 1 from app.platform_operators o where o.user_id = v_id) or exists (select 1 from auth.users u where u.id = v_id) then
+    raise exception '[E_INCOMPLETE] The operator is still there. Rolled back.'; end if;
+  raise notice 'Operator % removed (%).', p_email, (select count(*) from app.platform_operators) || ' operator(s) left';
+  if p_dry then raise exception '[E_DRY_RUN] Dry run. Nothing was removed.'; end if;
+  return format('Removed operator %s. %s operator(s) left.', p_email, (select count(*) from app.platform_operators));
+end $fn$;
