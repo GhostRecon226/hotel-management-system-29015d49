@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { errorMessage } from "@/lib/errors";
 import { AuthLayout } from "@/components/auth-layout";
 import { useHydrated } from "@/lib/use-hydrated";
+import { Turnstile } from "@/components/turnstile";
+import { captchaBlock, captchaOptions } from "@/lib/captcha";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({ meta: [{ title: "Reset your password | Zikora" }, { name: "description", content: "Get a link to set a new password." }, { name: "robots", content: "noindex" }] }),
@@ -25,22 +27,27 @@ function ForgotPassword() {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const hydrated = useHydrated();
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [captchaRound, setCaptchaRound] = useState(0);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     const parsed = (await makeSchema()).safeParse({ email });
     if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Please check the form."); return; }
+    const wait = captchaBlock(captcha);
+    if (wait) { setError(wait); return; }
     setBusy(true);
     try {
       // The link comes back to /reset-password on whatever address the app is running at.
-      const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, { redirectTo: `${window.location.origin}/reset-password` });
+      const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, { redirectTo: `${window.location.origin}/reset-password`, ...captchaOptions(captcha) });
       if (error) throw error;
       setSent(true); // same message whether or not the account exists, so nobody can test which emails are registered
     } catch (err) {
       setError(errorMessage(err));
     } finally {
       setBusy(false);
+      setCaptchaRound((n) => n + 1); // a token works once
     }
   }
 
@@ -64,6 +71,7 @@ function ForgotPassword() {
                   <Label htmlFor="forgot-email">Email</Label>
                   <Input id="forgot-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
+                <Turnstile onToken={setCaptcha} resetKey={captchaRound} />
                 {error && <p className="rounded-md bg-danger-soft px-3 py-2.5 text-sm text-danger-strong" role="alert">{error}</p>}
                 <Button type="submit" size="lg" className="w-full" disabled={busy}>{busy ? "Please wait…" : "Send reset link"}</Button>
                 <p className="text-center text-sm"><Link to="/auth" className="text-muted-foreground hover:text-foreground">Back to sign in</Link></p>

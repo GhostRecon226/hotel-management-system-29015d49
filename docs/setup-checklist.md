@@ -159,3 +159,14 @@ Vercel builds and publishes a site every time code reaches GitHub: `main` goes t
 - [ ] **H3. CLAUDE.** Ask you to switch builds back on (E4 > **Automatic**). Then I check a preview of the branch against the practice project, and test sign-up, invite, password reset and booking-confirmation emails.
 - [ ] **H4. YOU.** Approve the merge. I open a pull request to `main`; the checks must pass; you merge it. Vercel then publishes the site on `app.yourdomain.com`. As soon as the sign-in page loads there, do step **E11** (switch the live Supabase project's web address to your domain; the practice project stays on `localhost:8080`).
 - [ ] **H5. CLAUDE.** (Done on the `vercel.app` address on 5 Oct; repeat on your domain once it is set up.) Repeat the hand test on `https://app.yourdomain.com`, then go through the "before the first real hotel" list in the deployment plan with you.
+
+## F. Sign-up safety check (Turnstile, PLT-026)
+
+Do these in this order. If you turn it on in Supabase before the site has the key, nobody can sign in, sign up or reset a password.
+
+- [ ] **F1. YOU.** In Cloudflare (free account), go to **Turnstile** > **Add widget**. Name it Zikora. Add the hostnames of the live site and of the Vercel preview addresses. Mode: **Managed**. Cloudflare shows a **Site key** (public) and a **Secret key** (private). Do not paste either into chat.
+- [ ] **F2. YOU.** In Vercel, **Settings** > **Environment Variables**, add `VITE_TURNSTILE_SITE_KEY` with the Site key. Tick **Production** and **Preview**. Redeploy (merge or **Redeploy**). Open the sign-in page: you should see a small check box. Sign in once to prove it works.
+- [ ] **F3. YOU.** Practice first. In the practice Supabase project: **Authentication** > **Attack Protection** > **Enable CAPTCHA protection**, provider **Cloudflare Turnstile**, paste the **Secret key**, save. Sign in on the practice site to check.
+- [ ] **F4. YOU.** Same on the live Supabase project, only after F3 works and after Peter's yes for live.
+- If sign-in fails with a "captcha" message after F3 or F4, switch **Enable CAPTCHA protection** off again. Sign-in works at once.
+- Staff invites are not affected: they are sent by the server, not by the sign-up page.
