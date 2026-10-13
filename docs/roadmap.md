@@ -84,6 +84,7 @@ Nothing blocks the pilot in code. New ideas go in `docs/backlog.md`.
 | Offline walk-in | Ask the pilot hotels how often the connection drops. The downtime pack (`/downtime`) covers longer outages. |
 | Open sign-up controls (CAPTCHA, or close sign-up until launch) | Decide before launch on 28 Oct. |
 | Fix the last-room test so it runs on any machine | Needs Peter's yes, because it changes an existing test. I show before and after. |
+| Make the offline check-in browser test stand alone (`e2e/offline-stage3.spec.ts`, "a check-in entered with no connection") | Known limit, not a fault in the app. Run alone it fails, even on main; in the full suite it passes. Leave as is for the pilot. A fix changes an existing test, so it needs Peter's yes, with before and after. |
 | Overbooking allowance (QA-17) | Skip for the pilot. |
 
 ## 5. Offline mode, in plain terms
