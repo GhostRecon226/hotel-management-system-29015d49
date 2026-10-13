@@ -30,6 +30,20 @@ begin
   perform t.raises(format('select pg_temp.remove_hotels(array[%L]::uuid[], false)', gen_random_uuid()), 'E_NOT_FOUND', '[PLT-025] an unknown hotel id: refused');
 end $$;
 
+-- ID photo files: a live file blocks the removal; the record of an already deleted file does not.
+do $$
+declare v_g uuid := t.id('g1');
+begin
+  perform t.admin();
+  insert into public.guest_document_files (tenant_id, property_id, guest_id, side, storage_path, mime_type, size_bytes, status, uploaded_by, deleted_at, delete_reason)
+  values (t.id('tenantA'), t.id('propA'), v_g, 'front', 'rm-test/deleted.jpg', 'image/jpeg', 1000, 'deleted', t.id('adminA'), now(), 'test');
+  perform t.raises(format('select pg_temp.remove_hotels(array[%L]::uuid[], true)', t.id('tenantA')), 'E_DRY_RUN', '[PLT-025] the record of a deleted ID photo does not block the removal');
+  insert into public.guest_document_files (tenant_id, property_id, guest_id, side, storage_path, mime_type, size_bytes, status, uploaded_by)
+  values (t.id('tenantA'), t.id('propA'), v_g, 'back', 'rm-test/pending.jpg', 'image/jpeg', 1000, 'pending', t.id('adminA'));
+  perform t.raises(format('select pg_temp.remove_hotels(array[%L]::uuid[], true)', t.id('tenantA')), 'E_FILES_LEFT', '[PLT-025] an ID photo file still held blocks the removal');
+  delete from public.guest_document_files where storage_path like 'rm-test/%';
+end $$;
+
 -- A dry run does the whole job, reports, and leaves everything in place.
 do $$
 declare v_led int; v_audit int; v_users int;

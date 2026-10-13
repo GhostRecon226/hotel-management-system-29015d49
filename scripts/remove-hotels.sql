@@ -37,8 +37,9 @@ begin
     raise exception '[E_FORBIDDEN] A platform operator is a staff member of one of these hotels. Nothing was removed.'; end if;
 
   -- ID photo files live in storage, outside the database. Remove them first so none is left behind.
+  -- A record marked 'deleted' means the file is already gone, so it does not block.
   if to_regclass('public.guest_document_files') is not null then
-    execute 'select count(*) from public.guest_document_files where tenant_id = any($1)' into n using p_ids;
+    execute 'select count(*) from public.guest_document_files where tenant_id = any($1) and status <> ''deleted''' into n using p_ids;
     if n > 0 then
       raise exception '[E_FILES_LEFT] These hotels still have % ID photo file(s). Delete them first.', n; end if;
   end if;
@@ -135,7 +136,10 @@ begin
 
   raise notice 'Removed % hotel(s), % rows in % tables, % sign-in account(s).', array_length(p_ids, 1), v_rows, (select count(*) from jsonb_object_keys(v_counts)), v_accounts;
   if p_dry then
-    raise exception '[E_DRY_RUN] Dry run. Everything above worked, and nothing was removed.'; end if;
+    -- The counts go into the message too, because some ways of running SQL do not show notices.
+    raise exception '[E_DRY_RUN] Dry run, nothing was removed. Hotels: %. Would remove % rows in % tables and % sign-in account(s): %',
+      v_names, v_rows, (select count(*) from jsonb_object_keys(v_counts)), v_accounts,
+      (select string_agg(key || ' ' || value, ', ' order by key) from jsonb_each_text(v_counts)); end if;
   return format('Removed %s hotel(s), %s rows, %s sign-in account(s).', array_length(p_ids, 1), v_rows, v_accounts);
 end $fn$;
 
