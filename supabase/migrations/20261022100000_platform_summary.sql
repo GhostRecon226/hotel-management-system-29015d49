@@ -48,7 +48,7 @@ begin
     'monthly_value', (select coalesce(jsonb_agg(jsonb_build_object('currency', y.currency, 'amount', y.amount, 'hotels', y.n)
                         order by y.currency), '[]'::jsonb)
                       from (select h.currency, count(*)::int as n,
-                                   round(sum((pl.prices -> h.currency ->> 'month')::numeric) / power(10, app.currency_decimals(h.currency)),
+                                   round(sum((pl.prices -> h.currency ->> 'month')::numeric) / power(10::numeric, app.currency_decimals(h.currency)::numeric),
                                          app.currency_decimals(h.currency)) as amount
                             from hotels h join public.plans pl on pl.code = h.plan_code
                             where h.status = 'active' and (pl.prices -> h.currency ->> 'month') is not null
