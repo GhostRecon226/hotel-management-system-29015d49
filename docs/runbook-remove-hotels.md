@@ -7,7 +7,7 @@ One-time clean-up of demo hotels (PLT-025). The tool is `scripts/remove-hotels.s
 - Deletes every row the named hotels own, the hotels, and their staff sign-in accounts.
 - Leaves other hotels, the plan list and the permission list alone. Operators stay unless `remove_operator` is run on purpose.
 - Lifts the ledger locks for this one transaction only, then puts them back. If the database role may not do that in one step, it switches the locks off table by table and checks they are back on.
-- Refuses if a hotel still has ID photo files, if a platform operator is staff of the hotel, or if an id is unknown.
+- Refuses if a hotel still holds ID photo files (a record marked deleted does not count), if a platform operator is staff of the hotel, or if an id is unknown.
 - Rolls everything back if any row of the hotel is left or any row points at something removed.
 
 ## Hotels agreed on 13 Oct 2026 (Peter)
@@ -31,7 +31,7 @@ Until a new operator exists nobody can open `/platform`. To create one: Supabase
         select pg_temp.remove_hotels(array['<id>']::uuid[], true);
         rollback;
 
-   It must end with `[E_DRY_RUN]` and print the hotel names and row counts. Show Peter the counts.
+   It must end with `[E_DRY_RUN]`; the message names the hotels and lists the row counts, so it shows even when notices are hidden. Show Peter the counts.
 2. Real run: the same, with `false`, then `commit;`.
 3. Check: the hotel list shows only the hotels left, `/platform` loads, the operator can still sign in.
 4. Live only after Peter types "yes, live": backup into `~/hotel-desk-backups`, dry run, show counts, real run, check, link back to practice.
