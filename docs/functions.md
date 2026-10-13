@@ -1886,6 +1886,14 @@ Prices: column `plans.prices` (for example `{"NGN": {"month": 6000000, "year": 6
 - Permission: platform operator with two-step sign-in
 - Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
 
+### `public.platform_summary`
+- Args: none
+- The owner's one-glance view for the platform console (PLT-024). Counts hotels by status, hotels new in 7 and 30 days, trials ending within 14 days, hotels gone quiet (older than a week, no staff sign-in for 7 days) and the monthly list price of active hotels, worked out by the database in whole currency. Past due hotels are not counted as paying.
+- Returns: `jsonb` (`generated_at`, `hotels`, `by_status`, `joined_7d`, `joined_30d`, `trials_ending`, `quiet`, `monthly_value`). Hotel account data only: no guest, booking, balance or contact data (PLT-009).
+- Callable by signed-in users: yes · security definer
+- Permission: platform operator with two-step sign-in
+- Errors: `E_FORBIDDEN`, `E_MFA_REQUIRED`
+
 ### `app.assert_plan_fits`
 - Args: `p_tenant uuid, p_plan text`. Helper. Errors: `E_NOT_FOUND`, `E_PLAN_LIMIT`.
 

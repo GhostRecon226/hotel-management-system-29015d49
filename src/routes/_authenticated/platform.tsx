@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { SupportSection } from "@/components/platform-support";
+import { PlatformSummary } from "@/components/platform-summary";
 import { Field, FormDialog } from "@/lib/setup";
 import { formatDateTime, formatDay } from "@/lib/reservations";
 import {
@@ -64,6 +65,7 @@ function PlatformConsole() {
         <TwoStepGate onDone={async () => { await supabase.auth.refreshSession(); await qc.invalidateQueries({ queryKey: ["platform"] }); }} />
       ) : (
         <>
+          <PlatformSummary enabled={mfa} />
           <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filter hotels">
             {FILTERS.map(([k, label]) => (
               <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} aria-pressed={filter === k} onClick={() => setFilter(k)}>{label}</Button>

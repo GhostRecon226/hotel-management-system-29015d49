@@ -41,6 +41,15 @@ export interface FailedPayment {
 export function usePlatformFailedPayments(enabled: boolean) {
   return useQuery({ queryKey: ["platform", "failed-payments"], enabled, queryFn: () => callRpc<FailedPayment[]>("platform_failed_payments", {}) });
 }
+export interface PlatformSummary {
+  generated_at: string; hotels: number; by_status: Record<string, number>; joined_7d: number; joined_30d: number;
+  trials_ending: Array<{ tenant_id: string; hotel_name: string; trial_ends_at: string; days: number }>;
+  quiet: Array<{ tenant_id: string; hotel_name: string; last_sign_in_at: string | null }>;
+  monthly_value: Array<{ currency: string; amount: number; hotels: number }>;
+}
+export function usePlatformSummary(enabled: boolean) {
+  return useQuery({ queryKey: ["platform", "summary"], enabled, queryFn: () => callRpc<PlatformSummary>("platform_summary", {}) });
+}
 export function usePlans() {
   return useQuery({
     queryKey: ["platform", "plans"],
