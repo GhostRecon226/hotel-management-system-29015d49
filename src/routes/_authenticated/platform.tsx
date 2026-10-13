@@ -65,7 +65,7 @@ function PlatformConsole() {
         <TwoStepGate onDone={async () => { await supabase.auth.refreshSession(); await qc.invalidateQueries({ queryKey: ["platform"] }); }} />
       ) : (
         <>
-          <PlatformSummary enabled={mfa} />
+          <PlatformSummary enabled={mfa} tenants={tenants.data} onView={setOpen} />
           <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filter hotels">
             {FILTERS.map(([k, label]) => (
               <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} aria-pressed={filter === k} onClick={() => setFilter(k)}>{label}</Button>

@@ -50,6 +50,17 @@ begin
   j := public.platform_summary();
   perform t.eq((j->>'joined_7d')::int, v_j7 - 1, '[PLT-024] a hotel from 20 days ago is not new this week');
   perform t.eq((j->>'joined_30d')::int, v_j30, '[PLT-024] but is still new this month');
+  perform t.eq((j->>'joined_prev_7d')::int, 0, '[PLT-024] and is not in the week before either (8 to 14 days ago)');
+  perform t.ok(j->'joined_change_pct' = 'null'::jsonb, '[PLT-024] with no hotel in the week before there is no percentage change');
+  perform t.admin();
+  update public.tenants set created_at = now() - interval '10 days' where id = t.id('tenantB');
+  perform t.as_user(t.id('sumop'), 'aal2');
+  j := public.platform_summary();
+  perform t.eq((j->>'joined_prev_7d')::int, 1, '[PLT-024] a hotel from 10 days ago counts in the week before');
+  perform t.eq((j->>'joined_change_pct')::int, ((v_j7 - 1) - 1) * 100, '[PLT-024] the change on the week before is worked out in percent');
+  perform t.eq(jsonb_array_length(j->'joined_weekly'), 8, '[PLT-024] the trend line has the last 8 weeks');
+  perform t.eq((j->'joined_weekly'->>7)::int, v_j7 - 1, '[PLT-024] and its last point is this week');
+  perform t.eq((j->'joined_weekly'->>6)::int, 1, '[PLT-024] and the point before is the week before');
   perform t.admin();
 end $$;
 
@@ -90,6 +101,10 @@ begin
   j := public.platform_summary();
   perform t.ok(exists (select 1 from jsonb_array_elements(j->'quiet') e where e->>'tenant_id' = t.id('tenantA')::text),
     '[PLT-024] a hotel whose staff last signed in 10 days ago is quiet');
+  perform t.eq((select (e->>'days_inactive')::int from jsonb_array_elements(j->'quiet') e where e->>'tenant_id' = t.id('tenantA')::text), 10,
+    '[PLT-024] with the days since the last sign-in');
+  perform t.ok((select e->>'country' is not null from jsonb_array_elements(j->'quiet') e where e->>'tenant_id' = t.id('tenantA')::text),
+    '[PLT-024] and the hotel country');
   perform t.admin();
   update auth.users set last_sign_in_at = now() - interval '1 day' where id in (select id from public.profiles where tenant_id = t.id('tenantA'));
   perform t.as_user(t.id('sumop'), 'aal2');
