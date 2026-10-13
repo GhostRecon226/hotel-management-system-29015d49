@@ -14,7 +14,7 @@ Where the detail lives:
 
 ## 1. Done
 
-- 168 of 170 R1 requirements are built and tested (1 is database only, 1 has a known limit). The other 2 are in section 3.
+- 169 of 171 R1 requirements are built and tested (1 is database only, 1 has a known limit). The other 2 are in section 3.
 - Practice and live databases are both at 88 migrations (the newest, the platform summary, applied 13 Oct 2026).
 - Day 61 after the trial (PLT-018): the hotel moves to the cheapest plan that fits, has 14 days to pay, then becomes read-only. Plan prices are entered (Starter ₦30,000, Standard ₦45,000, Pro ₦80,000 a month; yearly is 10 months).
 - Offline mode stages 1, 2, 3a and 3b: saved lists readable with no connection, and charges, payments, housekeeping, check-out, room moves and check-in wait on the device and send when the connection returns. An ID number typed offline stays on the device only until it is sent. Walk-in is not built.
