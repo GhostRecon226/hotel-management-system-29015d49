@@ -170,3 +170,21 @@ Do these in this order. If you turn it on in Supabase before the site has the ke
 - [ ] **F4. YOU.** Same on the live Supabase project, only after F3 works and after Peter's yes for live.
 - If sign-in fails with a "captcha" message after F3 or F4, switch **Enable CAPTCHA protection** off again. Sign-in works at once.
 - Staff invites are not affected: they are sent by the server, not by the sign-up page.
+
+## I. Online payments (Paystack, PLT-012)
+
+The code is built and tested. Nothing is switched on until `PAYSTACK_SECRET_KEY` exists in Vercel. Test mode first, then live.
+
+Why a practice address: Paystack keeps one webhook address for test mode and one for live. The `vercel.app` addresses ask for a Vercel sign-in (deployment protection), so Paystack cannot reach them. A custom domain is exempt. So test mode needs its own custom address that serves the practice build.
+
+- [ ] **I1. YOU.** Paystack dashboard, **Settings** > **API Keys & Webhooks**. Copy the **Test secret key** (`sk_test_...`). Keep the **Live secret key** (`sk_live_...`) for I8. Do not paste either into chat.
+- [ ] **I2. YOU.** Vercel, **Settings** > **Domains** > **Add** `practice.zikorahq.com`. Under it, choose a **Git branch** and enter `practice`. Add the DNS record Vercel shows, where `zikorahq.com` DNS lives.
+- [ ] **I3. CLAUDE.** Create the `practice` branch from `main`. It is an environment, not a change: it carries no work of its own, and I move it forward to match `main` before each test. Vercel builds it with the Preview keys, so it talks to the practice database.
+- [ ] **I4. YOU.** In Vercel, **Settings** > **Environment Variables**, add `PAYSTACK_SECRET_KEY` with the **test** key. Tick **Preview** only. Turn on **Sensitive**.
+- [ ] **I5. YOU.** Cloudflare Turnstile widget: add the hostname `practice.zikorahq.com`. Practice Supabase, **Authentication** > **URL Configuration**: add `https://practice.zikorahq.com/**` to the trusted links. Leave the Site URL as it is.
+- [ ] **I6. YOU.** Paystack, test mode, **Settings** > **API Keys & Webhooks**: set the **Test Webhook URL** to `https://practice.zikorahq.com/api/webhooks/paystack` and save.
+- [ ] **I7. CLAUDE and YOU.** Test on `practice.zikorahq.com` with a Paystack test card: a good payment activates the plan once; a repeated webhook changes nothing; a failed card leaves the hotel on its current plan; the amount in Paystack matches the price on the plan page. I check the practice database and report.
+- [ ] **I8. YOU.** Only after Peter's "yes, live". Vercel: add `PAYSTACK_SECRET_KEY` again with the **live** key, tick **Production** only, **Sensitive** on. Paystack, live mode: set the **Live Webhook URL** to `https://zikorahq.com/api/webhooks/paystack`. Use the custom domain, never a `vercel.app` address. Redeploy Production.
+- [ ] **I9. CLAUDE and YOU.** First live payment is a real pilot hotel paying a real plan, watched together. Paystack can refund it from its dashboard if anything looks wrong.
+- If a payment is taken but the plan does not activate, send me the Paystack reference. The database holds the payment as pending, and replaying the webhook from Paystack's dashboard is safe because it applies once.
+- Check before I8: zikorahq.com serves this app, and the live Supabase **Site URL** and trusted links (E11) match it.
