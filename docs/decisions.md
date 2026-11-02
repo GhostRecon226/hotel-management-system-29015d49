@@ -43,6 +43,6 @@ Newest changes go at the bottom of each row's notes. Date format is day month ye
 |---|---|---|---|
 | D1 | A practice Supabase project for previews and tests, set up before the first pilot. | Confirmed 2 Oct 2026 | Previews never touch live hotel data. |
 | D2 | Peter's own domain: app on `app.`, email from `mail.`. | Confirmed 2 Oct 2026 | |
-| D3 | Euro Hotel on the live project stays as Peter's demo hotel. | Confirmed 1 Oct 2026 | Keep it active by hand before its trial ends (about 30 Oct 2026). |
+| D3 | Euro Hotel on the live project stays as Peter's demo hotel. | Confirmed 1 Oct 2026 | Keep it active by hand before its trial ends (about 30 Oct 2026). **Superseded 13 Oct 2026:** Peter had the demo hotels and the operator account removed on practice and live (PLT-025). Live now holds 0 hotels. |
 | D4 | A second trusted person with access to Vercel, Supabase, Resend and GitHub; two-step sign-in everywhere. | Confirmed 2 Oct 2026 | |
 | D5 | Vercel Pro and Supabase Pro. | Confirmed 2 Oct 2026 | Resend free tier for the pilot. |

@@ -1,6 +1,6 @@
 # Roadmap: the one page
 
-Last updated 13 Oct 2026. This is the first page to open. It says what is done, what is in progress and what is left. Each line points to the file that holds the detail. When something changes, change it here first.
+Last updated 2 Nov 2026. This is the first page to open. It says what is done, what is in progress and what is left. Each line points to the file that holds the detail. When something changes, change it here first.
 
 Where the detail lives:
 
@@ -8,7 +8,7 @@ Where the detail lives:
 - Decisions: `docs/decisions.md`.
 - Ideas we chose to do later: `docs/backlog.md`.
 - Faults we know about: `docs/known-issues.md`.
-- Full audit of 12 Oct 2026 and the kitchen, store and audit scope: Claude Docs, shared by Peter.
+- Latest audit (2 Nov 2026): `docs/audit-2026-11-02.md`. It replaces the audit of 12 Oct. The kitchen, store and audit scope is in Claude Docs, shared by Peter.
 - Dry run steps: `docs/pilot-dry-run.md`.
 - Setup and launch steps: `docs/setup-checklist.md`, `docs/deployment-plan.md`.
 
@@ -22,15 +22,19 @@ Where the detail lives:
 - Owner summary at the top of the platform console (PLT-024): hotels by status, new hotels this week and month with a change on the week before, trials ending within 14 days, hotels gone quiet, and the monthly list price of Active hotels. Account data only. Merged 13 Oct 2026.
 - Home page weight (PLT-023): the first page load went from 823 KB to 456 KB of script (243 KB to 142 KB compressed). CI fails a build that goes over the limit.
 - QA audit, phone layout fixes, Load more on long lists, top-bar search and one rule for money collected are done.
-- Full audit of what is built, in progress and outstanding was written on 12 Oct 2026.
+- Demo hotels and the old platform operator were removed on practice and live on 13 Oct (PLT-025). Both projects hold 0 hotels and 0 operators. Backups are in `~/hotel-desk-backups`.
+- Sign-up safety check (PLT-026) is switched on: site key in Vercel, CAPTCHA protection on in practice and live Supabase (14 Oct).
+- Latest audit of what is built, in process and outstanding: `docs/audit-2026-11-02.md` (2 Nov 2026).
 
 ## 2. In progress (this week)
 
 | Item | Who | State |
 |---|---|---|
 | Test the staff screens on a real iPhone and an Android phone, including Add to Home Screen and an ID photo | Peter | Not started |
-| Test hotel and staff on practice for the 14 Oct dry run | Peter, with Claude | Not started |
-| Dry run of one hotel day (`docs/pilot-dry-run.md`) | Peter and a second person | 14 Oct 2026 |
+| Platform operator on practice, then live. Nobody can open `/platform` until one exists. Needs a working mailbox for hello@zikorahq.com | Peter, with Claude | Not started |
+| Test hotel and staff on practice for the dry run | Peter, with Claude | Not started. Overdue (was 14 Oct). |
+| Dry run of one hotel day (`docs/pilot-dry-run.md`) | Peter and a second person | Overdue (was 14 Oct). New date to be set. |
+| Paystack test mode on `practice.zikorahq.com`, then live (`docs/setup-checklist.md` section I) | Peter, then Claude tests | Waiting on the test key in Vercel |
 | Fixes from the dry run | Claude | Keep a day free after the run |
 | Questions to the pilot hotel on kitchen and store | Peter sends | Draft ready |
 | Tax questions to the accountant | Peter sends | Draft ready |
@@ -40,7 +44,7 @@ Where the detail lives:
 ## 3. Left to build or settle
 
 ### Before the first pilot hotel
-Nothing blocks the pilot in code. New ideas go in `docs/backlog.md`.
+Nothing blocks the pilot in code. Four steps block it in practice: a platform operator, a working hello@ mailbox, the Resend key and sender in Vercel, and the test hotel for the dry run. New ideas go in `docs/backlog.md`.
 
 ### Before the first paying hotel
 | Item | Owner | Source |
@@ -50,10 +54,9 @@ Nothing blocks the pilot in code. New ideas go in `docs/backlog.md`.
 | Email sending: Resend key and sender in Vercel (also starts the contact form). Resend is on the Free plan, 30 emails an hour | Peter | QA-02 |
 | Vercel Pro (turns the 5-minute email job back on), Supabase Pro and backups check | Peter | D5 |
 | Sentry, UptimeRobot, GitHub Pro | Peter | `docs/safety-net.md` |
-| CRON_SECRET in Vercel, live Supabase Site URL | Peter | QA-13, QA-03 |
+| Live Supabase Site URL. (CRON_SECRET is set for Production, read 2 Nov.) | Peter | QA-03 |
 | Confirm hello@zikorahq.com is a real mailbox | Peter | audit |
 | Legal pages (14 stand-ins, Terms section 4, the FAQ offline answer), then switch off the Vercel build override | Peter and counsel | QA-24 |
-| Sign-up safety check (Turnstile, PLT-026): built, off until switched on. Create the Cloudflare widget, then follow `docs/setup-checklist.md` section F in order | Peter | PLT-026 |
 | Full script policy (CSP) | Claude, after phone tests | audit |
 
 ### Asked for by a pilot hotel (not built)
@@ -81,10 +84,10 @@ Nothing blocks the pilot in code. New ideas go in `docs/backlog.md`.
 
 | Decision | Recommendation |
 |---|---|
-| Demo hotels (two Euro Bar Hotel records) and pilot hotels: set to Active, or let day 61 run. First warnings land 23 Oct and 28 Oct. | Set demo and pilot hotels to Active. |
+| Pilot hotels: set to Active, or let day 61 run. (The demo hotels were removed on 13 Oct.) | Set pilot hotels to Active once they start. |
 | Build kitchen, store and restaurant, and in what order | Ask the pilot hotel the 8 questions first. Store first, then restaurant. |
 | Offline walk-in | Ask the pilot hotels how often the connection drops. The downtime pack (`/downtime`) covers longer outages. |
-| Sign-up safety check: built (PLT-026); switch-on steps in `docs/setup-checklist.md` section F. | Switch on before launch on 28 Oct. |
+| Sign-up safety check (PLT-026): on in both Supabase projects since 14 Oct. | Done. Check it again on the first real sign-up. |
 | Fix the last-room test so it runs on any machine | Needs Peter's yes, because it changes an existing test. I show before and after. |
 | Make the offline check-in browser test stand alone (`e2e/offline-stage3.spec.ts`, "a check-in entered with no connection") | Known limit, not a fault in the app. Run alone it fails, even on main; in the full suite it passes. Leave as is for the pilot. A fix changes an existing test, so it needs Peter's yes, with before and after. |
 | Overbooking allowance (QA-17) | Skip for the pilot. |
