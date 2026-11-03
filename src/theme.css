@@ -169,3 +169,25 @@
     oklch(0.22 0.045 205);
 }
 .text-gold { color: oklch(0.8 0.12 82); }
+
+/* Home page (storyboard v1). Light hero, a hotel that draws itself, calm reveals. All motion is off unless the visitor allows it. */
+.home-hero { background: linear-gradient(180deg, var(--primary-soft) 0%, var(--background) 100%); }
+.job-card, .job-icon { transition: none; }
+.hs-draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .hs-fade { animation: hs-fade 0.8s ease-out both; }
+  .hs-draw { stroke-dashoffset: 1; animation: hs-draw 1.4s ease-in-out 0.1s forwards; animation-iteration-count: 1; }
+  .hs-win { animation: hs-light 0.7s ease-out both; animation-delay: calc(1.3s + var(--i, 0) * 0.22s); }
+  .hs-settle { animation: hs-settle 0.9s ease-out 0.5s both; }
+  .hs-settle-late { animation-delay: 0.8s; }
+  .hs-panel { animation: hs-panel 0.35s ease-out both; }
+  .job-card { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+  .job-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-raised-app); border-color: color-mix(in oklab, var(--primary) 40%, transparent); }
+  .job-icon { transition: background-color 0.2s ease, color 0.2s ease; }
+  .job-card:hover .job-icon { background: var(--primary); color: var(--primary-foreground); }
+}
+@keyframes hs-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes hs-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes hs-light { from { opacity: 0.12; } to { opacity: 1; } }
+@keyframes hs-settle { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes hs-panel { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
