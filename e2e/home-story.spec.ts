@@ -44,6 +44,36 @@ test.describe("home page", () => {
     await expect(page.getByText(/Sample data\. Not a live hotel account\./)).toBeVisible();
   });
 
+  test("[PLT-027] capability cards open and close with the keyboard", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const card = page.getByRole("button", { name: /^Front desk Reservations/ });
+    await expect(card).toHaveAttribute("aria-expanded", "false");
+    await card.focus();
+    await page.keyboard.press("Enter");
+    await expect(card).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByText("Walk-ins, room moves and stay extensions")).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(card).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByText("Walk-ins, room moves and stay extensions")).toBeHidden();
+  });
+
+  test("[PLT-027] with motion allowed, sample statuses update; with reduced motion they stay still", async ({ page, browser }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const bRow = page.getByRole("tabpanel").getByText("Guest B · Standard");
+    await expect(bRow).toBeVisible();
+    await expect(page.getByRole("tabpanel").getByText("Dirty")).toHaveCount(0, { timeout: 8000 });
+    await expect(page.getByRole("tabpanel").getByText("Ready")).toHaveCount(3);
+    const ctx = await browser.newContext({ reducedMotion: "reduce" });
+    const still = await ctx.newPage();
+    await still.goto("/");
+    await still.waitForLoadState("networkidle");
+    await still.waitForTimeout(2500);
+    await expect(still.getByRole("tabpanel").getByText("Dirty")).toBeVisible();
+    await ctx.close();
+  });
+
   test("[PLT-027] the copy stays inside what the product does", async ({ page }) => {
     await page.goto("/");
     const text = (await page.locator("main").innerText()).toLowerCase();
