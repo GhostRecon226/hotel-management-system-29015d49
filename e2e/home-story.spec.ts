@@ -104,7 +104,7 @@ test.describe("home page", () => {
     await page.getByRole("tab", { name: "Money" }).click();
     const panel = page.getByRole("tabpanel");
     await expect(panel.getByText("26,000").first()).toBeVisible();
-    await expect(panel.getByRole("button", { name: "Post charge" })).toBeDisabled();
+    for (const gone of ["Post charge", "Split folio", "Transfer"]) await expect(panel.getByRole("button", { name: gone })).toHaveCount(0);
     await panel.getByRole("button", { name: "Record payment" }).click();
     await expect(panel.getByRole("status")).toContainText("The balance is now 0");
     await expect(panel.getByText("Settled", { exact: true })).toBeVisible();
@@ -121,6 +121,8 @@ test.describe("home page", () => {
     await panel.getByRole("button", { name: "Revenue by charge code" }).click();
     await expect(panel.getByRole("columnheader", { name: "Charge code" })).toBeVisible();
     await expect(panel.getByRole("cell", { name: "180,000" })).toBeVisible();
+    await expect(panel.getByRole("button", { name: "Export CSV" })).toHaveCount(0);
+    await expect(panel.getByRole("columnheader", { name: /tax/i })).toHaveCount(0);
     await panel.getByRole("button", { name: "Daily KPIs" }).click();
     await expect(panel.getByRole("columnheader", { name: "RevPAR" })).toBeVisible();
     const text = await panel.innerText();

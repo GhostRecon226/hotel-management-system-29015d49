@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
  * The four home page previews: drawn from the real Zikora screens (Front desk, Room board, Folio, Reports).
  * One made-up "Sample Hotel" with 20 rooms. Nothing here calls the app or a database, and nothing is added up in code:
  * the figures are fixed text that agree with each other (15 of 20 rooms sold, 12,000 each, 180,000 in all, 9,000 per room).
- * Amounts have no currency symbol. Only actions the real screens have are shown.
+ * Amounts have no currency symbol. Only actions the real screens have, and that work in the demo, are shown.
  * This file loads separately, shortly before the previews scroll into view (PLT-023).
  */
 export type PreviewKind = "front-desk" | "rooms" | "money" | "reports";
@@ -213,10 +213,7 @@ function Money() {
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <StatTile icon={Wallet} tone={paid ? "success" : "warning"} label={paid ? "Balance" : "Balance due"} value={paid ? "0" : "26,000"} sub={paid ? "Settled" : "Guest A · Room 106"} />
         <div className="flex flex-wrap content-center items-center gap-2">
-          <Button type="button" size="sm" variant="outline" disabled title="Not part of this sample">Post charge</Button>
           <Button type="button" size="sm" disabled={paid} onClick={() => { setPaid(true); setNote("Payment recorded on the folio. The balance is now 0 and the folio is settled."); }}>Record payment</Button>
-          <Button type="button" size="sm" variant="outline" disabled title="Not part of this sample">Split folio</Button>
-          <Button type="button" size="sm" variant="outline" disabled title="Not part of this sample">Transfer</Button>
         </div>
       </div>
       <Table>
@@ -262,7 +259,6 @@ function Reports() {
           <TableBody><TableRow className="status-swap"><TableCell>Room</TableCell><TableCell>Room</TableCell><TableCell className="tabular text-right">180,000</TableCell></TableRow></TableBody>
         </Table>
       )}
-      <div className="flex justify-end"><Button type="button" size="sm" variant="outline" disabled title="Not part of this sample">Export CSV</Button></div>
     </Frame>
   );
 }
