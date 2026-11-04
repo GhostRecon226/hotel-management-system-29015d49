@@ -1,7 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Hero } from "@/components/public/hero";
-import { CapabilityOverview, ClosingCta, ControlStrip, Handovers, ProofPillars, TeamHandover } from "@/components/public/home-sections";
+import { ClosingCta, TrustStrip } from "@/components/public/home-sections";
+import { Capabilities } from "@/components/public/home/capabilities";
+import { Journey } from "@/components/public/home/journey";
+import { Preview } from "@/components/public/home/preview";
 import { hasStoredSession } from "@/lib/session-hint";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
 
@@ -25,17 +28,13 @@ function Home() {
 
   return (
     <>
-      <Hero label="Hotel operations. Clearer control."
-        lead="Know what’s happening in your hotel." rest="Keep control of the details."
-        text="A room gets moved. A guest asks for a discount. Housekeeping needs to know what to clean. Accounts needs to know what was paid. Zikora connects these everyday workflows, so your team can work from the same record and managers can see the activity behind the day’s numbers."
-        trust="Launching across different markets · Designed for independent hotel operations" />
-      <Handovers />
-      <ProofPillars />
-      <TeamHandover />
-      <CapabilityOverview />
-      <ControlStrip />
-      <ClosingCta title="Try Zikora on your own hotel."
-        text="Create your hotel, add your rooms and run your front desk for 60 days. Every feature, no card needed." />
+      <Hero />
+      <Journey />
+      <Preview />
+      <Capabilities />
+      <TrustStrip />
+      <ClosingCta title="Try it on your own hotel."
+        text="Start your Zikora journey. 60 days free, every feature, no card needed." />
     </>
   );
 }
