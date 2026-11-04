@@ -16,7 +16,7 @@ const TABS: { v: PreviewKind; label: string }[] = [
 ];
 
 function Waiting() {
-  return <div aria-hidden className="min-h-[26rem] animate-pulse rounded-xl border border-border/70 bg-card p-6 shadow-card"><div className="h-4 w-32 rounded bg-muted" /><div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <div key={i} className="h-24 rounded-xl bg-muted/60" />)}</div></div>;
+  return <div aria-hidden className="min-h-[26rem] animate-pulse motion-reduce:animate-none rounded-xl border border-border/70 bg-card p-6 shadow-card"><div className="h-4 w-32 rounded bg-muted" /><div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <div key={i} className="h-24 rounded-xl bg-muted/60" />)}</div></div>;
 }
 
 export function Preview() {
@@ -36,7 +36,7 @@ export function Preview() {
         <div id="preview" ref={box} className="scroll-mt-24">
           <div className="mx-auto max-w-3xl text-center">
             <Eyebrow>Product preview</Eyebrow>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">See Zikora in action.</h2>
+            <h2 className="mt-4 font-sans text-3xl font-extrabold tracking-tight sm:text-4xl">See Zikora in action.</h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">Samples of the screens your team works in.</p>
           </div>
           <Tabs defaultValue="front-desk" className="mx-auto mt-8 max-w-4xl">

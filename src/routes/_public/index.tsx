@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Hero } from "@/components/public/hero";
-import { ClosingCta, TrustStrip } from "@/components/public/home-sections";
-import { Capabilities } from "@/components/public/home/capabilities";
-import { Journey } from "@/components/public/home/journey";
+import { ClosingCta } from "@/components/public/home-sections";
+import { Facts } from "@/components/public/home/facts";
+import { Hub } from "@/components/public/home/hub";
+import { Modules } from "@/components/public/home/modules";
+import { HomeFaq, HomePricing } from "@/components/public/home/plans-faq";
 import { Preview } from "@/components/public/home/preview";
 import { hasStoredSession } from "@/lib/session-hint";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
@@ -29,10 +31,12 @@ function Home() {
   return (
     <>
       <Hero />
-      <Journey />
+      <Hub />
+      <Modules />
       <Preview />
-      <Capabilities />
-      <TrustStrip />
+      <Facts />
+      <HomePricing />
+      <HomeFaq />
       <ClosingCta title="Try it on your own hotel."
         text="Start your Zikora journey. 60 days free, every feature, no card needed." />
     </>
