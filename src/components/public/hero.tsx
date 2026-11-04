@@ -60,6 +60,7 @@ function SampleScreen() {
                 <p className="text-xs text-muted-foreground">{t.label}</p>
                 <p className="mt-1 text-2xl font-extrabold tracking-tight tabular">{t.value}</p>
                 <p className="text-xs text-muted-foreground">{t.note}</p>
+                {t.label === "Occupancy" && <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-primary-soft"><div className="kpi-fill h-full w-3/4 rounded-full bg-primary" style={{ animationDelay: "1s" }} /></div>}
               </div>
             ))}
           </div>
@@ -88,7 +89,13 @@ export function Hero() {
       <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-12 text-center sm:px-6 sm:pb-24 sm:pt-16">
         <div className="hs-fade mx-auto max-w-3xl">
           <h1 className="font-sans text-balance text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-            The operating system for modern <em className="font-display font-medium italic text-primary">hotels</em>
+            The operating system for modern{" "}
+            <span className="relative inline-block">
+              <em className="font-display font-medium italic text-primary">hotels</em>
+              <svg aria-hidden viewBox="0 0 100 10" preserveAspectRatio="none" className="absolute inset-x-0 -bottom-1 h-2.5 w-full text-primary/70">
+                <path d="M2 7 Q 28 1 50 5 T 98 3" pathLength={1} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="hs-draw" style={{ animationDelay: "0.7s" }} />
+              </svg>
+            </span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground sm:text-lg">
             Zikora brings reservations, front desk, housekeeping and billing into one system, so owners, managers and staff work from the same record.
@@ -99,7 +106,7 @@ export function Hero() {
           </div>
           <p className="mt-3 text-sm text-muted-foreground">Every feature. No card needed.</p>
         </div>
-        <div className="relative mx-auto mt-12 max-w-4xl sm:mt-16" data-hero-screen>
+        <div className="hs-settle relative mx-auto mt-12 max-w-4xl sm:mt-16" data-hero-screen style={{ animationDelay: "0.3s" }}>
           <SampleScreen />
           <FloatCard icon={CheckCircle2} title="Check-in complete" text="Guest A · Room 106" className="lg:-left-40 lg:top-28" delay="0.5s" />
           <FloatCard icon={Sparkles} title="Cleaning done" text="Room 104 · inspection next" className="lg:-right-40 lg:top-56" delay="0.7s" />

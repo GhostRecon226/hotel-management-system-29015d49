@@ -150,7 +150,7 @@ function HomeHeader({ signedIn }: { signedIn: boolean }) {
   const link = "rounded-full px-3 py-1.5 text-sm font-semibold text-white/80 outline-none hover:text-white focus-visible:ring-3 focus-visible:ring-white/40";
   return (
     <header className="sticky top-0 z-20 px-3 pt-3 sm:px-6">
-      <div className="mer-ink mx-auto flex h-14 max-w-5xl items-center gap-x-4 rounded-2xl px-3 shadow-raised sm:px-4">
+      <div className="mer-ink mer-drop mx-auto flex h-14 max-w-5xl items-center gap-x-4 rounded-2xl px-3 shadow-raised sm:px-4">
         <Link to="/" className="flex items-center rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-white/40" aria-label="Zikora home">
           <BrandLogo onDark className="h-8 w-auto" />
         </Link>

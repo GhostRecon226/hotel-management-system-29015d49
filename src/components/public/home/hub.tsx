@@ -17,7 +17,7 @@ const NODES: { icon: LucideIcon; title: string; text: string; x: number; y: numb
 export function Hub() {
   return (
     <Section id="hub">
-      <div className="mx-auto max-w-2xl text-center">
+      <div data-reveal className="mx-auto max-w-2xl text-center">
         <h2 className="font-sans text-3xl font-extrabold tracking-tight sm:text-4xl">Everything works together.</h2>
         <p className="mt-3 text-[15px] text-muted-foreground sm:text-base">One record from booking to invoice. Each team sees the same facts, so nobody retypes them.</p>
       </div>
@@ -27,11 +27,11 @@ export function Hub() {
           <circle cx="50" cy="50" r="38" className="mer-hub-ring hs-fade" />
           {NODES.map((n) => <line key={n.title} x1="50" y1="50" x2={n.x} y2={n.y} pathLength={1} className="mer-hub-line hs-draw" />)}
         </svg>
-        <div aria-hidden className="mer-ink absolute left-1/2 top-1/2 hidden size-32 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-center text-lg font-extrabold tracking-tight text-white shadow-raised sm:grid">Zikora</div>
+        <div aria-hidden className="mer-ink mer-halo absolute left-1/2 top-1/2 hidden size-32 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-center text-lg font-extrabold tracking-tight text-white shadow-raised sm:grid">Zikora</div>
         <ul className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:block sm:gap-0">
-          {NODES.map(({ icon: Icon, title, text, x, y }) => (
-            <li key={title} style={{ "--x": `${x}%`, "--y": `${y}%` } as React.CSSProperties}
-              className="flex items-start gap-3 rounded-xl border border-border/70 bg-card p-4 shadow-card sm:absolute sm:left-[var(--x)] sm:top-[var(--y)] sm:w-48 sm:-translate-x-1/2 sm:-translate-y-1/2">
+          {NODES.map(({ icon: Icon, title, text, x, y }, i) => (
+            <li key={title} data-reveal style={{ "--x": `${x}%`, "--y": `${y}%`, "--i": i } as React.CSSProperties}
+              className="mer-lift flex items-start gap-3 rounded-xl border border-border/70 bg-card p-4 shadow-card sm:absolute sm:left-[var(--x)] sm:top-[var(--y)] sm:w-48 sm:-translate-x-1/2 sm:-translate-y-1/2">
               <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary-strong"><Icon className="size-4" /></span>
               <div>
                 <p className="text-[15px] font-bold leading-tight">{title}</p>

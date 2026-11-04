@@ -21,12 +21,12 @@ const MODULES: { icon: LucideIcon; title: string; text: string; more: string[] }
     more: ["Occupancy, ADR and RevPAR", "Revenue by charge code", "Outstanding balances and CSV exports"] },
 ];
 
-function Card({ icon: Icon, title, text, more }: (typeof MODULES)[number]) {
+function Card({ icon: Icon, title, text, more, i }: (typeof MODULES)[number] & { i: number }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   return (
-    <li className="border-b border-border/70 p-6 sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:[&:nth-child(2n)]:border-r lg:[&:nth-child(3n)]:border-r-0">
-      <span aria-hidden className="grid size-10 place-items-center rounded-lg bg-primary-soft text-primary-strong"><Icon className="size-5" /></span>
+    <li data-reveal style={{ "--i": i } as React.CSSProperties} className="mer-cell border-b border-border/70 p-6 sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:[&:nth-child(2n)]:border-r lg:[&:nth-child(3n)]:border-r-0">
+      <span aria-hidden className="mer-icon grid size-10 place-items-center rounded-lg bg-primary-soft text-primary-strong"><Icon className="size-5" /></span>
       <h3 className="font-sans mt-4 text-lg font-bold">{title}</h3>
       <p className="mt-1 text-[15px] text-muted-foreground">{text}</p>
       <button type="button" aria-expanded={open} aria-controls={id} onClick={() => setOpen((v) => !v)}
@@ -43,12 +43,12 @@ function Card({ icon: Icon, title, text, more }: (typeof MODULES)[number]) {
 export function Modules() {
   return (
     <Section id="features">
-      <div className="mx-auto max-w-2xl text-center">
+      <div data-reveal className="mx-auto max-w-2xl text-center">
         <h2 className="font-sans text-3xl font-extrabold tracking-tight sm:text-4xl">Everything you need to run your hotel.</h2>
         <p className="mt-3 text-[15px] text-muted-foreground sm:text-base">Built for the daily work of a front desk, a housekeeping team and an accounts office.</p>
       </div>
       <ul className="mt-10 grid border-t border-border/70 sm:grid-cols-2 lg:grid-cols-3">
-        {MODULES.map((m) => <Card key={m.title} {...m} />)}
+        {MODULES.map((m, i) => <Card key={m.title} {...m} i={i} />)}
       </ul>
     </Section>
   );

@@ -16,7 +16,7 @@ export function HomePricing() {
   const [billing, setBilling] = useState<"month" | "year">("month");
   return (
     <Section id="pricing" className="scroll-mt-20">
-      <div className="mx-auto max-w-2xl text-center">
+      <div data-reveal className="mx-auto max-w-2xl text-center">
         <h2 className="font-sans text-3xl font-extrabold tracking-tight sm:text-4xl">Simple, transparent pricing.</h2>
         <p className="mt-3 text-[15px] text-muted-foreground sm:text-base">60 days free with every feature. No card needed. Plans are sized by rooms, properties and staff users.</p>
       </div>
@@ -29,10 +29,10 @@ export function HomePricing() {
         </Tabs>
       </div>
       <div className="mx-auto mt-8 grid max-w-5xl gap-5 md:grid-cols-3">
-        {PLANS.map((p) => {
+        {PLANS.map((p, i) => {
           const star = p.name === "Standard";
           return (
-            <section key={p.name} className={cn("flex flex-col rounded-2xl border p-7", star ? "border-transparent bg-accent-fill text-primary-foreground shadow-accent" : "border-border/70 bg-card shadow-card")}>
+            <section key={p.name} data-reveal style={{ "--i": i } as React.CSSProperties} className={cn("mer-lift flex flex-col rounded-2xl border p-7", star ? "border-transparent bg-accent-fill text-primary-foreground shadow-accent" : "border-border/70 bg-card shadow-card")}>
               <h3 className="font-sans text-lg font-bold">{p.name}</h3>
               <p className="mt-4 text-4xl font-extrabold tracking-tight tabular">
                 {billing === "month" ? p.price : p.year}
@@ -58,7 +58,7 @@ export function HomeFaq() {
   return (
     <Section id="faq" className="scroll-mt-20">
       <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <div>
+        <div data-reveal>
           <h2 className="font-sans text-3xl font-extrabold tracking-tight sm:text-4xl">Frequently asked questions.</h2>
           <p className="mt-3 text-[15px] text-muted-foreground">Straight answers, including what Zikora does not do yet.</p>
           <p className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
@@ -66,7 +66,7 @@ export function HomeFaq() {
             <Link to="/contact" className="font-semibold text-primary underline-offset-4 hover:underline">Contact the Zikora team</Link>
           </p>
         </div>
-        <FaqList faqs={faqs} />
+        <div data-reveal style={{ "--i": 1 } as React.CSSProperties}><FaqList faqs={faqs} /></div>
       </div>
     </Section>
   );

@@ -130,4 +130,39 @@ test.describe("home page (Meridian)", () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await ctx.close();
   });
+
+  test("[PLT-027] with motion allowed, sections below the fold are visible from the start and reveal once as they scroll in", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const card = page.locator("#pricing section").first();
+    await expect(card).toHaveClass(/rv-pre/);
+    expect(await card.evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
+    await card.scrollIntoViewIfNeeded();
+    await expect(async () => {
+      expect(await card.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+    }).toPass({ timeout: 8000 });
+    await expect(card).not.toHaveClass(/rv-pre/);
+    // The first screen is never hidden.
+    expect(await page.getByRole("heading", { level: 1 }).evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+  });
+
+  test("[PLT-027] with motion allowed, the hero underline draws once and the hub lines are drawn", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const underline = page.locator("h1 svg path");
+    await expect(underline).toHaveCSS("stroke-dashoffset", "0px", { timeout: 6000 });
+    await page.locator("[data-hub]").scrollIntoViewIfNeeded();
+    await expect(page.locator(".mer-hub-line").first()).toHaveCSS("stroke-dashoffset", "0px", { timeout: 6000 });
+  });
+
+  test("[PLT-027] with reduced motion, no section is hidden and the hero underline is drawn at once", async ({ browser }) => {
+    const ctx = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    expect(await page.locator(".rv-pre").count()).toBe(0);
+    await expect(page.locator("h1 svg path")).toHaveCSS("stroke-dashoffset", "0px");
+    expect(await page.locator("#pricing section").first().evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+    await ctx.close();
+  });
 });

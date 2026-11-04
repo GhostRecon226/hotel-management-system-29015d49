@@ -7,6 +7,7 @@ import { Hub } from "@/components/public/home/hub";
 import { Modules } from "@/components/public/home/modules";
 import { HomeFaq, HomePricing } from "@/components/public/home/plans-faq";
 import { Preview } from "@/components/public/home/preview";
+import { useScrollReveal } from "@/components/public/home/use-scroll-reveal";
 import { hasStoredSession } from "@/lib/session-hint";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
 
@@ -27,6 +28,7 @@ function Home() {
   const navigate = useNavigate();
   // Signed-in users go to the app, as before. Only "/" redirects; other public pages stay readable.
   useEffect(() => { if (hasStoredSession()) navigate({ to: "/dashboard", replace: true }); }, [navigate]);
+  useScrollReveal();
 
   return (
     <>

@@ -216,3 +216,21 @@
 }
 .mer-hub-ring { fill: none; stroke: var(--primary); stroke-opacity: 0.25; stroke-dasharray: 1.2 1.6; stroke-width: 0.25; }
 .mer-hub-line { stroke: var(--primary); stroke-opacity: 0.35; stroke-width: 0.3; fill: none; }
+
+/* Home page motion (5 Nov 2026): reveals, hub halo, hovers, FAQ open. Everything here is off for visitors who prefer reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .rv-pre { opacity: 0; transform: translateY(18px); }
+  .rv-pre.rv-in { opacity: 1; transform: none; transition: opacity 0.6s ease, transform 0.6s ease; transition-delay: calc(var(--i, 0) * 80ms); }
+  .mer-drop { animation: mer-drop 0.6s ease-out both; }
+  .mer-halo::after { content: ""; position: absolute; inset: 0; border-radius: 9999px; border: 2px solid var(--primary); opacity: 0; animation: mer-halo 3.6s ease-out 1.6s infinite; }
+  .mer-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  .mer-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-raised-app); }
+  .mer-icon { transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease; }
+  .mer-cell:hover .mer-icon { background: var(--primary); color: var(--primary-foreground); transform: scale(1.06); }
+  #faq [role="region"][data-state="open"] { animation: mer-acc-open 0.25s ease-out; }
+  #faq [role="region"][data-state="closed"] { animation: mer-acc-close 0.2s ease-in; }
+}
+@keyframes mer-drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@keyframes mer-halo { 0% { opacity: 0.35; transform: scale(1); } 100% { opacity: 0; transform: scale(1.7); } }
+@keyframes mer-acc-open { from { height: 0; opacity: 0; } to { height: var(--radix-accordion-content-height); opacity: 1; } }
+@keyframes mer-acc-close { from { height: var(--radix-accordion-content-height); opacity: 1; } to { height: 0; opacity: 0; } }

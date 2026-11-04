@@ -12,13 +12,13 @@ export function Facts() {
   return (
     <Section>
       <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <div>
+        <div data-reveal>
           <h2 className="font-sans text-3xl font-extrabold tracking-tight sm:text-4xl">What changes for your team.</h2>
           <p className="mt-3 text-[15px] text-muted-foreground">Four things Zikora does every day, so the record stays right.</p>
         </div>
         <ol className="divide-y divide-border/70 border-y border-border/70" aria-label="What changes for your team">
           {FACTS.map((f, i) => (
-            <li key={f.title} className="flex gap-5 py-6">
+            <li key={f.title} data-reveal style={{ "--i": i } as React.CSSProperties} className="flex gap-5 py-6">
               <span aria-hidden className="w-8 shrink-0 text-sm font-bold tabular text-primary">{String(i + 1).padStart(2, "0")}</span>
               <div>
                 <h3 className="font-sans text-lg font-bold">{f.title}</h3>
