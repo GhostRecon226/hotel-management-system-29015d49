@@ -223,6 +223,13 @@
   .rv-pre.rv-in { opacity: 1; transform: none; transition: opacity 0.6s ease, transform 0.6s ease; transition-delay: calc(var(--i, 0) * 80ms); }
   .mer-drop { animation: mer-drop 0.6s ease-out both; }
   .mer-halo::after { content: ""; position: absolute; inset: 0; border-radius: 9999px; border: 2px solid var(--primary); opacity: 0; animation: mer-halo 3.6s ease-out 1.6s infinite; }
+  .mer-logo { animation: mer-pop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both, mer-breathe 5s ease-in-out 1.4s infinite; }
+  .dr-pre .mer-logo { animation: none; opacity: 0; transform: scale(0.6); }
+  .dr-pre .hs-draw { animation: none; stroke-dashoffset: 1; }
+  .dr-pre.dr-in .mer-logo { animation: mer-pop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both, mer-breathe 5s ease-in-out 1.4s infinite; opacity: 1; transform: none; }
+  .dr-pre.dr-in .hs-draw { animation: hs-draw 1.4s ease-in-out 0.1s forwards; }
+  .mer-hub-line { transition: stroke-opacity 0.3s ease; }
+  [data-hub]:hover .mer-hub-line { stroke-opacity: 0.7; }
   .mer-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
   .mer-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-raised-app); }
   .mer-icon { transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease; }
@@ -231,6 +238,8 @@
   #faq [role="region"][data-state="closed"] { animation: mer-acc-close 0.2s ease-in; }
 }
 @keyframes mer-drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@keyframes mer-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes mer-breathe { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(0 0 10px color-mix(in oklab, var(--primary) 70%, transparent)); } }
 @keyframes mer-halo { 0% { opacity: 0.35; transform: scale(1); } 100% { opacity: 0; transform: scale(1.7); } }
 @keyframes mer-acc-open { from { height: 0; opacity: 0; } to { height: var(--radix-accordion-content-height); opacity: 1; } }
 @keyframes mer-acc-close { from { height: var(--radix-accordion-content-height); opacity: 1; } to { height: 0; opacity: 0; } }
