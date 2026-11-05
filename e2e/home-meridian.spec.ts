@@ -189,4 +189,19 @@ test.describe("home page (Meridian)", () => {
     await expect(page.locator(".mer-hub-line").first()).toHaveCSS("stroke-dashoffset", "0px");
     await ctx.close();
   });
+
+  test("[PLT-027] on a wide screen the dark header spans the full width and the sample screen stays inside the page", async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await page.goto("/");
+    const header = await page.locator("[data-home-header]").boundingBox();
+    expect(header!.x).toBe(0);
+    expect(Math.round(header!.width)).toBe(1600);
+    expect(header!.height).toBeLessThanOrEqual(72);
+    // The links inside line up with the page content, not the screen edges.
+    const logo = await page.getByRole("link", { name: "Zikora home" }).boundingBox();
+    expect(logo!.x).toBeGreaterThan(100);
+    const screen = await page.getByRole("img", { name: /Sample Zikora home screen/ }).boundingBox();
+    expect(screen!.width).toBeLessThanOrEqual(1000);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
 });
