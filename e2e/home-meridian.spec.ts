@@ -165,4 +165,28 @@ test.describe("home page (Meridian)", () => {
     expect(await page.locator("#pricing section").first().evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
     await ctx.close();
   });
+
+  test("[PLT-027] the hub centre shows the Zikora mark and it fades in when the diagram comes into view", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const logo = page.locator("[data-hub] .mer-logo");
+    await expect(logo).toHaveCount(1);
+    await expect(logo).toHaveAttribute("src", /zikora-icon-dark-screen\.svg/);
+    await page.locator("[data-hub]").scrollIntoViewIfNeeded();
+    await expect(page.locator("[data-hub]")).toHaveClass(/dr-in/);
+    await expect(logo).toHaveCSS("opacity", "1", { timeout: 4000 });
+    expect(await logo.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
+  });
+
+  test("[PLT-027] with reduced motion the hub mark and lines are shown at once", async ({ browser }) => {
+    const ctx = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 1280, height: 800 } });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    expect(await page.locator(".dr-pre").count()).toBe(0);
+    await expect(page.locator("[data-hub] .mer-logo")).toHaveCSS("opacity", "1");
+    await expect(page.locator(".mer-hub-line").first()).toHaveCSS("stroke-dashoffset", "0px");
+    await ctx.close();
+  });
 });
