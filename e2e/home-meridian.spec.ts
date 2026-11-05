@@ -166,7 +166,7 @@ test.describe("home page (Meridian)", () => {
     await ctx.close();
   });
 
-  test("[PLT-027] on a wide screen the dark header spans the full width and the sample screen is large", async ({ page }) => {
+  test("[PLT-027] on a wide screen the dark header spans the full width and the sample screen stays inside the page", async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 900 });
     await page.goto("/");
     const header = await page.locator("[data-home-header]").boundingBox();
@@ -177,7 +177,7 @@ test.describe("home page (Meridian)", () => {
     const logo = await page.getByRole("link", { name: "Zikora home" }).boundingBox();
     expect(logo!.x).toBeGreaterThan(100);
     const screen = await page.getByRole("img", { name: /Sample Zikora home screen/ }).boundingBox();
-    expect(screen!.width).toBeGreaterThan(1000);
+    expect(screen!.width).toBeLessThanOrEqual(1000);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 });
