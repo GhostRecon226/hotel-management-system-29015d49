@@ -80,13 +80,13 @@ function SampleScreen() {
 
 export function Hero() {
   return (
-    <section className="mer-hero relative overflow-hidden">
+    <section className="mer-hero relative overflow-hidden border-b border-border/60">
       <svg aria-hidden viewBox="0 0 1200 200" preserveAspectRatio="none" className="pointer-events-none absolute inset-x-0 bottom-0 h-40 w-full text-primary/25 sm:h-56">
         <path d="M0 160 C150 110 260 150 400 120 S650 70 800 110 S1080 140 1200 100 L1200 200 L0 200Z" fill="currentColor" fillOpacity="0.12" />
         <path d="M0 160 C150 110 260 150 400 120 S650 70 800 110 S1080 140 1200 100" fill="none" stroke="currentColor" strokeWidth="1.5" />
         <path d="M0 185 C200 150 360 180 560 150 S900 130 1200 160" fill="none" stroke="currentColor" strokeWidth="1" />
       </svg>
-      <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-12 text-center sm:px-6 sm:pb-24 sm:pt-16">
+      <div className="relative mx-auto max-w-6xl px-4 pt-12 text-center sm:px-6 sm:pt-16">
         <div className="hs-fade mx-auto max-w-3xl">
           <h1 className="font-sans text-balance text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
             The operating system for modern{" "}
@@ -106,11 +106,11 @@ export function Hero() {
           </div>
           <p className="mt-3 text-sm text-muted-foreground">Every feature. No card needed.</p>
         </div>
-        <div className="hs-settle relative mx-auto mt-12 max-w-4xl sm:mt-16" data-hero-screen style={{ animationDelay: "0.3s" }}>
+        <div className="hs-settle relative mx-auto -mb-16 mt-12 max-w-6xl sm:-mb-24 sm:mt-16" data-hero-screen style={{ animationDelay: "0.3s" }}>
           <SampleScreen />
-          <FloatCard icon={CheckCircle2} title="Check-in complete" text="Guest A · Room 106" className="lg:-left-40 lg:top-28" delay="0.5s" />
-          <FloatCard icon={Sparkles} title="Cleaning done" text="Room 104 · inspection next" className="lg:-right-40 lg:top-56" delay="0.7s" />
-          <FloatCard icon={Wallet} title="Payment recorded" text="26,000 on the folio" className="lg:-bottom-6 lg:left-6" delay="0.9s" />
+          <FloatCard icon={CheckCircle2} title="Check-in complete" text="Guest A · Room 106" className="lg:-left-4 lg:top-28 2xl:-left-40" delay="0.5s" />
+          <FloatCard icon={Sparkles} title="Cleaning done" text="Room 104 · inspection next" className="lg:-right-4 lg:top-52 2xl:-right-40" delay="0.7s" />
+          <FloatCard icon={Wallet} title="Payment recorded" text="26,000 on the folio" className="lg:left-0 lg:top-52 2xl:-left-40" delay="0.9s" />
         </div>
       </div>
     </section>

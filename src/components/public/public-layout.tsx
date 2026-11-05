@@ -144,13 +144,13 @@ const HOME_NAV: { href: string; label: string; to?: "/features" }[] = [
   { href: "#faq", label: "FAQ" },
 ];
 
-/** Home page header: a floating dark pill. Same links and sign-in rules as the other pages. */
+/** Home page header: a full-width dark bar; the content inside lines up with the page below it. Same links and sign-in rules as the other pages. */
 function HomeHeader({ signedIn }: { signedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const link = "rounded-full px-3 py-1.5 text-sm font-semibold text-white/80 outline-none hover:text-white focus-visible:ring-3 focus-visible:ring-white/40";
   return (
-    <header className="sticky top-0 z-20 px-3 pt-3 sm:px-6">
-      <div className="mer-ink mer-drop mx-auto flex h-14 max-w-5xl items-center gap-x-4 rounded-2xl px-3 shadow-raised sm:px-4">
+    <header className="mer-ink sticky top-0 z-20 border-b border-white/10 shadow-raised" data-home-header>
+      <div className="mer-drop mx-auto flex h-16 max-w-6xl items-center gap-x-4 px-4 sm:px-6">
         <Link to="/" className="flex items-center rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-white/40" aria-label="Zikora home">
           <BrandLogo onDark className="h-8 w-auto" />
         </Link>
