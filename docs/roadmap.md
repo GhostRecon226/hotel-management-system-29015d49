@@ -45,7 +45,7 @@ Nothing blocks the pilot in code. New ideas go in `docs/backlog.md`.
 ### Before the first paying hotel
 | Item | Owner | Source |
 |---|---|---|
-| Switch billing on (Paystack key, webhook). Until then payment is arranged by email to hello@zikorahq.com | Peter and Claude | PLT-017, A13 |
+| Switch billing on (Paystack key, webhook). Built; Paystack account approved. Test mode on a practice address first, then live. Steps in setup-checklist section I. Until then payment is arranged by email to hello@zikorahq.com | Peter and Claude | PLT-012, PLT-017, A13 |
 | Tax rates signed off: service charge 10%, VAT 7.5%, levy 0% are unverified. Also fees, discounts, and tax on food and drink | Accountant | A11 |
 | Email sending: Resend key and sender in Vercel (also starts the contact form). Resend is on the Free plan, 30 emails an hour | Peter | QA-02 |
 | Vercel Pro (turns the 5-minute email job back on), Supabase Pro and backups check | Peter | D5 |
