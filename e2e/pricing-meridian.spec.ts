@@ -27,15 +27,10 @@ test.describe("pricing page (Meridian)", () => {
     await expect(main).toContainText("Same as ₦30,000 a month for 10 months");
   });
 
-  test("[PLT-029] home page and pricing page show the same plan list", async ({ page }) => {
+  test("[PLT-029] the home page has no plan prices, and links to this page", async ({ page }) => {
     await page.goto("/");
-    const home = await page.locator("#pricing").innerText();
-    await page.goto("/pricing");
-    const pricing = await page.locator("main").innerText();
-    for (const x of ["₦30,000", "₦45,000", "₦80,000", "Up to 20 rooms", "Up to 60 rooms", "Up to 150 rooms", "Up to 3 properties", "Up to 60 staff users"]) {
-      expect(home).toContain(x);
-      expect(pricing).toContain(x);
-    }
+    expect(await page.locator("main").innerText()).not.toMatch(/₦\d/);
+    await expect(page.locator("main").getByRole("link", { name: /^Pricing/ })).toHaveAttribute("href", "/pricing");
   });
 
   test("[PLT-029] says what happens after the 60 days, in three steps", async ({ page }) => {

@@ -1,16 +1,16 @@
-// Home page previews: four sample screens with one interaction each, lazy loaded, sample data only. The page layout tests are in home-meridian.spec.ts. [PLT-027]
+// How it works page previews: four sample screens with one interaction each, lazy loaded, sample data only. The page layout tests are in home-meridian.spec.ts. [PLT-027]
 import { test, expect, type Page } from "@playwright/test";
 
-/** Opens the home page, waits for it to start up, and scrolls to the previews. */
+/** Opens the How it works page, waits for it to start up, and scrolls to the previews. */
 async function openPreview(page: Page) {
-  await page.goto("/");
+  await page.goto("/how-it-works");
   await page.waitForLoadState("networkidle");
   await page.locator("#preview").scrollIntoViewIfNeeded();
 }
 
-test.describe("home page", () => {
+test.describe("how it works page", () => {
   test("[PLT-027] the previews switch with the keyboard and say they are sample data", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/how-it-works");
     await page.waitForLoadState("networkidle");
     const tabs = page.getByRole("tablist", { name: "Zikora previews" });
     await expect(tabs.getByRole("tab")).toHaveText(["Front desk", "Rooms", "Money", "Reports"]);
@@ -31,7 +31,7 @@ test.describe("home page", () => {
   test("[PLT-027] the preview code loads only when the previews come near the screen", async ({ page }) => {
     const files: string[] = [];
     page.on("request", (r) => { if (/preview\/panels/.test(r.url())) files.push(r.url()); });
-    await page.goto("/");
+    await page.goto("/how-it-works");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(500);
     expect(files, "previews must not load with the first page").toEqual([]);
@@ -116,10 +116,12 @@ test.describe("home page", () => {
   });
 
   test("[PLT-027] the copy stays inside what the product does", async ({ page }) => {
-    await page.goto("/");
-    const text = (await page.locator("main").innerText()).toLowerCase();
-    for (const banned of ["nigeria", "inventory", "procurement", "testimonial", "guest app", "self-service", "integration"]) {
-      expect(text, `home page must not say "${banned}"`).not.toContain(banned);
+    for (const path of ["/", "/how-it-works"]) {
+      await page.goto(path);
+      const text = (await page.locator("main").innerText()).toLowerCase();
+      for (const banned of ["nigeria", "inventory", "procurement", "testimonial", "guest app", "self-service", "integration"]) {
+        expect(text, `${path} must not say "${banned}"`).not.toContain(banned);
+      }
     }
   });
 

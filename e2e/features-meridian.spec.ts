@@ -24,8 +24,8 @@ test.describe("features page (Meridian)", () => {
     await page.goto("/features");
     await expect(page.locator("[data-home-header]")).toBeVisible();
     const nav = page.getByRole("navigation", { name: "Main" });
-    await expect(nav.getByRole("link", { name: "Pricing" })).toHaveAttribute("href", "/#pricing");
-    await expect(nav.getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "/#faq");
+    await expect(nav.getByRole("link", { name: "Pricing" })).toHaveAttribute("href", "/pricing");
+    await expect(nav.getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "/faq");
     await expect(nav.getByRole("link", { name: "Features" })).toHaveAttribute("href", "/features");
   });
 

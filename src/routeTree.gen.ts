@@ -23,6 +23,7 @@ import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as PublicContactRouteImport } from './routes/_public/contact'
 import { Route as PublicFaqRouteImport } from './routes/_public/faq'
 import { Route as PublicFeaturesRouteImport } from './routes/_public/features'
+import { Route as PublicHowItWorksRouteImport } from './routes/_public/how-it-works'
 import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
 import { Route as PublicSecurityRouteImport } from './routes/_public/security'
@@ -142,6 +143,11 @@ const PublicFaqRoute = PublicFaqRouteImport.update({
 const PublicFeaturesRoute = PublicFeaturesRouteImport.update({
   id: '/features',
   path: '/features',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicHowItWorksRoute = PublicHowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicPricingRoute = PublicPricingRouteImport.update({
@@ -456,6 +462,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
   '/features': typeof PublicFeaturesRoute
+  '/how-it-works': typeof PublicHowItWorksRoute
   '/pricing': typeof PublicPricingRoute
   '/privacy': typeof PublicPrivacyRoute
   '/security': typeof PublicSecurityRoute
@@ -521,6 +528,7 @@ export interface FileRoutesByTo {
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
   '/features': typeof PublicFeaturesRoute
+  '/how-it-works': typeof PublicHowItWorksRoute
   '/pricing': typeof PublicPricingRoute
   '/privacy': typeof PublicPrivacyRoute
   '/security': typeof PublicSecurityRoute
@@ -582,6 +590,7 @@ export interface FileRoutesById {
   '/_public/contact': typeof PublicContactRoute
   '/_public/faq': typeof PublicFaqRoute
   '/_public/features': typeof PublicFeaturesRoute
+  '/_public/how-it-works': typeof PublicHowItWorksRoute
   '/_public/pricing': typeof PublicPricingRoute
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/security': typeof PublicSecurityRoute
@@ -650,6 +659,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/features'
+    | '/how-it-works'
     | '/pricing'
     | '/privacy'
     | '/security'
@@ -715,6 +725,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/features'
+    | '/how-it-works'
     | '/pricing'
     | '/privacy'
     | '/security'
@@ -775,6 +786,7 @@ export interface FileRouteTypes {
     | '/_public/contact'
     | '/_public/faq'
     | '/_public/features'
+    | '/_public/how-it-works'
     | '/_public/pricing'
     | '/_public/privacy'
     | '/_public/security'
@@ -940,6 +952,13 @@ declare module '@tanstack/react-router' {
       path: '/features'
       fullPath: '/features'
       preLoaderRoute: typeof PublicFeaturesRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/how-it-works': {
+      id: '/_public/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof PublicHowItWorksRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/_public/pricing': {
@@ -1530,6 +1549,7 @@ interface PublicRouteRouteChildren {
   PublicContactRoute: typeof PublicContactRoute
   PublicFaqRoute: typeof PublicFaqRoute
   PublicFeaturesRoute: typeof PublicFeaturesRoute
+  PublicHowItWorksRoute: typeof PublicHowItWorksRoute
   PublicPricingRoute: typeof PublicPricingRoute
   PublicPrivacyRoute: typeof PublicPrivacyRoute
   PublicSecurityRoute: typeof PublicSecurityRoute
@@ -1542,6 +1562,7 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicContactRoute: PublicContactRoute,
   PublicFaqRoute: PublicFaqRoute,
   PublicFeaturesRoute: PublicFeaturesRoute,
+  PublicHowItWorksRoute: PublicHowItWorksRoute,
   PublicPricingRoute: PublicPricingRoute,
   PublicPrivacyRoute: PublicPrivacyRoute,
   PublicSecurityRoute: PublicSecurityRoute,
