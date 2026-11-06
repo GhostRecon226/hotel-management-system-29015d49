@@ -93,7 +93,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           if (/confirm/i.test(error.message)) throw new Error("Please confirm your email first. Check your inbox.");
           throw error;
         }
-        navigate({ to: "/dashboard", replace: true });
+        navigate({ to: "/home", replace: true });
       }
     } catch (err) {
       setError(errorMessage(err));
