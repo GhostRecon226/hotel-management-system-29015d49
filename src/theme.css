@@ -143,14 +143,26 @@
   --sidebar-ring: oklch(0.72 0.1 195);
 }
 
-/* Brand panel on the sign-in screens: the hotel lobby photo (public/brand/login-hero.jpg) under a dark teal wash so the white text stays readable. */
-.auth-hero {
+/* Brand panel on the sign-in screens: a dark ink ground with two slow glows (teal and gold, the logo colours).
+   The hotel-at-night drawing sits on it (src/components/auth-night.tsx). No photo, so nothing to download. */
+.auth-night { position: relative; isolation: isolate; background: oklch(0.2 0.045 205); }
+.auth-night::before {
+  content: ""; position: absolute; inset: -20%; z-index: -1;
   background:
-    linear-gradient(100deg, oklch(0.2 0.045 205 / 0.92) 0%, oklch(0.2 0.045 205 / 0.78) 55%, oklch(0.2 0.045 205 / 0.38) 100%),
-    linear-gradient(0deg, oklch(0.18 0.04 205 / 0.75), transparent 35%),
-    url("/brand/login-hero.jpg") 70% center / cover no-repeat,
-    oklch(0.22 0.045 205);
+    radial-gradient(40% 35% at 25% 20%, oklch(0.72 0.1 190 / 0.30), transparent 70%),
+    radial-gradient(35% 30% at 85% 85%, oklch(0.78 0.09 80 / 0.22), transparent 70%);
 }
+@media (prefers-reduced-motion: no-preference) {
+  .auth-night::before { animation: night-drift 14s ease-in-out infinite alternate; }
+  .night-win { animation: night-on 0.9s ease-out backwards; animation-delay: calc(var(--i, 0) * 0.14s + 0.3s); }
+  .night-dot { animation: night-ping 2s infinite; }
+}
+.night-win { fill: oklch(1 0 0 / 0.07); transition: fill 0.8s, filter 0.8s; }
+.night-win[data-s="occ"] { fill: oklch(0.78 0.09 80); filter: drop-shadow(0 0 6px oklch(0.78 0.09 80 / 0.7)); }
+.night-win[data-s="rdy"] { fill: oklch(0.75 0.11 190); filter: drop-shadow(0 0 6px oklch(0.75 0.11 190 / 0.7)); }
+@keyframes night-drift { to { transform: translate3d(4%, 3%, 0) scale(1.08); } }
+@keyframes night-on { from { fill: oklch(1 0 0 / 0.07); filter: none; } }
+@keyframes night-ping { 70% { box-shadow: 0 0 0 9px oklch(0.75 0.11 190 / 0); } 100% { box-shadow: 0 0 0 0 oklch(0.75 0.11 190 / 0); } }
 
 /* Greeting banner on the dashboard: the lobby photo under the same dark teal wash. */
 .dash-banner {
