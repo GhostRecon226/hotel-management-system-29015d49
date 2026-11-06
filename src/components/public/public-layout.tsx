@@ -84,7 +84,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </div>
             <p className={cn("mt-3 max-w-sm text-sm", home ? "text-white/75" : "text-muted-foreground")}>Zikora brings the daily work of running a hotel into one connected system, with a clearer record of rooms, service and money.</p>
           </div>
-          <FooterLinks dark={home} title="Product" links={[{ to: "/features", label: "Features" }, { to: "/security", label: "Security" }, { to: "/faq", label: "FAQ" }]} />
+          <FooterLinks dark={home} title="Product" links={[{ to: "/features", label: "Features" }, { to: "/how-it-works", label: "How it works" }, { to: "/pricing", label: "Pricing" }, { to: "/security", label: "Security" }, { to: "/faq", label: "FAQ" }]} />
           <FooterLinks dark={home} title="Company" links={[{ to: "/about", label: "About" }, { to: "/contact", label: "Contact" }]} />
           {!signedIn && (
             <div>
@@ -140,7 +140,7 @@ export function DraftNotice() {
   );
 }
 
-const DARK_PAGES = ["/", "/features", "/how-it-works", "/pricing", "/faq", "/about", "/contact"];
+const DARK_PAGES = ["/", "/features", "/how-it-works", "/pricing", "/faq", "/about", "/contact", "/security", "/privacy", "/terms"];
 
 // The dark header lists the main pages. Security is in the footer and the phone menu.
 const DARK_NAV = NAV.filter((n) => n.to !== "/security");
