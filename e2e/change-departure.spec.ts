@@ -26,7 +26,6 @@ test("an in-house stay can be extended and then shortened from the Front Desk", 
 
   const changeTo = async (offsetDays: number, hint: RegExp) => {
     await page.reload();
-    await page.getByRole("tab", { name: /In house/ }).click();
     await page.getByRole("row", { name: /Kemi Early/ }).getByRole("button", { name: "Actions for room 1" }).click();
     await page.getByRole("menuitem", { name: "Change departure" }).click();
     const dlg = page.getByRole("dialog", { name: /Change departure/ });

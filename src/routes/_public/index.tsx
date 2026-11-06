@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_public/")({
 function Home() {
   const navigate = useNavigate();
   // Signed-in users go to the app, as before. Only "/" redirects; other public pages stay readable.
-  useEffect(() => { if (hasStoredSession()) navigate({ to: "/dashboard", replace: true }); }, [navigate]);
+  useEffect(() => { if (hasStoredSession()) navigate({ to: "/home", replace: true }); }, [navigate]);
   useScrollReveal();
 
   return (

@@ -27,7 +27,6 @@ test("an in-house row has a Check out button that opens that guest's check-out, 
   await expect(toasts(page).filter({ hasText: "Walk-in checked in." })).toBeVisible();
 
   await page.reload();
-  await page.getByRole("tab", { name: /In house/ }).click();
   const row = page.getByRole("row", { name: /Olu Inhouse/ });
   const checkOut = row.getByRole("button", { name: "Check out room 1" }).or(row.getByRole("link", { name: "Check out room 1" }));
   await expect(checkOut).toBeVisible();

@@ -17,6 +17,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedCreateHotelRouteImport } from './routes/_authenticated/create-hotel'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
@@ -115,6 +116,11 @@ const AuthenticatedCreateHotelRoute =
     path: '/create-hotel',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlatformRoute = AuthenticatedPlatformRouteImport.update({
   id: '/platform',
   path: '/platform',
@@ -457,6 +463,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/home': typeof AuthenticatedHomeRoute
   '/platform': typeof AuthenticatedPlatformRoute
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
@@ -523,6 +530,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/home': typeof AuthenticatedHomeRoute
   '/platform': typeof AuthenticatedPlatformRoute
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
@@ -585,6 +593,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/create-hotel': typeof AuthenticatedCreateHotelRoute
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/platform': typeof AuthenticatedPlatformRoute
   '/_public/about': typeof PublicAboutRoute
   '/_public/contact': typeof PublicContactRoute
@@ -654,6 +663,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/create-hotel'
+    | '/home'
     | '/platform'
     | '/about'
     | '/contact'
@@ -720,6 +730,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/create-hotel'
+    | '/home'
     | '/platform'
     | '/about'
     | '/contact'
@@ -781,6 +792,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/_app'
     | '/_authenticated/create-hotel'
+    | '/_authenticated/home'
     | '/_authenticated/platform'
     | '/_public/about'
     | '/_public/contact'
@@ -910,6 +922,13 @@ declare module '@tanstack/react-router' {
       path: '/create-hotel'
       fullPath: '/create-hotel'
       preLoaderRoute: typeof AuthenticatedCreateHotelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/platform': {
@@ -1530,6 +1549,7 @@ const AuthenticatedAppRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
   AuthenticatedCreateHotelRoute: typeof AuthenticatedCreateHotelRoute
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedPlatformRoute: typeof AuthenticatedPlatformRoute
   AuthenticatedInvoicesIdRoute: typeof AuthenticatedInvoicesIdRoute
 }
@@ -1537,6 +1557,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
   AuthenticatedCreateHotelRoute: AuthenticatedCreateHotelRoute,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedPlatformRoute: AuthenticatedPlatformRoute,
   AuthenticatedInvoicesIdRoute: AuthenticatedInvoicesIdRoute,
 }
