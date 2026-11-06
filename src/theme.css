@@ -169,3 +169,77 @@
     oklch(0.22 0.045 205);
 }
 .text-gold { color: oklch(0.8 0.12 82); }
+
+/* Home page (storyboard v1). Light hero, a hotel that draws itself, calm reveals. All motion is off unless the visitor allows it. */
+.home-hero { background: linear-gradient(180deg, var(--primary-soft) 0%, var(--background) 100%); }
+.job-card, .job-icon { transition: none; }
+.hs-draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .hs-fade { animation: hs-fade 0.8s ease-out both; }
+  .hs-draw { stroke-dashoffset: 1; animation: hs-draw 1.4s ease-in-out 0.1s forwards; animation-iteration-count: 1; }
+  .hs-win { animation: hs-light 0.7s ease-out both; animation-delay: calc(1.3s + var(--i, 0) * 0.22s); }
+  .hs-settle { animation: hs-settle 0.9s ease-out 0.5s both; }
+  .hs-settle-late { animation-delay: 0.8s; }
+  .job-card { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+  .job-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-raised-app); border-color: color-mix(in oklab, var(--primary) 40%, transparent); }
+  .job-icon { transition: background-color 0.2s ease, color 0.2s ease; }
+  .job-chevron { transition: transform 0.25s ease; }
+  .job-more { transition: grid-template-rows 0.28s ease; }
+  .status-swap { animation: hs-pop 0.4s ease-out both; }
+  .kpi-fill { transform-origin: left; animation: hs-grow-x 0.8s ease-out both; }
+  .bar-rise { transform-origin: bottom; animation: hs-grow-y 0.6s ease-out both; }
+  .mm-armed .mm-pop { opacity: 0; transform: scale(0.8); }
+  .mm-in .mm-pop { opacity: 1; transform: none; transition: opacity 0.35s ease, transform 0.35s ease; }
+  .mm-armed .mm-grow-x { transform: scaleX(0); transform-origin: left; }
+  .mm-armed .mm-grow { transform: scaleY(0); transform-origin: bottom; }
+  .mm-in .mm-grow-x, .mm-in .mm-grow { transform: none; transition: transform 0.6s ease-out; }
+  .mm-in .mm-late { transition-delay: 0.8s; }
+  .job-card:hover .job-icon { background: var(--primary); color: var(--primary-foreground); }
+}
+/* Closed card details are hidden from view, keyboard and screen readers once the close finishes. */
+.job-more > div { transition: visibility 0s linear 0s; }
+.job-more[data-open="false"] > div { visibility: hidden; transition: visibility 0s linear 0.28s; }
+@keyframes hs-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes hs-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes hs-light { from { opacity: 0.12; } to { opacity: 1; } }
+@keyframes hs-settle { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes hs-pop { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: none; } }
+@keyframes hs-grow-x { from { transform: scaleX(0); } to { transform: none; } }
+@keyframes hs-grow-y { from { transform: scaleY(0); } to { transform: none; } }
+
+/* Home page, Meridian direction (Nov 2026). Zikora teal only; gold stays in the logo. Motion is off unless the visitor allows it. */
+.mer-ink { background: oklch(0.2 0.045 205); }
+.mer-hero { background: radial-gradient(ellipse 90% 55% at 50% 0%, var(--primary-soft), transparent 70%), var(--background); }
+.mer-tilt { transform: none; }
+@media (min-width: 1024px) {
+  .mer-tilt { transform: perspective(1800px) rotateX(8deg) rotateY(-4deg); transform-origin: center top; box-shadow: 0 40px 80px -30px oklch(0.2 0.045 205 / 0.35); }
+}
+.mer-hub-ring { fill: none; stroke: var(--primary); stroke-opacity: 0.25; stroke-dasharray: 1.2 1.6; stroke-width: 0.25; }
+.mer-hub-line { stroke: var(--primary); stroke-opacity: 0.35; stroke-width: 0.3; fill: none; }
+
+/* Home page motion (5 Nov 2026): reveals, hub halo, hovers, FAQ open. Everything here is off for visitors who prefer reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .rv-pre { opacity: 0; transform: translateY(18px); }
+  .rv-pre.rv-in { opacity: 1; transform: none; transition: opacity 0.6s ease, transform 0.6s ease; transition-delay: calc(var(--i, 0) * 80ms); }
+  .mer-drop { animation: mer-drop 0.6s ease-out both; }
+  .mer-halo::after { content: ""; position: absolute; inset: 0; border-radius: 9999px; border: 2px solid var(--primary); opacity: 0; animation: mer-halo 3.6s ease-out 1.6s infinite; }
+  .mer-logo { animation: mer-pop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both, mer-breathe 5s ease-in-out 1.4s infinite; }
+  .dr-pre .mer-logo { animation: none; opacity: 0; transform: scale(0.6); }
+  .dr-pre .hs-draw { animation: none; stroke-dashoffset: 1; }
+  .dr-pre.dr-in .mer-logo { animation: mer-pop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both, mer-breathe 5s ease-in-out 1.4s infinite; opacity: 1; transform: none; }
+  .dr-pre.dr-in .hs-draw { animation: hs-draw 1.4s ease-in-out 0.1s forwards; }
+  .mer-hub-line { transition: stroke-opacity 0.3s ease; }
+  [data-hub]:hover .mer-hub-line { stroke-opacity: 0.7; }
+  .mer-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  .mer-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-raised-app); }
+  .mer-icon { transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease; }
+  .mer-cell:hover .mer-icon { background: var(--primary); color: var(--primary-foreground); transform: scale(1.06); }
+  #faq [role="region"][data-state="open"] { animation: mer-acc-open 0.25s ease-out; }
+  #faq [role="region"][data-state="closed"] { animation: mer-acc-close 0.2s ease-in; }
+}
+@keyframes mer-drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@keyframes mer-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes mer-breathe { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(0 0 10px color-mix(in oklab, var(--primary) 70%, transparent)); } }
+@keyframes mer-halo { 0% { opacity: 0.35; transform: scale(1); } 100% { opacity: 0; transform: scale(1.7); } }
+@keyframes mer-acc-open { from { height: 0; opacity: 0; } to { height: var(--radix-accordion-content-height); opacity: 1; } }
+@keyframes mer-acc-close { from { height: var(--radix-accordion-content-height); opacity: 1; } to { height: 0; opacity: 0; } }

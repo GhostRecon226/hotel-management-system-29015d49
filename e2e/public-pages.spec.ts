@@ -4,7 +4,7 @@ import { test, expect } from "@playwright/test";
 import { createTestUser } from "./local-supabase";
 
 const PAGES: [string, RegExp][] = [
-  ["/", /Know what’s happening in your hotel\. Keep control of the details\./],
+  ["/", /The operating system for modern hotels/],
   ["/features", /The workflows behind a well-run hotel/],
   ["/pricing", /The right tools for the way your hotel runs/],
   ["/security", /Accountability should be built into the workflow/],

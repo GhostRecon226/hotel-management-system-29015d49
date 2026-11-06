@@ -1,7 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Hero } from "@/components/public/hero";
-import { CapabilityOverview, ClosingCta, ControlStrip, Handovers, ProofPillars, TeamHandover } from "@/components/public/home-sections";
+import { ClosingCta } from "@/components/public/home-sections";
+import { Hub } from "@/components/public/home/hub";
+import { Explore } from "@/components/public/home/explore";
+import { Modules } from "@/components/public/home/modules";
+import { useScrollReveal } from "@/components/public/home/use-scroll-reveal";
 import { hasStoredSession } from "@/lib/session-hint";
 import { ORGANIZATION_LD, pageHead } from "@/lib/seo";
 
@@ -22,20 +26,16 @@ function Home() {
   const navigate = useNavigate();
   // Signed-in users go to the app, as before. Only "/" redirects; other public pages stay readable.
   useEffect(() => { if (hasStoredSession()) navigate({ to: "/dashboard", replace: true }); }, [navigate]);
+  useScrollReveal();
 
   return (
     <>
-      <Hero label="Hotel operations. Clearer control."
-        lead="Know what’s happening in your hotel." rest="Keep control of the details."
-        text="A room gets moved. A guest asks for a discount. Housekeeping needs to know what to clean. Accounts needs to know what was paid. Zikora connects these everyday workflows, so your team can work from the same record and managers can see the activity behind the day’s numbers."
-        trust="Launching across different markets · Designed for independent hotel operations" />
-      <Handovers />
-      <ProofPillars />
-      <TeamHandover />
-      <CapabilityOverview />
-      <ControlStrip />
-      <ClosingCta title="Try Zikora on your own hotel."
-        text="Create your hotel, add your rooms and run your front desk for 60 days. Every feature, no card needed." />
+      <Hero />
+      <Hub />
+      <Modules />
+      <Explore />
+      <ClosingCta title="Try it on your own hotel."
+        text="Start your Zikora journey. 60 days free, every feature, no card needed." />
     </>
   );
 }
