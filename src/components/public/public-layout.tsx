@@ -139,7 +139,7 @@ export function DraftNotice() {
   );
 }
 
-const DARK_PAGES = ["/", "/features"];
+const DARK_PAGES = ["/", "/features", "/pricing"];
 
 // On the home page the section links jump within the page; on other pages they go to the home page section.
 const homeNav = (onHome: boolean): { href: string; label: string; to?: "/features" }[] => {
