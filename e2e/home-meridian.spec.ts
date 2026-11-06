@@ -1,4 +1,4 @@
-// Home page, Meridian direction (Nov 2026): hero, hub, feature grid, previews, facts, pricing, FAQ. No database calls. [PLT-027]
+// Home page, Meridian direction (Nov 2026): hero, hub, feature grid and a row of links to the other pages. No database calls. [PLT-027]
 import { test, expect } from "@playwright/test";
 
 test.describe("home page (Meridian)", () => {
@@ -10,10 +10,7 @@ test.describe("home page (Meridian)", () => {
     expect(h2s).toEqual([
       "Everything works together.",
       "Everything you need to run your hotel.",
-      "See Zikora in action.",
-      "What changes for your team.",
-      "Simple, transparent pricing.",
-      "Frequently asked questions.",
+      "Go deeper.",
       "Try it on your own hotel.",
     ]);
   });
@@ -22,12 +19,13 @@ test.describe("home page (Meridian)", () => {
     await page.goto("/");
     const nav = page.getByRole("navigation", { name: "Main" });
     await expect(nav.getByRole("link", { name: "Features" })).toHaveAttribute("href", "/features");
-    await expect(nav.getByRole("link", { name: "Product" })).toHaveAttribute("href", "#preview");
-    await expect(nav.getByRole("link", { name: "Pricing" })).toHaveAttribute("href", "#pricing");
-    await expect(nav.getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "#faq");
-    await expect(page.locator("#pricing")).toHaveCount(1);
-    await expect(page.locator("#faq")).toHaveCount(1);
-    await expect(page.locator("#preview")).toHaveCount(1);
+    await expect(nav.getByRole("link", { name: "How it works" })).toHaveAttribute("href", "/how-it-works");
+    await expect(nav.getByRole("link", { name: "Pricing" })).toHaveAttribute("href", "/pricing");
+    await expect(nav.getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "/faq");
+    await expect(nav.getByRole("link", { name: "About" })).toHaveAttribute("href", "/about");
+    await expect(nav.getByRole("link", { name: "Contact" })).toHaveAttribute("href", "/contact");
+    // The home page is short: pricing, FAQ and the previews live on their own pages.
+    for (const id of ["#pricing", "#faq", "#preview"]) await expect(page.locator(id)).toHaveCount(0);
   });
 
   test("[PLT-027] the hero sample screen is labelled sample data and agrees with the Front desk preview", async ({ page }) => {
@@ -61,44 +59,16 @@ test.describe("home page (Meridian)", () => {
     await expect(page.getByText("Check-in, walk-ins and room moves")).toBeHidden();
   });
 
-  test("[PLT-027] four numbered facts, no invented results", async ({ page }) => {
-    await page.goto("/");
-    const facts = page.getByRole("list", { name: "What changes for your team" }).getByRole("listitem");
-    await expect(facts).toHaveCount(4);
-    const text = await page.getByRole("list", { name: "What changes for your team" }).innerText();
-    expect(text).not.toMatch(/\d+\s?%/);
-  });
-
-  test("[PLT-027] pricing shows the three plans from the plan list and switches to annual", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-    const box = page.locator("#pricing");
-    for (const [name, price] of [["Starter", "₦30,000"], ["Standard", "₦45,000"], ["Pro", "₦80,000"]]) {
-      await expect(box.getByRole("heading", { level: 3, name })).toBeVisible();
-      await expect(box).toContainText(price);
-    }
-    await box.getByRole("tab", { name: /Annual/ }).click();
-    await expect(box).toContainText("₦300,000");
-    await expect(box.getByRole("link", { name: "Start free trial" })).toHaveCount(3);
-  });
-
-  test("[PLT-027] the FAQ opens an answer with the keyboard", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-    const q = page.locator("#faq").getByRole("button", { name: "Does it work offline?" });
-    await q.focus();
-    await page.keyboard.press("Enter");
-    await expect(q).toHaveAttribute("aria-expanded", "true");
-    await expect(page.getByText("Zikora requires an internet connection.")).toBeVisible();
-  });
-
   test("[PLT-027] every call to action goes where it says", async ({ page }) => {
     await page.goto("/");
     const main = page.locator("main");
     await expect(main.getByRole("link", { name: "Start 60 days free" })).toHaveAttribute("href", /\/auth\?mode=signup/);
-    await expect(main.getByRole("link", { name: "See Zikora in action" })).toHaveAttribute("href", "#preview");
-    await expect(main.getByRole("link", { name: "See full pricing" })).toHaveAttribute("href", "/pricing");
-    await expect(main.getByRole("link", { name: "See all questions" })).toHaveAttribute("href", "/faq");
+    await expect(main.getByRole("link", { name: "See Zikora in action" })).toHaveAttribute("href", "/how-it-works");
+    const explore = page.locator("main li").filter({ has: page.getByRole("heading", { level: 3, name: /^(Features|How it works|Pricing)$/ }) });
+    await expect(explore).toHaveCount(3);
+    await expect(main.getByRole("link", { name: /^Features/ })).toHaveAttribute("href", "/features");
+    await expect(main.getByRole("link", { name: /^How it works/ })).toHaveAttribute("href", "/how-it-works");
+    await expect(main.getByRole("link", { name: /^Pricing/ })).toHaveAttribute("href", "/pricing");
     await expect(main.getByRole("link", { name: "Start free trial" }).last()).toHaveAttribute("href", /\/auth\?mode=signup/);
   });
 
@@ -110,7 +80,7 @@ test.describe("home page (Meridian)", () => {
     await expect(page.getByRole("img", { name: /Sample Zikora home screen/ })).toBeVisible();
     const running = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === "running" && !(a instanceof CSSTransition)).length);
     expect(running).toBe(0);
-    for (const sel of ["[data-hub] li", "#features h3", "#pricing h3"]) {
+    for (const sel of ["[data-hub] li", "#features h3"]) {
       expect(await page.locator(sel).first().evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
     }
     await ctx.close();
@@ -126,7 +96,7 @@ test.describe("home page (Meridian)", () => {
     const a = await items.nth(0).boundingBox();
     const b = await items.nth(2).boundingBox();
     expect(b!.y).toBeGreaterThan(a!.y + a!.height - 2);
-    await page.locator("#pricing").scrollIntoViewIfNeeded();
+    await page.locator("#features").scrollIntoViewIfNeeded();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await ctx.close();
   });
@@ -134,7 +104,7 @@ test.describe("home page (Meridian)", () => {
   test("[PLT-027] with motion allowed, sections below the fold are visible from the start and reveal once as they scroll in", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
-    const card = page.locator("#pricing section").first();
+    const card = page.locator("#features li").first();
     await expect(card).toHaveClass(/rv-pre/);
     expect(await card.evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
     await card.scrollIntoViewIfNeeded();
@@ -162,7 +132,7 @@ test.describe("home page (Meridian)", () => {
     await page.waitForLoadState("networkidle");
     expect(await page.locator(".rv-pre").count()).toBe(0);
     await expect(page.locator("h1 svg path")).toHaveCSS("stroke-dashoffset", "0px");
-    expect(await page.locator("#pricing section").first().evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+    expect(await page.locator("#features li").first().evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
     await ctx.close();
   });
 

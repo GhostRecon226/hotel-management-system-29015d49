@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/features", label: "Features" },
+  { to: "/how-it-works", label: "How it works" },
   { to: "/security", label: "Security" },
   { to: "/pricing", label: "Pricing" },
   { to: "/faq", label: "FAQ" },
@@ -30,7 +31,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <a href="#main" className="sr-only rounded-lg bg-card px-4 py-2 font-semibold text-primary-strong focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:shadow-raised">
         Skip to content
       </a>
-      {home ? <HomeHeader signedIn={signedIn} onHome={path === "/"} /> : (
+      {home ? <HomeHeader signedIn={signedIn} /> : (
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-x-6 px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
@@ -106,7 +107,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   );
 }
 
-type FooterLink = { to: "/" | "/features" | "/security" | "/pricing" | "/faq" | "/about" | "/contact" | "/privacy" | "/terms"; label: string };
+type FooterLink = { to: "/" | "/features" | "/how-it-works" | "/security" | "/pricing" | "/faq" | "/about" | "/contact" | "/privacy" | "/terms"; label: string };
 function FooterLinks({ title, links, dark }: { title: string; links: FooterLink[]; dark?: boolean }) {
   return (
     <div>
@@ -139,21 +140,13 @@ export function DraftNotice() {
   );
 }
 
-const DARK_PAGES = ["/", "/features", "/pricing", "/faq"];
+const DARK_PAGES = ["/", "/features", "/how-it-works", "/pricing", "/faq"];
 
-// On the home page the section links jump within the page; on other pages they go to the home page section.
-const homeNav = (onHome: boolean): { href: string; label: string; to?: "/features" }[] => {
-  const h = onHome ? "" : "/";
-  return [
-    { href: "/features", label: "Features", to: "/features" },
-    { href: `${h}#preview`, label: "Product" },
-    { href: `${h}#pricing`, label: "Pricing" },
-    { href: `${h}#faq`, label: "FAQ" },
-  ];
-};
+// The dark header lists the main pages. Security is in the footer and the phone menu.
+const DARK_NAV = NAV.filter((n) => n.to !== "/security");
 
 /** Home page header: a full-width dark bar; the content inside lines up with the page below it. Same links and sign-in rules as the other pages. */
-function HomeHeader({ signedIn, onHome }: { signedIn: boolean; onHome: boolean }) {
+function HomeHeader({ signedIn }: { signedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const link = "rounded-full px-3 py-1.5 text-sm font-semibold text-white/80 outline-none hover:text-white focus-visible:ring-3 focus-visible:ring-white/40";
   return (
@@ -163,9 +156,7 @@ function HomeHeader({ signedIn, onHome }: { signedIn: boolean; onHome: boolean }
           <BrandLogo onDark className="h-8 w-auto" />
         </Link>
         <nav aria-label="Main" className="ml-auto hidden items-center gap-1 lg:flex">
-          {homeNav(onHome).map((n) => n.to
-            ? <Link key={n.label} to={n.to} className={link}>{n.label}</Link>
-            : <a key={n.label} href={n.href} className={link}>{n.label}</a>)}
+          {DARK_NAV.map((n) => <Link key={n.to} to={n.to} className={link}>{n.label}</Link>)}
         </nav>
         <div className="ml-auto flex items-center gap-2 lg:ml-3">
           {signedIn

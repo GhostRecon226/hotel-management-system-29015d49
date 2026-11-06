@@ -102,7 +102,7 @@ export function Hero() {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg"><Link to="/auth" search={{ mode: "signup" }}>Start 60 days free <ArrowRight aria-hidden /></Link></Button>
-            <Button asChild size="lg" variant="outline"><a href="#preview">See Zikora in action</a></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/how-it-works">See Zikora in action</Link></Button>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">Every feature. No card needed.</p>
         </div>
