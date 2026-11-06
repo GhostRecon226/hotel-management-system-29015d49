@@ -53,6 +53,6 @@ On practice: find a test hotel on its trial, **Manage**, **Activate or extend pa
 - **Remove an operator:** `delete from app.platform_operators where user_id = (select id from auth.users where email = 'their-email');`
 - An operator account can never be added to a hotel; a hotel account can never be made an operator. Keep them separate.
 
-## The two demo hotels
+## The demo hotels (removed)
 
-Euro Hotel (the demo) and Euro Bar Hotel are on free trials ending around 30 October and 4 November. The daily clock makes a hotel read-only the night its trial ends. In the console they appear under "Trial ends within 7 days" from about a week before. To keep the demo open, use **Extend trial** with a reason such as "Demo hotel for sales visits" (up to a year at a time), or **Activate** when a hotel pays.
+The demo hotels (Euro Hotel and Euro Bar Hotel) were removed on 13 Oct 2026 (PLT-025). Live holds 0 hotels, so the lists and the owner summary are empty until a real hotel signs up.

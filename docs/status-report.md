@@ -1,5 +1,7 @@
 # Status report: Hotel Desk (first audit)
 
+> **Current audit: `docs/audit-2026-11-02.md` (2 Nov 2026).** This file is history.
+
 > Current status is in `docs/requirements.csv` (the register) and `docs/HMS_R1_Requirements.xlsx`. The tables below are the 1 Oct 2026 snapshot and are not updated. Items they list as Missing, such as support access (PLT-010) and the collections follow-up, may now be built.
 >
 > History. This report describes the app as it was first built with Lovable, and the work to remove it. Lovable was fully removed from the code on 2 Oct 2026. For the current state see `docs/deployment-plan.md` and `docs/setup-checklist.md`.
