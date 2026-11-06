@@ -140,7 +140,7 @@ export function DraftNotice() {
   );
 }
 
-const DARK_PAGES = ["/", "/features", "/how-it-works", "/pricing", "/faq"];
+const DARK_PAGES = ["/", "/features", "/how-it-works", "/pricing", "/faq", "/about", "/contact"];
 
 // The dark header lists the main pages. Security is in the footer and the phone menu.
 const DARK_NAV = NAV.filter((n) => n.to !== "/security");
