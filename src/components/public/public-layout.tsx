@@ -21,14 +21,16 @@ const NAV = [
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [signedIn, setSignedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const home = useRouterState({ select: (st) => st.location.pathname === "/" });
+  // Pages already redone in the dark-header look. The rest keep the light header until each is redone.
+  const path = useRouterState({ select: (st) => st.location.pathname });
+  const home = DARK_PAGES.includes(path);
   useEffect(() => setSignedIn(hasStoredSession()), []);
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <a href="#main" className="sr-only rounded-lg bg-card px-4 py-2 font-semibold text-primary-strong focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:shadow-raised">
         Skip to content
       </a>
-      {home ? <HomeHeader signedIn={signedIn} /> : (
+      {home ? <HomeHeader signedIn={signedIn} onHome={path === "/"} /> : (
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-x-6 px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
@@ -137,15 +139,21 @@ export function DraftNotice() {
   );
 }
 
-const HOME_NAV: { href: string; label: string; to?: "/features" }[] = [
-  { href: "/features", label: "Features", to: "/features" },
-  { href: "#preview", label: "Product" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#faq", label: "FAQ" },
-];
+const DARK_PAGES = ["/", "/features"];
+
+// On the home page the section links jump within the page; on other pages they go to the home page section.
+const homeNav = (onHome: boolean): { href: string; label: string; to?: "/features" }[] => {
+  const h = onHome ? "" : "/";
+  return [
+    { href: "/features", label: "Features", to: "/features" },
+    { href: `${h}#preview`, label: "Product" },
+    { href: `${h}#pricing`, label: "Pricing" },
+    { href: `${h}#faq`, label: "FAQ" },
+  ];
+};
 
 /** Home page header: a full-width dark bar; the content inside lines up with the page below it. Same links and sign-in rules as the other pages. */
-function HomeHeader({ signedIn }: { signedIn: boolean }) {
+function HomeHeader({ signedIn, onHome }: { signedIn: boolean; onHome: boolean }) {
   const [open, setOpen] = useState(false);
   const link = "rounded-full px-3 py-1.5 text-sm font-semibold text-white/80 outline-none hover:text-white focus-visible:ring-3 focus-visible:ring-white/40";
   return (
@@ -155,7 +163,7 @@ function HomeHeader({ signedIn }: { signedIn: boolean }) {
           <BrandLogo onDark className="h-8 w-auto" />
         </Link>
         <nav aria-label="Main" className="ml-auto hidden items-center gap-1 lg:flex">
-          {HOME_NAV.map((n) => n.to
+          {homeNav(onHome).map((n) => n.to
             ? <Link key={n.label} to={n.to} className={link}>{n.label}</Link>
             : <a key={n.label} href={n.href} className={link}>{n.label}</a>)}
         </nav>
