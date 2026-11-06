@@ -168,6 +168,17 @@ async function bookedGuest(page: Page, first: string) {
   }, first);
 }
 
+/**
+ * Opens the Front Desk and waits for it to finish loading before the connection is cut, as the other offline tests do.
+ * Going offline while the page behind the test is still loading can leave the "waiting to send" bar out of step with
+ * the queue, which made this test fail now and then. [OFF-007]
+ */
+async function settleOnFrontDesk(page: Page) {
+  await page.goto("/front-desk");
+  await expect(page.getByRole("heading", { name: /Front Desk/ }).first()).toBeVisible({ timeout: 15_000 });
+  await page.waitForLoadState("networkidle");
+}
+
 const checkInArgs = (res: string, room: string) => ({
   p_id: res, p_registration: { id_type: "passport", id_number: SECRET, id_expiry: "2031-01-01", nationality: "NG", registration_accepted: true },
   p_room_id: room, p_room_override_reason: null, p_deposit_waive_reason: null,
@@ -181,6 +192,7 @@ test("offline: a check-in entered with no connection sends once, and the ID numb
   await signInAndCreateHotel(page, "offin");
   await setUpRoomsAndRates(page);
   const g = await bookedGuest(page, "Arriving");
+  await settleOnFrontDesk(page);
 
   await context.setOffline(true);
   expect(await queueCheckIn(page, checkInArgs(g.res, g.rooms[0]!))).toBe("queued");
@@ -198,6 +210,7 @@ test("offline: a refused check-in is kept for attention with its ID number erase
   await setUpRoomsAndRates(page);
   const taken = await checkedInGuest(page, "Occupant", 0);
   const g = await bookedGuest(page, "Refused");
+  await settleOnFrontDesk(page);
 
   // Room 1 is occupied, so the database refuses this check-in when it is sent.
   await context.setOffline(true);
