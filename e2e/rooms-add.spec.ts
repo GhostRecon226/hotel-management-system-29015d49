@@ -114,7 +114,7 @@ test("front desk staff do not see the add buttons on the Rooms page", async ({ p
   await clerkPage.getByLabel("Email").fill(clerk.email);
   await clerkPage.getByLabel("Password").fill(clerk.password);
   await clerkPage.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(clerkPage).toHaveURL(/\/dashboard$/, { timeout: 15_000 });
+  await expect(clerkPage).toHaveURL(/\/front-desk$/, { timeout: 15_000 });
   await clerkPage.goto("/rooms");
   await expect(clerkPage.getByRole("heading", { name: "Rooms", exact: true })).toBeVisible();
   await expect(clerkPage.locator('main a[href^="/rooms/"]').first()).toBeVisible();
