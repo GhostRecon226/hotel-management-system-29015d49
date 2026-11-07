@@ -54,7 +54,7 @@ export function PriorityBadge({ priority }: { priority: string }) {
 }
 
 /** Tasks for the current property; finished ones only for the business date. */
-export function useHkTasks(filter?: { mine?: boolean; column?: string }) {
+export function useHkTasks(filter?: { mine?: boolean; column?: string; withFinished?: boolean }) {
   const { property, ctx } = useAccess();
   return useQuery({
     queryKey: ["housekeeping", "tasks", property?.id, filter],
@@ -62,7 +62,7 @@ export function useHkTasks(filter?: { mine?: boolean; column?: string }) {
     refetchInterval: 30_000,
     queryFn: async () => {
       let q = (supabase.from as any)("v_hk_board").select("*").eq("property_id", property!.id).neq("status", "cancelled");
-      if (filter?.mine) q = q.eq("assignee_id", ctx.user_id).in("status", ["assigned", "in_progress", "failed", "open"]);
+      if (filter?.mine) q = q.eq("assignee_id", ctx.user_id).in("status", filter.withFinished ? ["assigned", "in_progress", "failed", "open", "done", "inspected"] : ["assigned", "in_progress", "failed", "open"]);
       if (filter?.column) q = q.eq("board_column", filter.column);
       const { data, error } = await q.order("created_at");
       if (error) throw error;
