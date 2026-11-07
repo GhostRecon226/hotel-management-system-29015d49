@@ -6,7 +6,9 @@ import { formatDateTime } from "@/lib/reservations";
 import {
   APPROVAL_MENU_PERMS, APPROVE_PERM, DecideDialog, KIND_LABEL, useApprovals, useCanDecide, useWithdraw, type ApprovalRow,
 } from "@/lib/approvals";
+import { Clock, Hourglass } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { StatTile } from "@/components/stats";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Money } from "@/components/ui/money";
@@ -90,6 +92,10 @@ function Approvals() {
   return (
     <div>
       <PageHeader title="Approvals" description="Discounts above a limit, adjustments, reversals and refunds need a second person to approve." />
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:max-w-xl">
+        <StatTile icon={Hourglass} tone="warning" label="Waiting for me" value={waiting.length} sub="Ready for your decision" />
+        <StatTile icon={Clock} tone="info" label="My open requests" value={mine.filter((a) => a.status === "pending").length} sub="Waiting on someone else" />
+      </div>
       <Tabs defaultValue="waiting">
         <TabsList className="mb-3">
           <TabsTrigger value="waiting">Waiting for me ({waiting.length})</TabsTrigger>
