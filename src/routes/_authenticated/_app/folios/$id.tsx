@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Info, MoreHorizontal, Wallet } from "lucide-react";
 import { FilledStat, StatTile } from "@/components/stats";
 import {
@@ -19,7 +19,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/_app/folios/$id")({ component: FolioPage });
+export const Route = createFileRoute("/_authenticated/_app/folios/$id")({
+  // The Cashier page links here with ?pay=1 so the payment form opens at once.
+  validateSearch: (s: Record<string, unknown>): { pay?: true } => (s["pay"] === true || s["pay"] === "1" || s["pay"] === 1 ? { pay: true } : {}),
+  component: FolioPage,
+});
 
 const KIND: Record<string, string> = { charge: "Charge", payment: "Payment", reversal: "Reversal", transfer: "Transfer", discount: "Discount", adjustment: "Adjustment", refund: "Refund" };
 
@@ -38,6 +42,11 @@ function FolioPage() {
   const [reverse, setReverse] = useState<FolioTx | null>(null);
   const invoices = useFolioInvoices(id);
   const issue = useIssueInvoice();
+  const { pay } = Route.useSearch();
+  const payOpened = useRef(false);
+  useEffect(() => {
+    if (pay && !payOpened.current && folio?.status === "open" && perm.deposit) { payOpened.current = true; setDialog("payment"); }
+  }, [pay, folio?.status, perm.deposit]);
 
   if (isLoading) return <LoadingState label="Loading folio…" />;
   if (!folio) return <EmptyState title="Folio not found" />;
