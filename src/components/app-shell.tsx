@@ -55,7 +55,7 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav className="flex h-full flex-col px-4 pb-4 pt-5">
       <div className="mb-5 px-2">
-        <BrandLogo onDark className="h-9 w-auto" />
+        <BrandLogo className="h-9 w-auto" />
         <div className="mt-1.5 truncate text-xs text-sidebar-foreground/70">{ctx.tenant?.name}</div>
       </div>
       <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-1">
