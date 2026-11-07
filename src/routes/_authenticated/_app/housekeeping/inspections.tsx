@@ -48,7 +48,7 @@ function Inspections() {
                     {t.fail_count > 0 && <Badge variant="warning">Re-clean</Badge>}
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <Initials name={t.completed_by_name} className="size-6 text-[11px]" />
+                    <Initials name={t.completed_by_name} className="size-6 text-xs" />
                     <span className="min-w-0">Cleaned by {t.completed_by_name ?? "unknown"} <span className="text-muted-foreground tabular">· {formatDateTime(t.completed_at)}</span></span>
                   </div>
                   {p.total > 0 && (

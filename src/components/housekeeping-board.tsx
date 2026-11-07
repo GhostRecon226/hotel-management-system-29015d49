@@ -47,7 +47,7 @@ export function BoardCard({ t, actions }: { t: HkTask; actions?: ReactNode }) {
       )}
       <div className="flex items-center gap-2 text-sm">
         {t.assignee_name
-          ? <><Initials name={t.assignee_name} className="size-6 text-[11px]" /><span className="min-w-0 truncate">{t.assignee_name}</span></>
+          ? <><Initials name={t.assignee_name} className="size-6 text-xs" /><span className="min-w-0 truncate">{t.assignee_name}</span></>
           : <span className="text-muted-foreground">Not assigned</span>}
       </div>
       {t.inspected_by_name && t.status === "inspected" && <p className="text-sm text-muted-foreground">Inspected by {t.inspected_by_name}</p>}
