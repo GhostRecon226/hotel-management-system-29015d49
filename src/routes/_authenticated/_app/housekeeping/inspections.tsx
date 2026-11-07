@@ -9,11 +9,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EmptyState, LoadingState } from "@/components/ui/states";
+import { Initials } from "@/components/dashboard-parts";
+import { ProgressBar } from "@/components/housekeeping-board";
+import { addDefectLine, checklistProgress, COMMON_DEFECTS, removeDefectLine } from "@/lib/housekeeping-view";
+import { cn } from "@/lib/utils";
 import { RoomName } from "@/components/room-name";
 
-export const Route = createFileRoute("/_authenticated/_app/housekeeping/inspections")({ component: Inspections });
+export const Route = createFileRoute("/_authenticated/_app/housekeeping/inspections")({
+  head: () => ({ meta: [{ title: "Inspections · Zikora" }] }),
+  component: Inspections,
+});
 
 function Inspections() {
   const { can, ctx } = useAccess();
@@ -25,35 +31,44 @@ function Inspections() {
   return (
     <div>
       <PageHeader title="Inspections" description="Rooms cleaned and waiting for a check. You cannot inspect a room you cleaned." />
-      <Table>
-        <TableHeader><TableRow>
-          <TableHead>Room</TableHead><TableHead>Task</TableHead><TableHead>Cleaned by</TableHead><TableHead>Finished</TableHead><TableHead className="w-56" />
-        </TableRow></TableHeader>
-        <TableBody>
-          {isLoading && <TableSkeletonRows cols={5} />}
-          {!isLoading && data.length === 0 && <TableStateRow colSpan={5} title="Nothing waiting" description="Completed rooms appear here for inspection." />}
-          {data.map((t) => {
-            const own = t.completed_by === ctx.user_id;
-            return (
-              <TableRow key={t.id}>
-                <TableCell className="text-base"><RoomName label={t.room_number} typeName={t.room_type_name} /></TableCell>
-                <TableCell>{TASK_TYPES[t.type]}{t.fail_count > 0 && <Badge variant="warning" className="ml-2">Re-clean</Badge>}
-                  {t.notes && <span className="block text-sm text-muted-foreground">{t.notes}</span>}</TableCell>
-                <TableCell>{t.completed_by_name ?? "—"}</TableCell>
-                <TableCell className="tabular">{formatDateTime(t.completed_at)}</TableCell>
-                <TableCell className="text-right">
-                  {own ? <span className="text-sm text-muted-foreground">You cleaned this room</span> : (
-                    <div className="flex justify-end gap-2">
-                      <Button size="sm" onClick={() => setPass(t)}>Pass</Button>
-                      <Button size="sm" variant="destructive" onClick={() => setFail(t)}>Fail</Button>
+      {isLoading ? <LoadingState label="Loading rooms…" />
+        : data.length === 0 ? <EmptyState title="Nothing waiting" description="Completed rooms appear here for inspection." />
+        : (
+          <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {data.map((t) => {
+              const own = t.completed_by === ctx.user_id;
+              const p = checklistProgress(t.checklist);
+              return (
+                <li key={t.id} className="space-y-3 rounded-xl border border-border/70 bg-card p-4 shadow-card">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-base"><RoomName label={t.room_number} typeName={t.room_type_name} className="font-bold" /></div>
+                      <div className="text-sm text-muted-foreground">{TASK_TYPES[t.type]}{t.floor ? ` · Floor ${t.floor}` : ""}</div>
+                    </div>
+                    {t.fail_count > 0 && <Badge variant="warning">Re-clean</Badge>}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Initials name={t.completed_by_name} className="size-6 text-xs" />
+                    <span className="min-w-0">Cleaned by {t.completed_by_name ?? "unknown"} <span className="text-muted-foreground tabular">· {formatDateTime(t.completed_at)}</span></span>
+                  </div>
+                  {p.total > 0 && (
+                    <div className="space-y-1">
+                      <ProgressBar done={p.done} total={p.total} label={`Checklist for room ${t.room_number}`} />
+                      <p className="text-sm text-muted-foreground tabular">Checklist: {p.done} of {p.total} ticked</p>
                     </div>
                   )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                  {t.notes && <p className="rounded-lg bg-muted px-3 py-2 text-sm">{t.notes}</p>}
+                  {own ? <p className="text-sm text-muted-foreground">You cleaned this room</p> : (
+                    <div className="flex gap-2">
+                      <Button className="h-11 flex-1" onClick={() => setPass(t)}>Pass</Button>
+                      <Button className="h-11 flex-1" variant="destructive" onClick={() => setFail(t)}>Fail</Button>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       <PassDialog task={pass} onOpenChange={(o) => !o && setPass(null)} />
       <FailDialog task={fail} onOpenChange={(o) => !o && setFail(null)} />
     </div>
@@ -87,6 +102,16 @@ function FailDialog({ task, onOpenChange }: { task: HkTask | null; onOpenChange:
     <FormDialog open={!!task} onOpenChange={onOpenChange} title={`Fail · ${task?.room_number ?? ""}`} busy={m.isPending}
       onSubmit={() => m.mutate({ p_id: task!.id, p_pass: false, p_defects: defects.split("\n").map((d) => d.trim()).filter(Boolean) },
         { onSuccess: () => onOpenChange(false) })}>
+      <div role="group" aria-label="Common problems" className="flex flex-wrap gap-2">
+        {COMMON_DEFECTS.map((d) => {
+          const on = defects.split("\n").some((l) => l.trim().toLowerCase() === d.toLowerCase());
+          return (
+            <button key={d} type="button" aria-pressed={on} onClick={() => setDefects(on ? removeDefectLine(defects, d) : addDefectLine(defects, d))}
+              className={cn("min-h-11 rounded-full border px-3.5 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/40",
+                on ? "border-destructive/40 bg-danger-soft text-danger-strong" : "border-border bg-card text-foreground hover:bg-muted")}>{d}</button>
+          );
+        })}
+      </div>
       <Field label="What needs fixing" htmlFor="f-def" hint="One item per line. The task goes back to the attendant with this list.">
         <Textarea id="f-def" required rows={5} value={defects} onChange={(e) => setDefects(e.target.value)} placeholder={"Hair in the shower\nTowels missing"} />
       </Field>
