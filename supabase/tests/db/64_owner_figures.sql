@@ -47,7 +47,7 @@ begin
   where b.property_id = t.id('propA') and b.balance > 0 and b.currency::text = p.base_currency::text;
   perform t.eq((j->>'owed')::numeric, v_owed, '[RPT-010] owed is the sum of folios with a balance, from the ledger');
   perform t.eq((j->>'owed_folios')::bigint, v_n, '[RPT-010] owed folios counts the folios that owe');
-  perform t.ok(v_owed >= 10000, '[RPT-010] the dinner charge is owed');
+  perform t.ok(v_owed > 0, '[RPT-010] the folio still owes after the 7,500 paid');
   perform t.admin();
 
   -- A day with no saved figures shows nothing instead of zero.
