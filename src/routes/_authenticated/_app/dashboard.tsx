@@ -11,7 +11,8 @@ import { PageHeader } from "@/components/page-header";
 import { SetupCard } from "@/components/setup-checklist";
 import { MorningBrief } from "@/components/morning-brief";
 import { OwnerSummaryCard } from "@/components/owner-summary";
-import { ArrowDownRight, ArrowUpRight, BedDouble, CalendarPlus, CheckCircle2, Receipt, Sparkles, UserPlus, Wrench, LogOut, KeyRound, type LucideIcon } from "lucide-react";
+import { NeedsDecision, OwnerFigures } from "@/components/owner-figures";
+import { ArrowDownRight, ArrowUpRight, BedDouble, CalendarPlus, Receipt, Sparkles, UserPlus, LogOut, KeyRound, type LucideIcon } from "lucide-react";
 import { StatTile } from "@/components/stats";
 import { ActivityItem, HeadRow, Initials, ListCard, Meta, ROW_ACTION, RoomStatusDonut, Row } from "@/components/dashboard-parts";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +49,8 @@ function Dashboard() {
   const { ctx, property, can, canAny, level } = useAccess();
   const s = useDashboardSummary();
   const showKpi = canAny(["rpt.operations.view", "rpt.finance.view"]);
+  // People who may see finance reports get the owner's view: money and decisions first, no desk shortcuts.
+  const moneyFirst = can("rpt.finance.view");
   const [days, setDays] = useState("7");
   const [hello, setHello] = useState("Welcome");
   useEffect(() => { setHello(greeting(new Date().getHours())); }, []);
@@ -94,22 +97,30 @@ function Dashboard() {
 
   return (
     <div className="space-y-5">
-      <section className="dash-banner relative overflow-hidden rounded-xl px-5 py-6 text-white shadow-raised sm:px-7 sm:py-7" aria-label="Welcome">
+      <section className="rounded-xl border border-border bg-card px-5 py-4 shadow-card sm:px-6" aria-label="Welcome">
         <h1 className="sr-only">Dashboard</h1>
-        <h2 className="text-[28px] font-semibold leading-tight sm:text-4xl">{hello}{firstName ? `, ${firstName}` : ""}</h2>
-        <p className="mt-1.5 text-[15px] text-white/85">Here is what is happening at {property.name} today, {formatDay(property.business_date)}.</p>
-        {tonight != null && (
-          <div className="mt-4 inline-flex items-baseline gap-2 rounded-xl bg-white/10 px-4 py-2 ring-1 ring-white/15 sm:absolute sm:right-7 sm:top-1/2 sm:mt-0 sm:-translate-y-1/2 sm:flex-col sm:items-end sm:gap-0 sm:py-3">
-            <span className="text-xs uppercase tracking-wide text-white/75">Expected tonight</span>
-            <span className="text-2xl font-bold tabular sm:text-3xl">{tonight} <span className="text-base font-semibold text-white/80">of {totalRooms} rooms</span></span>
-            <span className="text-sm text-white/80">{tonightPct}% full</span>
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-l-4 border-primary pl-4">
+          <div className="min-w-0">
+            <h2 className="text-2xl font-semibold leading-tight sm:text-[28px]">{hello}{firstName ? `, ${firstName}` : ""}</h2>
+            <p className="mt-1 text-[15px] text-muted-foreground">{property.name} · {formatDay(property.business_date)}</p>
           </div>
-        )}
+          {tonight != null && (
+            <div className="text-right">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expected tonight</div>
+              <div className="text-2xl font-bold tabular">{tonight} <span className="text-base font-semibold text-muted-foreground">of {totalRooms} rooms</span></div>
+              <div className="text-sm text-muted-foreground">{tonightPct}% full</div>
+            </div>
+          )}
+        </div>
       </section>
 
       <SetupCard />
+      <OwnerFigures />
+      <NeedsDecision approvals={d?.pending_approvals} urgentTickets={d?.urgent_tickets} openTickets={d?.open_tickets} />
       <OwnerSummaryCard />
       <MorningBrief />
+
+      <h2 className="text-lg font-semibold">Now</h2>
 
       {s.isLoading ? <LoadingState label="Loading today…" /> : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
@@ -129,15 +140,7 @@ function Dashboard() {
         </div>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-        <h2 className="sr-only">Needs attention</h2>
-        <StatTile compact icon={CheckCircle2} tone={d?.pending_approvals ? "warning" : "neutral"} label="Approvals waiting" value={d?.pending_approvals}
-          sub={d?.pending_approvals ? "Waiting for a manager" : "Nothing waiting"} to="/approvals" />
-        <StatTile compact icon={Wrench} tone={d?.urgent_tickets ? "danger" : "neutral"} label="Open maintenance tickets" value={d?.open_tickets}
-          sub={d?.urgent_tickets ? `${d.urgent_tickets} urgent` : "None urgent"} to={canAny(["mnt.view", "mnt.ticket.create"]) ? "/maintenance" : undefined} />
-      </div>
-
-      {visibleActions.length > 0 && (
+      {!moneyFirst && visibleActions.length > 0 && (
         <section aria-label="Quick actions">
           <h2 className="mb-3 text-lg font-semibold">Quick actions</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

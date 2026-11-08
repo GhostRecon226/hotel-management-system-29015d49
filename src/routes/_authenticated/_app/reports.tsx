@@ -24,7 +24,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Money } from "@/components/ui/money";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { GroupedTabs, type TabGroup } from "@/components/grouped-tabs";
+import { matchingPeriod, PERIODS, periodRange } from "@/lib/report-periods";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RoomName } from "@/components/room-name";
 import { CollectionsPanel } from "@/components/collections-panel";
@@ -55,6 +57,7 @@ function Reports() {
   const ops = canAny(["rpt.operations.view", "rpt.finance.view"]);
   const fin = can("rpt.finance.view");
   const [range, setRange] = useState({ from: "", to: "" });
+  const [tab, setTab] = useState("kpi");
   useEffect(() => {
     // Default: the last 30 days up to today, so today's payments and revenue show. Daily KPIs exist only for closed dates.
     if (property && !range.to) { const to = property.business_date; setRange({ from: addDays(to, -29), to }); }
@@ -96,10 +99,25 @@ function Reports() {
     ["Date", "Rooms available", "Rooms sold", "Occupancy", "ADR", "RevPAR", "Room revenue", "Total revenue", "Arrivals", "Departures", "No-shows", "Cancellations"],
     k.map((r) => [r.business_date, r.rooms_available, r.rooms_sold, r.occupancy, r.adr, r.revpar, r.room_revenue, r.total_revenue, r.arrivals, r.departures, r.no_shows, r.cancellations]));
 
+  const groups: TabGroup[] = [
+    { label: "Performance", items: [{ value: "kpi", label: "Daily KPIs" }, { value: "stays", label: "Cancellations and stay length" }] },
+    ...(fin ? [
+      { label: "Money in", items: [{ value: "revenue", label: "Revenue by charge code" }, { value: "source", label: "By booking source" }, { value: "payments", label: "Payments" }] },
+      { label: "Money owed", items: [{ value: "balances", label: "Outstanding balances" }, { value: "ageing", label: "Ageing" }, { value: "collections", label: "Collections" }, { value: "byguest", label: "Balances by guest" }] },
+    ] : []),
+    ...(canExport ? [{ label: "Share", items: [{ value: "export", label: "Export" }] }] : []),
+  ];
+
   return (
     <div className="space-y-6">
       <PageHeader title="Reports" description="Figures come from the closed business dates and the ledger." />
       <FilterBar>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Period">
+          {PERIODS.map((p) => (
+            <Button key={p.key} size="sm" aria-pressed={!!property && matchingPeriod(range, property.business_date) === p.key} variant={property && matchingPeriod(range, property.business_date) === p.key ? "default" : "outline"} disabled={!property}
+              onClick={() => property && setRange(periodRange(p.key, property.business_date))}>{p.label}</Button>
+          ))}
+        </div>
         <div className="flex items-center gap-2"><Label htmlFor="r-from">From</Label><Input id="r-from" type="date" className="w-44" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} /></div>
         <div className="flex items-center gap-2"><Label htmlFor="r-to">To</Label><Input id="r-to" type="date" className="w-44" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} /></div>
       </FilterBar>
@@ -110,19 +128,9 @@ function Reports() {
         <StatTile icon={Wallet} tone="accent" label="RevPAR" value={<Money amount={period.data?.revpar ?? null} currency={cur} className="text-left" />} sub="Room revenue per room available" />
         <StatTile icon={BedDouble} tone="info" label="Rooms sold" value={period.data?.rooms_sold ?? "—"} sub="Nights stayed in this period" />
       </div>
-      <Tabs defaultValue="kpi">
-        <TabsList className="mb-3">
-          <TabsTrigger value="kpi">Daily KPIs</TabsTrigger>
-          {fin && <TabsTrigger value="revenue">Revenue by charge code</TabsTrigger>}
-          {fin && <TabsTrigger value="source">By booking source</TabsTrigger>}
-          {fin && <TabsTrigger value="balances">Outstanding balances</TabsTrigger>}
-          {fin && <TabsTrigger value="ageing">Ageing</TabsTrigger>}
-          {fin && <TabsTrigger value="collections">Collections</TabsTrigger>}
-          {fin && <TabsTrigger value="payments">Payments</TabsTrigger>}
-          <TabsTrigger value="stays">Cancellations and stay length</TabsTrigger>
-          {fin && <TabsTrigger value="byguest">Balances by guest</TabsTrigger>}
-          {canExport && <TabsTrigger value="export">Export</TabsTrigger>}
-        </TabsList>
+      <Tabs value={tab} onValueChange={setTab} className="space-y-3">
+        <GroupedTabs label="Report" layout="rows" groups={groups} value={tab} onChange={setTab} />
+        <div className="min-w-0 space-y-3">
 
         <TabsContent value="kpi">
           <div className="mb-3 flex justify-end"><Button variant="outline" disabled={k.length === 0} onClick={exportKpi}><Download className="h-4 w-4" /> Download CSV</Button></div>
@@ -349,6 +357,7 @@ function Reports() {
             </Card>
           </TabsContent>
         )}
+        </div>
       </Tabs>
       <DefinitionsBox />
     </div>
