@@ -1905,6 +1905,14 @@ Prices: column `plans.prices` (for example `{"NGN": {"month": 6000000, "year": 6
 - Permission: `adm.subscription.manage`
 - Errors: `E_FORBIDDEN`
 
+### `public.owner_figures`
+- Args: `p_property_id uuid`
+- For the Dashboard's Yesterday row: the last closed day's revenue, occupancy, ADR and RevPAR, money collected (same rule as the Payments report), what guests owe now in the hotel's own currency, and the change against the same weekday a week earlier. The database works the changes out; the browser only shows them. A day with no saved figures returns `has_figures` false and empty values, not zeros.
+- Returns: `jsonb`
+- Callable by signed-in users: yes · security definer · read only
+- Permission: `rpt.finance.view`
+- Errors: `E_FORBIDDEN`
+
 ### `public.owner_summary`
 - Args: `p_property_id uuid`
 - Returns: `jsonb` (facts, collected money for the last closed day, `lines` and `text`)
