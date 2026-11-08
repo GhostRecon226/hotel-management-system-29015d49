@@ -44,7 +44,7 @@ export function AdminHealth({ onOpen }: { onOpen: (tab: string) => void }) {
     const trial = s.status === "trial" && left != null;
     const bad = s.status === "past_due" || s.status === "suspended" || !s.writable;
     boxes.push(<Box key="p" label="Plan" value={s.plan_name}
-      sub={trial ? `Free trial, ${left} ${left === 1 ? "day" : "days"} left` : s.status === "active" ? "Active" : s.status.replace("_", " ")}
+      sub={trial ? `Free trial, ${left} ${left === 1 ? "day" : "days"} left` : s.status === "active" ? "Plan is active" : s.status.replace("_", " ")}
       tone={bad ? "bad" : trial && left < 14 ? "warn" : "plain"} to="plan" onOpen={onOpen} />);
   }
   if (seeDate && roll.data) {
