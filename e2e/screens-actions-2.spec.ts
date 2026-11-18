@@ -18,6 +18,7 @@ test("QA-11 a reported problem shows on the maintenance list and counts as open"
   });
   expect(failures, "set-up calls").toEqual([]);
   await page.goto("/maintenance");
+  await page.getByRole("button", { name: "List" }).click();
   const row = page.getByRole("row").filter({ hasText: "Leaking basin tap" });
   await expect(row).toBeVisible({ timeout: 10_000 });
   await expect(row).toContainText("Urgent");

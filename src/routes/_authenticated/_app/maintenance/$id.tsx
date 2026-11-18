@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useAccess } from "@/lib/access";
 import { formatDateTime, formatDay } from "@/lib/reservations";
 import { BLOCK_TYPES } from "@/lib/rooms";
@@ -9,6 +9,9 @@ import {
   useTicket, useTicketBlocks, useWorkMutation,
 } from "@/lib/maintenance";
 import { TicketPhotos } from "@/components/ticket-photos";
+import { StepBar } from "@/components/maintenance-parts";
+import { COMMON_FIXES } from "@/lib/maintenance-view";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,21 +56,43 @@ function TicketDetail() {
   const live = ["open", "assigned", "in_progress", "waiting"].includes(t.status);
   const done = () => setDlg(null);
 
-  const actions: ReactNode[] = [];
-  if (worker && ["open", "assigned", "waiting"].includes(t.status)) actions.push(<Button key="s" disabled={start.isPending} onClick={() => start.mutate({ p_id: t.id })}>{t.status === "waiting" ? "Resume work" : "Start work"}</Button>);
-  if (worker && ["assigned", "in_progress", "waiting"].includes(t.status)) actions.push(<Button key="r" onClick={() => setDlg("resolve")}>Mark resolved</Button>);
-  if (worker && ["assigned", "in_progress"].includes(t.status)) actions.push(<Button key="w" variant="outline" onClick={() => setDlg("wait")}>Put on hold</Button>);
-  if (can("mnt.ticket.close") && t.status === "resolved") actions.push(<Button key="c" disabled={close.isPending} onClick={() => close.mutate({ p_id: t.id })}>Check and close</Button>);
-  if (can("mnt.ticket.close") && ["resolved", "closed"].includes(t.status)) actions.push(<Button key="o" variant="outline" onClick={() => setDlg("reopen")}>Reopen</Button>);
-  if (can("mnt.ticket.assign") && live) actions.push(<Button key="a" variant="outline" onClick={() => setDlg("assign")}>{t.assignee_id ? "Reassign" : "Assign"}</Button>);
-  if (can("room.ooo.set") && t.room_id && !["closed", "cancelled"].includes(t.status)) actions.push(<Button key="b" variant="outline" onClick={() => setDlg("block")}>Block room</Button>);
-  if (live && (can("mnt.ticket.assign") || (t.created_by === ctx.user_id && t.status === "open"))) actions.push(<Button key="x" variant="ghost" className="text-destructive" onClick={() => setDlg("cancel")}>Cancel ticket</Button>);
+  // One main button for the next step; every other action sits under More. Who may do what is unchanged.
+  type Act = { key: string; label: string; run: () => void; busy?: boolean; danger?: boolean };
+  const acts: Act[] = [];
+  const startAct: Act = { key: "s", label: t.status === "waiting" ? "Resume work" : "Start work", busy: start.isPending, run: () => start.mutate({ p_id: t.id }) };
+  const resolveAct: Act = { key: "r", label: "Mark resolved", run: () => setDlg("resolve") };
+  const closeAct: Act = { key: "c", label: "Check and close", busy: close.isPending, run: () => close.mutate({ p_id: t.id }) };
+  if (worker && ["open", "assigned", "waiting"].includes(t.status)) acts.push(startAct);
+  if (worker && ["assigned", "in_progress", "waiting"].includes(t.status)) acts.push(resolveAct);
+  if (worker && ["assigned", "in_progress"].includes(t.status)) acts.push({ key: "w", label: "Put on hold", run: () => setDlg("wait") });
+  if (can("mnt.ticket.close") && t.status === "resolved") acts.push(closeAct);
+  if (can("mnt.ticket.close") && ["resolved", "closed"].includes(t.status)) acts.push({ key: "o", label: "Reopen", run: () => setDlg("reopen") });
+  if (can("mnt.ticket.assign") && live) acts.push({ key: "a", label: t.assignee_id ? "Reassign" : "Assign", run: () => setDlg("assign") });
+  if (can("room.ooo.set") && t.room_id && !["closed", "cancelled"].includes(t.status)) acts.push({ key: "b", label: "Block room", run: () => setDlg("block") });
+  if (live && (can("mnt.ticket.assign") || (t.created_by === ctx.user_id && t.status === "open"))) acts.push({ key: "x", label: "Cancel ticket", danger: true, run: () => setDlg("cancel") });
+  const mainKey = ["s", "r", "c", "a"].find((k) => acts.some((a) => a.key === k) && !(k === "a" && (t.assignee_id || t.status !== "open")));
+  const main = acts.find((a) => a.key === mainKey);
+  const more = acts.filter((a) => a !== main);
+  const actions = (
+    <div className="flex flex-wrap gap-2">
+      {main && <Button disabled={main.busy === true} onClick={main.run}>{main.label}</Button>}
+      {more.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><Button variant="outline">More <ChevronDown className="h-4 w-4" aria-hidden /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {more.map((a) => <DropdownMenuItem key={a.key} className={a.danger ? "h-11 text-destructive" : "h-11"} disabled={a.busy === true} onClick={a.run}>{a.label}</DropdownMenuItem>)}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
+  );
 
   return (
     <div>
       <Link to="/maintenance" className="mb-3 inline-flex h-11 items-center gap-2 text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> All tickets</Link>
       <PageHeader title={t.title} description={t.room_number ? `${t.room_number}${t.location ? ` · ${t.location}` : ""}` : t.location ?? ""}
-        actions={<div className="flex flex-wrap gap-2">{actions}</div>} />
+        actions={actions} />
+      <StepBar status={t.status} />
       <div className="mb-4 flex flex-wrap gap-2">
         <StatusBadge map={TICKET_STATUS} value={t.status} />
         <StatusBadge map={PRIORITY} value={t.priority} />
@@ -124,7 +149,7 @@ function TicketDetail() {
       <BlockTicketRoomDialog ticket={dlg === "block" ? t : null} onOpenChange={(o) => !o && done()} />
       <TextReasonDialog open={dlg === "wait"} title="Put on hold" label="What are you waiting for?" busy={wait.isPending}
         onOpenChange={(o) => !o && done()} onSubmit={(r) => wait.mutate({ p_id: t.id, p_reason: r }, { onSuccess: done })} />
-      <TextReasonDialog open={dlg === "resolve"} title="Mark resolved" label="What was done?" busy={resolve.isPending}
+      <TextReasonDialog open={dlg === "resolve"} title="Mark resolved" label="What was done?" quick={COMMON_FIXES} busy={resolve.isPending}
         onOpenChange={(o) => !o && done()} onSubmit={(r) => resolve.mutate({ p_id: t.id, p_resolution: r }, { onSuccess: done })} />
       <TextReasonDialog open={dlg === "reopen"} title="Reopen ticket" label="Why is it being reopened?" busy={reopen.isPending}
         onOpenChange={(o) => !o && done()} onSubmit={(r) => reopen.mutate({ p_id: t.id, p_reason: r }, { onSuccess: done })} />

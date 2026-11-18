@@ -18,6 +18,8 @@ import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { RoomName } from "@/components/room-name";
+import { ViewSwitch } from "@/components/maintenance-parts";
+import { EmptyState, LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/_app/service-requests")({
   head: () => ({
@@ -54,10 +56,14 @@ function ServiceRequests() {
   return (
     <div>
       <PageHeader title="Service requests" description="Create new requests from the In house list on the Front Desk. Charges go on the guest's folio when a request is completed." />
+      <div className="mb-3 md:hidden">
+        <ViewSwitch label="Show requests" value={["active", "mine", "all"].includes(status) ? status : "active"} onChange={setStatus}
+          options={[{ key: "active", label: "Not finished" }, { key: "mine", label: "Mine" }, { key: "all", label: "All" }]} />
+      </div>
       <FilterBar>
         <Input className="w-64" placeholder="Search request, guest or room" value={q} onChange={(e) => setQ(e.target.value)} />
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-48 max-md:hidden"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="active">Not finished</SelectItem>
             <SelectItem value="mine">Assigned to me</SelectItem>
@@ -66,7 +72,18 @@ function ServiceRequests() {
           </SelectContent>
         </Select>
       </FilterBar>
-      <Table wide>
+      <div className="space-y-3 md:hidden" aria-label="Service requests as cards">
+        {isLoading ? <LoadingState label="Loading requests…" />
+          : list.length === 0 ? <EmptyState title="No service requests" description="Use the In house list on the Front Desk to add one." />
+          : list.map((r) => (
+            <ServiceCard key={r.id} r={r} live={ACTIVE.includes(r.status)} worker={can("svc.order.complete")}
+              canAssign={can("svc.order.create")} canCancel={can("svc.order.cancel") || (r.created_by === ctx.user_id && r.status === "open")}
+              busy={start.isPending || complete.isPending}
+              onStart={() => start.mutate({ p_id: r.id })} onComplete={() => complete.mutate({ p_id: r.id })}
+              onAssign={() => setAssign(r)} onCancel={() => setCancelling(r)} />
+          ))}
+      </div>
+      <div className="max-md:hidden"><Table wide>
         <TableHeader><TableRow>
           <TableHead>Room</TableHead><TableHead>Request</TableHead><TableHead>Status</TableHead><TableHead>Assigned to</TableHead>
           <TableHead className="text-right">Charge</TableHead><TableHead>Created</TableHead><TableHead className="w-44" />
@@ -118,11 +135,49 @@ function ServiceRequests() {
             );
           })}
         </TableBody>
-      </Table>
+      </Table></div>
       <AssignServiceDialog req={assign} onOpenChange={(o) => !o && setAssign(null)} />
       <TextReasonDialog open={!!cancelling} title="Cancel request" label="Reason" busy={cancel.isPending}
         onOpenChange={(o) => !o && setCancelling(null)}
         onSubmit={(reason) => cancel.mutate({ p_id: cancelling!.id, p_reason: reason }, { onSuccess: () => setCancelling(null) })} />
+    </div>
+  );
+}
+
+/** One request as a card for a phone: room first, what is wanted, the charge, and one large action. */
+function ServiceCard({ r, live, worker, canAssign, canCancel, busy, onStart, onComplete, onAssign, onCancel }: {
+  r: ServiceRequest; live: boolean; worker: boolean; canAssign: boolean; canCancel: boolean; busy: boolean;
+  onStart: () => void; onComplete: () => void; onAssign: () => void; onCancel: () => void;
+}) {
+  const startable = worker && ["open", "assigned"].includes(r.status);
+  return (
+    <div className="space-y-2 rounded-xl border border-border/70 bg-card p-4 shadow-card">
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-2xl font-semibold leading-tight">{r.room_number ? <RoomName label={r.room_number} /> : "No room"}</span>
+        <StatusBadge map={SVC_STATUS} value={r.status} />
+      </div>
+      <p className="text-[17px] font-semibold [overflow-wrap:anywhere]">{r.description}</p>
+      <p className="text-sm text-muted-foreground">
+        <Link to="/reservations/$id" params={{ id: r.reservation_id }} className="text-primary-strong hover:underline">{r.guest_name ?? r.reservation_number}</Link>
+        {" · "}{SVC_CATEGORIES[r.category] ?? r.category}{r.assignee_name ? ` · ${r.assignee_name}` : " · Nobody assigned"}
+      </p>
+      {r.cancel_reason && <p className="text-sm text-muted-foreground">Cancelled: {r.cancel_reason}</p>}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+        {r.chargeable ? <>
+          <Money amount={r.charge_amount} currency={r.currency} className="text-base font-semibold" />
+          {r.posted_transaction_id ? <Badge variant="success">On folio</Badge> : live && <span className="text-muted-foreground">Posts to the folio when completed</span>}
+        </> : <span className="text-muted-foreground">Free</span>}
+      </div>
+      {worker && live && (startable
+        ? <Button size="lg" className="w-full" variant="outline" disabled={busy} onClick={onStart}>Start</Button>
+        : null)}
+      {worker && live && <Button size="lg" className="w-full" disabled={busy} onClick={onComplete}>Complete</Button>}
+      {live && (canAssign || canCancel) && (
+        <div className="flex flex-wrap gap-2">
+          {canAssign && <Button size="sm" variant="ghost" className="pointer-coarse:h-11" onClick={onAssign}>{r.assignee_id ? "Reassign" : "Assign"}</Button>}
+          {canCancel && <Button size="sm" variant="ghost" className="text-destructive pointer-coarse:h-11" onClick={onCancel}>Cancel request</Button>}
+        </div>
+      )}
     </div>
   );
 }
