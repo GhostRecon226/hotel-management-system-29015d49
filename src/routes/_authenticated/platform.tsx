@@ -1,25 +1,28 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
-import { Money } from "@/components/ui/money";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
+import { ChipPicker } from "@/components/chip-picker";
 import { SupportSection } from "@/components/platform-support";
-import { PlatformSummary } from "@/components/platform-summary";
+import { SummaryTiles } from "@/components/platform-summary";
+import { AccountFacts, CallsToday, HistoryList, nextStepText, STATUS, StatusBadge } from "@/components/platform-parts";
 import { Field, FormDialog } from "@/lib/setup";
-import { formatDateTime, formatDay } from "@/lib/reservations";
+import { formatDay } from "@/lib/reservations";
 import {
-  daysUntil, endOfDay, type PlatformAction, type PlatformTenant, TwoStepGate, usePlans, usePlatformChange, usePlatformHistory,
-  usePlatformFailedPayments, usePlatformTenants,
+  endOfDay, type PlatformAction, type PlatformTenant, TwoStepGate, usePlans, usePlatformChange, usePlatformFailedPayments, usePlatformSummary, usePlatformTenants,
 } from "@/lib/platform";
+import { callsToday, filterTenants, nextDate, nextStep, statusCounts } from "@/lib/platform-view";
 import { whoamiQuery } from "@/lib/queries";
 
 // Platform console (PLT-008, PLT-009, PLT-013): hotels' accounts only, never their guests, bookings or money.
@@ -32,14 +35,7 @@ export const Route = createFileRoute("/_authenticated/platform")({
   component: PlatformConsole,
 });
 
-const STATUS: Record<string, { label: string; tone: "success" | "warning" | "danger" | "info" | "neutral" }> = {
-  trial: { label: "Trial", tone: "info" }, active: { label: "Active", tone: "success" }, past_due: { label: "Past due", tone: "warning" },
-  expired: { label: "Trial ended", tone: "danger" }, suspended: { label: "Suspended", tone: "danger" }, cancelled: { label: "Cancelled", tone: "neutral" },
-};
-const StatusBadge = ({ s }: { s: string }) => <Badge variant={STATUS[s]?.tone ?? "neutral"} dot>{STATUS[s]?.label ?? s}</Badge>;
-
-type Filter = "all" | "trial_soon" | "past_due" | "readonly";
-const FILTERS: Array<[Filter, string]> = [["all", "All hotels"], ["trial_soon", "Trial ends within 7 days"], ["past_due", "Past due"], ["readonly", "Read-only"]];
+type Filter = string; // "all" or a subscription status
 
 function PlatformConsole() {
   const qc = useQueryClient();
@@ -47,15 +43,19 @@ function PlatformConsole() {
   const me = useQuery(whoamiQuery);
   const mfa = !!me.data?.mfa;
   const tenants = usePlatformTenants(mfa);
+  const summary = usePlatformSummary(mfa);
+  const failed = usePlatformFailedPayments(mfa);
   const [filter, setFilter] = useState<Filter>("all");
-  const [open, setOpen] = useState<PlatformTenant | null>(null);
-  const rows = useMemo(() => (tenants.data ?? []).filter((t) => {
-    if (filter === "trial_soon") { const d = daysUntil(t.trial_ends_at); return t.subscription_status === "trial" && d != null && d <= 7; }
-    if (filter === "past_due") return t.subscription_status === "past_due";
-    if (filter === "readonly") return ["expired", "suspended", "cancelled"].includes(t.access_status);
-    return true;
-  }), [tenants.data, filter]);
-  const current = open ? (tenants.data ?? []).find((t) => t.tenant_id === open.tenant_id) ?? open : null;
+  const [q, setQ] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const now = Date.now();
+  const all = tenants.data ?? [];
+  const rows = useMemo(() => filterTenants(all, filter, q), [all, filter, q]);
+  const counts = statusCounts(all);
+  const calls = useMemo(() => callsToday(all, failed.data ?? [], summary.data?.quiet ?? [], Date.now()), [all, failed.data, summary.data]);
+  const current = openId ? all.find((t) => t.tenant_id === openId) ?? null : null;
+  const chips = [["all", "All"], ...Object.entries(STATUS).filter(([k]) => (counts[k] ?? 0) > 0).map(([k, v]) => [k, v.label === "Trial" ? "On trial" : v.label])]
+    .map(([k, label]) => ({ key: k!, label: `${label} ${counts[k!] ?? 0}` }));
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
@@ -65,78 +65,40 @@ function PlatformConsole() {
         <TwoStepGate onDone={async () => { await supabase.auth.refreshSession(); await qc.invalidateQueries({ queryKey: ["platform"] }); }} />
       ) : (
         <>
-          <PlatformSummary enabled={mfa} tenants={tenants.data} onView={setOpen} />
-          <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filter hotels">
-            {FILTERS.map(([k, label]) => (
-              <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} aria-pressed={filter === k} onClick={() => setFilter(k)}>{label}</Button>
-            ))}
-          </div>
-          <Table>
-            <TableHeader><TableRow>
-              <TableHead>Hotel</TableHead><TableHead>Status</TableHead><TableHead>Plan</TableHead><TableHead>Trial ends</TableHead>
-              <TableHead>Paid until</TableHead><TableHead className="text-right">Properties</TableHead><TableHead className="text-right">Rooms</TableHead>
-              <TableHead className="text-right">Staff</TableHead><TableHead />
-            </TableRow></TableHeader>
-            <TableBody>
-              {tenants.isLoading && <TableSkeletonRows cols={9} />}
-              {!tenants.isLoading && rows.length === 0 && <TableStateRow colSpan={9} title="No hotels match this filter" />}
-              {rows.map((t) => {
-                const d = daysUntil(t.trial_ends_at);
-                return (
-                  <TableRow key={t.tenant_id}>
-                    <TableCell><span className="font-medium">{t.hotel_name}</span><span className="block text-sm text-muted-foreground">{t.country} · since {formatDay(t.created_at)}</span></TableCell>
-                    <TableCell><StatusBadge s={t.subscription_status} /></TableCell>
-                    <TableCell>{t.plan_name}</TableCell>
-                    <TableCell>{t.trial_ends_at ? <>{formatDay(t.trial_ends_at)}{t.subscription_status === "trial" && d != null && <span className="block text-sm text-muted-foreground">{d > 0 ? `in ${d} day${d === 1 ? "" : "s"}` : "today"}</span>}</> : "—"}</TableCell>
-                    <TableCell>{t.paid_until ? formatDay(t.paid_until) : "—"}</TableCell>
-                    <TableCell className="text-right tabular">{t.properties}</TableCell>
-                    <TableCell className="text-right tabular">{t.rooms}</TableCell>
-                    <TableCell className="text-right tabular">{t.active_users}</TableCell>
-                    <TableCell className="text-right"><Button size="sm" variant="outline" onClick={() => setOpen(t)} aria-label={`Manage ${t.hotel_name}`}>Manage</Button></TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          <FailedPayments enabled={mfa} />
-          <HotelPanel tenant={current} onOpenChange={(o) => !o && setOpen(null)} />
+          <SummaryTiles summary={summary.data} loading={summary.isLoading} failed={summary.isError} calls={calls.length} />
+          {!tenants.isLoading && <CallsToday calls={calls} onView={setOpenId} hasTenant={(id) => all.some((t) => t.tenant_id === id)} />}
+          <section aria-labelledby="hotel-list" className="space-y-3">
+            <h2 id="hotel-list" className="sr-only">Hotels</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Input className="w-full sm:w-72" placeholder="Search hotel or country" aria-label="Search hotels" value={q} onChange={(e) => setQ(e.target.value)} />
+              <ChipPicker label="Filter hotels by status" selected={filter} options={chips} onPick={setFilter} />
+            </div>
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Hotel</TableHead><TableHead>Status</TableHead><TableHead>Plan</TableHead><TableHead>Next date</TableHead><TableHead />
+              </TableRow></TableHeader>
+              <TableBody>
+                {tenants.isLoading && <TableSkeletonRows cols={5} />}
+                {!tenants.isLoading && rows.length === 0 && <TableStateRow colSpan={5} title="No hotels match" description="Clear the search or pick All." />}
+                {rows.map((t) => {
+                  const next = nextDate(t, now);
+                  return (
+                    <TableRow key={t.tenant_id}>
+                      <TableCell><span className="font-medium">{t.hotel_name}</span><span className="block text-sm text-muted-foreground">{t.country} · since {formatDay(t.created_at)}</span></TableCell>
+                      <TableCell><StatusBadge s={t.subscription_status} /></TableCell>
+                      <TableCell>{t.plan_name}</TableCell>
+                      <TableCell>{next ? <>{next.label}<span className="block text-sm text-muted-foreground">{formatDay(next.date)}</span></> : "—"}</TableCell>
+                      <TableCell className="text-right"><Button size="sm" variant="outline" className="pointer-coarse:h-11" onClick={() => setOpenId(t.tenant_id)} aria-label={`Manage ${t.hotel_name}`}>Manage</Button></TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </section>
+          <HotelPanel tenant={current} onOpenChange={(o) => !o && setOpenId(null)} />
         </>
       )}
     </div>
-  );
-}
-
-// Subscription payments that failed, or that a hotel started and never finished. Contact the hotel, or activate by hand.
-function FailedPayments({ enabled }: { enabled: boolean }) {
-  const q = usePlatformFailedPayments(enabled);
-  const rows = q.data ?? [];
-  if (q.isLoading || rows.length === 0) return null;
-  return (
-    <section className="mt-10" aria-labelledby="failed-payments">
-      <h2 id="failed-payments" className="mb-1 text-lg font-semibold">Payments to follow up</h2>
-      <p className="mb-3 text-sm text-muted-foreground">Failed payments from the last 60 days, and payments left waiting for more than a day.</p>
-      <Table>
-        <TableHeader><TableRow>
-          <TableHead>Started</TableHead><TableHead>Hotel</TableHead><TableHead>Plan</TableHead>
-          <TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead><TableHead>Reference</TableHead>
-        </TableRow></TableHeader>
-        <TableBody>
-          {rows.map((r) => (
-            <TableRow key={r.payment_id}>
-              <TableCell>{formatDateTime(r.created_at)}</TableCell>
-              <TableCell className="font-medium">{r.tenant_name}</TableCell>
-              <TableCell><span className="capitalize">{r.plan_code}</span><span className="block text-sm text-muted-foreground">{r.period === "year" ? "Yearly" : "Monthly"}</span></TableCell>
-              <TableCell className="text-right"><Money amount={r.amount} currency={r.currency} /></TableCell>
-              <TableCell>
-                <Badge variant={r.status === "failed" ? "danger" : "warning"} dot>{r.status === "failed" ? "Failed" : "Not finished"}</Badge>
-                {r.failure_reason && <span className="block text-sm text-muted-foreground">{r.failure_reason}</span>}
-              </TableCell>
-              <TableCell className="font-mono text-xs">{r.reference}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </section>
   );
 }
 
@@ -149,46 +111,49 @@ const ACTIONS: Array<{ action: PlatformAction; label: string; when: (t: Platform
 ];
 
 function HotelPanel({ tenant, onOpenChange }: { tenant: PlatformTenant | null; onOpenChange: (o: boolean) => void }) {
-  const history = usePlatformHistory(tenant?.tenant_id ?? null);
   const [action, setAction] = useState<PlatformAction | null>(null);
+  const [tab, setTab] = useState("account");
+  useEffect(() => { setTab("account"); setAction(null); }, [tenant?.tenant_id]);
+  const step = tenant ? nextStep(tenant, Date.now()) : null;
+  const text = step ? nextStepText(step) : null;
+  const available = tenant ? ACTIONS.filter((a) => a.when(tenant)) : [];
+  const main = available.find((a) => a.action === step?.main);
+  const more = available.filter((a) => a !== main);
   return (
     <Sheet open={!!tenant} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
-        <SheetHeader><SheetTitle>{tenant?.hotel_name}</SheetTitle></SheetHeader>
-        {tenant && (
-          <div className="mt-4 space-y-6 px-1">
-            <dl className="grid grid-cols-2 gap-3 text-[15px]">
-              <div><dt className="text-sm text-muted-foreground">Status</dt><dd><StatusBadge s={tenant.subscription_status} /></dd></div>
-              <div><dt className="text-sm text-muted-foreground">Plan</dt><dd>{tenant.plan_name}</dd></div>
-              <div><dt className="text-sm text-muted-foreground">Trial ends</dt><dd>{tenant.trial_ends_at ? formatDay(tenant.trial_ends_at) : "—"}</dd></div>
-              <div><dt className="text-sm text-muted-foreground">Paid until</dt><dd>{tenant.paid_until ? formatDay(tenant.paid_until) : "—"}</dd></div>
-            </dl>
-            <div className="flex flex-wrap gap-2">
-              {ACTIONS.filter((a) => a.when(tenant)).map((a) => (
-                <Button key={a.action} size="sm" variant={a.action === "suspend" || a.action === "cancel" ? "outline" : "default"} onClick={() => setAction(a.action)}>{a.label}</Button>
-              ))}
+        <SheetHeader>
+          <SheetTitle className="flex flex-wrap items-center gap-2">{tenant?.hotel_name}{tenant && <StatusBadge s={tenant.subscription_status} />}</SheetTitle>
+          {tenant && <p className="text-sm text-muted-foreground">{tenant.country} · since {formatDay(tenant.created_at)} · {tenant.plan_name} plan</p>}
+        </SheetHeader>
+        {tenant && text && (
+          <div className="mt-4 space-y-4 px-1">
+            <div className="space-y-2 rounded-xl border border-primary/30 bg-primary-soft/60 p-3">
+              <p className="font-semibold">{text.headline}</p>
+              <p className="text-sm text-muted-foreground">{text.detail}</p>
+              <div className="flex flex-wrap gap-2">
+                {main && <Button className="pointer-coarse:h-11" onClick={() => setAction(main.action)}>{main.label}</Button>}
+                {more.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild><Button variant="outline" className="pointer-coarse:h-11">More <ChevronDown className="h-4 w-4" aria-hidden /></Button></DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      {more.map((a) => <DropdownMenuItem key={a.action} className={a.action === "suspend" || a.action === "cancel" ? "h-11 text-destructive" : "h-11"} onClick={() => setAction(a.action)}>{a.label}</DropdownMenuItem>)}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
-            <SupportSection tenantId={tenant.tenant_id} />
-            <section aria-labelledby="hist-title">
-              <h3 id="hist-title" className="mb-2 font-semibold">History</h3>
-              {history.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
-              {history.data?.length === 0 && <p className="text-sm text-muted-foreground">No changes yet.</p>}
-              <ol className="space-y-3">
-                {history.data?.map((h, i) => (
-                  <li key={`${h.created_at}-${i}`} className="rounded-md border p-3 text-sm">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {h.from_status && <><StatusBadge s={h.from_status} /><span aria-hidden>→</span></>}<StatusBadge s={h.to_status} />
-                      <span className="text-muted-foreground">{formatDateTime(h.created_at)}</span>
-                    </div>
-                    <p className="mt-1">{h.reason}</p>
-                    <p className="text-muted-foreground">{h.source === "platform" ? `By ${h.operator_email ?? "a platform operator"}` : h.source === "clock" ? "By the daily clock" : "By the hotel"}{h.period_end ? ` · period ends ${formatDay(h.period_end)}` : ""}{h.plan_code ? ` · plan ${h.plan_code}` : ""}</p>
-                  </li>
-                ))}
-              </ol>
-            </section>
+            <Tabs value={tab} onValueChange={setTab}>
+              <TabsList aria-label="Hotel">
+                <TabsTrigger value="account">Account</TabsTrigger><TabsTrigger value="support">Support</TabsTrigger><TabsTrigger value="history">History</TabsTrigger>
+              </TabsList>
+              <TabsContent value="account" className="mt-3"><AccountFacts t={tenant} /></TabsContent>
+              <TabsContent value="support" className="mt-3"><SupportSection tenantId={tenant.tenant_id} /></TabsContent>
+              <TabsContent value="history" className="mt-3"><HistoryList tenantId={tenant.tenant_id} /></TabsContent>
+            </Tabs>
           </div>
         )}
-        {tenant && action && <ActionDialog tenant={tenant} action={action} onClose={() => setAction(null)} />}
+        {tenant && action && <ActionDialog tenant={tenant} action={action} onClose={() => setAction(null)} onSaved={() => setTab("history")} />}
       </SheetContent>
     </Sheet>
   );
@@ -199,7 +164,7 @@ const TITLES: Record<PlatformAction, string> = {
   suspend: "Suspend the hotel", cancel: "Cancel the hotel's subscription",
 };
 
-function ActionDialog({ tenant, action, onClose }: { tenant: PlatformTenant; action: PlatformAction; onClose: () => void }) {
+function ActionDialog({ tenant, action, onClose, onSaved }: { tenant: PlatformTenant; action: PlatformAction; onClose: () => void; onSaved: () => void }) {
   const plans = usePlans();
   const m = usePlatformChange();
   const [date, setDate] = useState("");
@@ -225,7 +190,7 @@ function ActionDialog({ tenant, action, onClose }: { tenant: PlatformTenant; act
       onSubmit={() => {
         if (!confirming) { setConfirming(true); return; }
         m.mutate({ tenant: tenant.tenant_id, action, reason: reason.trim(), until: needsDate ? endOfDay(date) : null, plan: needsPlan ? plan : null },
-          { onSuccess: onClose });
+          { onSuccess: () => { onSaved(); onClose(); } });
       }}>
       {!confirming ? (
         <>

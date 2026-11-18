@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, Check } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { Steps } from "@/components/steps";
 import { Initials } from "@/components/dashboard-parts";
 import { RoomName } from "@/components/room-name";
 import { Badge } from "@/components/ui/badge";
@@ -108,28 +109,11 @@ export function WorkloadStrip({ people, nobody }: { people: Workload[]; nobody: 
   );
 }
 
-/** The five steps of a ticket with the current one marked. Words as well as colour, so colour is never the only signal. */
+/** The five steps of a ticket with the current one marked. */
 export function StepBar({ status }: { status: string }) {
   const at = ticketStep(status);
   if (at < 0) return null;
-  return (
-    <ol aria-label="Progress" className="mb-4 flex">
-      {TICKET_STEPS.map((label, i) => {
-        const state = i < at || status === "closed" ? "done" : i === at ? "now" : "next";
-        return (
-          <li key={label} aria-current={state === "now" ? "step" : undefined} className="relative flex-1 pt-7 text-center text-xs sm:text-sm">
-            {i > 0 && <span aria-hidden className={cn("absolute left-[-50%] top-[13px] h-0.5 w-full", i <= at ? "bg-primary" : "bg-border")} />}
-            <span aria-hidden className={cn("absolute left-1/2 top-0 z-10 grid size-7 -translate-x-1/2 place-items-center rounded-full text-xs font-bold",
-              state === "next" ? "bg-border text-muted-foreground" : "bg-primary text-primary-foreground", state === "now" && "ring-4 ring-primary/20")}>
-              {state === "done" ? <Check className="size-4" /> : i + 1}
-            </span>
-            <span className={cn(state === "now" ? "font-bold text-foreground" : "text-muted-foreground")}>{label}</span>
-            {state === "now" && <span className="sr-only"> (current step)</span>}
-          </li>
-        );
-      })}
-    </ol>
-  );
+  return <Steps labels={TICKET_STEPS} at={at} allDone={status === "closed"} />;
 }
 
 /** Pick one view of a screen. Large touch targets; the pressed button is marked for screen readers. */
