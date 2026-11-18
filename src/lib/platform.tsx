@@ -10,6 +10,7 @@ import { errorMessage } from "@/lib/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Steps } from "@/components/steps";
 
 export interface PlatformTenant {
   tenant_id: string; hotel_name: string; country: string; access_status: string; subscription_status: string;
@@ -121,6 +122,8 @@ export function TwoStepGate({ onDone }: { onDone: () => void }) {
   return (
     <div className="max-w-md space-y-4">
       <h2 className="text-xl font-semibold">Confirm it is you</h2>
+      {!verified && <Steps label="Two-step sign-in" labels={["Install app", "Scan code", "Type code"]} at={enrol ? (code.length > 0 ? 2 : 1) : 0} />}
+      {verified && <p className="text-[15px] text-muted-foreground">Type the 6-digit code your authenticator app shows.</p>}
       {!verified && !enrol && (
         <>
           <p className="text-[15px] text-muted-foreground">The platform console needs two-step sign-in. Set up an authenticator app (for example Google Authenticator or 1Password) once; after that you type a 6-digit code each time you sign in.</p>
