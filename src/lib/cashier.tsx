@@ -27,6 +27,11 @@ export interface AuditFlags { business_date: string; blocking: AuditFlag[]; warn
 
 export const SHIFT_PERMS = ["fin.shift.close", "fin.shift.reconcile"];
 
+/** A closed shift with a difference that nobody has reconciled yet. */
+export function shiftNeedsReview(x: Pick<ShiftRow, "status" | "reconciled" | "variance_total">) {
+  return x.status === "closed" && !x.reconciled && Number(x.variance_total ?? 0) !== 0;
+}
+
 export function useShifts(status: string | null) {
   const { property } = useAccess();
   return useQuery({

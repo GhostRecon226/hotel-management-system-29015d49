@@ -164,14 +164,6 @@
 @keyframes night-on { from { fill: oklch(1 0 0 / 0.07); filter: none; } }
 @keyframes night-ping { 70% { box-shadow: 0 0 0 9px oklch(0.75 0.11 190 / 0); } 100% { box-shadow: 0 0 0 0 oklch(0.75 0.11 190 / 0); } }
 
-/* Greeting banner on the dashboard: the lobby photo under the same dark teal wash. */
-.dash-banner {
-  background:
-    linear-gradient(95deg, oklch(0.2 0.045 205 / 0.94) 0%, oklch(0.2 0.045 205 / 0.8) 50%, oklch(0.2 0.045 205 / 0.35) 100%),
-    url("/brand/login-hero.jpg") 60% 45% / cover no-repeat,
-    oklch(0.22 0.045 205);
-}
-
 /* Landing page hero (marketing only): the lobby photo under a dark teal wash. Gold is for marketing, never app screens. */
 .landing-hero {
   background:

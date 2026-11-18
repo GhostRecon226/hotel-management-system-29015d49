@@ -14,6 +14,14 @@ export interface DashboardSummary {
   vacant_clean: number; vacant_dirty: number; out_of_order: number; pending_approvals: number; open_tickets: number; urgent_tickets: number;
 }
 
+export interface OwnerFigures {
+  date: string; compare_date: string; currency: string; has_figures: boolean;
+  revenue: number | string | null; occupancy: number | string | null; adr: number | string | null; revpar: number | string | null;
+  collected: number | string; owed: number | string; owed_folios: number;
+  /** Changes on the same weekday a week earlier, worked out by the database. Null when there is nothing to compare with. */
+  change: { revenue_pct: number | null; occupancy_points: number | null; adr: number | string | null; revpar: number | string | null; collected_pct: number | null };
+}
+
 export interface ActivityRow { kind: string; title: string; detail: string; at: string; amount: number | null; currency: string | null }
 
 export function addDays(iso: string, n: number) {
@@ -30,6 +38,17 @@ export function useDashboardSummary() {
     enabled: !!property,
     refetchInterval: 60_000,
     queryFn: () => callRpc<DashboardSummary>("dashboard_summary", { p_property_id: property!.id }),
+  });
+}
+
+/** Yesterday's money and rooms with the change on last week, and what guests owe. Finance report rights only; the database refuses anyone else. */
+export function useOwnerFigures(enabled: boolean) {
+  const { property } = useAccess();
+  return useQuery({
+    queryKey: ["reports", "owner-figures", property?.id, property?.business_date],
+    enabled: !!property && enabled,
+    retry: false,
+    queryFn: () => callRpc<OwnerFigures>("owner_figures", { p_property_id: property!.id }),
   });
 }
 

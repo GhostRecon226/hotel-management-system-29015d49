@@ -24,7 +24,9 @@ import { Label } from "@/components/ui/label";
 import { TableSkeletonRows, TableStateRow } from "@/components/ui/states";
 import { SupportPanel } from "@/components/admin/support-panel";
 import { AiPanel } from "@/components/admin/ai-panel";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { GroupedTabs, type TabGroup } from "@/components/grouped-tabs";
+import { AdminHealth } from "@/components/admin/admin-health";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -51,27 +53,32 @@ function Admin() {
   if (!canAny(["fin.nightaudit.run", "adm.support.manage", ...ADMIN_PERMS])) return <NoAccess />;
 
   const tabs = [
-    can("adm.user.manage") && { value: "users", label: "Staff", node: <UsersPanel /> },
-    canAny(["adm.role.manage", "adm.user.manage"]) && { value: "roles", label: "Roles", node: <RolesPanel /> },
-    can("adm.role.manage") && { value: "limits", label: "Approval limits", node: <LimitsPanel /> },
-    can("adm.audit.view") && { value: "audit", label: "Audit log", node: <AuditPanel /> },
-    canAny(["adm.subscription.manage", "adm.user.manage"]) && { value: "plan", label: "Subscription", node: <SubscriptionPanel /> },
-    canAny(["fin.nightaudit.run", "adm.audit.view"]) && { value: "date", label: "Business date", node: <BusinessDate /> },
-    can("adm.user.manage") && { value: "outbox", label: "Messages", node: <OutboxPanel /> },
-    can("adm.support.manage") && { value: "support", label: "Support access", node: <SupportPanel /> },
-    can("adm.ai.manage") && { value: "ai", label: "AI helpers", node: <AiPanel /> },
-  ].filter(Boolean) as { value: string; label: string; node: React.ReactNode }[];
+    can("adm.user.manage") && { group: "People", value: "users", label: "Staff", node: <UsersPanel /> },
+    canAny(["adm.role.manage", "adm.user.manage"]) && { group: "People", value: "roles", label: "Roles", node: <RolesPanel /> },
+    can("adm.role.manage") && { group: "People", value: "limits", label: "Approval limits", node: <LimitsPanel /> },
+    canAny(["fin.nightaudit.run", "adm.audit.view"]) && { group: "Hotel", value: "date", label: "Business date", node: <BusinessDate /> },
+    canAny(["adm.subscription.manage", "adm.user.manage"]) && { group: "Hotel", value: "plan", label: "Subscription", node: <SubscriptionPanel /> },
+    can("adm.user.manage") && { group: "Hotel", value: "outbox", label: "Messages", node: <OutboxPanel /> },
+    can("adm.ai.manage") && { group: "Hotel", value: "ai", label: "AI helpers", node: <AiPanel /> },
+    can("adm.audit.view") && { group: "Safety", value: "audit", label: "Audit log", node: <AuditPanel /> },
+    can("adm.support.manage") && { group: "Safety", value: "support", label: "Support access", node: <SupportPanel /> },
+  ].filter(Boolean) as { group: string; value: string; label: string; node: React.ReactNode }[];
 
   if (tabs.length === 0) return <NoAccess />;
+  const groups: TabGroup[] = ["People", "Hotel", "Safety"]
+    .map((g) => ({ label: g, items: tabs.filter((t) => t.group === g).map((t) => ({ value: t.value, label: t.label })) }))
+    .filter((g) => g.items.length > 0);
+  const current = tabs.some((t) => t.value === tab) ? tab! : tabs[0]!.value;
 
   return (
     <div className="space-y-6">
       <PageHeader title="Admin" description="Staff, roles, limits, history and your subscription." />
-      <Tabs value={tabs.some((t) => t.value === tab) ? tab! : tabs[0]!.value} onValueChange={setTab}>
-        <TabsList className="flex-wrap">
-          {tabs.map((t) => <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>)}
-        </TabsList>
-        {tabs.map((t) => <TabsContent key={t.value} value={t.value} className="mt-4">{t.node}</TabsContent>)}
+      <AdminHealth onOpen={setTab} />
+      <Tabs value={current} onValueChange={setTab} className="space-y-3">
+        <GroupedTabs label="Admin area" layout="rows" groups={groups} value={current} onChange={setTab} />
+        <div className="min-w-0">
+          {tabs.map((t) => <TabsContent key={t.value} value={t.value} className="mt-0">{t.node}</TabsContent>)}
+        </div>
       </Tabs>
     </div>
   );
