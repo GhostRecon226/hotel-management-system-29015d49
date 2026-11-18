@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChipPicker } from "@/components/chip-picker";
+import { addLine, COMMON_PROBLEMS } from "@/lib/maintenance-view";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -160,7 +162,9 @@ export function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boole
           p_assignee_id: f.assignee === "none" ? null : f.assignee,
         }, { onSuccess: (id) => { onOpenChange(false); onCreated?.(id as string); } });
       }}>
-      <Field label="What is wrong?" htmlFor="t-title"><Input id="t-title" required value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="e.g. AC not cooling" /></Field>
+      <ChipPicker label="Common problems" selected={f.title} options={COMMON_PROBLEMS.map((p) => ({ key: p, label: p }))}
+        onPick={(k) => setF({ ...f, title: k === "Other" || f.title === k ? "" : k })} />
+      <Field label="What is wrong?" htmlFor="t-title"><Input id="t-title" required value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Tap a problem above or type it" /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Room" htmlFor="t-room">
           <Select value={f.room} onValueChange={(v) => setF({ ...f, room: v })}>
@@ -172,12 +176,10 @@ export function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boole
           </Select>
         </Field>
         <Field label={f.room === "none" ? "Location" : "Location (optional)"} htmlFor="t-loc"><Input id="t-loc" value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} placeholder="e.g. Lobby toilet" /></Field>
-        <Field label="Priority" htmlFor="t-pri">
-          <Select value={f.priority} onValueChange={(v) => setF({ ...f, priority: v })}>
-            <SelectTrigger id="t-pri"><SelectValue /></SelectTrigger>
-            <SelectContent>{Object.entries(PRIORITY).map(([k, p]) => <SelectItem key={k} value={k}>{p.label}</SelectItem>)}</SelectContent>
-          </Select>
-        </Field>
+        <div className="space-y-2 sm:col-span-2">
+          <div className="text-sm font-medium">How urgent?</div>
+          <ChipPicker label="How urgent" selected={f.priority} options={Object.entries(PRIORITY).map(([k, p]) => ({ key: k, label: p.label }))} onPick={(k) => setF({ ...f, priority: k })} />
+        </div>
         {can("mnt.ticket.assign") && (
           <Field label="Assign to" htmlFor="t-who">
             <StaffSelect id="t-who" fn="mnt_staff" value={f.assignee} onChange={(v) => setF({ ...f, assignee: v })} noneLabel="Nobody yet" />
@@ -230,13 +232,16 @@ export function BlockTicketRoomDialog({ ticket, onOpenChange }: { ticket: Ticket
   );
 }
 
-export function TextReasonDialog({ open, title, label, busy, onOpenChange, onSubmit }: {
+export function TextReasonDialog({ open, title, label, busy, onOpenChange, onSubmit, quick }: {
   open: boolean; title: string; label: string; busy: boolean; onOpenChange: (o: boolean) => void; onSubmit: (text: string) => void;
+  /** One-tap lines that add to the text box. */
+  quick?: string[];
 }) {
   const [text, setText] = useState("");
   useEffect(() => { if (open) setText(""); }, [open]);
   return (
     <FormDialog open={open} onOpenChange={onOpenChange} title={title} busy={busy} onSubmit={() => onSubmit(text)}>
+      {quick && <ChipPicker label="Common answers" selected={text.split("\n").map((l) => l.trim())} options={quick.map((q) => ({ key: q, label: q }))} onPick={(k) => setText(addLine(text, k))} />}
       <Field label={label} htmlFor="tr-text"><Textarea id="tr-text" required value={text} onChange={(e) => setText(e.target.value)} /></Field>
     </FormDialog>
   );
