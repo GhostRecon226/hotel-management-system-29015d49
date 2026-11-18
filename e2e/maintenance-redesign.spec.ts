@@ -40,8 +40,8 @@ test("[MNT-006] the supervisor opens on the board, with what needs attention and
   await expect(load.getByText("1 active · 0 waiting")).toBeVisible();
   await expect(page.getByRole("region", { name: "Open" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Assigned and working" })).toContainText("TV remote broken");
-  await expect(page.getByRole("button", { name: "Board" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "List" }).click();
+  await expect(page.getByRole("button", { name: "Board", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "List", exact: true }).click();
   await expect(page.getByRole("row").filter({ hasText: "No hot water" })).toBeVisible();
 });
 
@@ -50,7 +50,7 @@ test("[MNT-005] My jobs shows my ticket with one large button, and Mark resolved
   await setUpRoomsAndRates(page);
   await makeTickets(page);
   await page.goto("/maintenance");
-  await page.getByRole("button", { name: "My jobs" }).click();
+  await page.getByRole("button", { name: "My jobs", exact: true }).click();
   await expect(page.getByText("1 job to do")).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("TV remote broken")).toBeVisible();
   await expect(page.getByText("No hot water")).toHaveCount(0);
@@ -66,7 +66,7 @@ test("[MNT-007] a ticket shows five steps, one main button and the other actions
   await setUpRoomsAndRates(page);
   await makeTickets(page);
   await page.goto("/maintenance");
-  await page.getByRole("button", { name: "List" }).click();
+  await page.getByRole("button", { name: "List", exact: true }).click();
   await page.getByRole("link", { name: "TV remote broken" }).click();
   const steps = page.getByRole("list", { name: "Progress" });
   await expect(steps).toBeVisible({ timeout: 10_000 });
